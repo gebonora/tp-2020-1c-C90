@@ -7,7 +7,7 @@
 #include "main.h"
 
 
-int main(){
+int main32(){
 	puts("Adiós Mundo Cruel");
 	return 0;
 }
