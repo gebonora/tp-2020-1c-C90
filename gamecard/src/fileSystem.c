@@ -30,6 +30,8 @@ int main(){
 	iniciarLogger();
 	crearDirectoriosBase("Metadata");
 	crearDirectoriosBase("Files");
+	crearArchivosBase("Metadata/Metadata.bin");
+	crearArchivosBase("Metadata/Bitmap.bin");
 	return 0;
 }
 
@@ -42,6 +44,14 @@ void crearDirectoriosBase(char* subPath){
 	if (directorio == NULL){
 		puts(path);
 		mkdir(path,0777);
+	}
+}
+
+void crearArchivosBase(char* subPath){
+	char* path = string_new();
+	string_append_with_format(&path, "%s/%s", PUNTO_MONTAJE_TALLGRASS, subPath);
+	if(fopen(path,"r")==NULL){
+		fopen(path,"w");
 	}
 }
 

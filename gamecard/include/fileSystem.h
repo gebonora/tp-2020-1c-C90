@@ -14,6 +14,7 @@
 #include "config.h"
 #include "logger.h"
 
-void crearDirectoriosBase(char*);
+void crearDirectoriosBase(char* subPath);
+void crearArchivosBase(char* subPath);
 
 #endif /* GAMECARD_INCLUDE_FILESYSTEM_H_ */
