@@ -1,4 +1,4 @@
-#include "interface.h"
+#include "../include/interface.h"
 
 void* serialize_get(Get* get_pokemon, int bytes) {
 	int displacement = 0;

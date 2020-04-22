@@ -1,13 +1,11 @@
-#include "interface.h"
+#include "../include/interface.h"
 
-Pokemon* recv_pokemon(int socket) {
+Pokemon* recv_pokemon(int socket, bool multiple_coordinates) {
 	Pokemon* pokemon = malloc(sizeof(Pokemon));
 
-	t_list* coordinates = list_create();
-	list_add(coordinates, recv_coordinate(socket));
-
 	pokemon->name = recv_name(socket);
-	pokemon->coordinates = coordinates;
+
+	pokemon->coordinates = recv_coordinates(socket, multiple_coordinates);
 
 	return pokemon;
 }

@@ -1,5 +1,5 @@
-#ifndef BROKER_INCLUDE_PROTOCOLO_H_
-#define BROKER_INCLUDE_PROTOCOLO_H_
+#ifndef BROKER_INCLUDE_PROTOCOL_H_
+#define BROKER_INCLUDE_PROTOCOL_H_
 
 #include <stdint.h>
 #include <stdio.h>
@@ -27,7 +27,7 @@ typedef struct {
 
 typedef struct {
 	Pokemon* pokemon;
-	int quantity;
+	uint32_t quantity;
 } New;
 
 typedef struct {
@@ -36,7 +36,7 @@ typedef struct {
 
 typedef struct {
 	Pokemon* pokemon;
-	int coordinates_quantity;
+	uint32_t coordinates_quantity;
 } Localized;
 
 typedef struct {
@@ -48,4 +48,4 @@ typedef struct {
 	void* buffer;
 } Message;
 
-#endif /* BROKER_INCLUDE_PROTOCOLO_H_ */
+#endif /* BROKER_INCLUDE_PROTOCOL_H_ */

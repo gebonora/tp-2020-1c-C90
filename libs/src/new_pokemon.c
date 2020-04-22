@@ -1,4 +1,4 @@
-#include "interface.h"
+#include "../include/interface.h"
 
 void* serialize_new(New* new_pokemon, int bytes) {
 	int displacement = 0;
@@ -48,7 +48,7 @@ void send_new(New* new_pokemon, int socket) {
 New* recv_new(int socket) {
 	New* new_pokemon = malloc(sizeof(New));
 
-	new_pokemon->pokemon = recv_pokemon(socket);
+	new_pokemon->pokemon = recv_pokemon(socket, false);
 	new_pokemon->quantity = recv_uint32(socket);
 
 	return new_pokemon;

@@ -10,7 +10,8 @@
 #include<commons/collections/list.h>
 #include<string.h>
 #include<pthread.h>
-#include<protocolo.h>
+
+#include "include/protocol.h"
 
 pthread_t thread;
 
