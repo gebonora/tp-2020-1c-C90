@@ -23,7 +23,6 @@
  */
 #include "fileSystem.h"
 
-
 int main(){
 	puts("arranco la wea");
 	cargarConfigConexiones();
