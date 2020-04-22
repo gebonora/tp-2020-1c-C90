@@ -53,7 +53,7 @@ void sendCatch(Catch* catch, int socket) {
 	messageCatch->buffer = catch;
 
 	int bytes = calcularBytesCatch(catch);
-	void* serializado = serializarCatch(messageCatch);
+	void* serializado = serializarCatch(messageCatch, bytes);
 
 	send(socket, serializado, bytes, 0);
 

@@ -9,12 +9,14 @@
 #define BROKER_INCLUDE_INTERFACE_H_
 
 #include "protocolo.h"
+#include <string.h>
+#include <sys/socket.h>
 
 int recvUint32(int);
 
 Catch* recvCatch(int);
 void sendCatch(Catch*, int);
-int calcularBytesCatch(Message*);
+int calcularBytesCatch(Catch*);
 void* serializarCatch(Message*, int);
 
 
