@@ -1,10 +1,3 @@
-/*
- * protocolo.h
- *
- *  Created on: 21 abr. 2020
- *      Author: utnso
- */
-
 #ifndef BROKER_INCLUDE_PROTOCOLO_H_
 #define BROKER_INCLUDE_PROTOCOLO_H_
 
@@ -21,7 +14,7 @@ typedef enum {
 	CAUGHT = 5
 } Operation;
 
-typedef struct {
+typedef struct {//ver si hay varios parecen y hacer algo generico
 	uint32_t sizeName;
 	char* pokemonName;
 	uint32_t posX;

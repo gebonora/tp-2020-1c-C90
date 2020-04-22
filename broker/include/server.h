@@ -1,10 +1,3 @@
-/*
- * server.h
- *
- *  Created on: 21 abr. 2020
- *      Author: utnso
- */
-
 #ifndef BROKER_INCLUDE_SERVER_H_
 #define BROKER_INCLUDE_SERVER_H_
 
