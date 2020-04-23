@@ -13,12 +13,12 @@ Pokemon* recv_pokemon(int socket) {
 }
 
 void free_pokemon(Pokemon* pokemon) {
-	free(pokemon->name->value);
+	free_name(pokemon->name);
 	list_destroy(pokemon->coordinates);
 	free(pokemon);
 }
 
-int calculate_bytes(Pokemon* pokemon) {
+int calculate_pokemon_bytes(Pokemon* pokemon) {
 	return sizeof(uint32_t) * 4 + strlen(pokemon->name->value) + 1;
 }
 
@@ -41,13 +41,12 @@ void* serialize_pokemon(Pokemon* pokemon, Operation operation, int bytes) {
 	displacement += sizeof(uint32_t);
 
 	memcpy(serialized + displacement, &(coordinate->pos_y), sizeof(uint32_t));
-	displacement += sizeof(uint32_t);
 
 	return serialized;
 }
 
 void send_pokemon(Pokemon* pokemon, Operation operation, int socket) {
-	int bytes = calculate_bytes(pokemon);
+	int bytes = calculate_pokemon_bytes(pokemon);
 	void* serialized = serialize_pokemon(pokemon, operation, bytes);
 	send(socket, serialized, bytes, 0);
 

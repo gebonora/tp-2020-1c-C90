@@ -2,8 +2,10 @@
 
 uint32_t recv_uint32(int socket) {
 	uint32_t recibido;
-	if(recv(socket, &recibido, sizeof(uint32_t), 0)!=-1) return recibido;
-	else return -1;
+	if (recv(socket, &recibido, sizeof(uint32_t), 0) != -1)
+		return recibido;
+	else
+		return -1;
 }
 
 Name* recv_name(int socket) {
@@ -23,4 +25,9 @@ Coordinate* recv_coordinate(int socket) {
 	coordinate->pos_x = pos_x;
 	coordinate->pos_y = pos_y;
 	return coordinate;
+}
+
+void free_name(Name* name) {
+	free(name->value);
+	free(name);
 }
