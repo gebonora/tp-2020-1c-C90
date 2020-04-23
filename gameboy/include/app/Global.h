@@ -7,7 +7,8 @@
 
 #include <commons/log.h>
 #include <commons/config.h>
+#include "include/interface.h"
 
-#define GAMEBOY_CONFIG_FILE "config/gameboy.config"
+#define GAMEBOY_CONFIG_FILE "gameboy/config/gameboy.config"
 
 #endif //GAMEBOY_GLOBAL_H

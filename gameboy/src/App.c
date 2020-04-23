@@ -1,7 +1,7 @@
 #include "app/App.h"
 
 int main() {
-    t_log *logger = log_create("logs/gameboy.log", "GameBoy.app", 1, LOG_LEVEL_INFO);
+    t_log *logger = log_create("gameboy/logs/gameboy.log", "GameBoy.app", 1, LOG_LEVEL_INFO);
     mostrarTitulo(logger);
     log_info(logger, "========================= Inicio de ejecución ============================");
 
