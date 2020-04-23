@@ -12,12 +12,12 @@
 #include <string.h>
 #include <sys/socket.h>
 
-int recvUint32(int);
-
-Catch* recvCatch(int);
-void sendCatch(Catch*, int);
-int calcularBytesCatch(Catch*);
-void* serializarCatch(Message*, int);
-
+uint32_t recv_uint32(int);
+Name* recv_name(int);
+Coordinate* recv_coordinate(int);
+void* serialize_pokemon(Pokemon*, Operation, int);
+int calculate_bytes(Pokemon*);
+void send_pokemon(Pokemon*, Operation, int);
+Pokemon* recv_pokemon(int);
 
 #endif /* BROKER_INCLUDE_INTERFACE_H_ */
