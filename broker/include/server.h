@@ -11,9 +11,7 @@
 #include<string.h>
 #include<pthread.h>
 
-#include "include/protocol.h"
-
-pthread_t thread;
+#include "include/interface.h"
 
 t_log* logger;
 

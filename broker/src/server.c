@@ -42,27 +42,38 @@ void esperar_cliente(int socket_servidor)
 
 	int socket_cliente = accept(socket_servidor, (void*) &dir_cliente, &tam_direccion);
 
-	pthread_create(&thread,NULL,(void*)serve_client,&socket_cliente);
+	pthread_t thread = pthread_create(&thread,NULL,(void*)serve_client,&socket_cliente);//ver como pasar el parametro socket
 	pthread_detach(thread);
-
 }
 
 void serve_client(int* socket) {
-	int cod_op;
-	if(recv(*socket, &cod_op, sizeof(int), MSG_WAITALL) == -1)
-		cod_op = -1;
-	process_request(cod_op, *socket);
+	while (1) {
+		int cod_op;
+
+		if (recv(*socket, &cod_op, sizeof(int), 0) == -1)
+			cod_op = -1;
+		process_request(cod_op, *socket);
+	}
 }
 
-void process_request(int cod_op, int cliente_fd) {
-		switch (cod_op) {
-		case GET:
-			break;
-		case 0:
-			pthread_exit(NULL);
-		case -1:
-			pthread_exit(NULL);
-		}
+void process_request(int cod_op, int socket) {
+	switch (cod_op) {
+	case NEW:
+		/*
+		 * recv new
+		 * procesar el new: guardar en la cola/memoria, generar el id, mandar el id al que me lo envio, enviar a todos los suscriptos, etc
+		 * liberar el new
+		 * break*/
+		New* new = recv_new(socket);
+		log_info(logger, "Me llego un new");
+		log_info(logger, "Nombre pokemon: %s", new->pokemon->name->value);
+		free_new(new);
+		break;
+	case 0:
+		pthread_exit(NULL); //revisar cuando matar al hilo y cerrar la conexion
+	case -1:
+		pthread_exit(NULL); //revisar cuando matar al hilo y cerrar la conexion
+	}
 }
 
 
