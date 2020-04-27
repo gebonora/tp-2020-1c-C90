@@ -44,16 +44,16 @@ void esperar_cliente(int socket_servidor)
 
 	serve_client(socket_cliente);
 
-/*	pthread_t thread;
+	pthread_t thread;
 
 	pthread_create(&thread,NULL,(void*)serve_client, &socket_cliente);//ver como pasar el parametro socket
 	pthread_detach(thread);
-*/}
+}
 
 void serve_client(int socket_e) {
 	puts("entre serve client");
 	int cod_op;
-	recv(socket_e, &cod_op, 5, MSG_WAITALL);
+	recv(socket_e, &cod_op, sizeof(int), MSG_WAITALL);
 	//send(*socket_e, cod_op, 5, 0);
 	process_request(cod_op, socket_e);
 
