@@ -29,7 +29,7 @@ char* ALGORITMO_PARTICION_LIBRE;
 void iniciar_servidor(void);
 void esperar_cliente(int);
 void process_request(int, int);
-void serve_client(int*);
+void serve_client(int);
 
 
 #endif /* BROKER_INCLUDE_SERVER_H_ */

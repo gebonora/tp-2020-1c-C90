@@ -42,7 +42,7 @@ void esperar_cliente(int socket_servidor)
 
 	int socket_cliente = accept(socket_servidor, (void*) &dir_cliente, &tam_direccion);
 
-	serve_client(&socket_cliente);
+	serve_client(socket_cliente);
 
 /*	pthread_t thread;
 
@@ -50,12 +50,12 @@ void esperar_cliente(int socket_servidor)
 	pthread_detach(thread);
 */}
 
-void serve_client(int* socket_e) {
+void serve_client(int socket_e) {
 	puts("entre serve client");
 	int cod_op;
-	recv(*socket_e, &cod_op, 5, MSG_WAITALL);
+	recv(socket_e, &cod_op, 5, MSG_WAITALL);
 	//send(*socket_e, cod_op, 5, 0);
-	process_request(cod_op, *socket_e);
+	process_request(cod_op, socket_e);
 
 }
 
