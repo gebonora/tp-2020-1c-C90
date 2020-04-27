@@ -24,50 +24,50 @@ void iniciar_servidor(void) {
         break;
     }
 
-    logger = log_create("../logs/server.log", "Broker Server", 0, LOG_LEVEL_INFO);
+    logger = log_create("/home/utnso/tp-2020-1c-C90/broker/logs/server.log", "Broker Server", 1, LOG_LEVEL_INFO);
 
 	listen(socket_servidor, SOMAXCONN);
 
     freeaddrinfo(servinfo);
 
-    while(1)
-    	esperar_cliente(socket_servidor);
+	esperar_cliente(socket_servidor);
 }
 
 void esperar_cliente(int socket_servidor)
 {
+	puts("entre esperar cliente");
 	struct sockaddr_in dir_cliente;
 
 	int tam_direccion = sizeof(struct sockaddr_in);
 
 	int socket_cliente = accept(socket_servidor, (void*) &dir_cliente, &tam_direccion);
 
-	pthread_t thread = pthread_create(&thread,NULL,(void*)serve_client,&socket_cliente);//ver como pasar el parametro socket
+	serve_client(&socket_cliente);
+
+/*	pthread_t thread;
+
+	pthread_create(&thread,NULL,(void*)serve_client, &socket_cliente);//ver como pasar el parametro socket
 	pthread_detach(thread);
-}
+*/}
 
-void serve_client(int* socket) {
-	while (1) {
-		int cod_op;
+void serve_client(int* socket_e) {
+	puts("entre serve client");
+	int cod_op;
+	recv(*socket_e, &cod_op, 5, MSG_WAITALL);
+	//send(*socket_e, cod_op, 5, 0);
+	process_request(cod_op, *socket_e);
 
-		if (recv(*socket, &cod_op, sizeof(int), 0) == -1)
-			cod_op = -1;
-		process_request(cod_op, *socket);
-	}
 }
 
 void process_request(int cod_op, int socket) {
 	switch (cod_op) {
-	case NEW:
-		/*
-		 * recv new
-		 * procesar el new: guardar en la cola/memoria, generar el id, mandar el id al que me lo envio, enviar a todos los suscriptos, etc
-		 * liberar el new
-		 * break*/
-		New* new = recv_new(socket);
+	case NEW: ;
+		New* new_pokemon = recv_new(socket);
 		log_info(logger, "Me llego un new");
-		log_info(logger, "Nombre pokemon: %s", new->pokemon->name->value);
-		free_new(new);
+		log_info(logger, "Nombre pokemon: %s", new_pokemon->pokemon->name->value);
+		int id = 900;
+		send(socket, &id, sizeof(int), 0);
+		//free_new(new_pokemon);
 		break;
 	case 0:
 		pthread_exit(NULL); //revisar cuando matar al hilo y cerrar la conexion

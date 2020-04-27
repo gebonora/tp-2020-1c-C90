@@ -12,6 +12,7 @@
 #include<pthread.h>
 
 #include "include/interface.h"
+#include "include/protocol.h"
 
 t_log* logger;
 
@@ -22,12 +23,13 @@ int TAMANO_MINIMO_PARTICION;
 char* ALGORITMO_MEMORIA;
 char* ALGORITMO_REEMPLAZO;
 int FRECUENCIA_COMPACTACION;
+char* ALGORITMO_PARTICION_LIBRE;
 
 
 void iniciar_servidor(void);
 void esperar_cliente(int);
-void process_request(int cod_op, int cliente_fd);
-void serve_client(int *socket);
+void process_request(int, int);
+void serve_client(int*);
 
 
 #endif /* BROKER_INCLUDE_SERVER_H_ */
