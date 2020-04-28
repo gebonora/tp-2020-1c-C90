@@ -1,6 +1,7 @@
 #include "app/App.h"
 
 int main() {
+    //TODO: Separar loggers obligatorio del de uso interno
     t_log *logger = log_create("logs/gameboy.log", "GameBoy.app", 1, LOG_LEVEL_INFO);
     mostrarTitulo(logger);
     log_info(logger, "========================= Inicio de ejecución ============================");
@@ -15,6 +16,7 @@ int main() {
     //Liberacion
     log_debug(logger, "Saliendo...");
     log_info(logger, "============================ Fin de ejecución ============================");
+    config_destroy(config); //TODO: Remover cuando se migre a servicio
     log_destroy(logger);
     return 0;
 }

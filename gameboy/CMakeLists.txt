@@ -5,6 +5,11 @@ set(CMAKE_C_STANDARD 11)
 
 # .h files
 include_directories(include)
+if(DEFINED CMAKE_LIBRARY_PATH)
+    include_directories(${CMAKE_LIBRARY_PATH}/include)
+    link_directories(${CMAKE_LIBRARY_PATH}/lib)
+endif(DEFINED CMAKE_LIBRARY_PATH)
+
 # .c files
 file(GLOB_RECURSE SOURCES RELATIVE ${CMAKE_SOURCE_DIR} "src/*.c")
 # sin esto no vivimos
