@@ -7,7 +7,6 @@ int main() {
 
     // Config
     log_debug(logger, "Levantando configuracion...");
-    t_config *config = config_create(GAMEBOY_CONFIG_FILE);
     servicioDeConfiguracion = ServicioDeConfiguracionConstructor.new(GAMEBOY_CONFIG_FILE, GAMEBOY_INTERNAL_LOG_FILE);
 
     // Logger obligatorio
