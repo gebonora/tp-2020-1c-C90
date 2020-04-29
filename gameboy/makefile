@@ -13,10 +13,10 @@ endef
 
 PROJECT = gameBoy
 TARGET = $(BDIR)/$(PROJECT) # Definimos la tarea que va a ejecutar make por defecto Y el nombre del binario final....
-LIBS = -lreadline -lcommons -pthread # Incluimos las bibliotecas que necesitamos
+LIBS = -lreadline -lcommons -pthread -ldeLIBird # Incluimos las bibliotecas que necesitamos
 CC = gcc # Vamos a usar gcc como compilador, porque nos encanta!
 CFLAGS = -g -Wall # Compilamos con los flags -g (con simbolos de debug) y -Wall (que nos muestre todos los warnings)
-CFLAGS += -I$(IDIR) -I$(LIBSDIR)
+CFLAGS += -I$(IDIR) #-I$(LIBSDIR)
 
 .PHONY: default all clean
 

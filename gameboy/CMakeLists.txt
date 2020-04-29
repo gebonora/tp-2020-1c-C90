@@ -16,7 +16,7 @@ file(GLOB_RECURSE SOURCES RELATIVE ${CMAKE_SOURCE_DIR} "src/*.c")
 add_executable(${PROJECT_NAME} ${SOURCES})
 
 # Commons y otras librerias
-target_link_libraries(${PROJECT_NAME} commons)
+target_link_libraries(${PROJECT_NAME} commons delibird)
 
 # Config
 add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory
