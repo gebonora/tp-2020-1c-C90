@@ -14,7 +14,7 @@ int main() {
     char * mandatoryLogPath = config_get_string_value(config, MANDATORY_LOG);
     MANDATORY_LOGGER = log_create(mandatoryLogPath, "LogObligatorio", 1, LOG_LEVEL_INFO);
 
-    //Liberacion
+    // Liberacion
     log_debug(logger, "Saliendo...");
     log_info(logger, "============================ Fin de ejecución ============================");
     config_destroy(config); //TODO: Remover cuando se migre a servicio
