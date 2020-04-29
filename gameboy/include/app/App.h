@@ -6,6 +6,7 @@
 #define GAMEBOY_APP_H
 
 #include "app/Global.h"
+#include "app/Servicios.h"
 
 void mostrarTitulo(t_log * logger);
 
