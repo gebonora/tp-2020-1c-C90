@@ -1,17 +1,18 @@
 #include "app/App.h"
 
 int main() {
-    //TODO: Separar loggers obligatorio del de uso interno
-    t_log *logger = log_create("logs/gameboy.log", "GameBoy.app", 1, LOG_LEVEL_INFO);
+    t_log *logger = log_create(GAMEBOY_INTERNAL_LOG_FILE, "GameBoy.app", 0, LOG_LEVEL_INFO);
     mostrarTitulo(logger);
     log_info(logger, "========================= Inicio de ejecución ============================");
 
     // Config - TODO: Migrar a servicio
     log_debug(logger, "Levantando configuracion...");
     t_config *config = config_create(GAMEBOY_CONFIG_FILE);
-    char *clave = "PUERTO_TEAM";
-    char *valor = config_get_string_value(config, clave);
-    log_info(logger, "Se obtuvo un string de la configuracion: %s -> %s", clave, valor);
+
+    // Logger obligatorio
+    log_debug(logger, "Configurando logger obligatorio...");
+    char * mandatoryLogPath = config_get_string_value(config, MANDATORY_LOG);
+    MANDATORY_LOGGER = log_create(mandatoryLogPath, "LogObligatorio", 1, LOG_LEVEL_INFO);
 
     //Liberacion
     log_debug(logger, "Saliendo...");
