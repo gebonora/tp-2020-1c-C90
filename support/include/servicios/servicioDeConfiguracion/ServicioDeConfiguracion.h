@@ -14,7 +14,7 @@
 #include <sys/types.h>
 #include <sys/inotify.h>
 
-#include <utils/hilos/HiloFacil.h>
+#include "utils/hilos/HiloFacil.h"
 
 #define EVENT_SIZE (sizeof (struct inotify_event))
 #define BUF_LEN (32 * (EVENT_SIZE + 16))
