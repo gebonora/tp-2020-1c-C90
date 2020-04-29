@@ -63,7 +63,7 @@ static void monitorearConfiguracion(ServicioDeConfiguracion *this) {
 static void actualizarConfiguracion(ServicioDeConfiguracion *this) {
     pthread_mutex_lock(&mutexServicioDeConfiguracion);
     config_destroy(this->config);
-    this->config = config_create(SUSE_CONFIG_FILE);
+    this->config = config_create(this->configPath);
     pthread_mutex_unlock(&mutexServicioDeConfiguracion);
     log_info(this->logger, "Se actualizó la configuracion");
 }
@@ -113,12 +113,14 @@ static void destruir(ServicioDeConfiguracion *this) {
     log_destroy(this->logger);
 }
 
-static ServicioDeConfiguracion new() {
+static ServicioDeConfiguracion new(char * configPath, char * logPath) {
     pthread_mutex_init(&mutexServicioDeConfiguracion, NULL);
     int fd = inotify_init();
     return (ServicioDeConfiguracion) {
-            .logger = log_create(SUSE_LOG_FILE, "ServicioDeConfiguracion", 0, LOG_LEVEL_INFO),
-            .config = config_create(SUSE_CONFIG_FILE),
+            .configPath = configPath,
+            .logPath = logPath,
+            .logger = log_create(logPath, "ServicioDeConfiguracion", 0, LOG_LEVEL_INFO),
+            .config = config_create(configPath),
             .fileDescriptor = fd,
             .fileWatch = inotify_add_watch(fd, "./config", IN_MODIFY),
             .tiempoDeRefresco = 1,

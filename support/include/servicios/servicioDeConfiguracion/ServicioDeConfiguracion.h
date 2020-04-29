@@ -6,6 +6,7 @@
 #define SUPPORT_SERVICIODECONFIGURACION_H
 
 #include <commons/config.h>
+#include <commons/log.h>
 #include <unistd.h>
 #include <pthread.h>
 #include <stdio.h>
@@ -14,7 +15,6 @@
 #include <sys/inotify.h>
 
 #include <utils/hilos/HiloFacil.h>
-#include "app/Global.h"
 
 #define EVENT_SIZE (sizeof (struct inotify_event))
 #define BUF_LEN (32 * (EVENT_SIZE + 16))
@@ -22,6 +22,8 @@
 pthread_mutex_t mutexServicioDeConfiguracion;
 
 typedef struct ServicioDeConfiguracion {
+    char * configPath;
+    char * logPath;
     t_log *logger;
     t_config *config;
     int fileDescriptor;
@@ -44,7 +46,7 @@ typedef struct ServicioDeConfiguracion {
 } ServicioDeConfiguracion;
 
 extern const struct ServicioDeConfiguracionClass {
-    ServicioDeConfiguracion (*new)();
+    ServicioDeConfiguracion (*new)(char * configPath, char * logPath);
 } ServicioDeConfiguracionConstructor;
 
 ServicioDeConfiguracion servicioDeConfiguracion;
