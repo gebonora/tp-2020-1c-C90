@@ -4,27 +4,26 @@
 
 #include "modelo/PedidoGameBoy.h"
 
-PedidoGameBoy *crearPedidoGameBoy(int cantidadArugmentos, char** arrayArgumentos) {
-    PedidoGameBoy *pedidoGameBoy = malloc(sizeof(PedidoGameBoy));
+PedidoGameBoy crearPedidoGameBoy(int cantidadArugmentos, char** arrayArgumentos) {
+    PedidoGameBoy pedidoGameBoy = {.argumentos=malloc(sizeof(Argumentos))};
 
-    Proceso proceso = obtenerProceso(arrayArgumentos[0]);
-    pedidoGameBoy->proceso = proceso;
+    Proceso proceso = obtenerProceso(arrayArgumentos[1]);
+    pedidoGameBoy.proceso = proceso;
 
-    int inicioArgumentos;
+    int inicioArgumentos = 3;
 
     if (proceso == SUSCRIPTOR) {
-        pedidoGameBoy->tipoMensaje = UNTYPED_MESSAGE;
-        inicioArgumentos = 1;
-    } else {
-        pedidoGameBoy->tipoMensaje = obtenerTipoMensaje(arrayArgumentos[1]);
+        pedidoGameBoy.tipoMensaje = UNTYPED_MESSAGE;
         inicioArgumentos = 2;
+    } else {
+        pedidoGameBoy.tipoMensaje = obtenerTipoMensaje(arrayArgumentos[2]);
     }
 
     Argumentos argumentos = list_create();
     for (int i=inicioArgumentos; i < cantidadArugmentos; i++)
         list_add(argumentos, arrayArgumentos[i]);
 
-    pedidoGameBoy->argumentos = argumentos;
+    pedidoGameBoy.argumentos = argumentos;
 
     return pedidoGameBoy;
 }
@@ -34,8 +33,6 @@ Proceso obtenerProceso(char * nombreProceso) {
         return BROKER;
     } else if (string_equals_ignore_case("TEAM", nombreProceso)) {
         return TEAM;
-    } else if (string_equals_ignore_case("CATCH_POKEMON", nombreProceso)) {
-        return CATCH_POKEMON;
     } else if (string_equals_ignore_case("GAMECARD", nombreProceso)) {
         return GAMECARD;
     } else if (string_equals_ignore_case("SUSCRIPTOR", nombreProceso)) {
@@ -60,6 +57,38 @@ TipoMensaje obtenerTipoMensaje(char * tipoMensaje) {
     } else {
         log_error(INTERNAL_LOGGER, "Tipo de mensaje no soportado: %s", tipoMensaje);
         exit(EXIT_FAILURE);
+    }
+}
+
+char * nombreProceso(Proceso proceso) {
+    switch (proceso) {
+        case BROKER:
+            return "BROKER";
+        case TEAM:
+            return "TEAM";
+        case GAMECARD:
+            return "GAMECARD";
+        case SUSCRIPTOR:
+            return "SUSCRIPTOR";
+        default:
+            return "UNKNOWN_PROCESS";
+    }
+}
+
+char * nombreTipoMensaje(TipoMensaje tipoMensaje) {
+    switch (tipoMensaje) {
+        case NEW_POKEMON:
+            return "NEW_POKEMON";
+        case APPEARED_POKEMON:
+            return "APPEARED_POKEMON";
+        case CATCH_POKEMON:
+            return "CATCH_POKEMON";
+        case CAUGHT_POKEMON:
+            return "CAUGHT_POKEMON";
+        case GET_POKEMON:
+            return "GET_POKEMON";
+        default:
+            return "UNKNOWN_MESSAGE";
     }
 }
 

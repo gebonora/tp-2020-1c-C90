@@ -7,6 +7,7 @@
 
 #include "app/Global.h"
 #include "app/Servicios.h"
+#include "controladores/ControladorPedidosGameBoy.h"
 
 void mostrarTitulo(t_log * logger);
 

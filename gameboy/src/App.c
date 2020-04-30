@@ -1,7 +1,7 @@
 #include "app/App.h"
 
 int main(int argc, char **argv) {
-    INTERNAL_LOGGER = log_create(GAMEBOY_INTERNAL_LOG_FILE, "GameBoy.app", 1, LOG_LEVEL_INFO);
+    INTERNAL_LOGGER = log_create(GAMEBOY_INTERNAL_LOG_FILE, "GameBoy.app", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_INFO);
     mostrarTitulo(INTERNAL_LOGGER);
     log_info(INTERNAL_LOGGER, "========================= Inicio de ejecución ============================");
 
@@ -15,7 +15,9 @@ int main(int argc, char **argv) {
     MANDATORY_LOGGER = log_create(mandatoryLogPath, "LogObligatorio", 1, LOG_LEVEL_INFO);
 
     // Controlador
-
+    ControladorPedidosGameBoy controladorPedidosGameBoy = ControladorPedidosGameBoyConstructor.new();
+    PedidoGameBoy pedidoGameBoy = crearPedidoGameBoy(argc, argv);
+    controladorPedidosGameBoy.despacharPedido(&controladorPedidosGameBoy, pedidoGameBoy);
 
     // Liberacion
     log_debug(INTERNAL_LOGGER, "Finalizando proceso GameBoy...");

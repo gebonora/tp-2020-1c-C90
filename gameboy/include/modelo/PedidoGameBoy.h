@@ -33,11 +33,15 @@ typedef struct {
     Argumentos argumentos;
 } PedidoGameBoy;
 
-PedidoGameBoy *crearPedidoGameBoy(int cantidadArugmentos, char** arrayArgumentos);
+PedidoGameBoy crearPedidoGameBoy(int cantidadArugmentos, char** arrayArgumentos);
 
 Proceso obtenerProceso(char * nombreProceso);
 
 TipoMensaje obtenerTipoMensaje(char * tipoMensaje);
+
+char * nombreProceso(Proceso proceso);
+
+char * nombreTipoMensaje(TipoMensaje tipoMensaje);
 
 void eliminarPedidoGameBoy(PedidoGameBoy *pedidoGameBoy);
 
