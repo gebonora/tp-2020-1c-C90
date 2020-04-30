@@ -9,7 +9,6 @@
 
 
 void iniciarLogger(){
-	logger = log_create("gamecard/logs/logger.log","Server",1,LOG_LEVEL_INFO);
+	logger = log_create(PATH_LOGGER,"Server",1,LOG_LEVEL_INFO);
 	log_info(logger,"Logger iniciado");
-
 }

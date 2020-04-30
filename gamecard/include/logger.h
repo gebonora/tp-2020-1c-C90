@@ -20,6 +20,7 @@ t_log* logger;
 
 void iniciarLogger();
 
+#define PATH_LOGGER "/home/utnso/tp-2020-1c-C90/gamecard/logs/logger.log"
 
 
 #endif /* GAMECARD_INCLUDE_LOGGER_H_ */

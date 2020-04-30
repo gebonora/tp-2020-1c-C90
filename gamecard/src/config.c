@@ -8,7 +8,7 @@
 #include "config.h"
 
 void cargarConfigConexiones(){
-	config = config_create("gamecard/config/gameCard.config");
+	config = config_create(PATH_CONFIG);
 	PUERTO_BROKER = config_get_string_value(config, "PUERTO_BROKER");
 	IP_BROKER = config_get_string_value(config, "IP_BROKER");
 	PUNTO_MONTAJE_TALLGRASS = config_get_string_value(config, "PUNTO_MONTAJE_TALLGRASS");

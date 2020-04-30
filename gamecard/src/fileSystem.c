@@ -24,7 +24,7 @@
 #include "fileSystem.h"
 
 int main(){
-	puts("arranco la wea");
+	puts("arranco el main");
 	cargarConfigConexiones();
 	iniciarLogger();
 	crearDirectoriosBase("Metadata");

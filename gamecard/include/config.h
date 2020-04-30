@@ -22,6 +22,8 @@ char* PUNTO_MONTAJE_TALLGRASS;
 char* IP_BROKER;
 char* PUERTO_BROKER;
 
+#define PATH_CONFIG "/home/utnso/tp-2020-1c-C90/gamecard/config/gameCard.config"
+
 void cargarConfigConexiones();
 
 
