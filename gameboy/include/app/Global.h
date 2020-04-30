@@ -23,5 +23,6 @@
 
 // Variables globales
 t_log * MANDATORY_LOGGER;
+t_log * INTERNAL_LOGGER;
 
 #endif //GAMEBOY_GLOBAL_H
