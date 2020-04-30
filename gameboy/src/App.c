@@ -11,7 +11,7 @@ int main() {
 
     // Logger obligatorio
     log_debug(logger, "Configurando logger obligatorio...");
-    char * mandatoryLogPath = config_get_string_value(config, MANDATORY_LOG);
+    char * mandatoryLogPath = config_get_string_value(servicioDeConfiguracion, MANDATORY_LOG);
     MANDATORY_LOGGER = log_create(mandatoryLogPath, "LogObligatorio", 1, LOG_LEVEL_INFO);
 
     // Liberacion
