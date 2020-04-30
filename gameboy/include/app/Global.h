@@ -23,7 +23,7 @@
 #define MANDATORY_LOG "MANDATORY_LOG"
 
 // Constantes
-#define SHOW_INTERNAL_CONSOLE 1 // Setear en 1 temporalmente para mostrar la consola de uso interno. ¡NO PUSHEAR EL 1!
+#define SHOW_INTERNAL_CONSOLE 1 // Setear en 1 para mostrar la consola de uso interno. Dejar en 0 para la entrega.
 
 // Variables globales
 t_log * MANDATORY_LOGGER;
