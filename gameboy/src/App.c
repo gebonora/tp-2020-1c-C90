@@ -15,12 +15,18 @@ int main(int argc, char **argv) {
     MANDATORY_LOGGER = log_create(mandatoryLogPath, "LogObligatorio", 1, LOG_LEVEL_INFO);
 
     // Controlador
-    ControladorPedidosGameBoy controladorPedidosGameBoy = ControladorPedidosGameBoyConstructor.new();
-    PedidoGameBoy pedidoGameBoy = crearPedidoGameBoy(argc, argv);
-    controladorPedidosGameBoy.despacharPedido(&controladorPedidosGameBoy, pedidoGameBoy);
+    if (argc > 1) {
+        ControladorPedidosGameBoy controladorPedidosGameBoy = ControladorPedidosGameBoyConstructor.new();
+        PedidoGameBoy pedidoGameBoy = crearPedidoGameBoy(argc, argv);
+        controladorPedidosGameBoy.despacharPedido(&controladorPedidosGameBoy, pedidoGameBoy);
+    } else {
+        log_error(INTERNAL_LOGGER, "No se ingresaron argumentos al proceso.");
+    }
 
     // Liberacion
     log_debug(INTERNAL_LOGGER, "Finalizando proceso GameBoy...");
+    log_debug(INTERNAL_LOGGER, "Liberando logger obligatorio");
+    log_destroy(MANDATORY_LOGGER);
     log_debug(INTERNAL_LOGGER, "Liberando servicios");
     servicioDeConfiguracion.destruir(&servicioDeConfiguracion);
     log_debug(INTERNAL_LOGGER, "Saliendo...");
