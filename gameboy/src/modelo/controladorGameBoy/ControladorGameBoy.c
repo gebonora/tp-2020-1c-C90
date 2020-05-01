@@ -8,6 +8,12 @@ ControladorGameBoy obtenerControladorPara(PedidoGameBoy pedidoGameBoy, t_log * l
     switch (pedidoGameBoy.proceso) {
         case TEAM:
             return controladorTeam;
+        case BROKER:
+            return controladorBroker;
+        case GAMECARD:
+            return controladorGamecard;
+        case SUSCRIPTOR:
+            return controladorSuscriptor;
         default:
             log_error(logger, "No se pudo resolver el controlador para el proceso %s",
                     nombreProceso(pedidoGameBoy.proceso));

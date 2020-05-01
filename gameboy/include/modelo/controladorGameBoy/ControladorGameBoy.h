@@ -16,5 +16,8 @@ ControladorGameBoy obtenerControladorPara(PedidoGameBoy pedidoGameBoy, t_log * l
 
 // Lista de controladores
 ControladorGameBoy controladorTeam;
+ControladorGameBoy controladorBroker;
+ControladorGameBoy controladorGamecard;
+ControladorGameBoy controladorSuscriptor;
 
 #endif //GAMEBOY_CONTROLADORGAMEBOY_H
