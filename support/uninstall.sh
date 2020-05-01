@@ -1,1 +1,1 @@
-xargs rm < ./deploy/install_manifest.txt
+xargs rm < ./install_manifest.txt
