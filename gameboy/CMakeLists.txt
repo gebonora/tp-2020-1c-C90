@@ -5,13 +5,19 @@ set(CMAKE_C_STANDARD 11)
 
 # .h files
 include_directories(include)
+include_directories(/usr/include/support)
+if(DEFINED CMAKE_LIBRARY_PATH)
+    include_directories(${CMAKE_LIBRARY_PATH}/include)
+    link_directories(${CMAKE_LIBRARY_PATH}/lib)
+endif(DEFINED CMAKE_LIBRARY_PATH)
+
 # .c files
 file(GLOB_RECURSE SOURCES RELATIVE ${CMAKE_SOURCE_DIR} "src/*.c")
 # sin esto no vivimos
 add_executable(${PROJECT_NAME} ${SOURCES})
 
 # Commons y otras librerias
-target_link_libraries(${PROJECT_NAME} commons)
+target_link_libraries(${PROJECT_NAME} commons delibird support)
 
 # Config
 add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory

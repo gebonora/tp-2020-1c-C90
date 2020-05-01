@@ -46,6 +46,14 @@ typedef struct {
 typedef struct {
 	Operation operation_code;
 	void* buffer;
+	uint32_t id_correlational;
 } Message;
+
+typedef struct {
+	uint32_t id;
+	Message* message;
+	t_list* sent;
+	t_list* confirmed;
+} Memory_Message;
 
 #endif /* BROKER_INCLUDE_PROTOCOL_H_ */
