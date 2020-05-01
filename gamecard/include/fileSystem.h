@@ -13,6 +13,7 @@
 #include <dirent.h>
 #include "config.h"
 #include "logger.h"
+#include <delibird/interface.h>
 
 void crearDirectoriosBase(char* subPath);
 void crearArchivosBase(char* subPath);
