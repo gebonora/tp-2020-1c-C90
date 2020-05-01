@@ -2,7 +2,6 @@
 IDIR = include
 SDIR = src
 ODIR = obj
-BDIR = bin
 LIBSDIR = ../libs/
 
 define convert_obj_to_src_path
@@ -12,7 +11,7 @@ endef
 # Template tuneado
 
 PROJECT = gameCard
-TARGET = $(BDIR)/$(PROJECT) # Definimos la tarea que va a ejecutar make por defecto Y el nombre del binario final....
+TARGET = $(PROJECT) # Definimos la tarea que va a ejecutar make por defecto Y el nombre del binario final....
 LIBS = -lreadline -lcommons -pthread # Incluimos las bibliotecas que necesitamos
 CC = gcc # Vamos a usar gcc como compilador, porque nos encanta!
 CFLAGS = -g -Wall # Compilamos con los flags -g (con simbolos de debug) y -Wall (que nos muestre todos los warnings)
@@ -51,6 +50,5 @@ check:
 
 # Creacion de directorio
 create-dirs:
-	mkdir -p bin
 	mkdir -p logs
 	mkdir -p obj
