@@ -57,12 +57,13 @@ void serve_client(int socket_e) {
 }
 
 void process_request(int cod_op, int socket) {
+	int id = 900;
 	switch (cod_op) {
 	case NEW: ;
 		New* new_pokemon = recv_new(socket);
 		log_info(logger, "Me llego un new");
 		log_info(logger, "Nombre pokemon: %s", new_pokemon->pokemon->name->value);
-		int id = 900;
+
 		send(socket, &id, sizeof(int), 0);
 		//free_new(new_pokemon);
 		break;
@@ -70,8 +71,13 @@ void process_request(int cod_op, int socket) {
 		Caught* caught_pokemon = recv_caught(socket);
 		log_info(logger, "Me llego un caught");
 		log_info(logger, "Resultado: %d", caught_pokemon->result);
-		int id2 = 900;
-		send(socket, &id2, sizeof(int), 0);
+		send(socket, &id, sizeof(int), 0);
+		break;
+	case GET: ;
+		Get* get_pokemon = recv_get(socket);
+		log_info(logger, "Me llego un get");
+		log_info(logger, "Nombre del pokemon: %s", get_pokemon->name->value);
+		send(socket, &id, sizeof(int), 0);
 		break;
 	case 0:
 		pthread_exit(NULL); //revisar cuando matar al hilo y cerrar la conexion
