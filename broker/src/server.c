@@ -30,7 +30,7 @@ void iniciar_servidor(void) {
 
     freeaddrinfo(servinfo);
 
-	esperar_cliente(socket_servidor);
+    while(1) esperar_cliente(socket_servidor);
 }
 
 void esperar_cliente(int socket_servidor)
@@ -38,14 +38,14 @@ void esperar_cliente(int socket_servidor)
 	struct sockaddr_in dir_cliente;
 
 	int tam_direccion = sizeof(struct sockaddr_in);
-
+	log_info(logger, "Esperando clientes");
 	int socket_cliente = accept(socket_servidor, (void*) &dir_cliente, &tam_direccion);
 
-	serve_client(socket_cliente);
+	log_info(logger, "Se conectó el cliente: %d", socket_cliente);
 
 	pthread_t thread;
 
-	pthread_create(&thread,NULL,(void*)serve_client, &socket_cliente);//ver como pasar el parametro socket
+	pthread_create(&thread,NULL,(void*)serve_client, socket_cliente);//ver como pasar el parametro socket
 	pthread_detach(thread);
 }
 
@@ -63,21 +63,22 @@ void process_request(int cod_op, int socket) {
 		New* new_pokemon = recv_new(socket);
 		log_info(logger, "Me llego un new");
 		log_info(logger, "Nombre pokemon: %s", new_pokemon->pokemon->name->value);
-
 		send(socket, &id, sizeof(int), 0);
-		//free_new(new_pokemon);
+		free_new(new_pokemon);
 		break;
 	case CAUGHT: ;
 		Caught* caught_pokemon = recv_caught(socket);
 		log_info(logger, "Me llego un caught");
 		log_info(logger, "Resultado: %d", caught_pokemon->result);
 		send(socket, &id, sizeof(int), 0);
+		free(caught_pokemon);
 		break;
 	case GET: ;
 		Get* get_pokemon = recv_get(socket);
 		log_info(logger, "Me llego un get");
 		log_info(logger, "Nombre del pokemon: %s", get_pokemon->name->value);
 		send(socket, &id, sizeof(int), 0);
+		free_get(get_pokemon);
 		break;
 	case 0:
 		pthread_exit(NULL); //revisar cuando matar al hilo y cerrar la conexion
