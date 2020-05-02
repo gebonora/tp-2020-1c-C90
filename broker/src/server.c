@@ -35,7 +35,6 @@ void iniciar_servidor(void) {
 
 void esperar_cliente(int socket_servidor)
 {
-	puts("entre esperar cliente");
 	struct sockaddr_in dir_cliente;
 
 	int tam_direccion = sizeof(struct sockaddr_in);
@@ -51,10 +50,8 @@ void esperar_cliente(int socket_servidor)
 }
 
 void serve_client(int socket_e) {
-	puts("entre serve client");
 	int cod_op;
 	recv(socket_e, &cod_op, sizeof(int), MSG_WAITALL);
-	//send(*socket_e, cod_op, 5, 0);
 	process_request(cod_op, socket_e);
 
 }
