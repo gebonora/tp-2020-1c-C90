@@ -66,6 +66,13 @@ void process_request(int cod_op, int socket) {
 		send(socket, &id, sizeof(int), 0);
 		//free_new(new_pokemon);
 		break;
+	case CAUGHT: ;
+		Caught* caught_pokemon = recv_caught(socket);
+		log_info(logger, "Me llego un caught");
+		log_info(logger, "Resultado: %d", caught_pokemon->result);
+		int id2 = 900;
+		send(socket, &id2, sizeof(int), 0);
+		break;
 	case 0:
 		pthread_exit(NULL); //revisar cuando matar al hilo y cerrar la conexion
 	case -1:
