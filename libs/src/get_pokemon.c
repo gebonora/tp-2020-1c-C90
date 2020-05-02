@@ -18,7 +18,7 @@ void* serialize_get(Get* get_pokemon, int bytes) {
 }
 
 int calculate_get_bytes(Get* get_pokemon) {
-	return sizeof(Operation) + strlen(get_pokemon->name->value) + 1;
+	return sizeof(int) + sizeof(Operation) + strlen(get_pokemon->name->value) + 1;
 }
 
 void send_get(Get* get_pokemon, int socket) {
