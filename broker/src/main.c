@@ -13,7 +13,6 @@ int main(){
 	ALGORITMO_PARTICION_LIBRE = config_get_string_value(config, "ALGORITMO_PARTICION_LIBRE");
 	FRECUENCIA_COMPACTACION = config_get_int_value(config, "FRECUENCIA_COMPACTACION");
 
-	puts("lei la conf");
 	iniciar_servidor();
 	return 0;
 }
