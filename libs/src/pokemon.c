@@ -15,7 +15,7 @@ void free_pokemon(Pokemon* pokemon) {
 }
 
 int calculate_pokemon_bytes(Pokemon* pokemon) {
-	return sizeof(uint32_t) * 4 + strlen(pokemon->name->value) + 1;
+	return sizeof(Operation) + sizeof(uint32_t) + pokemon->coordinates->elements_count * sizeof(uint32_t) * 2 + strlen(pokemon->name->value) + 1;
 }
 
 void* serialize_pokemon(Pokemon* pokemon, Operation operation, int bytes) {
