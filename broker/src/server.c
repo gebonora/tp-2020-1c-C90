@@ -1,6 +1,6 @@
 #include "server.h"
 
-void iniciar_servidor(void) {
+void iniciar_servidor() {
 	int socket_servidor;
 
     struct addrinfo hints, *servinfo, *p;
@@ -63,6 +63,7 @@ void process_request(int cod_op, int socket) {
 		New* new_pokemon = recv_new(socket);
 		log_info(logger, "Me llego un new");
 		log_info(logger, "Nombre pokemon: %s", new_pokemon->pokemon->name->value);
+		log_info(logger, "Cantidad: %d", new_pokemon->quantity);
 		send(socket, &id, sizeof(int), 0);
 		free_new(new_pokemon);
 		break;
@@ -79,6 +80,29 @@ void process_request(int cod_op, int socket) {
 		log_info(logger, "Nombre del pokemon: %s", get_pokemon->name->value);
 		send(socket, &id, sizeof(int), 0);
 		free_get(get_pokemon);
+		break;
+	case LOCALIZED: ;
+		Localized* localized_pokemon = recv_localized(socket);
+		log_info(logger, "Me llego un localized");
+		log_info(logger, "Nombre del pokemon: %s", localized_pokemon->pokemon->name->value);
+		log_info(logger, "Cantidad de coordenadas: %d", localized_pokemon->coordinates_quantity);
+		send(socket, &id, sizeof(int), 0);
+		free_localized(localized_pokemon);
+		break;
+	case APPEARED: ;
+		Pokemon* appeared_pokemon = recv_pokemon(socket, false);
+		log_info(logger, "Me llego un appeared");
+		log_info(logger, "Nombre del pokemon: %s", appeared_pokemon->name->value);
+		send(socket, &id, sizeof(int), 0);
+		free_pokemon(appeared_pokemon);
+		break;
+	case CATCH: ;
+		Pokemon* catch_pokemon = recv_pokemon(socket, false);
+		log_info(logger, "Me llego un catch");
+		log_info(logger, "Nombre del pokemon: %s", catch_pokemon->name->value);
+		//log_info(logger, "Coordenadas: ", list_iterate()catch_pokemon->coordinates);
+		send(socket, &id, sizeof(int), 0);
+		free_pokemon(catch_pokemon);
 		break;
 	case 0:
 		pthread_exit(NULL); //revisar cuando matar al hilo y cerrar la conexion
