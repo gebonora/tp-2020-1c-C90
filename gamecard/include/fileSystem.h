@@ -13,9 +13,11 @@
 #include <dirent.h>
 #include "config.h"
 #include "logger.h"
-#include <delibird/interface.h>
+#include <stdbool.h>
+
 
 void crearDirectoriosBase(char* subPath);
 void crearArchivosBase(char* subPath);
+int fileExists(char * path);
 
 #endif /* GAMECARD_INCLUDE_FILESYSTEM_H_ */
