@@ -4,8 +4,9 @@ void* serialize_localized(Localized* localized_pokemon, int bytes) {
 	int displacement = 0;
 	void* serialized = malloc(bytes);
 
-	memcpy(serialized + displacement, (int*) LOCALIZED, sizeof(uint32_t));
-	displacement += sizeof(uint32_t);
+	Operation op = LOCALIZED;
+	memcpy(serialized + displacement, &op, sizeof(Operation));
+	displacement += sizeof(Operation);
 
 	memcpy(serialized + displacement, &(localized_pokemon->pokemon->name->size), sizeof(uint32_t));
 	displacement += sizeof(uint32_t);
@@ -15,18 +16,6 @@ void* serialize_localized(Localized* localized_pokemon, int bytes) {
 
 	memcpy(serialized + displacement, &(localized_pokemon->coordinates_quantity), sizeof(uint32_t));
 	displacement += sizeof(uint32_t);
-
-	/*void _serialize_coordinate(t_link_element* element) {
-		Coordinate* coordinate = (Coordinate*) element->data;
-		memcpy(serialized + displacement, &(coordinate->pos_x), sizeof(uint32_t));
-		displacement += sizeof(uint32_t);
-
-		memcpy(serialized + displacement, &(coordinate->pos_y), sizeof(uint32_t));
-		displacement += sizeof(uint32_t);
-	}
-
-	list_iterate(localized_pokemon->pokemon->coordinates, _serialize_coordinate);
-	*/
 
 	for(int i = 0; i < localized_pokemon->coordinates_quantity; i++) {
 		Coordinate* coordinate = list_get(localized_pokemon->pokemon->coordinates, i);
@@ -42,7 +31,7 @@ void* serialize_localized(Localized* localized_pokemon, int bytes) {
 }
 
 int calculate_localized_bytes(Localized* localized_pokemon) {
-	return calculate_pokemon_bytes(localized_pokemon->pokemon) + sizeof(uint32_t);
+	return sizeof(uint32_t) + calculate_pokemon_bytes(localized_pokemon->pokemon);
 }
 
 void send_localized(Localized* localized_pokemon, int socket) {

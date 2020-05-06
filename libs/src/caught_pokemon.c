@@ -4,8 +4,9 @@ void* serialize_caught(Caught* caught_pokemon, int bytes) {
 	int displacement = 0;
 	void* serialized = malloc(bytes);
 
-	memcpy(serialized + displacement, (int*) CAUGHT, sizeof(uint32_t));
-	displacement += sizeof(uint32_t);
+	Operation op = CAUGHT;
+	memcpy(serialized + displacement, &op, sizeof(Operation));
+	displacement += sizeof(Operation);
 
 	memcpy(serialized + displacement, &(caught_pokemon->result), sizeof(uint32_t));
 

@@ -4,8 +4,9 @@ void* serialize_get(Get* get_pokemon, int bytes) {
 	int displacement = 0;
 	void* serialized = malloc(bytes);
 
-	memcpy(serialized + displacement, (int*) GET, sizeof(uint32_t));
-	displacement += sizeof(uint32_t);
+	Operation op = GET;
+	memcpy(serialized + displacement, &op, sizeof(Operation));
+	displacement += sizeof(Operation);
 
 	memcpy(serialized + displacement, &(get_pokemon->name->size), sizeof(uint32_t));
 	displacement += sizeof(uint32_t);
@@ -17,7 +18,7 @@ void* serialize_get(Get* get_pokemon, int bytes) {
 }
 
 int calculate_get_bytes(Get* get_pokemon) {
-	return sizeof(uint32_t) + strlen(get_pokemon->name->value) + 1;
+	return sizeof(int) + sizeof(Operation) + strlen(get_pokemon->name->value) + 1;
 }
 
 void send_get(Get* get_pokemon, int socket) {

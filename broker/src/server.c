@@ -1,6 +1,6 @@
 #include "server.h"
 
-void iniciar_servidor(void) {
+void iniciar_servidor() {
 	int socket_servidor;
 
     struct addrinfo hints, *servinfo, *p;
@@ -24,14 +24,13 @@ void iniciar_servidor(void) {
         break;
     }
 
-    logger = log_create("../logs/server.log", "Broker Server", 0, LOG_LEVEL_INFO);
+    logger = log_create("/home/utnso/tp-2020-1c-C90/broker/logs/server.log", "Broker Server", 1, LOG_LEVEL_INFO);
 
 	listen(socket_servidor, SOMAXCONN);
 
     freeaddrinfo(servinfo);
 
-    while(1)
-    	esperar_cliente(socket_servidor);
+    while(1) esperar_cliente(socket_servidor);
 }
 
 void esperar_cliente(int socket_servidor)
@@ -39,30 +38,77 @@ void esperar_cliente(int socket_servidor)
 	struct sockaddr_in dir_cliente;
 
 	int tam_direccion = sizeof(struct sockaddr_in);
-
+	log_info(logger, "Esperando clientes");
 	int socket_cliente = accept(socket_servidor, (void*) &dir_cliente, &tam_direccion);
 
-	pthread_create(&thread,NULL,(void*)serve_client,&socket_cliente);
+	log_info(logger, "Se conectó el cliente: %d", socket_cliente);
+
+	pthread_t thread;
+
+	pthread_create(&thread,NULL,(void*)serve_client, socket_cliente);//ver como pasar el parametro socket
 	pthread_detach(thread);
-
 }
 
-void serve_client(int* socket) {
+void serve_client(int socket_e) {
 	int cod_op;
-	if(recv(*socket, &cod_op, sizeof(int), MSG_WAITALL) == -1)
-		cod_op = -1;
-	process_request(cod_op, *socket);
+	recv(socket_e, &cod_op, sizeof(int), MSG_WAITALL);
+	process_request(cod_op, socket_e);
+
 }
 
-void process_request(int cod_op, int cliente_fd) {
-		switch (cod_op) {
-		case GET:
-			break;
-		case 0:
-			pthread_exit(NULL);
-		case -1:
-			pthread_exit(NULL);
-		}
+void process_request(int cod_op, int socket) {
+	int id = 900;
+	switch (cod_op) {
+	case NEW: ;
+		New* new_pokemon = recv_new(socket);
+		log_info(logger, "Me llego un new");
+		log_info(logger, "Nombre pokemon: %s", new_pokemon->pokemon->name->value);
+		log_info(logger, "Cantidad: %d", new_pokemon->quantity);
+		send(socket, &id, sizeof(int), 0);
+		free_new(new_pokemon);
+		break;
+	case CAUGHT: ;
+		Caught* caught_pokemon = recv_caught(socket);
+		log_info(logger, "Me llego un caught");
+		log_info(logger, "Resultado: %d", caught_pokemon->result);
+		send(socket, &id, sizeof(int), 0);
+		free(caught_pokemon);
+		break;
+	case GET: ;
+		Get* get_pokemon = recv_get(socket);
+		log_info(logger, "Me llego un get");
+		log_info(logger, "Nombre del pokemon: %s", get_pokemon->name->value);
+		send(socket, &id, sizeof(int), 0);
+		free_get(get_pokemon);
+		break;
+	case LOCALIZED: ;
+		Localized* localized_pokemon = recv_localized(socket);
+		log_info(logger, "Me llego un localized");
+		log_info(logger, "Nombre del pokemon: %s", localized_pokemon->pokemon->name->value);
+		log_info(logger, "Cantidad de coordenadas: %d", localized_pokemon->coordinates_quantity);
+		send(socket, &id, sizeof(int), 0);
+		free_localized(localized_pokemon);
+		break;
+	case APPEARED: ;
+		Pokemon* appeared_pokemon = recv_pokemon(socket, false);
+		log_info(logger, "Me llego un appeared");
+		log_info(logger, "Nombre del pokemon: %s", appeared_pokemon->name->value);
+		send(socket, &id, sizeof(int), 0);
+		free_pokemon(appeared_pokemon);
+		break;
+	case CATCH: ;
+		Pokemon* catch_pokemon = recv_pokemon(socket, false);
+		log_info(logger, "Me llego un catch");
+		log_info(logger, "Nombre del pokemon: %s", catch_pokemon->name->value);
+		//log_info(logger, "Coordenadas: ", list_iterate()catch_pokemon->coordinates);
+		send(socket, &id, sizeof(int), 0);
+		free_pokemon(catch_pokemon);
+		break;
+	case 0:
+		pthread_exit(NULL); //revisar cuando matar al hilo y cerrar la conexion
+	case -1:
+		pthread_exit(NULL); //revisar cuando matar al hilo y cerrar la conexion
+	}
 }
 
 

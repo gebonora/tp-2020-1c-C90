@@ -4,8 +4,9 @@ void* serialize_new(New* new_pokemon, int bytes) {
 	int displacement = 0;
 	void* serialized = malloc(bytes);
 
-	memcpy(serialized + displacement, (int*) NEW, sizeof(uint32_t));
-	displacement += sizeof(uint32_t);
+	Operation op = NEW;
+	memcpy(serialized + displacement, &op, sizeof(Operation));
+	displacement += sizeof(Operation);
 
 	memcpy(serialized + displacement, &(new_pokemon->pokemon->name->size), sizeof(uint32_t));
 	displacement += sizeof(uint32_t);
@@ -32,24 +33,22 @@ void free_new(New* new_pokemon) {
 }
 
 int calculate_new_bytes(New* new_pokemon) {
-	return sizeof(uint32_t) + calculate_pokemon_bytes(new_pokemon->pokemon);
+	return sizeof(int) + calculate_pokemon_bytes(new_pokemon->pokemon);
 }
 
-void send_new(New* new_pokemon, int socket) {
+void send_new(New* new_pokemon, int socket_e) {
 	int bytes = calculate_new_bytes(new_pokemon);
 	void* serialized = serialize_new(new_pokemon, bytes);
 
-	send(socket, serialized, bytes, 0);
+	send(socket_e, serialized, bytes, 0);
 
 	free(serialized);
 	free_new(new_pokemon);
 }
 
-New* recv_new(int socket) {
+New* recv_new(int socket_e) {
 	New* new_pokemon = malloc(sizeof(New));
-
-	new_pokemon->pokemon = recv_pokemon(socket, false);
-	new_pokemon->quantity = recv_uint32(socket);
-
+	new_pokemon->pokemon = recv_pokemon(socket_e, false);
+	new_pokemon->quantity = recv_uint32(socket_e);
 	return new_pokemon;
 }
