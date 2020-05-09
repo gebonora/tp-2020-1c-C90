@@ -18,6 +18,8 @@ Name* recv_name(int);
 Coordinate* recv_coordinate(int);
 void free_name(Name*);
 t_list* recv_coordinates(int, bool);
+Name* create_name(char*);
+Get* create_get_pokemon(char*);
 
 // CATCH, APPEARED
 void* serialize_pokemon(Pokemon*, Operation, int);

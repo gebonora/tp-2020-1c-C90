@@ -45,3 +45,15 @@ void free_name(Name* name) {
 	free(name->value);
 	free(name);
 }
+
+Name* create_name(char* name) {
+	Name* pokemon_name = malloc(sizeof(Name));
+	char* pokemon_name_value = malloc(strlen(name) + 1);
+	pokemon_name_value = strcpy(pokemon_name_value, name);
+
+	pokemon_name->value = pokemon_name_value;
+	pokemon_name->size = strlen(name) + 1;
+
+	return pokemon_name;
+
+}
