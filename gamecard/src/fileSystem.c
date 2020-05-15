@@ -23,7 +23,7 @@
  */
 #include "fileSystem.h"
 
-int main(){
+int main232(){
 	puts("arranco el main");
 	cargarConfigConexiones();
 	iniciarLogger();

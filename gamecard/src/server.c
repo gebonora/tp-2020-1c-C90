@@ -5,7 +5,6 @@
  *      Author: GONZALO BONORA
  */
 
-
 /* Se conecta con BROKER a las colas de mensajes.
  * Abre un socket de solo escucha para un gameboy
  *
@@ -27,36 +26,147 @@
  */
 #include "server.h"
 
+void atenderConexiones() {
+	pthread_t threadNew, threadCatch, threadGet, threadGameboy;
 
-int iniciar_servidor(char* ) //crea el socket de servidor
-{
+	pthread_create(&threadNew, NULL, (void*) atenderNew, NULL);
+	pthread_detach(threadNew);
 
-	int socket_servidor;
+	pthread_create(&threadCatch, NULL, (void*) atenderCatch, NULL);
+	pthread_detach(threadCatch);
 
-    struct addrinfo hints, *servinfo, *p;
+	pthread_create(&threadGet, NULL, (void*) atenderGet, NULL);
+	pthread_detach(threadGet);
 
-    memset(&hints, 0, sizeof(hints));
-    hints.ai_family = AF_UNSPEC;
-    hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags = AI_PASSIVE;
+	pthread_create(&threadGameboy, NULL, (void*) atenderGameboy, NULL);
+	pthread_detach(threadGameboy);
 
-    getaddrinfo(IP, PUERTO, &hints, &servinfo);
-
-    for (p=servinfo; p != NULL; p = p->ai_next)
-    {
-        if ((socket_servidor = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1)
-            continue;
-
-        if (bind(socket_servidor, p->ai_addr, p->ai_addrlen) == -1) {
-            close(socket_servidor);
-            continue;
-        }
-        break;
-    }
-
-	listen(socket_servidor, SOMAXCONN);
-
-    freeaddrinfo(servinfo);
-
-    return socket_servidor;
 }
+
+void atenderNew() {
+	int socketDeEscucha = iniciarSocketDeEscucha();
+	esperarBrokerNew(socketDeEscucha);
+}
+
+void esperarBrokerNew(int socketDeEscucha) {
+	/*
+	 * Ciclo que:
+	 * Recibe un New
+	 * Crea un hilo para atenderlo
+	 */
+	while (1) {
+		New* unNew = recv_new(socketDeEscucha);
+		pthread_t thread;
+		pthread_create(&thread, NULL, (void*) procesarHiloNew, unNew);
+		pthread_detach(thread);
+	}
+}
+
+void procesarHiloNew(New* unNew) {
+	//procesar
+	//crear socket descartable al broker
+	int socketDescartable = crearSocketHaciaBroker();
+	//enviar respuesta al broker
+	//esperar confirmacion del broker?
+	//liberar memoriar y cerrar socket
+	//termina el hilo
+}
+
+void atenderCatch() {
+	int socketDeEscucha = iniciarSocketDeEscucha();
+	esperarBrokerCatch(socketDeEscucha);
+}
+
+void esperarBrokerCatch(int socketDeEscucha) {
+	/*
+	 * Ciclo que:
+	 * Recibe un New
+	 * Crea un hilo para atenderlo
+	 */
+	while (1) {
+		Pokemon* unCatch = recv_pokemon(socketDeEscucha, false);
+		pthread_t thread;
+		pthread_create(&thread, NULL, (void*) procesarHiloCatch, unCatch);
+		pthread_detach(thread);
+	}
+}
+
+void procesarHiloCatch(Pokemon* unCatch) {
+	//procesar
+	//crear socket descartable al broker
+	int socketDescartable = crearSocketHaciaBroker();
+	//enviar respuesta al broker
+	//esperar confirmacion del broker?
+	//liberar memoriar y cerrar socket
+	//termina el hilo
+}
+
+void atenderGet() {
+	int socketDeEscucha = iniciarSocketDeEscucha();
+	esperarBrokerGet(socketDeEscucha);
+}
+
+void esperarBrokerGet(int socketDeEscucha) {
+	/*
+	 * Ciclo que:
+	 * Recibe un New
+	 * Crea un hilo para atenderlo
+	 */
+	while (1) {
+		Get* unGet = recv_get(socketDeEscucha);
+		pthread_t thread;
+		pthread_create(&thread, NULL, (void*) procesarHiloGet, unGet);
+		pthread_detach(thread);
+	}
+}
+
+void procesarHiloGet(Get* unGet) {
+	//procesar
+	//crear socket descartable al broker
+	int socketDescartable = crearSocketHaciaBroker();
+	//enviar respuesta al broker
+	//esperar confirmacion del broker?
+	//liberar memoriar y cerrar socket
+	//termina el hilo
+}
+
+void atenderGameboy() {
+	return;
+}
+
+int iniciarSocketDeEscucha() {
+	int socketDeEscucha = crearSocketHaciaBroker();
+	//conectarnos al broker y hacer handshake
+
+	send(socketDeEscucha, (int*) 200, sizeof(int), 0);
+
+	printf("Envie: %d", 200);
+
+	int recibido;
+	recv(socketDeEscucha, &recibido, sizeof(int), MSG_WAITALL);
+
+	printf("Recibi: %d", recibido);
+
+//antes del return validar que se recibio bien.
+	return socketDeEscucha;
+
+}
+
+int crearSocketHaciaBroker() {
+	struct addrinfo hints;
+	struct addrinfo* server_info;
+	memset(&hints, 0, sizeof(hints));
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_flags = AI_PASSIVE;
+	getaddrinfo(IP_BROKER, PUERTO_BROKER, &hints, &server_info);
+	int socketDeEscucha = socket(server_info->ai_family,
+			server_info->ai_socktype, server_info->ai_protocol);
+	if (connect(socketDeEscucha, server_info->ai_addr, server_info->ai_addrlen)
+			== -1)
+		puts("error");
+
+	freeaddrinfo(server_info);
+	return socketDeEscucha;
+}
+
