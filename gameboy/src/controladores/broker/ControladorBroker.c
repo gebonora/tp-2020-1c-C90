@@ -33,6 +33,13 @@ void atenderPedidoBroker(PedidoGameBoy pedidoGameBoy, t_log * logger) {
     case CATCH_POKEMON: ;
     break;
     case CAUGHT_POKEMON: ;
+    	uint32_t id_correlational = atoi(list_get(pedidoGameBoy.argumentos, 0));
+    	Caught* caught_pokemon = create_caught_pokemon(
+				atoi(list_get(pedidoGameBoy.argumentos, 1))
+				);
+		send_caught(caught_pokemon, socket_broker);
+		send(socket_broker, &id_correlational, sizeof(uint32_t), 0);
+		recv(socket_broker, &id, sizeof(int), MSG_WAITALL);
     break;
     case GET_POKEMON: ;
     	Get* get_pokemon = create_get_pokemon(

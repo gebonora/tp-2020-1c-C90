@@ -57,5 +57,6 @@ void free_localized(Localized*);
 void* serialize_caught(Caught*, int);
 void send_caught(Caught*, int);
 Caught* recv_caught(int);
+Caught* create_caught_pokemon(uint32_t);
 
 #endif /* BROKER_INCLUDE_INTERFACE_H_ */
