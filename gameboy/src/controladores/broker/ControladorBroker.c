@@ -16,6 +16,7 @@ void atenderPedidoBroker(PedidoGameBoy pedidoGameBoy, t_log * logger) {
     char* puerto = servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, PUERTO_BROKER);
     int socket_broker = crear_conexion(ip, puerto);
     int id;
+    uint32_t id_correlational;
 
     switch(pedidoGameBoy.tipoMensaje) {
     case NEW_POKEMON: ;
@@ -28,12 +29,21 @@ void atenderPedidoBroker(PedidoGameBoy pedidoGameBoy, t_log * logger) {
     break;
 
     case APPEARED_POKEMON: ;
+		Pokemon* pokemon = create_pokemon(
+				 list_get(pedidoGameBoy.argumentos, 0),
+				 atoi(list_get(pedidoGameBoy.argumentos, 1)),
+				 atoi(list_get(pedidoGameBoy.argumentos, 2))
+				);
+		id_correlational = atoi(list_get(pedidoGameBoy.argumentos, 3));
+		send_pokemon(pokemon, APPEARED, socket_broker);
+		send(socket_broker, &id_correlational, sizeof(uint32_t), 0);
     break;
 
     case CATCH_POKEMON: ;
+
     break;
     case CAUGHT_POKEMON: ;
-    	uint32_t id_correlational = atoi(list_get(pedidoGameBoy.argumentos, 0));
+    	id_correlational = atoi(list_get(pedidoGameBoy.argumentos, 0));
     	Caught* caught_pokemon = create_caught_pokemon(
 				atoi(list_get(pedidoGameBoy.argumentos, 1))
 				);

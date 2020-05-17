@@ -58,6 +58,7 @@ void serve_client(int socket_e) {
 
 void process_request(int cod_op, int socket) {
 	int id = 900;
+	uint32_t id_correlational;
 	switch (cod_op) {
 	case NEW: ;
 		New* new_pokemon = recv_new(socket);
@@ -69,7 +70,7 @@ void process_request(int cod_op, int socket) {
 		break;
 	case CAUGHT: ;
 		Caught* caught_pokemon = recv_caught(socket);
-		uint32_t id_correlational = recv_uint32(socket);
+		id_correlational = recv_uint32(socket);
 		log_info(logger, "Me llego un caught");
 		log_info(logger, "Resultado: %d", caught_pokemon->result);
 		log_info(logger, "Id correlational: %d", id_correlational);
@@ -93,8 +94,10 @@ void process_request(int cod_op, int socket) {
 		break;
 	case APPEARED: ;
 		Pokemon* appeared_pokemon = recv_pokemon(socket, false);
+		id_correlational = recv_uint32(socket);
 		log_info(logger, "Me llego un appeared");
 		log_info(logger, "Nombre del pokemon: %s", appeared_pokemon->name->value);
+		log_info(logger, "Id correlational: %d", id_correlational);
 		send(socket, &id, sizeof(int), 0);
 		free_pokemon(appeared_pokemon);
 		break;
