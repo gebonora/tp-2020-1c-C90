@@ -31,3 +31,11 @@ Caught* recv_caught(int socket) {
 	return caught_pokemon;
 }
 
+Caught* create_caught_pokemon(uint32_t result) {
+	Caught* caught_pokemon =malloc(sizeof(Caught));
+
+	caught_pokemon->result = result;
+
+	return caught_pokemon;
+}
+

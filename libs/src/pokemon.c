@@ -49,3 +49,17 @@ void send_pokemon(Pokemon* pokemon, Operation operation, int socket_e) {
 	free(serialized);
 	free_pokemon(pokemon);
 }
+
+Pokemon* create_pokemon(char* name, uint32_t posx, uint32_t posy) {
+
+	Pokemon* pokemon = malloc(sizeof(Pokemon));
+
+	pokemon->name = create_name(name);
+	t_list* coordinates = list_create();
+	Coordinate* coor = create_coordinate(posx, posy);
+	list_add(coordinates, coor);
+	pokemon->coordinates = coordinates;
+
+	return pokemon;
+
+}

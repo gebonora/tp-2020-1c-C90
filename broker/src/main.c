@@ -2,7 +2,7 @@
 
 int main(){
 
-	t_config* config = config_create("/home/utnso/tp-2020-1c-C90/broker/config/brokerconfig.config");
+	t_config* config = config_create("/home/utnso/tp-2020-1c-C90/broker/config/broker.config");
 
 	IP = config_get_string_value(config, "IP_BROKER");
 	PUERTO = config_get_string_value(config, "PUERTO_BROKER");
