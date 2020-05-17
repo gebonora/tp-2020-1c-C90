@@ -5,14 +5,26 @@
 #include "controladores/broker/ControladorBroker.h"
 #include<readline/readline.h>
 #include<stdio.h>
+#include "support/servicios/servicioDeConfiguracion/ServicioDeConfiguracion.h"
 #include<stdlib.h>
+#include<netdb.h>
 
 
 void atenderPedidoBroker(PedidoGameBoy pedidoGameBoy, t_log * logger) {
     log_info(logger, "Se atendio el pedido en el controlador de BROKER");
+    char* ip = servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, IP_BROKER);
+    char* puerto = servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, PUERTO_BROKER);
+    int socket_broker = crear_conexion(ip, puerto);
+    int id;
+
     switch(pedidoGameBoy.tipoMensaje) {
     case NEW_POKEMON: ;
-
+    	char* nombre = list_get(pedidoGameBoy.argumentos, 0);
+    	uint32_t posx =  atoi(list_get(pedidoGameBoy.argumentos, 1));
+    	uint32_t posy =  atoi(list_get(pedidoGameBoy.argumentos, 2));
+    	uint32_t cantidad = atoi(list_get(pedidoGameBoy.argumentos, 3));
+    	New* new_pokemon = create_new_pokemon(nombre, posx, posy, cantidad);
+		send_new(new_pokemon, socket_broker);
     break;
 
     case APPEARED_POKEMON: ;
@@ -23,8 +35,11 @@ void atenderPedidoBroker(PedidoGameBoy pedidoGameBoy, t_log * logger) {
     case CAUGHT_POKEMON: ;
     break;
     case GET_POKEMON: ;
-    	Get* get_pokemon = create_get_pokemon(list_get(pedidoGameBoy.argumentos, 0));
-    	send_
+    	Get* get_pokemon = create_get_pokemon(
+    			list_get(pedidoGameBoy.argumentos, 0)
+				);
+    	send_get(get_pokemon, socket_broker);
+    	recv(socket_broker, &id, sizeof(int), MSG_WAITALL);
     break;
     case UNTYPED_MESSAGE: ;
     break;

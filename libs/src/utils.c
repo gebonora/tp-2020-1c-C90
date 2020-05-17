@@ -25,6 +25,13 @@ Coordinate* recv_coordinate(int socket_e) {
 	return coordinate;
 }
 
+Coordinate* create_coordinate(uint32_t posx, uint32_t posy) {
+	Coordinate* coor = malloc(sizeof(Coordinate));
+	coor->pos_x = posx;
+	coor->pos_y = posy;
+	return coor;
+}
+
 t_list* recv_coordinates(int socket_e, bool multiple_coordinates) {
 	t_list* coordinates = list_create();
 	if(multiple_coordinates) {
