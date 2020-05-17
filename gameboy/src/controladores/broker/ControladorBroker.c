@@ -20,27 +20,31 @@ void atenderPedidoBroker(PedidoGameBoy pedidoGameBoy, t_log * logger) {
 
     switch(pedidoGameBoy.tipoMensaje) {
     case NEW_POKEMON: ;
-    	char* nombre = list_get(pedidoGameBoy.argumentos, 0);
-    	uint32_t posx =  atoi(list_get(pedidoGameBoy.argumentos, 1));
-    	uint32_t posy =  atoi(list_get(pedidoGameBoy.argumentos, 2));
-    	uint32_t cantidad = atoi(list_get(pedidoGameBoy.argumentos, 3));
-    	New* new_pokemon = create_new_pokemon(nombre, posx, posy, cantidad);
+    	New* new_pokemon = create_new_pokemon(
+    			list_get(pedidoGameBoy.argumentos, 0),
+				atoi(list_get(pedidoGameBoy.argumentos, 1)),
+				atoi(list_get(pedidoGameBoy.argumentos, 2)),
+				atoi(list_get(pedidoGameBoy.argumentos, 3))
+				);
 		send_new(new_pokemon, socket_broker);
     break;
-
     case APPEARED_POKEMON: ;
-		Pokemon* pokemon = create_pokemon(
+		Pokemon* appeared_pokemon = create_pokemon(
 				 list_get(pedidoGameBoy.argumentos, 0),
 				 atoi(list_get(pedidoGameBoy.argumentos, 1)),
 				 atoi(list_get(pedidoGameBoy.argumentos, 2))
 				);
 		id_correlational = atoi(list_get(pedidoGameBoy.argumentos, 3));
-		send_pokemon(pokemon, APPEARED, socket_broker);
+		send_pokemon(appeared_pokemon, APPEARED, socket_broker);
 		send(socket_broker, &id_correlational, sizeof(uint32_t), 0);
     break;
-
     case CATCH_POKEMON: ;
-
+    	Pokemon* catch_pokemon = create_pokemon(
+    				 list_get(pedidoGameBoy.argumentos, 0),
+    				 atoi(list_get(pedidoGameBoy.argumentos, 1)),
+    				 atoi(list_get(pedidoGameBoy.argumentos, 2))
+    				);
+		send_pokemon(catch_pokemon, CATCH, socket_broker);
     break;
     case CAUGHT_POKEMON: ;
     	id_correlational = atoi(list_get(pedidoGameBoy.argumentos, 0));
