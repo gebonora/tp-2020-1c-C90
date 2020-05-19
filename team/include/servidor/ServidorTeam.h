@@ -15,6 +15,26 @@
 #include "app/Global.h"
 #include "servicios/servicioDeConfiguracion/ServicioDeConfiguracion.h"
 
+#include "libs/include/protocol.h"
+
+void atenderAppeared();
+void esperarBrokerAppeared(int socketDeEscucha);
+void procesarHiloAppeared(Pokemon* unPokemon);
+
+void atenderCaught();
+void esperarBrokerCaught(int socketDeEscucha);
+void procesarHiloCaught(Caught* unCaught);
+
+void atenderLocalized();
+void esperarBrokerLocalized(int socketDeEscucha);
+void procesarHiloLocalized(Localized* unLocalized);
+
+int iniciarSocketDeEscucha() ;
+int crearSocketHaciaBroker();
+
+void atenderGameboy();
+
+
 typedef struct ServidorTeam {
     int socketServidor;
     t_log *logger;
