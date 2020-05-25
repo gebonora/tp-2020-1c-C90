@@ -6,6 +6,7 @@
 #include <commons/config.h>
 #include <commons/string.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <readline/readline.h>
 #include <pthread.h>
@@ -20,6 +21,7 @@ char* ALGORITMO_REEMPLAZO;
 int FRECUENCIA_COMPACTACION;
 char* ALGORITMO_PARTICION_LIBRE;
 
+uint32_t MESSAGE_ID;
 t_log* LOGGER;
 t_queue* NEW_QUEUE;
 t_queue* APPEARED_QUEUE;
@@ -33,6 +35,7 @@ pthread_mutex_t MUTEX_GET_QUEUE;
 pthread_mutex_t MUTEX_LOCALIZED_QUEUE;
 pthread_mutex_t MUTEX_CATCH_QUEUE;
 pthread_mutex_t MUTEX_CAUGHT_QUEUE;
+pthread_mutex_t MUTEX_MESSAGE_ID;
 sem_t NEW_MESSAGES;
 sem_t APPEARED_MESSAGES;
 sem_t GET_MESSAGES;
@@ -43,5 +46,6 @@ sem_t CAUGHT_MESSAGES;
 void init_config();
 void init_queues();
 void init_semaphores();
+void init_context();
 
 #endif

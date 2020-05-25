@@ -53,11 +53,11 @@ void serve_client(int socket_e) {
 	int cod_op;
 	recv(socket_e, &cod_op, sizeof(int), MSG_WAITALL);
 	process_request(cod_op, socket_e);
-
 }
 
 void process_request(int cod_op, int socket) {
-	int id = 900;
+	uint32_t generated_id = get_id();
+	log_info(LOGGER, "Message id generated: %d", generated_id);
 	uint32_t id_correlational;
 	switch (cod_op) {
 	case NEW: ;
@@ -65,7 +65,16 @@ void process_request(int cod_op, int socket) {
 		log_info(LOGGER, "Me llego un new");
 		log_info(LOGGER, "Nombre pokemon: %s", new_pokemon->pokemon->name->value);
 		log_info(LOGGER, "Cantidad: %d", new_pokemon->quantity);
-		send(socket, &id, sizeof(int), 0);
+
+		pthread_mutex_lock(&MUTEX_NEW_QUEUE);
+		queue_push(NEW_QUEUE, new_pokemon);
+		pthread_mutex_unlock(&MUTEX_NEW_QUEUE);
+		sem_post(&NEW_MESSAGES);
+		New* new_en_cola = queue_pop(NEW_QUEUE);
+
+		log_info(LOGGER, "Saque de la cola: %s", new_en_cola->pokemon->name->value);
+
+		send(socket, &generated_id, sizeof(uint32_t), 0);
 		free_new(new_pokemon);
 		break;
 	case CAUGHT: ;
@@ -74,7 +83,16 @@ void process_request(int cod_op, int socket) {
 		log_info(LOGGER, "Me llego un caught");
 		log_info(LOGGER, "Resultado: %d", caught_pokemon->result);
 		log_info(LOGGER, "Id correlational: %d", id_correlational);
-		send(socket, &id, sizeof(int), 0);
+
+		pthread_mutex_lock(&MUTEX_CAUGHT_QUEUE);
+		queue_push(CAUGHT_QUEUE, caught_pokemon);
+		pthread_mutex_unlock(&MUTEX_CAUGHT_QUEUE);
+		sem_post(&CAUGHT_MESSAGES);
+		Caught* caught_en_cola = queue_pop(CAUGHT_QUEUE);
+
+		log_info(LOGGER, "Saque de la cola: %d", caught_en_cola->result);
+
+		send(socket, &generated_id, sizeof(uint32_t), 0);
 		free(caught_pokemon);
 		break;
 	case GET: ;
@@ -90,7 +108,7 @@ void process_request(int cod_op, int socket) {
 
 		log_info(LOGGER, "Saque de la cola: %s", metido_en_cola->name->value);
 
-		send(socket, &id, sizeof(int), 0);
+		send(socket, &generated_id, sizeof(uint32_t), 0);
 		free_get(get_pokemon);
 		break;
 	case LOCALIZED: ;
@@ -98,7 +116,20 @@ void process_request(int cod_op, int socket) {
 		log_info(LOGGER, "Me llego un localized");
 		log_info(LOGGER, "Nombre del pokemon: %s", localized_pokemon->pokemon->name->value);
 		log_info(LOGGER, "Cantidad de coordenadas: %d", localized_pokemon->coordinates_quantity);
-		send(socket, &id, sizeof(int), 0);
+		for(int i = 0; i < localized_pokemon->coordinates_quantity; i++) {
+			Coordinate* loc_coordinate = list_get(localized_pokemon->pokemon->coordinates, i);
+			log_info(LOGGER, "Coordenada: x=%d, y=%d", loc_coordinate->pos_x, loc_coordinate->pos_y);
+		}
+
+		pthread_mutex_lock(&MUTEX_LOCALIZED_QUEUE);
+		queue_push(LOCALIZED_QUEUE, localized_pokemon);
+		pthread_mutex_unlock(&MUTEX_LOCALIZED_QUEUE);
+		sem_post(&LOCALIZED_MESSAGES);
+		Localized* localized_en_cola = queue_pop(LOCALIZED_QUEUE);
+
+		log_info(LOGGER, "Saque de la cola: %s", localized_en_cola->pokemon->name->value);
+
+		send(socket, &generated_id, sizeof(uint32_t), 0);
 		free_localized(localized_pokemon);
 		break;
 	case APPEARED: ;
@@ -107,15 +138,36 @@ void process_request(int cod_op, int socket) {
 		log_info(LOGGER, "Me llego un appeared");
 		log_info(LOGGER, "Nombre del pokemon: %s", appeared_pokemon->name->value);
 		log_info(LOGGER, "Id correlational: %d", id_correlational);
-		send(socket, &id, sizeof(int), 0);
+		Coordinate* coordinate = list_get(appeared_pokemon->coordinates, 0);
+		log_info(LOGGER, "Coordenada: x=%d, y=%d", coordinate->pos_x, coordinate->pos_y);
+
+		pthread_mutex_lock(&MUTEX_APPEARED_QUEUE);
+		queue_push(APPEARED_QUEUE, appeared_pokemon);
+		pthread_mutex_unlock(&MUTEX_APPEARED_QUEUE);
+		sem_post(&APPEARED_MESSAGES);
+		Pokemon* appeared_en_cola = queue_pop(APPEARED_QUEUE);
+
+		log_info(LOGGER, "Saque de la cola: %s", appeared_en_cola->name->value);
+
+		send(socket, &generated_id, sizeof(uint32_t), 0);
 		free_pokemon(appeared_pokemon);
 		break;
 	case CATCH: ;
 		Pokemon* catch_pokemon = recv_pokemon(socket, false);
 		log_info(LOGGER, "Me llego un catch");
 		log_info(LOGGER, "Nombre del pokemon: %s", catch_pokemon->name->value);
-		//log_info(logger, "Coordenadas: ", list_iterate()catch_pokemon->coordinates);
-		send(socket, &id, sizeof(int), 0);
+		Coordinate* catch_coordinate = list_get(catch_pokemon->coordinates, 0);
+		log_info(LOGGER, "Coordenada: x=%d, y=%d", catch_coordinate->pos_x, catch_coordinate->pos_y);
+
+		pthread_mutex_lock(&MUTEX_CATCH_QUEUE);
+		queue_push(CATCH_QUEUE, catch_pokemon);
+		pthread_mutex_unlock(&MUTEX_CATCH_QUEUE);
+		sem_post(&CATCH_MESSAGES);
+		Pokemon* catch_en_cola = queue_pop(CATCH_QUEUE);
+
+		log_info(LOGGER, "Saque de la cola: %s", catch_en_cola->name->value);
+
+		send(socket, &generated_id, sizeof(uint32_t), 0);
 		free_pokemon(catch_pokemon);
 		break;
 	case 0:

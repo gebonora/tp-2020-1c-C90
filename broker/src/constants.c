@@ -23,6 +23,7 @@ void init_queues() {
 }
 
 void init_semaphores() {
+	pthread_mutex_init(&MUTEX_MESSAGE_ID, NULL);
 	pthread_mutex_init(&MUTEX_NEW_QUEUE, NULL);
 	pthread_mutex_init(&MUTEX_APPEARED_QUEUE, NULL);
 	pthread_mutex_init(&MUTEX_GET_QUEUE, NULL);
@@ -35,4 +36,8 @@ void init_semaphores() {
 	sem_init(&LOCALIZED_MESSAGES, 0, 0);
 	sem_init(&CATCH_MESSAGES, 0, 0);
 	sem_init(&CAUGHT_MESSAGES, 0, 0);
+}
+
+void init_context() {
+	MESSAGE_ID = 0;
 }
