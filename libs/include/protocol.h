@@ -7,7 +7,11 @@
 #include <commons/collections/list.h>
 
 typedef enum {
-	NEW = 1, LOCALIZED = 2, GET = 3, APPEARED = 4, CATCH = 5, CAUGHT = 6
+	GAMEBOY = 8, TEAM = 9, GAMECARD = 10, BROKER = 11
+} Process;
+
+typedef enum {
+	NEW = 1, LOCALIZED = 2, GET = 3, APPEARED = 4, CATCH = 5, CAUGHT = 6, SUSCRIBE = 7
 } Operation;
 
 typedef struct {

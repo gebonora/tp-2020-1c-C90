@@ -170,6 +170,22 @@ void process_request(int cod_op, int socket) {
 		send(socket, &generated_id, sizeof(uint32_t), 0);
 		free_pokemon(catch_pokemon);
 		break;
+	case SUSCRIBE: ;
+		log_info(LOGGER, "Me llego un suscribe");
+		int cod_process;
+		recv(socket, &cod_process, sizeof(int), MSG_WAITALL);
+		int cod_cola;
+		recv(socket, &cod_cola, sizeof(int), MSG_WAITALL);
+		int suscription_time;
+		if(GAMEBOY == cod_process) {
+			recv(socket, &suscription_time, sizeof(int), MSG_WAITALL);
+		}
+
+		log_info(LOGGER, "Suscripcion del proceso: %d", cod_process);
+		log_info(LOGGER, "Suscripcion en cola: %d", cod_cola);
+		log_info(LOGGER, "Suscripcion time en segundos: %d", suscription_time);
+
+		break;
 	case 0:
 		pthread_exit(NULL); //revisar cuando matar al hilo y cerrar la conexion
 	case -1:

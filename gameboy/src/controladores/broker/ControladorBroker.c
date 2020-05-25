@@ -3,18 +3,17 @@
 //
 
 #include "controladores/broker/ControladorBroker.h"
-#include<readline/readline.h>
-#include<stdio.h>
+#include <readline/readline.h>
+#include <stdio.h>
 #include "support/servicios/servicioDeConfiguracion/ServicioDeConfiguracion.h"
-#include<stdlib.h>
-#include<netdb.h>
-
+#include <stdlib.h>
+#include <netdb.h>
 
 void atenderPedidoBroker(PedidoGameBoy pedidoGameBoy, t_log * logger) {
     log_info(logger, "Se atendio el pedido en el controlador de BROKER");
     char* ip = servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, IP_BROKER);
     char* puerto = servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, PUERTO_BROKER);
-    int socket_broker = crear_conexion(ip, puerto);
+    int socket_broker = create_conection(ip, puerto);
     int id;
     uint32_t id_correlational;
 
@@ -65,28 +64,6 @@ void atenderPedidoBroker(PedidoGameBoy pedidoGameBoy, t_log * logger) {
     case UNTYPED_MESSAGE: ;
     break;
     }
-}
-
-int crear_conexion(char *ip, char* puerto)
-{
-	struct addrinfo hints;
-	struct addrinfo *server_info;
-
-	memset(&hints, 0, sizeof(hints));
-	hints.ai_family = AF_UNSPEC;
-	hints.ai_socktype = SOCK_STREAM;
-	hints.ai_flags = AI_PASSIVE;
-
-	getaddrinfo(ip, puerto, &hints, &server_info);
-
-	int socket_cliente = socket(server_info->ai_family, server_info->ai_socktype, server_info->ai_protocol);
-
-	if(connect(socket_cliente, server_info->ai_addr, server_info->ai_addrlen) == -1)
-		printf("error");
-
-	freeaddrinfo(server_info);
-
-	return socket_cliente;
 }
 
 ControladorGameBoy controladorBroker = {.proceso=BROKER, .atenderPedido=atenderPedidoBroker};
