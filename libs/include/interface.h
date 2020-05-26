@@ -60,6 +60,6 @@ void send_caught(Caught*, int);
 Caught* recv_caught(int);
 Caught* create_caught_pokemon(uint32_t);
 
-int create_conection(char*, char*);
+int create_connection(char*, char*);
 
 #endif /* BROKER_INCLUDE_INTERFACE_H_ */

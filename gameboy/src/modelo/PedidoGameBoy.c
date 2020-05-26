@@ -7,13 +7,13 @@
 PedidoGameBoy crearPedidoGameBoy(int cantidadArugmentos, char** arrayArgumentos) {
     PedidoGameBoy pedidoGameBoy = {.argumentos=malloc(sizeof(Argumentos))};
 
-    Proceso proceso = obtenerProceso(arrayArgumentos[1]);
+    Process proceso = obtenerProceso(arrayArgumentos[1]);
     pedidoGameBoy.proceso = proceso;
 
     int inicioArgumentos = 3;
 
     if (proceso == SUSCRIPTOR) {
-        pedidoGameBoy.tipoMensaje = UNTYPED_MESSAGE;
+        pedidoGameBoy.tipoMensaje = SUBSCRIBE;
         inicioArgumentos = 2;
     } else {
         pedidoGameBoy.tipoMensaje = obtenerTipoMensaje(arrayArgumentos[2]);
@@ -28,7 +28,7 @@ PedidoGameBoy crearPedidoGameBoy(int cantidadArugmentos, char** arrayArgumentos)
     return pedidoGameBoy;
 }
 
-Proceso obtenerProceso(char * nombreProceso) {
+Process obtenerProceso(char * nombreProceso) {
     if (string_equals_ignore_case("BROKER", nombreProceso)) {
         return BROKER;
     } else if (string_equals_ignore_case("TEAM", nombreProceso)) {
@@ -60,7 +60,7 @@ TipoMensaje obtenerTipoMensaje(char * tipoMensaje) {
     }
 }
 
-char * nombreProceso(Proceso proceso) {
+char * nombreProceso(Process proceso) {
     switch (proceso) {
         case BROKER:
             return "BROKER";

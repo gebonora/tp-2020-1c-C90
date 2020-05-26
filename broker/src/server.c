@@ -170,7 +170,7 @@ void process_request(int cod_op, int socket) {
 		send(socket, &generated_id, sizeof(uint32_t), 0);
 		free_pokemon(catch_pokemon);
 		break;
-	case SUSCRIBE: ;
+	case SUBSCRIBE: ;
 		log_info(LOGGER, "Me llego un suscribe");
 		int cod_process;
 		recv(socket, &cod_process, sizeof(int), MSG_WAITALL);

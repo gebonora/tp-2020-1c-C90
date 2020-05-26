@@ -65,7 +65,7 @@ Name* create_name(char* name) {
 
 }
 
-int create_conection(char *ip, char* puerto) {
+int create_connection(char *ip, char* puerto) {
 	struct addrinfo hints;
 	struct addrinfo *server_info;
 
