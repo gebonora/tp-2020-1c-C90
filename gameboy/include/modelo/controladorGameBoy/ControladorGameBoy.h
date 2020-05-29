@@ -9,6 +9,9 @@
 #include <netdb.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <delibird/protocol.h>
+#include <delibird/interface.h>
+
 
 typedef struct ControladorGameBoy {
     Proceso proceso;

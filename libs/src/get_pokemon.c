@@ -43,3 +43,11 @@ void free_get(Get* get_pokemon) {
 	free_name(get_pokemon->name);
 	free(get_pokemon);
 }
+
+Get* create_get_pokemon(char* name) {
+	Get* get_pokemon = malloc(sizeof(Get));
+
+	get_pokemon->name = create_name(name);
+
+	return get_pokemon;
+}
