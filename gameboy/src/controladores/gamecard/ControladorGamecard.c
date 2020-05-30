@@ -10,7 +10,6 @@ void atenderPedidoGamecard(PedidoGameBoy pedidoGameBoy, t_log * logger) {
 }
 
 
-
 int crearSocketHaciaBroker() {
 	char* IP = servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, IP_GAMECARD);
 	char* PUERTO = servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, PUERTO_GAMECARD);
