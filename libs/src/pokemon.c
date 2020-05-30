@@ -1,12 +1,10 @@
 #include "../include/interface.h"
 
-Pokemon* recv_pokemon(int socket, bool multiple_coordinates) {
+Pokemon* recv_pokemon(int socket_e, bool multiple_coordinates) {
 	Pokemon* pokemon = malloc(sizeof(Pokemon));
+	pokemon->name = recv_name(socket_e);
 
-	pokemon->name = recv_name(socket);
-
-	pokemon->coordinates = recv_coordinates(socket, multiple_coordinates);
-
+	pokemon->coordinates = recv_coordinates(socket_e, multiple_coordinates);
 	return pokemon;
 }
 
@@ -17,7 +15,7 @@ void free_pokemon(Pokemon* pokemon) {
 }
 
 int calculate_pokemon_bytes(Pokemon* pokemon) {
-	return sizeof(uint32_t) * 4 + strlen(pokemon->name->value) + 1;
+	return sizeof(Operation) + sizeof(uint32_t) + pokemon->coordinates->elements_count * sizeof(uint32_t) * 2 + strlen(pokemon->name->value) + 1;
 }
 
 void* serialize_pokemon(Pokemon* pokemon, Operation operation, int bytes) {
@@ -43,11 +41,25 @@ void* serialize_pokemon(Pokemon* pokemon, Operation operation, int bytes) {
 	return serialized;
 }
 
-void send_pokemon(Pokemon* pokemon, Operation operation, int socket) {
+void send_pokemon(Pokemon* pokemon, Operation operation, int socket_e) {
 	int bytes = calculate_pokemon_bytes(pokemon);
 	void* serialized = serialize_pokemon(pokemon, operation, bytes);
-	send(socket, serialized, bytes, 0);
+	send(socket_e, serialized, bytes, 0);
 
 	free(serialized);
 	free_pokemon(pokemon);
+}
+
+Pokemon* create_pokemon(char* name, uint32_t posx, uint32_t posy) {
+
+	Pokemon* pokemon = malloc(sizeof(Pokemon));
+
+	pokemon->name = create_name(name);
+	t_list* coordinates = list_create();
+	Coordinate* coor = create_coordinate(posx, posy);
+	list_add(coordinates, coor);
+	pokemon->coordinates = coordinates;
+
+	return pokemon;
+
 }

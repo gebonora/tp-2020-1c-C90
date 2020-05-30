@@ -6,6 +6,8 @@
 #define GAMEBOY_CONTROLADORGAMEBOY_H
 
 #include "modelo/PedidoGameBoy.h"
+#include <delibird/protocol.h>
+#include <delibird/interface.h>
 
 typedef struct ControladorGameBoy {
     Proceso proceso;
