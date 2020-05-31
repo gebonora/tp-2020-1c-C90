@@ -3,18 +3,17 @@
 //
 
 #include "controladores/broker/ControladorBroker.h"
-#include<readline/readline.h>
-#include<stdio.h>
+#include <readline/readline.h>
+#include <stdio.h>
 #include "support/servicios/servicioDeConfiguracion/ServicioDeConfiguracion.h"
-#include<stdlib.h>
-#include<netdb.h>
-
+#include <stdlib.h>
+#include <netdb.h>
 
 void atenderPedidoBroker(PedidoGameBoy pedidoGameBoy, t_log * logger) {
     log_info(logger, "Se atendio el pedido en el controlador de BROKER");
     char* ip = servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, IP_BROKER);
     char* puerto = servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, PUERTO_BROKER);
-    int socket_broker = crear_conexion(ip, puerto);
+    int socket_broker = create_connection(ip, puerto);
     int id;
     uint32_t id_correlational;
 
@@ -62,31 +61,39 @@ void atenderPedidoBroker(PedidoGameBoy pedidoGameBoy, t_log * logger) {
     	send_get(get_pokemon, socket_broker);
     	recv(socket_broker, &id, sizeof(int), MSG_WAITALL);
     break;
-    case UNTYPED_MESSAGE: ;
+    case SUBSCRIBE: ;
+    	Operation destination_queue = get_operation(list_get(pedidoGameBoy.argumentos, 0));
+    	uint32_t operation = SUBSCRIBE;
+    	uint32_t process_gameboy = GAMEBOY;
+    	int suscription_time = atoi(list_get(pedidoGameBoy.argumentos, 1));
+    	send(socket_broker, &operation, sizeof(uint32_t), 0);
+    	send(socket_broker, &process_gameboy, sizeof(uint32_t), 0);
+    	send(socket_broker, &destination_queue, sizeof(uint32_t), 0);
+    	send(socket_broker, &suscription_time, sizeof(uint32_t), 0);
+
+    	Result result;
+    	recv(socket_broker, &result, sizeof(Result), MSG_WAITALL);
+
+    	log_info(logger, "Resultado: %d", result);
     break;
     }
 }
 
-int crear_conexion(char *ip, char* puerto)
-{
-	struct addrinfo hints;
-	struct addrinfo *server_info;
-
-	memset(&hints, 0, sizeof(hints));
-	hints.ai_family = AF_UNSPEC;
-	hints.ai_socktype = SOCK_STREAM;
-	hints.ai_flags = AI_PASSIVE;
-
-	getaddrinfo(ip, puerto, &hints, &server_info);
-
-	int socket_cliente = socket(server_info->ai_family, server_info->ai_socktype, server_info->ai_protocol);
-
-	if(connect(socket_cliente, server_info->ai_addr, server_info->ai_addrlen) == -1)
-		printf("error");
-
-	freeaddrinfo(server_info);
-
-	return socket_cliente;
+Operation get_operation(char* operation_name) {
+	if (string_equals_ignore_case("NEW_POKEMON", operation_name)) {
+		return NEW;
+	} else if (string_equals_ignore_case("APPEARED_POKEMON", operation_name)) {
+		return APPEARED;
+	} else if (string_equals_ignore_case("CATCH_POKEMON", operation_name)) {
+		return CATCH;
+	} else if (string_equals_ignore_case("CAUGHT_POKEMON", operation_name)) {
+		return CAUGHT;
+	} else if (string_equals_ignore_case("GET_POKEMON", operation_name)) {
+		return GET;
+	} else {
+		log_error(INTERNAL_LOGGER, "Tipo de operacion no soportada: %s", operation_name);
+		exit(EXIT_FAILURE);
+	}
 }
 
 ControladorGameBoy controladorBroker = {.proceso=BROKER, .atenderPedido=atenderPedidoBroker};

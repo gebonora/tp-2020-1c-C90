@@ -8,15 +8,9 @@
 #include <commons/string.h>
 #include "stdlib.h"
 #include "app/Global.h"
+#include <delibird/protocol.h>
 
 typedef t_list * Argumentos;
-
-typedef enum {
-    BROKER,
-    TEAM,
-    GAMECARD,
-    SUSCRIPTOR
-} Proceso;
 
 typedef enum {
     NEW_POKEMON,
@@ -28,18 +22,18 @@ typedef enum {
 } TipoMensaje;
 
 typedef struct {
-    Proceso proceso;
+    Process proceso;
     TipoMensaje tipoMensaje;
     Argumentos argumentos;
 } PedidoGameBoy;
 
 PedidoGameBoy crearPedidoGameBoy(int cantidadArugmentos, char** arrayArgumentos);
 
-Proceso obtenerProceso(char * nombreProceso);
+Process obtenerProceso(char * nombreProceso);
 
 TipoMensaje obtenerTipoMensaje(char * tipoMensaje);
 
-char * nombreProceso(Proceso proceso);
+char * nombreProceso(Process proceso);
 
 char * nombreTipoMensaje(TipoMensaje tipoMensaje);
 

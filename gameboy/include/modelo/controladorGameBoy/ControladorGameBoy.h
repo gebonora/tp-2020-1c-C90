@@ -10,7 +10,7 @@
 #include <delibird/interface.h>
 
 typedef struct ControladorGameBoy {
-    Proceso proceso;
+    Process proceso;
     void (*atenderPedido)(PedidoGameBoy pedidoGameBoy, t_log * logger);
 } ControladorGameBoy;
 
