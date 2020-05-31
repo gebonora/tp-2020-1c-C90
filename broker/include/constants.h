@@ -12,6 +12,7 @@
 #include <readline/readline.h>
 #include <pthread.h>
 #include <semaphore.h>
+#include "broker.h"
 
 char* IP;
 char* PUERTO;
@@ -52,5 +53,6 @@ void init_config();
 void init_queues();
 void init_semaphores();
 void init_context();
+void init_threads();
 
 #endif

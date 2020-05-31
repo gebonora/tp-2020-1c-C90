@@ -5,6 +5,7 @@ int main(){
 	init_queues();
 	init_semaphores();
 	init_context();
+	init_threads();
 	init_server();
 	return 0;
 }

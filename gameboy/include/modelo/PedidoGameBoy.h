@@ -18,6 +18,7 @@ typedef enum {
     CATCH_POKEMON,
     CAUGHT_POKEMON,
     GET_POKEMON,
+	LOCALIZED_POKEMON,
     UNTYPED_MESSAGE
 } TipoMensaje;
 

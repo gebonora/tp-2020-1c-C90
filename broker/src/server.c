@@ -70,9 +70,6 @@ void process_request(int cod_op, int socket) {
 		queue_push(NEW_QUEUE, new_pokemon);
 		pthread_mutex_unlock(&MUTEX_NEW_QUEUE);
 		sem_post(&NEW_MESSAGES);
-		New* new_en_cola = queue_pop(NEW_QUEUE);
-
-		log_info(LOGGER, "Saque de la cola: %s", new_en_cola->pokemon->name->value);
 
 		send(socket, &generated_id, sizeof(uint32_t), 0);
 		free_new(new_pokemon);
@@ -88,9 +85,6 @@ void process_request(int cod_op, int socket) {
 		queue_push(CAUGHT_QUEUE, caught_pokemon);
 		pthread_mutex_unlock(&MUTEX_CAUGHT_QUEUE);
 		sem_post(&CAUGHT_MESSAGES);
-		Caught* caught_en_cola = queue_pop(CAUGHT_QUEUE);
-
-		log_info(LOGGER, "Saque de la cola: %d", caught_en_cola->result);
 
 		send(socket, &generated_id, sizeof(uint32_t), 0);
 		free(caught_pokemon);
@@ -104,9 +98,6 @@ void process_request(int cod_op, int socket) {
 		queue_push(GET_QUEUE, get_pokemon);
 		pthread_mutex_unlock(&MUTEX_GET_QUEUE);
 		sem_post(&GET_MESSAGES);
-		Get* metido_en_cola = queue_pop(GET_QUEUE);
-
-		log_info(LOGGER, "Saque de la cola: %s", metido_en_cola->name->value);
 
 		send(socket, &generated_id, sizeof(uint32_t), 0);
 		free_get(get_pokemon);
@@ -125,9 +116,6 @@ void process_request(int cod_op, int socket) {
 		queue_push(LOCALIZED_QUEUE, localized_pokemon);
 		pthread_mutex_unlock(&MUTEX_LOCALIZED_QUEUE);
 		sem_post(&LOCALIZED_MESSAGES);
-		Localized* localized_en_cola = queue_pop(LOCALIZED_QUEUE);
-
-		log_info(LOGGER, "Saque de la cola: %s", localized_en_cola->pokemon->name->value);
 
 		send(socket, &generated_id, sizeof(uint32_t), 0);
 		free_localized(localized_pokemon);
@@ -145,9 +133,6 @@ void process_request(int cod_op, int socket) {
 		queue_push(APPEARED_QUEUE, appeared_pokemon);
 		pthread_mutex_unlock(&MUTEX_APPEARED_QUEUE);
 		sem_post(&APPEARED_MESSAGES);
-		Pokemon* appeared_en_cola = queue_pop(APPEARED_QUEUE);
-
-		log_info(LOGGER, "Saque de la cola: %s", appeared_en_cola->name->value);
 
 		send(socket, &generated_id, sizeof(uint32_t), 0);
 		free_pokemon(appeared_pokemon);
@@ -163,9 +148,6 @@ void process_request(int cod_op, int socket) {
 		queue_push(CATCH_QUEUE, catch_pokemon);
 		pthread_mutex_unlock(&MUTEX_CATCH_QUEUE);
 		sem_post(&CATCH_MESSAGES);
-		Pokemon* catch_en_cola = queue_pop(CATCH_QUEUE);
-
-		log_info(LOGGER, "Saque de la cola: %s", catch_en_cola->name->value);
 
 		send(socket, &generated_id, sizeof(uint32_t), 0);
 		free_pokemon(catch_pokemon);

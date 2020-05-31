@@ -50,3 +50,35 @@ void init_context() {
 	dictionary_put(SUBSCRIBERS_BY_QUEUE, "CATCH", list_create());
 	dictionary_put(SUBSCRIBERS_BY_QUEUE, "CAUGHT", list_create());
 }
+
+void init_threads() {
+	pthread_t thread_new;
+
+	pthread_create(&thread_new, NULL,(void*)consumer_new_queue, NULL);
+	pthread_detach(thread_new);
+
+	pthread_t thread_get;
+
+	pthread_create(&thread_get, NULL,(void*)consumer_get_queue, NULL);
+	pthread_detach(thread_get);
+
+	pthread_t thread_appeared;
+
+	pthread_create(&thread_appeared, NULL,(void*)consumer_appeared_queue, NULL);
+	pthread_detach(thread_appeared);
+
+	pthread_t thread_localized;
+
+	pthread_create(&thread_localized, NULL,(void*)consumer_localized_queue, NULL);
+	pthread_detach(thread_localized);
+
+	pthread_t thread_catch;
+
+	pthread_create(&thread_catch, NULL,(void*)consumer_catch_queue, NULL);
+	pthread_detach(thread_new);
+
+	pthread_t thread_caught;
+
+	pthread_create(&thread_caught, NULL,(void*)consumer_caught_queue, NULL);
+	pthread_detach(thread_caught);
+}

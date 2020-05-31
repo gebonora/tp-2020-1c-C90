@@ -61,6 +61,28 @@ void atenderPedidoBroker(PedidoGameBoy pedidoGameBoy, t_log * logger) {
     	send_get(get_pokemon, socket_broker);
     	recv(socket_broker, &id, sizeof(int), MSG_WAITALL);
     break;
+    case LOCALIZED_POKEMON: ;
+    	Name* name = create_name(list_get(pedidoGameBoy.argumentos, 0));
+    	Pokemon* pokemon = malloc(sizeof(Pokemon));
+    	int cant_coor = atoi(list_get(pedidoGameBoy.argumentos, 1));
+
+    	t_list* coordinates = list_create();
+
+    	for(int i = 0, x = 2, y = 3;  i< cant_coor; i++, x+=2, y+=2) {
+    		Coordinate* coor = create_coordinate(atoi(list_get(pedidoGameBoy.argumentos, x)), atoi(list_get(pedidoGameBoy.argumentos, y)));
+    		list_add(coordinates, coor);
+    	}
+
+    	Localized* localized_pokemon = malloc(sizeof(Localized));
+    	localized_pokemon->coordinates_quantity = cant_coor;
+    	pokemon->name = name;
+    	pokemon->coordinates = coordinates;
+    	localized_pokemon->pokemon = pokemon;
+
+    	send_localized(localized_pokemon, socket_broker);
+    	recv(socket_broker, &id, sizeof(int), MSG_WAITALL);
+
+    break;
     case SUBSCRIBE: ;
     	Operation destination_queue = get_operation(list_get(pedidoGameBoy.argumentos, 0));
     	uint32_t operation = SUBSCRIBE;
