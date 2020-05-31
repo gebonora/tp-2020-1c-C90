@@ -180,10 +180,18 @@ void process_request(int cod_op, int socket) {
 		if(GAMEBOY == cod_process) {
 			recv(socket, &suscription_time, sizeof(int), MSG_WAITALL);
 		}
+		char* op = get_operation_by_value(cod_cola);
+		pthread_mutex_lock(&MUTEX_SUBSCRIBERS_BY_QUEUE);
+		t_list* subscribers = dictionary_get(SUBSCRIBERS_BY_QUEUE, op);
+		list_add(subscribers, socket);
+		pthread_mutex_unlock(&MUTEX_SUBSCRIBERS_BY_QUEUE);
 
 		log_info(LOGGER, "Suscripcion del proceso: %d", cod_process);
 		log_info(LOGGER, "Suscripcion en cola: %d", cod_cola);
 		log_info(LOGGER, "Suscripcion time en segundos: %d", suscription_time);
+
+		Result result =  OK;
+		send(socket, &result, sizeof(Result), 0);
 
 		break;
 	case 0:

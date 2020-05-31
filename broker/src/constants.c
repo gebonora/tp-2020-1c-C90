@@ -30,14 +30,23 @@ void init_semaphores() {
 	pthread_mutex_init(&MUTEX_LOCALIZED_QUEUE, NULL);
 	pthread_mutex_init(&MUTEX_CATCH_QUEUE, NULL);
 	pthread_mutex_init(&MUTEX_CAUGHT_QUEUE, NULL);
+	pthread_mutex_init(&MUTEX_SUBSCRIBERS_BY_QUEUE, NULL);
 	sem_init(&NEW_MESSAGES, 0, 0);
 	sem_init(&APPEARED_MESSAGES, 0, 0);
 	sem_init(&GET_MESSAGES, 0, 0);
 	sem_init(&LOCALIZED_MESSAGES, 0, 0);
 	sem_init(&CATCH_MESSAGES, 0, 0);
 	sem_init(&CAUGHT_MESSAGES, 0, 0);
+	sem_init(&SUBSCRIBERS, 0, 0);
 }
 
 void init_context() {
 	MESSAGE_ID = 0;
+	SUBSCRIBERS_BY_QUEUE = dictionary_create();
+	dictionary_put(SUBSCRIBERS_BY_QUEUE, "NEW", list_create());
+	dictionary_put(SUBSCRIBERS_BY_QUEUE, "APPEARED", list_create());
+	dictionary_put(SUBSCRIBERS_BY_QUEUE, "GET", list_create());
+	dictionary_put(SUBSCRIBERS_BY_QUEUE, "LOCALIZED", list_create());
+	dictionary_put(SUBSCRIBERS_BY_QUEUE, "CATCH", list_create());
+	dictionary_put(SUBSCRIBERS_BY_QUEUE, "CAUGHT", list_create());
 }

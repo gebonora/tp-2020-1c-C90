@@ -70,6 +70,11 @@ void atenderPedidoBroker(PedidoGameBoy pedidoGameBoy, t_log * logger) {
     	send(socket_broker, &process_gameboy, sizeof(uint32_t), 0);
     	send(socket_broker, &destination_queue, sizeof(uint32_t), 0);
     	send(socket_broker, &suscription_time, sizeof(uint32_t), 0);
+
+    	Result result;
+    	recv(socket_broker, &result, sizeof(Result), MSG_WAITALL);
+
+    	log_info(logger, "Resultado: %d", result);
     break;
     }
 }

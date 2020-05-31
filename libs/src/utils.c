@@ -85,3 +85,27 @@ int create_connection(char *ip, char* puerto) {
 
 	return socket_cliente;
 }
+
+char* get_operation_by_value(int value){
+	switch(value){
+	case 1: ;
+		return "NEW";
+		break;
+	case 2: ;
+		return "LOCALIZED";
+		break;
+	case 3: ;
+		return "GET";
+		break;
+	case 4: ;
+		return "APPEARED";
+		break;
+	case 5: ;
+		return "CATCH";
+		break;
+	case 6: ;
+		return "CAUGHT";
+		break;
+	default: return "SUBSCRIBE";
+	}
+}

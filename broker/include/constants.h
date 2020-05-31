@@ -5,6 +5,7 @@
 #include <commons/log.h>
 #include <commons/config.h>
 #include <commons/string.h>
+#include <commons/collections/dictionary.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -42,6 +43,10 @@ sem_t GET_MESSAGES;
 sem_t LOCALIZED_MESSAGES;
 sem_t CATCH_MESSAGES;
 sem_t CAUGHT_MESSAGES;
+
+t_dictionary* SUBSCRIBERS_BY_QUEUE;
+pthread_mutex_t MUTEX_SUBSCRIBERS_BY_QUEUE;
+sem_t SUBSCRIBERS;
 
 void init_config();
 void init_queues();

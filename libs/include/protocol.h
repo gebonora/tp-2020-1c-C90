@@ -14,6 +14,10 @@ typedef enum {
 	NEW = 1, LOCALIZED = 2, GET = 3, APPEARED = 4, CATCH = 5, CAUGHT = 6, SUBSCRIBE = 7
 } Operation;
 
+typedef enum {
+	OK, FAIL, ACKNOWLEDGE
+} Result;
+
 typedef struct {
 	uint32_t pos_x;
 	uint32_t pos_y;
