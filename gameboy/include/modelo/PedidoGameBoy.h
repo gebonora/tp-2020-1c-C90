@@ -28,7 +28,7 @@ typedef struct {
     Argumentos argumentos;
 } PedidoGameBoy;
 
-PedidoGameBoy crearPedidoGameBoy(int cantidadArugmentos, char** arrayArgumentos);
+PedidoGameBoy crearPedidoGameBoy(int cantidadArgumentos, char** arrayArgumentos);
 
 Process obtenerProceso(char * nombreProceso);
 
