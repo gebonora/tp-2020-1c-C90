@@ -65,7 +65,7 @@ void esperarBrokerNew(int socketDeEscucha) {
 void procesarHiloNew(New* unNew) {
 	//procesar
 	//crear socket descartable al broker
-	int socketDescartable = crearSocketHaciaBroker();
+	int socketDescartable = crearSocketCliente(IP_BROKER, PUERTO_BROKER);
 	//enviar respuesta al broker
 	//esperar confirmacion del broker?
 	//liberar memoriar y cerrar socket
@@ -94,7 +94,7 @@ void esperarBrokerCatch(int socketDeEscucha) {
 void procesarHiloCatch(Pokemon* unCatch) {
 	//procesar
 	//crear socket descartable al broker
-	int socketDescartable = crearSocketHaciaBroker();
+	int socketDescartable = crearSocketCliente(IP_BROKER, PUERTO_BROKER);
 	//enviar respuesta al broker
 	//esperar confirmacion del broker?
 	//liberar memoriar y cerrar socket
@@ -123,7 +123,7 @@ void esperarBrokerGet(int socketDeEscucha) {
 void procesarHiloGet(Get* unGet) {
 	//procesar
 	//crear socket descartable al broker
-	int socketDescartable = crearSocketHaciaBroker();
+	int socketDescartable = crearSocketCliente(IP_BROKER, PUERTO_BROKER);
 	//enviar respuesta al broker
 	//esperar confirmacion del broker?
 	//liberar memoriar y cerrar socket
@@ -131,11 +131,16 @@ void procesarHiloGet(Get* unGet) {
 }
 
 void atenderGameboy() {
+	int socketServidor = crearSocketServidor(IP_GAMECARD_GAMEBOY,
+			PUERTO_GAMECARD_GAMEBOY);
+
+
+
 	return;
 }
 
 int iniciarSocketDeEscucha() {
-	int socketDeEscucha = crearSocketHaciaBroker();
+	int socketDeEscucha = crearSocketCliente(IP_BROKER, PUERTO_BROKER);
 	//conectarnos al broker y hacer handshake
 
 	send(socketDeEscucha, (int*) 200, sizeof(int), 0);
@@ -150,23 +155,5 @@ int iniciarSocketDeEscucha() {
 //antes del return validar que se recibio bien.
 	return socketDeEscucha;
 
-}
-
-int crearSocketHaciaBroker() {
-	struct addrinfo hints;
-	struct addrinfo* server_info;
-	memset(&hints, 0, sizeof(hints));
-	hints.ai_family = AF_UNSPEC;
-	hints.ai_socktype = SOCK_STREAM;
-	hints.ai_flags = AI_PASSIVE;
-	getaddrinfo(IP_BROKER, PUERTO_BROKER, &hints, &server_info);
-	int socketDeEscucha = socket(server_info->ai_family,
-			server_info->ai_socktype, server_info->ai_protocol);
-	if (connect(socketDeEscucha, server_info->ai_addr, server_info->ai_addrlen)
-			== -1)
-		puts("error");
-
-	freeaddrinfo(server_info);
-	return socketDeEscucha;
 }
 

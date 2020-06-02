@@ -13,6 +13,7 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <delibird/interface.h>
+#include "support/utils/sockets/Sockets.h"
 #include <netdb.h>
 #include <config.h>
 
@@ -30,7 +31,6 @@ void esperarBrokerGet(int socketDeEscucha);
 void procesarHiloGet(Get* unGet);
 
 int iniciarSocketDeEscucha() ;
-int crearSocketHaciaBroker();
 
 void atenderGameboy();
 
