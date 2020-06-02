@@ -5,7 +5,7 @@
 #ifndef SUPPORT_HILOFACIL_H
 #define SUPPORT_HILOFACIL_H
 
-#include "pthread.h"
+#include <pthread.h>
 
 int crearHilo(void *funcion(void *), void *parametros);
 
