@@ -4,7 +4,7 @@
 
 #include "modelo/PedidoGameBoy.h"
 
-PedidoGameBoy crearPedidoGameBoy(int cantidadArugmentos, char** arrayArgumentos) {
+PedidoGameBoy crearPedidoGameBoy(int cantidadArgumentos, char** arrayArgumentos) {
     PedidoGameBoy pedidoGameBoy = {.argumentos=malloc(sizeof(Argumentos))};
 
     Proceso proceso = obtenerProceso(arrayArgumentos[1]);
@@ -20,7 +20,7 @@ PedidoGameBoy crearPedidoGameBoy(int cantidadArugmentos, char** arrayArgumentos)
     }
 
     Argumentos argumentos = list_create();
-    for (int i=inicioArgumentos; i < cantidadArugmentos; i++)
+    for (int i=inicioArgumentos; i < cantidadArgumentos; i++)
         list_add(argumentos, arrayArgumentos[i]);
 
     pedidoGameBoy.argumentos = argumentos;
