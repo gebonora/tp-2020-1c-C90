@@ -4,23 +4,23 @@
 
 #include "modelo/PedidoGameBoy.h"
 
-PedidoGameBoy crearPedidoGameBoy(int cantidadArugmentos, char** arrayArgumentos) {
+PedidoGameBoy crearPedidoGameBoy(int cantidadArgumentos, char** arrayArgumentos) {
     PedidoGameBoy pedidoGameBoy = {.argumentos=malloc(sizeof(Argumentos))};
 
-    Proceso proceso = obtenerProceso(arrayArgumentos[1]);
+    Process proceso = obtenerProceso(arrayArgumentos[1]);
     pedidoGameBoy.proceso = proceso;
 
     int inicioArgumentos = 3;
 
     if (proceso == SUSCRIPTOR) {
-        pedidoGameBoy.tipoMensaje = UNTYPED_MESSAGE;
+        pedidoGameBoy.tipoMensaje = SUBSCRIBE;
         inicioArgumentos = 2;
     } else {
         pedidoGameBoy.tipoMensaje = obtenerTipoMensaje(arrayArgumentos[2]);
     }
 
     Argumentos argumentos = list_create();
-    for (int i=inicioArgumentos; i < cantidadArugmentos; i++)
+    for (int i=inicioArgumentos; i < cantidadArgumentos; i++)
         list_add(argumentos, arrayArgumentos[i]);
 
     pedidoGameBoy.argumentos = argumentos;
@@ -28,7 +28,7 @@ PedidoGameBoy crearPedidoGameBoy(int cantidadArugmentos, char** arrayArgumentos)
     return pedidoGameBoy;
 }
 
-Proceso obtenerProceso(char * nombreProceso) {
+Process obtenerProceso(char * nombreProceso) {
     if (string_equals_ignore_case("BROKER", nombreProceso)) {
         return BROKER;
     } else if (string_equals_ignore_case("TEAM", nombreProceso)) {
@@ -54,13 +54,15 @@ TipoMensaje obtenerTipoMensaje(char * tipoMensaje) {
         return CAUGHT_POKEMON;
     } else if (string_equals_ignore_case("GET_POKEMON", tipoMensaje)) {
         return GET_POKEMON;
+    } else if (string_equals_ignore_case("LOCALIZED_POKEMON", tipoMensaje)) {
+        return LOCALIZED_POKEMON;
     } else {
         log_error(INTERNAL_LOGGER, "Tipo de mensaje no soportado: %s", tipoMensaje);
         exit(EXIT_FAILURE);
     }
 }
 
-char * nombreProceso(Proceso proceso) {
+char * nombreProceso(Process proceso) {
     switch (proceso) {
         case BROKER:
             return "BROKER";

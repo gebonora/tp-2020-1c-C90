@@ -20,6 +20,7 @@ t_log* logger;
 
 void iniciarLogger();
 
+#define PATH_LOGGER "logs/logger.log"
 
 
 #endif /* GAMECARD_INCLUDE_LOGGER_H_ */

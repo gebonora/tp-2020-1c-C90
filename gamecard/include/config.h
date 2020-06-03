@@ -22,6 +22,8 @@ char* PUNTO_MONTAJE_TALLGRASS;
 char* IP_BROKER;
 char* PUERTO_BROKER;
 
+#define PATH_CONFIG "config/gameCard.config"
+
 void cargarConfigConexiones();
 
 

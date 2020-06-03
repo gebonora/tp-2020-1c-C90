@@ -1,6 +1,6 @@
 #include "server.h"
 
-void iniciar_servidor() {
+void init_server() {
 	int socket_servidor;
 
     struct addrinfo hints, *servinfo, *p;
@@ -24,7 +24,7 @@ void iniciar_servidor() {
         break;
     }
 
-    logger = log_create("/home/utnso/tp-2020-1c-C90/broker/logs/server.log", "Broker Server", 1, LOG_LEVEL_INFO);
+    LOGGER = log_create("/home/utnso/tp-2020-1c-C90/broker/logs/server.log", "Broker Server", 1, LOG_LEVEL_INFO);
 
 	listen(socket_servidor, SOMAXCONN);
 
@@ -38,14 +38,14 @@ void esperar_cliente(int socket_servidor)
 	struct sockaddr_in dir_cliente;
 
 	int tam_direccion = sizeof(struct sockaddr_in);
-	log_info(logger, "Esperando clientes");
+	log_info(LOGGER, "Esperando clientes");
 	int socket_cliente = accept(socket_servidor, (void*) &dir_cliente, &tam_direccion);
 
-	log_info(logger, "Se conectó el cliente: %d", socket_cliente);
+	log_info(LOGGER, "Se conectó el cliente: %d", socket_cliente);
 
 	pthread_t thread;
 
-	pthread_create(&thread,NULL,(void*)serve_client, socket_cliente);//ver como pasar el parametro socket
+	pthread_create(&thread,NULL,(void*)serve_client, socket_cliente);
 	pthread_detach(thread);
 }
 
@@ -53,62 +53,181 @@ void serve_client(int socket_e) {
 	int cod_op;
 	recv(socket_e, &cod_op, sizeof(int), MSG_WAITALL);
 	process_request(cod_op, socket_e);
-
 }
 
 void process_request(int cod_op, int socket) {
-	int id = 900;
+	uint32_t generated_id = get_id();
+	log_info(LOGGER, "Message id generated: %d", generated_id);
+	uint32_t id_correlational;
 	switch (cod_op) {
 	case NEW: ;
 		New* new_pokemon = recv_new(socket);
-		log_info(logger, "Me llego un new");
-		log_info(logger, "Nombre pokemon: %s", new_pokemon->pokemon->name->value);
-		log_info(logger, "Cantidad: %d", new_pokemon->quantity);
-		send(socket, &id, sizeof(int), 0);
+		log_info(LOGGER, "Me llego un new");
+		log_info(LOGGER, "Nombre pokemon: %s", new_pokemon->pokemon->name->value);
+		log_info(LOGGER, "Cantidad: %d", new_pokemon->quantity);
+
+		pthread_mutex_lock(&MUTEX_NEW_QUEUE);
+		queue_push(NEW_QUEUE, new_pokemon);
+		pthread_mutex_unlock(&MUTEX_NEW_QUEUE);
+		sem_post(&NEW_MESSAGES);
+
+		send(socket, &generated_id, sizeof(uint32_t), 0);
 		free_new(new_pokemon);
 		break;
 	case CAUGHT: ;
 		Caught* caught_pokemon = recv_caught(socket);
-		log_info(logger, "Me llego un caught");
-		log_info(logger, "Resultado: %d", caught_pokemon->result);
-		send(socket, &id, sizeof(int), 0);
+		id_correlational = recv_uint32(socket);
+		log_info(LOGGER, "Me llego un caught");
+		log_info(LOGGER, "Resultado: %d", caught_pokemon->result);
+		log_info(LOGGER, "Id correlational: %d", id_correlational);
+
+		pthread_mutex_lock(&MUTEX_CAUGHT_QUEUE);
+		queue_push(CAUGHT_QUEUE, caught_pokemon);
+		pthread_mutex_unlock(&MUTEX_CAUGHT_QUEUE);
+		sem_post(&CAUGHT_MESSAGES);
+
+		send(socket, &generated_id, sizeof(uint32_t), 0);
 		free(caught_pokemon);
 		break;
 	case GET: ;
 		Get* get_pokemon = recv_get(socket);
-		log_info(logger, "Me llego un get");
-		log_info(logger, "Nombre del pokemon: %s", get_pokemon->name->value);
-		send(socket, &id, sizeof(int), 0);
+		log_info(LOGGER, "Me llego un get");
+		log_info(LOGGER, "Nombre del pokemon: %s", get_pokemon->name->value);
+
+ 	 	pthread_mutex_lock(&MUTEX_GET_QUEUE);
+		queue_push(GET_QUEUE, get_pokemon);
+		pthread_mutex_unlock(&MUTEX_GET_QUEUE);
+		sem_post(&GET_MESSAGES);
+
+		send(socket, &generated_id, sizeof(uint32_t), 0);
 		free_get(get_pokemon);
 		break;
 	case LOCALIZED: ;
 		Localized* localized_pokemon = recv_localized(socket);
-		log_info(logger, "Me llego un localized");
-		log_info(logger, "Nombre del pokemon: %s", localized_pokemon->pokemon->name->value);
-		log_info(logger, "Cantidad de coordenadas: %d", localized_pokemon->coordinates_quantity);
-		send(socket, &id, sizeof(int), 0);
+		log_info(LOGGER, "Me llego un localized");
+		log_info(LOGGER, "Nombre del pokemon: %s", localized_pokemon->pokemon->name->value);
+		log_info(LOGGER, "Cantidad de coordenadas: %d", localized_pokemon->coordinates_quantity);
+		for(int i = 0; i < localized_pokemon->coordinates_quantity; i++) {
+			Coordinate* loc_coordinate = list_get(localized_pokemon->pokemon->coordinates, i);
+			log_info(LOGGER, "Coordenada: x=%d, y=%d", loc_coordinate->pos_x, loc_coordinate->pos_y);
+		}
+
+		pthread_mutex_lock(&MUTEX_LOCALIZED_QUEUE);
+		queue_push(LOCALIZED_QUEUE, localized_pokemon);
+		pthread_mutex_unlock(&MUTEX_LOCALIZED_QUEUE);
+		sem_post(&LOCALIZED_MESSAGES);
+
+		send(socket, &generated_id, sizeof(uint32_t), 0);
 		free_localized(localized_pokemon);
 		break;
 	case APPEARED: ;
 		Pokemon* appeared_pokemon = recv_pokemon(socket, false);
-		log_info(logger, "Me llego un appeared");
-		log_info(logger, "Nombre del pokemon: %s", appeared_pokemon->name->value);
-		send(socket, &id, sizeof(int), 0);
+		id_correlational = recv_uint32(socket);
+		log_info(LOGGER, "Me llego un appeared");
+		log_info(LOGGER, "Nombre del pokemon: %s", appeared_pokemon->name->value);
+		log_info(LOGGER, "Id correlational: %d", id_correlational);
+		Coordinate* coordinate = list_get(appeared_pokemon->coordinates, 0);
+		log_info(LOGGER, "Coordenada: x=%d, y=%d", coordinate->pos_x, coordinate->pos_y);
+
+		pthread_mutex_lock(&MUTEX_APPEARED_QUEUE);
+		queue_push(APPEARED_QUEUE, appeared_pokemon);
+		pthread_mutex_unlock(&MUTEX_APPEARED_QUEUE);
+		sem_post(&APPEARED_MESSAGES);
+
+		send(socket, &generated_id, sizeof(uint32_t), 0);
 		free_pokemon(appeared_pokemon);
 		break;
 	case CATCH: ;
 		Pokemon* catch_pokemon = recv_pokemon(socket, false);
-		log_info(logger, "Me llego un catch");
-		log_info(logger, "Nombre del pokemon: %s", catch_pokemon->name->value);
-		//log_info(logger, "Coordenadas: ", list_iterate()catch_pokemon->coordinates);
-		send(socket, &id, sizeof(int), 0);
+		log_info(LOGGER, "Me llego un catch");
+		log_info(LOGGER, "Nombre del pokemon: %s", catch_pokemon->name->value);
+		Coordinate* catch_coordinate = list_get(catch_pokemon->coordinates, 0);
+		log_info(LOGGER, "Coordenada: x=%d, y=%d", catch_coordinate->pos_x, catch_coordinate->pos_y);
+
+		pthread_mutex_lock(&MUTEX_CATCH_QUEUE);
+		queue_push(CATCH_QUEUE, catch_pokemon);
+		pthread_mutex_unlock(&MUTEX_CATCH_QUEUE);
+		sem_post(&CATCH_MESSAGES);
+
+		send(socket, &generated_id, sizeof(uint32_t), 0);
 		free_pokemon(catch_pokemon);
+		break;
+	case SUBSCRIBE: ;
+		log_info(LOGGER, "Me llego un suscribe");
+		int cod_process;
+		recv(socket, &cod_process, sizeof(int), MSG_WAITALL);
+		int cod_cola;
+		recv(socket, &cod_cola, sizeof(int), MSG_WAITALL);
+		int suscription_time;
+		if(GAMEBOY == cod_process) {
+			recv(socket, &suscription_time, sizeof(int), MSG_WAITALL);
+		}
+		char* op = get_operation_by_value(cod_cola);
+		pthread_mutex_lock(&MUTEX_SUBSCRIBERS_BY_QUEUE);
+		t_list* subscribers = dictionary_get(SUBSCRIBERS_BY_QUEUE, op);
+		list_add(subscribers, socket);
+		pthread_mutex_unlock(&MUTEX_SUBSCRIBERS_BY_QUEUE);
+
+		log_info(LOGGER, "Suscripcion del proceso: %d", cod_process);
+		log_info(LOGGER, "Suscripcion en cola: %d", cod_cola);
+		log_info(LOGGER, "Suscripcion time en segundos: %d", suscription_time);
+
+		Result result =  OK;
+		send(socket, &result, sizeof(Result), 0);
+
 		break;
 	case 0:
 		pthread_exit(NULL); //revisar cuando matar al hilo y cerrar la conexion
 	case -1:
 		pthread_exit(NULL); //revisar cuando matar al hilo y cerrar la conexion
 	}
+
+}
+/*
+void laburar() {
+	log_info(LOGGER, "Entre a laburar");
+	pthread_mutex_init(&mutex_queue, NULL);
+	sem_init(&mensajes_en_queue, 0, 0);
+
+	message_queue = queue_create();
+
+	pthread_t producer;
+
+	pthread_create(&producer,NULL,(void*)productor, NULL);
+
+	pthread_t consumer;
+
+	pthread_create(&consumer,NULL,(void*)consumidor, NULL);
+	pthread_detach(producer);
+	pthread_detach(consumer);
 }
 
+void productor() {
+	log_info(LOGGER,"Arranca el producer");
+	int valor = 0;
+	while(valor != 10) {
+ 	 	pthread_mutex_lock(&mutex_queue);
+		log_info(LOGGER,"Entra a la queue: %d", valor);
+		queue_push(message_queue, valor);
+		pthread_mutex_unlock(&mutex_queue);
+		sem_post(&mensajes_en_queue);
+		valor++;
+		//sleep(1);
+	}
+}
+
+void consumidor() {
+	log_info(LOGGER,"Arranca el consumer");
+	int mensajes_consumidos = 0;
+	while(mensajes_consumidos != 10) {
+		sem_wait(&mensajes_en_queue);
+		pthread_mutex_lock(&mutex_queue);
+		int valor = queue_pop(message_queue);
+		pthread_mutex_unlock(&mutex_queue);
+		log_info(LOGGER,"Sale de la queue: %d", valor);
+		mensajes_consumidos++;
+		//sleep(1);
+	}
+}
+*/
 

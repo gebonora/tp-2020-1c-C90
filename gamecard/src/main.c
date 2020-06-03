@@ -7,8 +7,9 @@
 #include "main.h"
 
 
-int main32(){
-	puts("Adiós Mundo Cruel");
-	return 0;
+int main(){
+	puts("arranco el main");
+	cargarConfigConexiones();
+	iniciarLogger();
 }
 

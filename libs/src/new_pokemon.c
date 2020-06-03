@@ -52,3 +52,12 @@ New* recv_new(int socket_e) {
 	new_pokemon->quantity = recv_uint32(socket_e);
 	return new_pokemon;
 }
+
+New* create_new_pokemon(char* name, uint32_t posx, uint32_t posy, uint32_t quantity) {
+	New* new_pokemon = malloc(sizeof(New));
+
+	new_pokemon->pokemon = create_pokemon(name, posx, posy);
+	new_pokemon->quantity = quantity;
+
+	return new_pokemon;
+}
