@@ -13,7 +13,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include "app/Global.h"
-#include "servicios/servicioDeConfiguracion/ServicioDeConfiguracion.h"
+#include "app/Servicios.h"
 
 typedef struct ServidorTeam {
     int socketServidor;
