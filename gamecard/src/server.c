@@ -65,7 +65,7 @@ void esperarBrokerNew(int socketDeEscucha) {
 void procesarHiloNew(New* unNew) {
 	//procesar
 	//crear socket descartable al broker
-	int socketDescartable = crearSocketHaciaBroker();
+	int socketDescartable = crearSocketCliente(IP_BROKER, PUERTO_BROKER);
 	//enviar respuesta al broker
 	//esperar confirmacion del broker?
 	//liberar memoriar y cerrar socket
@@ -94,7 +94,7 @@ void esperarBrokerCatch(int socketDeEscucha) {
 void procesarHiloCatch(Pokemon* unCatch) {
 	//procesar
 	//crear socket descartable al broker
-	int socketDescartable = crearSocketHaciaBroker();
+	int socketDescartable = crearSocketCliente(IP_BROKER, PUERTO_BROKER);
 	//enviar respuesta al broker
 	//esperar confirmacion del broker?
 	//liberar memoriar y cerrar socket
@@ -123,7 +123,7 @@ void esperarBrokerGet(int socketDeEscucha) {
 void procesarHiloGet(Get* unGet) {
 	//procesar
 	//crear socket descartable al broker
-	int socketDescartable = crearSocketHaciaBroker();
+	int socketDescartable = crearSocketCliente(IP_BROKER, PUERTO_BROKER);
 	//enviar respuesta al broker
 	//esperar confirmacion del broker?
 	//liberar memoriar y cerrar socket
@@ -131,11 +131,62 @@ void procesarHiloGet(Get* unGet) {
 }
 
 void atenderGameboy() {
-	return;
+	int socketServidor = crearSocketServidor(IP_GAMECARD_GAMEBOY,
+			PUERTO_GAMECARD_GAMEBOY);
+	while (1) {
+
+		pthread_t thread;
+		uint32_t idMensaje;
+
+		struct sockaddr_in dir_cliente;
+		socklen_t tam_direccion = sizeof(struct sockaddr_in);
+
+		log_info(logger, "Esperando Gameboys en el socket: %d", socketServidor);
+
+		int socketCliente = accept(socketServidor, (void*) &dir_cliente,
+				&tam_direccion);
+
+		log_info(logger, "Se conectó el Gameboy: %d", socketCliente);
+
+		int codOp;
+		recv(socketCliente, &codOp, sizeof(int), MSG_WAITALL);
+
+		log_info(logger, "codOp: %d", codOp);
+
+		switch (codOp) {
+		case NEW:
+			;
+			New* unNew = recv_new(socketCliente);
+			log_info(logger, "Llegó un New de: %s",unNew->pokemon->name->value); //mejorar logeo
+
+			recv(socketCliente, &idMensaje, sizeof(uint32_t), 0);
+
+			log_info(logger, "Id mensaje: %d",idMensaje);
+
+			//pthread_create(&thread, NULL, (void*) procesarHiloNew, unNew);
+			//pthread_detach(thread);
+			break;
+		case CATCH:
+			;
+			/*Pokemon* unCatch = recv_pokemon(socketCliente, false);
+			 pthread_create(&thread, NULL, (void*) procesarHiloCatch, unCatch);
+			 pthread_detach(thread);*/
+			puts("entrecatach");
+			//
+			break;
+		case GET:
+			;
+			Get* unGet = recv_get(socketCliente);
+			pthread_create(&thread, NULL, (void*) procesarHiloGet, unGet);
+			pthread_detach(thread);
+			break;
+		}
+
+	}
 }
 
 int iniciarSocketDeEscucha() {
-	int socketDeEscucha = crearSocketHaciaBroker();
+	int socketDeEscucha = crearSocketCliente(IP_BROKER, PUERTO_BROKER);
 	//conectarnos al broker y hacer handshake
 
 	send(socketDeEscucha, (int*) 200, sizeof(int), 0);
@@ -150,23 +201,5 @@ int iniciarSocketDeEscucha() {
 //antes del return validar que se recibio bien.
 	return socketDeEscucha;
 
-}
-
-int crearSocketHaciaBroker() {
-	struct addrinfo hints;
-	struct addrinfo* server_info;
-	memset(&hints, 0, sizeof(hints));
-	hints.ai_family = AF_UNSPEC;
-	hints.ai_socktype = SOCK_STREAM;
-	hints.ai_flags = AI_PASSIVE;
-	getaddrinfo(IP_BROKER, PUERTO_BROKER, &hints, &server_info);
-	int socketDeEscucha = socket(server_info->ai_family,
-			server_info->ai_socktype, server_info->ai_protocol);
-	if (connect(socketDeEscucha, server_info->ai_addr, server_info->ai_addrlen)
-			== -1)
-		puts("error");
-
-	freeaddrinfo(server_info);
-	return socketDeEscucha;
 }
 

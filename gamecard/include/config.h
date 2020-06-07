@@ -14,6 +14,8 @@
 #include <commons/log.h>
 #include <commons/config.h>
 
+#include "logger.h"
+
 t_config* config;
 
 int TIEMPO_DE_REINTENTO_CONEXION;
@@ -21,6 +23,8 @@ int TIEMPO_DE_REINTENTO_OPERACION;
 char* PUNTO_MONTAJE_TALLGRASS;
 char* IP_BROKER;
 char* PUERTO_BROKER;
+char* IP_GAMECARD_GAMEBOY;
+char* PUERTO_GAMECARD_GAMEBOY;
 
 #define PATH_CONFIG "config/gameCard.config"
 
