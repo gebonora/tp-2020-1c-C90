@@ -11,8 +11,9 @@ void atenderPedidoGamecard(PedidoGameBoy pedidoGameBoy, t_log * logger) {
 	IP_GAMECARD);
 	char* puerto = servicioDeConfiguracion.obtenerString(
 			&servicioDeConfiguracion, PUERTO_GAMECARD);
-	int socketCliente = crearSocketCliente(IP_GAMECARD, PUERTO_GAMECARD);
+	int socketCliente = crearSocketCliente(ip, puerto);
 	uint32_t idMensaje;
+
 	switch (pedidoGameBoy.tipoMensaje) {
 	case NEW_POKEMON:
 		;
@@ -22,6 +23,7 @@ void atenderPedidoGamecard(PedidoGameBoy pedidoGameBoy, t_log * logger) {
 				atoi(list_get(pedidoGameBoy.argumentos, 1)),
 				atoi(list_get(pedidoGameBoy.argumentos, 2)),
 				atoi(list_get(pedidoGameBoy.argumentos, 3)));
+
 		send_new(newPokemon, socketCliente);
 		idMensaje = atoi(list_get(pedidoGameBoy.argumentos, 4));
 		send(socketCliente, &idMensaje, sizeof(uint32_t), MSG_WAITALL);
