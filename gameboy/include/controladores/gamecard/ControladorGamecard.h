@@ -6,8 +6,8 @@
 #define GAMEBOY_CONTROLADORGAMECARD_H
 
 #include "modelo/controladorGameBoy/ControladorGameBoy.h"
-#include "support/utils/sockets/Sockets.h"
-#include "support/servicios/servicioDeConfiguracion/ServicioDeConfiguracion.h"
+#include "delibird/utils/sockets/Sockets.h"
+#include "delibird/servicios/servicioDeConfiguracion/ServicioDeConfiguracion.h"
 
 void atenderPedidoGamecard(PedidoGameBoy pedidoGameBoy, t_log * logger);
 
