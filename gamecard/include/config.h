@@ -14,6 +14,8 @@
 #include <commons/log.h>
 #include <commons/config.h>
 
+#include "logger.h"
+
 t_config* config;
 
 int TIEMPO_DE_REINTENTO_CONEXION;

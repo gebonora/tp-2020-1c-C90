@@ -21,5 +21,8 @@ void cargarConfigConexiones() {
 			"PUERTO_GAMECARD_GAMEBOY");
 	IP_GAMECARD_GAMEBOY = config_get_string_value(config,
 			"IP_GAMECARD_GAMEBOY");
+	log_info(logger,
+			"Config cargada: IP_GAMECARD_GAMEBOY: %s, PUERTO_GAMECARD_GAMEBOY: %s",
+			IP_GAMECARD_GAMEBOY, PUERTO_GAMECARD_GAMEBOY);
 }
 

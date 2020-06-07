@@ -133,10 +133,56 @@ void procesarHiloGet(Get* unGet) {
 void atenderGameboy() {
 	int socketServidor = crearSocketServidor(IP_GAMECARD_GAMEBOY,
 			PUERTO_GAMECARD_GAMEBOY);
+	while (1) {
 
+		pthread_t thread;
+		uint32_t idMensaje;
 
+		struct sockaddr_in dir_cliente;
+		socklen_t tam_direccion = sizeof(struct sockaddr_in);
 
-	return;
+		log_info(logger, "Esperando Gameboys en el socket: %d", socketServidor);
+
+		int socketCliente = accept(socketServidor, (void*) &dir_cliente,
+				&tam_direccion);
+
+		log_info(logger, "Se conectó el Gameboy: %d", socketCliente);
+
+		int codOp;
+		recv(socketCliente, &codOp, sizeof(int), MSG_WAITALL);
+
+		log_info(logger, "codOp: %d", codOp);
+
+		switch (codOp) {
+		case NEW:
+			;
+			New* unNew = recv_new(socketCliente);
+			log_info(logger, "Llegó un New de: %s",unNew->pokemon->name->value); //mejorar logeo
+
+			recv(socketCliente, &idMensaje, sizeof(uint32_t), 0);
+
+			log_info(logger, "Id mensaje: %d",idMensaje);
+
+			//pthread_create(&thread, NULL, (void*) procesarHiloNew, unNew);
+			//pthread_detach(thread);
+			break;
+		case CATCH:
+			;
+			/*Pokemon* unCatch = recv_pokemon(socketCliente, false);
+			 pthread_create(&thread, NULL, (void*) procesarHiloCatch, unCatch);
+			 pthread_detach(thread);*/
+			puts("entrecatach");
+			//
+			break;
+		case GET:
+			;
+			Get* unGet = recv_get(socketCliente);
+			pthread_create(&thread, NULL, (void*) procesarHiloGet, unGet);
+			pthread_detach(thread);
+			break;
+		}
+
+	}
 }
 
 int iniciarSocketDeEscucha() {

@@ -11,5 +11,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "logger.h"
+#include "config.h"
+#include "server.h"
+
 
 #endif /* GAMECARD_INCLUDE_MAIN_H_ */
