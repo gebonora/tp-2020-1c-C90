@@ -2,8 +2,8 @@
 // Created by Alan Zhao on 29/04/2020.
 //
 
-#ifndef SUPPORT_SERVICIODECONFIGURACION_H
-#define SUPPORT_SERVICIODECONFIGURACION_H
+#ifndef DELIBIRD_SERVICIODECONFIGURACION_H
+#define DELIBIRD_SERVICIODECONFIGURACION_H
 
 #include <commons/config.h>
 #include <commons/log.h>
@@ -51,4 +51,4 @@ extern const struct ServicioDeConfiguracionClass {
 
 ServicioDeConfiguracion servicioDeConfiguracion;
 
-#endif //SUPPORT_SERVICIODECONFIGURACION_H
+#endif //DELIBIRD_SERVICIODECONFIGURACION_H

@@ -2,8 +2,8 @@
 // Created by Alan Zhao on 29/04/2020.
 //
 
-#ifndef SUPPORT_PROGRAMADORDETAREAS_H
-#define SUPPORT_PROGRAMADORDETAREAS_H
+#ifndef DELIBIRD_PROGRAMADORDETAREAS_H
+#define DELIBIRD_PROGRAMADORDETAREAS_H
 
 #include <unistd.h>
 #include <stdbool.h>
@@ -29,4 +29,4 @@ void destruirTarea(Tarea *tarea);
 
 Tarea *crearTarea(char *descripcion, void (*funcion)(void *), void *args, int intervaloEnMilisegundos);
 
-#endif //SUPPORT_PROGRAMADORDETAREAS_H
+#endif //DELIBIRD_PROGRAMADORDETAREAS_H
