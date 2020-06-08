@@ -18,11 +18,10 @@
 #include <config.h>
 #include <sys/sem.h>
 
-typedef struct{
+typedef struct {
 	void* mensaje;
 	uint32_t idMensaje;
-}ArgumentosHilo;
-
+} ArgumentosHilo;
 
 void atenderConexiones();
 void atenderNew();
@@ -37,10 +36,11 @@ void atenderGet();
 void esperarBrokerGet(int socketDeEscucha);
 void procesarHiloGet(ArgumentosHilo* argumentosHilo);
 
-int iniciarSocketDeEscucha() ;
+int iniciarSocketDeEscucha(Operation cola);
 
 void atenderGameboy();
 
-char* traducirOperacion(int operacion);
+char* traducirOperacion(Operation operacion);
+char* traducirResult(Result result);
 
 #endif /* GAMECARD_INCLUDE_SERVER_H_ */

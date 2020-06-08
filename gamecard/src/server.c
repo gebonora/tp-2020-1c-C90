@@ -40,12 +40,19 @@ void atenderConexiones() {
 
 	pthread_create(&threadGameboy, NULL, (void*) atenderGameboy, NULL);
 	pthread_detach(threadGameboy);
-	while(1);
+	while (1)
+		;
 
 }
 
 void atenderNew() {
-	int socketDeEscucha = iniciarSocketDeEscucha();
+	int socketDeEscucha = iniciarSocketDeEscucha(NEW);
+	while (socketDeEscucha == -1) {
+		log_info(loggerNew, "Error al conectar con Broker. Reintentando en '%d' segundos...", TIEMPO_DE_REINTENTO_CONEXION);
+		sleep(TIEMPO_DE_REINTENTO_CONEXION);
+		socketDeEscucha = iniciarSocketDeEscucha(NEW);
+	}
+	log_info(loggerNew, "Subscripto al Broker con el socket: '%d' Escuchando mensajes...", socketDeEscucha);
 	esperarBrokerNew(socketDeEscucha);
 }
 
@@ -97,7 +104,12 @@ void procesarHiloNew(ArgumentosHilo* argumentosHilo) {
 }
 
 void atenderCatch() {
-	int socketDeEscucha = iniciarSocketDeEscucha();
+	int socketDeEscucha = iniciarSocketDeEscucha(CATCH);
+	while (socketDeEscucha == -1) {
+		log_info(loggerCatch, "Error al conectar con Broker. Reintentando en '%d' segundos...", TIEMPO_DE_REINTENTO_CONEXION);
+		sleep(TIEMPO_DE_REINTENTO_CONEXION);
+		socketDeEscucha = iniciarSocketDeEscucha(CATCH);
+	}
 	esperarBrokerCatch(socketDeEscucha);
 }
 
@@ -141,14 +153,19 @@ void procesarHiloCatch(ArgumentosHilo* argumentosHilo) {
 	free(argumentosHilo);
 	//close(socketDescatable);
 	pthread_mutex_lock(&m_loggerCatch);
-	log_info(loggerCatch, "Se terminó con éxito un hilo: 'Catch'");
+	log_info(loggerCatch, "Se terminó con éxito un hilo");
 	pthread_mutex_unlock(&m_loggerCatch);
 
 	//termina el hilo
 }
 
 void atenderGet() {
-	int socketDeEscucha = iniciarSocketDeEscucha();
+	int socketDeEscucha = iniciarSocketDeEscucha(GET);
+	while (socketDeEscucha == -1) {
+		log_info(loggerGet, "Error al conectar con Broker. Reintentando en '%d' segundos...", TIEMPO_DE_REINTENTO_CONEXION);
+		sleep(TIEMPO_DE_REINTENTO_CONEXION);
+		socketDeEscucha = iniciarSocketDeEscucha(GET);
+	}
 	esperarBrokerGet(socketDeEscucha);
 }
 
@@ -184,7 +201,7 @@ void procesarHiloGet(ArgumentosHilo* argumentosHilo) {
 	free(argumentosHilo);
 	//close(socketDescartable);
 	pthread_mutex_lock(&m_loggerGet);
-	log_info(loggerGet, "Se terminó con éxito un hilo: 'Get'");
+	log_info(loggerGet, "Se terminó con éxito un hilo");
 	pthread_mutex_unlock(&m_loggerGet);
 
 	//termina el hilo
@@ -253,29 +270,34 @@ void atenderGameboy() {
 	}
 }
 
-int iniciarSocketDeEscucha() {
+int iniciarSocketDeEscucha(Operation cola) {
 	int socketDeEscucha = crearSocketCliente(IP_BROKER, PUERTO_BROKER);
-	puts("retorna");
-	if(socketDeEscucha == -1){
-		sleep(100000000);
+	if (socketDeEscucha == -1) {
+		return -1;
 	}
 	//conectarnos al broker y hacer handshake
+	Operation subscribe = SUBSCRIBE;
+	Process gameCard = GAMECARD;
 
-	send(socketDeEscucha, (int*) 200, sizeof(int), 0);
-
-	printf("Envie: %d", 200);
-
-	int recibido;
-	recv(socketDeEscucha, &recibido, sizeof(int), MSG_WAITALL);
-
-	printf("Recibi: %d", recibido);
+	if (send(socketDeEscucha, &subscribe, sizeof(int), 0) == -1)
+		perror("send1:");
+	if (send(socketDeEscucha, &gameCard, sizeof(int), 0) == -1)
+		perror("send2:");
+	if (send(socketDeEscucha, &cola, sizeof(int), 0) == -1)
+		perror("send2:");
+	Result result;
+	recv(socketDeEscucha, &result, sizeof(Result), 0);
+	if (result != OK) {
+		close(socketDeEscucha);
+		return -1;
+	}
 
 //antes del return validar que se recibio bien.
 	return socketDeEscucha;
 
 }
 
-char* traducirOperacion(int operacion) {
+char* traducirOperacion(Operation operacion) {
 	switch (operacion) {
 	case NEW:
 		return "NEW";
@@ -285,6 +307,19 @@ char* traducirOperacion(int operacion) {
 		return "GET";
 	default:
 		return "OPERACION DESCONOCIDA. ALGO ANDA MAL!";
+	}
+}
+
+char* traducirResult(Result result) {
+	switch (result) {
+	case OK:
+		return "OK";
+	case FAIL:
+		return "FAIL";
+	case ACKNOWLEDGE:
+		return "ACKONWLEDGE";
+	default:
+		return "RESULTADO DESCONOCIDO. ALGO ANDA MAL!";
 	}
 }
 
