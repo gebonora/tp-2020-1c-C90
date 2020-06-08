@@ -36,7 +36,7 @@ void atenderGet();
 void esperarBrokerGet(int socketDeEscucha);
 void procesarHiloGet(ArgumentosHilo* argumentosHilo);
 
-int iniciarSocketDeEscucha(Operation cola);
+int iniciarSocketDeEscucha(Operation cola, t_log* logger, pthread_mutex_t* mutex);
 
 void atenderGameboy();
 

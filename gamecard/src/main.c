@@ -11,7 +11,7 @@ int main(){
 	puts("arranco el main");
 	iniciarLoggers();
 	cargarConfigConexiones();
-	//atenderConexiones();
-	atenderNew();
+	atenderConexiones();
+	//atenderNew();
 }
 

@@ -46,13 +46,7 @@ void atenderConexiones() {
 }
 
 void atenderNew() {
-	int socketDeEscucha = iniciarSocketDeEscucha(NEW);
-	while (socketDeEscucha == -1) {
-		log_info(loggerNew, "Error al conectar con Broker. Reintentando en '%d' segundos...", TIEMPO_DE_REINTENTO_CONEXION);
-		sleep(TIEMPO_DE_REINTENTO_CONEXION);
-		socketDeEscucha = iniciarSocketDeEscucha(NEW);
-	}
-	log_info(loggerNew, "Subscripto al Broker con el socket: '%d' Escuchando mensajes...", socketDeEscucha);
+	int socketDeEscucha = subscribirseACola(NEW, loggerNew, &m_loggerNew);
 	esperarBrokerNew(socketDeEscucha);
 }
 
@@ -65,8 +59,8 @@ void esperarBrokerNew(int socketDeEscucha) {
 
 	while (1) {
 		uint32_t idMensaje;
-		New* unNew = recv_new(socketDeEscucha);
-		recv(socketDeEscucha, &idMensaje, sizeof(uint32_t), 0);
+		New* unNew = recv_new(socketDeEscucha); //cheqyear socket caidp y reconectar
+		recv(socketDeEscucha, &idMensaje, sizeof(uint32_t), 0); //chequear socket caido y reconectar
 
 		ArgumentosHilo* argumentosHilo = malloc(sizeof(ArgumentosHilo));
 		argumentosHilo->mensaje = unNew;
@@ -104,12 +98,7 @@ void procesarHiloNew(ArgumentosHilo* argumentosHilo) {
 }
 
 void atenderCatch() {
-	int socketDeEscucha = iniciarSocketDeEscucha(CATCH);
-	while (socketDeEscucha == -1) {
-		log_info(loggerCatch, "Error al conectar con Broker. Reintentando en '%d' segundos...", TIEMPO_DE_REINTENTO_CONEXION);
-		sleep(TIEMPO_DE_REINTENTO_CONEXION);
-		socketDeEscucha = iniciarSocketDeEscucha(CATCH);
-	}
+	int socketDeEscucha = subscribirseACola(CATCH, loggerCatch, &m_loggerCatch);
 	esperarBrokerCatch(socketDeEscucha);
 }
 
@@ -160,12 +149,7 @@ void procesarHiloCatch(ArgumentosHilo* argumentosHilo) {
 }
 
 void atenderGet() {
-	int socketDeEscucha = iniciarSocketDeEscucha(GET);
-	while (socketDeEscucha == -1) {
-		log_info(loggerGet, "Error al conectar con Broker. Reintentando en '%d' segundos...", TIEMPO_DE_REINTENTO_CONEXION);
-		sleep(TIEMPO_DE_REINTENTO_CONEXION);
-		socketDeEscucha = iniciarSocketDeEscucha(GET);
-	}
+	int socketDeEscucha = subscribirseACola(GET, loggerGet, &m_loggerGet);
 	esperarBrokerGet(socketDeEscucha);
 }
 
@@ -266,11 +250,10 @@ void atenderGameboy() {
 			pthread_detach(thread);
 			break;
 		}
-
 	}
 }
 
-int iniciarSocketDeEscucha(Operation cola) {
+int iniciarSocketDeEscucha(Operation cola, t_log* logger, pthread_mutex_t* mutex) {
 	int socketDeEscucha = crearSocketCliente(IP_BROKER, PUERTO_BROKER);
 	if (socketDeEscucha == -1) {
 		return -1;
@@ -279,22 +262,46 @@ int iniciarSocketDeEscucha(Operation cola) {
 	Operation subscribe = SUBSCRIBE;
 	Process gameCard = GAMECARD;
 
-	if (send(socketDeEscucha, &subscribe, sizeof(int), 0) == -1)
-		perror("send1:");
-	if (send(socketDeEscucha, &gameCard, sizeof(int), 0) == -1)
-		perror("send2:");
-	if (send(socketDeEscucha, &cola, sizeof(int), 0) == -1)
-		perror("send2:");
+	if (send(socketDeEscucha, &subscribe, sizeof(int), MSG_NOSIGNAL) < 0) {
+		close(socketDeEscucha);
+		return -1;
+	}
+	if (send(socketDeEscucha, &gameCard, sizeof(int), MSG_NOSIGNAL) < 0) {
+		close(socketDeEscucha);
+		return -1;
+	}
+	if (send(socketDeEscucha, &cola, sizeof(int), MSG_NOSIGNAL) < 0) {
+		close(socketDeEscucha);
+		return -1;
+	}
 	Result result;
-	recv(socketDeEscucha, &result, sizeof(Result), 0);
+
+	if (recv(socketDeEscucha, &result, sizeof(Result), 0) <= 0) {
+		close(socketDeEscucha);
+		return -1;
+	}
 	if (result != OK) {
 		close(socketDeEscucha);
 		return -1;
 	}
 
-//antes del return validar que se recibio bien.
 	return socketDeEscucha;
+}
 
+int subscribirseACola(Operation cola, t_log* logger, pthread_mutex_t* mutex) {
+	int socketDeEscucha = iniciarSocketDeEscucha(cola, logger, mutex);
+	while (socketDeEscucha == -1) {
+		pthread_mutex_lock(mutex);
+		log_info(logger, "Error al conectar con Broker. Reintentando en '%d' segundos...", TIEMPO_DE_REINTENTO_CONEXION);
+		pthread_mutex_unlock(mutex);
+		sleep(TIEMPO_DE_REINTENTO_CONEXION);
+		socketDeEscucha = iniciarSocketDeEscucha(GET, logger, &m_loggerGet);
+	}
+	pthread_mutex_lock(mutex);
+	log_info(logger, "Subscripto al Broker con el socket: '%d' Escuchando mensajes...", socketDeEscucha);
+	pthread_mutex_unlock(mutex);
+
+	return socketDeEscucha;
 }
 
 char* traducirOperacion(Operation operacion) {
