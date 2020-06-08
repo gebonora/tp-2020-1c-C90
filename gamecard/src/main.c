@@ -9,9 +9,9 @@
 
 int main(){
 	puts("arranco el main");
-	iniciarLogger();
+	iniciarLoggers();
 	cargarConfigConexiones();
-	//tenderConexiones();
-	atenderGameboy();
+	atenderConexiones();
+	//atenderGameboy();
 }
 

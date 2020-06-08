@@ -26,7 +26,7 @@
 int main232(){
 	puts("arranco el main");
 	cargarConfigConexiones();
-	iniciarLogger();
+	//iniciarLoggers();
 	crearDirectoriosBase("Metadata");
 	crearDirectoriosBase("Files");
 	crearArchivosBase("Metadata/Metadata.bin");
