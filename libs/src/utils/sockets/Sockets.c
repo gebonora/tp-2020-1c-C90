@@ -17,11 +17,11 @@ int crearSocketCliente(char* ip, char* puerto) {
 
 	getaddrinfo(ip, puerto, &hints, &server_info);
 
-	int socketCliente = socket(server_info->ai_family, server_info->ai_socktype,
-			server_info->ai_protocol);
-	if (connect(socketCliente, server_info->ai_addr, server_info->ai_addrlen)
-			== -1)
+	int socketCliente = socket(server_info->ai_family, server_info->ai_socktype, server_info->ai_protocol);
+	if (connect(socketCliente, server_info->ai_addr, server_info->ai_addrlen) == -1) {
+		socketCliente = -1;
 		perror("Error al crear Socket Cliente");
+	}
 
 	freeaddrinfo(server_info);
 	return socketCliente;
@@ -40,8 +40,7 @@ int crearSocketServidor(char* ip, char* puerto) {
 	getaddrinfo(ip, puerto, &hints, &servinfo);
 
 	for (p = servinfo; p != NULL; p = p->ai_next) {
-		if ((socketServidor = socket(p->ai_family, p->ai_socktype,
-				p->ai_protocol)) == -1)
+		if ((socketServidor = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1)
 			continue;
 
 		if (bind(socketServidor, p->ai_addr, p->ai_addrlen) == -1) {
