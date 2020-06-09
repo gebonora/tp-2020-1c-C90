@@ -78,7 +78,8 @@ void procesarHiloNew(ArgumentosHilo* argumentosHilo) {
 	uint32_t idMensaje = argumentosHilo->idMensaje;
 	logearNewRecibido(unNew, idMensaje);
 
-	//procesarNew(unNew); filesystem acá
+	//filesystem acá
+	Pokemon* pokemonAppeared = procesarNew(unNew); //FS
 
 	//crear socket descartable al broker
 	//int socketDescartable = crearSocketCliente(IP_BROKER, PUERTO_BROKER);
@@ -92,7 +93,7 @@ void procesarHiloNew(ArgumentosHilo* argumentosHilo) {
 	free(argumentosHilo);
 	//close(socketDescartable);
 	pthread_mutex_lock(&m_loggerNew);
-	log_info(loggerNew, "Se terminó con éxito un hilo: 'New'"); //medio al pedo logear esto en la version final
+	log_info(loggerNew, "Se terminó con éxito un hilo"); //medio al pedo logear esto en la version final
 	pthread_mutex_unlock(&m_loggerNew);
 	//termina el hilo
 }
@@ -130,6 +131,9 @@ void procesarHiloCatch(ArgumentosHilo* argumentosHilo) {
 	uint32_t idMensaje = argumentosHilo->idMensaje;
 	logearCatchRecibido(unPokemon, idMensaje);
 
+	Caught* pokemonCatch = procesarCatch(unPokemon); //FS
+
+
 	//crear socket descartable al broker
 	//int socketDescartable = crearSocketCliente(IP_BROKER, PUERTO_BROKER);
 
@@ -138,7 +142,7 @@ void procesarHiloCatch(ArgumentosHilo* argumentosHilo) {
 	//esperar confirmacion del broker?
 
 	//liberar memoriar y cerrar socket
-	free_pokemon(unPokemon);
+	free_pokemon( unPokemon);
 	free(argumentosHilo);
 	//close(socketDescatable);
 	pthread_mutex_lock(&m_loggerCatch);
@@ -172,6 +176,8 @@ void procesarHiloGet(ArgumentosHilo* argumentosHilo) {
 	Get* unGet = (Get*) (argumentosHilo->mensaje);
 	uint32_t idMensaje = argumentosHilo->idMensaje;
 	logearGetRecibido(unGet, idMensaje);
+
+	Localized* pokemonLocalized = procesarLocalized(unGet);
 
 	//crear socket descartable al broker
 	//int socketDescartable = crearSocketCliente(IP_BROKER, PUERTO_BROKER);
@@ -295,7 +301,7 @@ int subscribirseACola(Operation cola, t_log* logger, pthread_mutex_t* mutex) {
 		log_info(logger, "Error al conectar con Broker. Reintentando en '%d' segundos...", TIEMPO_DE_REINTENTO_CONEXION);
 		pthread_mutex_unlock(mutex);
 		sleep(TIEMPO_DE_REINTENTO_CONEXION);
-		socketDeEscucha = iniciarSocketDeEscucha(GET, logger, &m_loggerGet);
+		socketDeEscucha = iniciarSocketDeEscucha(cola, logger, mutex);
 	}
 	pthread_mutex_lock(mutex);
 	log_info(logger, "Subscripto al Broker con el socket: '%d' Escuchando mensajes...", socketDeEscucha);
