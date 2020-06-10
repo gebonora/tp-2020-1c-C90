@@ -15,13 +15,11 @@ int main() {
     MANDATORY_LOGGER = log_create(mandatoryLogPath, "LogObligatorio", 1, LOG_LEVEL_INFO);
 
     // Server
-    servidorTeam = ServidorTeamConstructor.new();
-    servidorTeam.iniciar(&servidorTeam);
-    servidorTeam.atenderConexiones(&servidorTeam);
+    //atenderConexiones();
 
     // Liberacion
     log_debug(INTERNAL_LOGGER, "Finalizando proceso Team...");
-    servidorTeam.terminar(&servidorTeam);
+    //terminar();
     log_debug(INTERNAL_LOGGER, "Liberando logger obligatorio");
     log_destroy(MANDATORY_LOGGER);
     log_debug(INTERNAL_LOGGER, "Liberando servicios");

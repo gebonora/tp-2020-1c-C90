@@ -15,7 +15,13 @@
 #include "app/Global.h"
 #include "servicios/servicioDeConfiguracion/ServicioDeConfiguracion.h"
 
-#include "libs/include/protocol.h"
+#include <commons/log.h>
+#include <commons/config.h>
+
+typedef struct {
+	void* mensaje;
+	uint32_t idMensaje;
+} ArgumentosHilo;
 
 void atenderAppeared();
 void esperarBrokerAppeared(int socketDeEscucha);
@@ -23,30 +29,20 @@ void procesarHiloAppeared(Pokemon* unPokemon);
 
 void atenderCaught();
 void esperarBrokerCaught(int socketDeEscucha);
-void procesarHiloCaught(Caught* unCaught);
+void procesarHiloCaught(ArgumentosHilo* argumentosHilo);
 
 void atenderLocalized();
 void esperarBrokerLocalized(int socketDeEscucha);
-void procesarHiloLocalized(Localized* unLocalized);
+void procesarHiloLocalized(ArgumentosHilo* argumentosHilo);
 
-int iniciarSocketDeEscucha() ;
-int crearSocketHaciaBroker();
+
+int iniciarSocketDeEscucha(Operation cola, t_log* logger, pthread_mutex_t* mutex);
+int subscribirseACola(Operation cola, t_log* logger, pthread_mutex_t* mutex);
+char* traducirOperacion(Operation operacion);
+char* traducirResult(Result result);
+
 
 void atenderGameboy();
 
-
-typedef struct ServidorTeam {
-    int socketServidor;
-    t_log *logger;
-    void (*iniciar)(struct ServidorTeam *this);
-    void (*atenderConexiones)(struct ServidorTeam *this);
-    void (*terminar)(struct ServidorTeam *this);
-} ServidorTeam;
-
-extern const struct ServidorTeamClass {
-    ServidorTeam (*new)();
-} ServidorTeamConstructor;
-
-ServidorTeam servidorTeam;
 
 #endif //TEAM_SERVIDORTEAM_H
