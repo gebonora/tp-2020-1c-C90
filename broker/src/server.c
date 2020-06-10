@@ -24,7 +24,7 @@ void init_server() {
         break;
     }
 
-    LOGGER = log_create("/home/utnso/tp-2020-1c-C90/broker/logs/server.log", "Broker Server", 1, LOG_LEVEL_INFO);
+    LOGGER = log_create("/home/utnso/broker-refactor/tp-2020-1c-C90/broker/logs/server.log", "Broker Server", 1, LOG_LEVEL_INFO);
 
 	listen(socket_servidor, SOMAXCONN);
 
@@ -39,19 +39,20 @@ void esperar_cliente(int socket_servidor)
 
 	int tam_direccion = sizeof(struct sockaddr_in);
 	log_info(LOGGER, "Esperando clientes");
-	int socket_cliente = accept(socket_servidor, (void*) &dir_cliente, &tam_direccion);
+	int socket_cliente = accept(socket_servidor, (void*) &dir_cliente, &tam_direccion); // chequear el -1 en el accept.
 
 	log_info(LOGGER, "Se conectó el cliente: %d", socket_cliente);
 
 	pthread_t thread;
 
-	pthread_create(&thread,NULL,(void*)serve_client, socket_cliente);
-	pthread_detach(thread);
+	serve_client(socket_cliente); //para pruebas, scar
+	//pthread_create(&thread,NULL,(void*)serve_client, socket_cliente);
+	//pthread_detach(thread);
 }
 
 void serve_client(int socket_e) {
 	int cod_op;
-	recv(socket_e, &cod_op, sizeof(int), MSG_WAITALL);
+	recv(socket_e, &cod_op, sizeof(int), MSG_WAITALL); //agregar un if para chequear a mano el error.
 	process_request(cod_op, socket_e);
 }
 
@@ -62,6 +63,12 @@ void process_request(int cod_op, int socket) {
 	switch (cod_op) {
 	case NEW: ;
 		New* new_pokemon = recv_new(socket);
+		if(new_pokemon ==NULL){
+			log_info(LOGGER, "Error al recibir new");
+			break;
+		}
+
+
 		log_info(LOGGER, "Me llego un new");
 		log_info(LOGGER, "Nombre pokemon: %s", new_pokemon->pokemon->name->value);
 		log_info(LOGGER, "Cantidad: %d", new_pokemon->quantity);

@@ -13,20 +13,28 @@ void* serialize_caught(Caught* caught_pokemon, int bytes) {
 	return serialized;
 }
 
-void send_caught(Caught* caught_pokemon, int socket) {
+int send_caught(Caught* caught_pokemon, int socket) { //changed int y nosignal.
 	int bytes = sizeof(uint32_t) * 2;
+	int resultado = 0;
 	void* serialized = serialize_caught(caught_pokemon, bytes);
 
-	send(socket, serialized, bytes, 0);
+	if (send(socket, serialized, bytes, MSG_NOSIGNAL) < 0) {
+		resultado = -1;
+	}
 
 	free(serialized);
 	free(caught_pokemon);
+	return resultado;
 }
 
-Caught* recv_caught(int socket) {
+Caught* recv_caught(int socket) { //changed
 	Caught* caught_pokemon = malloc(sizeof(Caught));
 
 	caught_pokemon->result = recv_uint32(socket);
+	if (caught_pokemon->result < 0) {
+		free(caught_pokemon);
+		return NULL;
+	}
 
 	return caught_pokemon;
 }
