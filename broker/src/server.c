@@ -24,7 +24,7 @@ void init_server() {
         break;
     }
 
-    LOGGER = log_create("/home/utnso/broker-refactor/tp-2020-1c-C90/broker/logs/server.log", "Broker Server", 1, LOG_LEVEL_INFO);
+    LOGGER = log_create("/home/utnso/tp-2020-1c-C90/broker/logs/server.log", "Broker Server", 1, LOG_LEVEL_INFO);
 
 	listen(socket_servidor, SOMAXCONN);
 
@@ -39,20 +39,19 @@ void esperar_cliente(int socket_servidor)
 
 	int tam_direccion = sizeof(struct sockaddr_in);
 	log_info(LOGGER, "Esperando clientes");
-	int socket_cliente = accept(socket_servidor, (void*) &dir_cliente, &tam_direccion); // chequear el -1 en el accept.
+	int socket_cliente = accept(socket_servidor, (void*) &dir_cliente, &tam_direccion);
 
 	log_info(LOGGER, "Se conectó el cliente: %d", socket_cliente);
 
 	pthread_t thread;
 
-	serve_client(socket_cliente); //para pruebas, scar
-	//pthread_create(&thread,NULL,(void*)serve_client, socket_cliente);
-	//pthread_detach(thread);
+	pthread_create(&thread,NULL,(void*)serve_client, socket_cliente);
+	pthread_detach(thread);
 }
 
 void serve_client(int socket_e) {
 	int cod_op;
-	recv(socket_e, &cod_op, sizeof(int), MSG_WAITALL); //agregar un if para chequear a mano el error.
+	recv(socket_e, &cod_op, sizeof(int), MSG_WAITALL);
 	process_request(cod_op, socket_e);
 }
 
@@ -63,12 +62,6 @@ void process_request(int cod_op, int socket) {
 	switch (cod_op) {
 	case NEW: ;
 		New* new_pokemon = recv_new(socket);
-		if(new_pokemon ==NULL){
-			log_info(LOGGER, "Error al recibir new");
-			break;
-		}
-
-
 		log_info(LOGGER, "Me llego un new");
 		log_info(LOGGER, "Nombre pokemon: %s", new_pokemon->pokemon->name->value);
 		log_info(LOGGER, "Cantidad: %d", new_pokemon->quantity);
@@ -195,20 +188,14 @@ void laburar() {
 	log_info(LOGGER, "Entre a laburar");
 	pthread_mutex_init(&mutex_queue, NULL);
 	sem_init(&mensajes_en_queue, 0, 0);
-
 	message_queue = queue_create();
-
 	pthread_t producer;
-
 	pthread_create(&producer,NULL,(void*)productor, NULL);
-
 	pthread_t consumer;
-
 	pthread_create(&consumer,NULL,(void*)consumidor, NULL);
 	pthread_detach(producer);
 	pthread_detach(consumer);
 }
-
 void productor() {
 	log_info(LOGGER,"Arranca el producer");
 	int valor = 0;
@@ -222,7 +209,6 @@ void productor() {
 		//sleep(1);
 	}
 }
-
 void consumidor() {
 	log_info(LOGGER,"Arranca el consumer");
 	int mensajes_consumidos = 0;
@@ -237,4 +223,3 @@ void consumidor() {
 	}
 }
 */
-
