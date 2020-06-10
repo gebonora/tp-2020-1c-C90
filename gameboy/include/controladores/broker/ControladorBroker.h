@@ -8,5 +8,6 @@
 #include "modelo/controladorGameBoy/ControladorGameBoy.h"
 
 void atenderPedidoBroker(PedidoGameBoy pedidoGameBoy, t_log * logger);
+Operation get_operation(char*);
 
 #endif //GAMEBOY_CONTROLADORBROKER_H

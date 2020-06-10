@@ -19,7 +19,7 @@ file(GLOB_RECURSE SOURCES RELATIVE ${CMAKE_SOURCE_DIR} "src/*.c")
 add_library(${PROJECT_NAME} SHARED ${SOURCES})
 
 #Importing libraries
-target_link_libraries(${PROJECT_NAME} commons)
+target_link_libraries(${PROJECT_NAME} commons pthread)
 
 # Decide where to install (Default is GNU Dir)
 if(NOT DEFINED CMAKE_LIBRARY_PATH)

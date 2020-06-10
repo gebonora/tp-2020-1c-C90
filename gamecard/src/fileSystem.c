@@ -23,10 +23,10 @@
  */
 #include "fileSystem.h"
 
-int main(){
-	puts("arranco la wea");
+int main232(){
+	puts("arranco el main");
 	cargarConfigConexiones();
-	iniciarLogger();
+	//iniciarLoggers();
 	crearDirectoriosBase("Metadata");
 	crearDirectoriosBase("Files");
 	crearArchivosBase("Metadata/Metadata.bin");
@@ -39,19 +39,25 @@ int main(){
 void crearDirectoriosBase(char* subPath){
 	char* path = string_new();
 	string_append_with_format(&path, "%s/%s", PUNTO_MONTAJE_TALLGRASS, subPath);
-	DIR* directorio = opendir(path);
-	if (directorio == NULL){
-		puts(path);
+	if(!fileExists(path)){
 		mkdir(path,0777);
 	}
+	free(path);
 }
 
 void crearArchivosBase(char* subPath){
 	char* path = string_new();
 	string_append_with_format(&path, "%s/%s", PUNTO_MONTAJE_TALLGRASS, subPath);
-	if(fopen(path,"r")==NULL){
-		fopen(path,"w");
+	if(!fileExists(path)){
+		FILE* fp = fopen(path,"w");
+		fclose(fp);
 	}
+	free(path);
+}
+
+int fileExists(char* path) { //check existence of files and directories
+  struct stat   buffer;
+  return (stat (path, &buffer) == 0);
 }
 
 

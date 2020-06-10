@@ -25,6 +25,13 @@ Coordinate* recv_coordinate(int socket_e) {
 	return coordinate;
 }
 
+Coordinate* create_coordinate(uint32_t posx, uint32_t posy) {
+	Coordinate* coor = malloc(sizeof(Coordinate));
+	coor->pos_x = posx;
+	coor->pos_y = posy;
+	return coor;
+}
+
 t_list* recv_coordinates(int socket_e, bool multiple_coordinates) {
 	t_list* coordinates = list_create();
 	if(multiple_coordinates) {
@@ -44,4 +51,61 @@ t_list* recv_coordinates(int socket_e, bool multiple_coordinates) {
 void free_name(Name* name) {
 	free(name->value);
 	free(name);
+}
+
+Name* create_name(char* name) {
+	Name* pokemon_name = malloc(sizeof(Name));
+	char* pokemon_name_value = malloc(strlen(name) + 1);
+	pokemon_name_value = strcpy(pokemon_name_value, name);
+
+	pokemon_name->value = pokemon_name_value;
+	pokemon_name->size = strlen(name) + 1;
+
+	return pokemon_name;
+
+}
+
+int create_connection(char *ip, char* puerto) {
+	struct addrinfo hints;
+	struct addrinfo *server_info;
+
+	memset(&hints, 0, sizeof(hints));
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_flags = AI_PASSIVE;
+
+	getaddrinfo(ip, puerto, &hints, &server_info);
+
+	int socket_cliente = socket(server_info->ai_family, server_info->ai_socktype, server_info->ai_protocol);
+
+	if(connect(socket_cliente, server_info->ai_addr, server_info->ai_addrlen) == -1)
+		printf("error");
+
+	freeaddrinfo(server_info);
+
+	return socket_cliente;
+}
+
+char* get_operation_by_value(int value){
+	switch(value){
+	case 1: ;
+		return "NEW";
+		break;
+	case 2: ;
+		return "LOCALIZED";
+		break;
+	case 3: ;
+		return "GET";
+		break;
+	case 4: ;
+		return "APPEARED";
+		break;
+	case 5: ;
+		return "CATCH";
+		break;
+	case 6: ;
+		return "CAUGHT";
+		break;
+	default: return "SUBSCRIBE";
+	}
 }

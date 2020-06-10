@@ -13,7 +13,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include "app/Global.h"
-#include "servicios/servicioDeConfiguracion/ServicioDeConfiguracion.h"
+#include "app/Servicios.h"
 
 #include <commons/log.h>
 #include <commons/config.h>

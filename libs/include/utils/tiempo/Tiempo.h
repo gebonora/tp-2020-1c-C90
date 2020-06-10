@@ -2,8 +2,8 @@
 // Created by Alan Zhao on 29/04/2020.
 //
 
-#ifndef SUPPORT_TIEMPO_H
-#define SUPPORT_TIEMPO_H
+#ifndef DELIBIRD_TIEMPO_H
+#define DELIBIRD_TIEMPO_H
 
 #include <time.h>
 #include <sys/time.h>
@@ -18,4 +18,4 @@ double milisegundosHastaAhora(struct timeval tiempoInicio);
 
 double milisegundos(struct timeval tiempo);
 
-#endif //SUPPORT_TIEMPO_H
+#endif //DELIBIRD_TIEMPO_H
