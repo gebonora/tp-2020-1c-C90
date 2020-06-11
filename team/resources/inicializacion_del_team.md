@@ -58,22 +58,22 @@ donde puedan llevar a cabo sus acciones.
 
 Decidimos separar la logica de planificacion de las responsabilidades del entrenador utilizando un wrapper.  
 
-Existe la clase _Entrenador**Planificable**_, cuyo objetivo es manejar un hilo al que "pausaremos" con semaforos.
+Existe la clase _HiloEntrenadorPlanificable**_, cuyo objetivo es manejar un hilo al que "pausaremos" con semaforos.
 Dentro de la misma se podrá llamar a los metodos del entrenador al que envuelve.
 
-Por cada entrenador existira un _EntrenadorPlanificable_.  
-Cuando el planificador decida mandar al entrenador a **NEW**, estara interactuando con un _EntrenadorPlanificable_, 
+Por cada entrenador existira un _HiloEntrenadorPlanificable_.  
+Cuando el planificador decida mandar al entrenador a **NEW**, estara interactuando con un _HiloEntrenadorPlanificable_, 
 enviando por detrás un **signal** al semaforo correspondiente.  
 
 Dentro del entrenador habrá un ciclo while habilitado por el semáforo. Adentro del mismo se chequeará si hay
 "cosas para hacer" (ver mas detalles en la documentación de la arquitectura entrenador) y mientras no haya un **wait**
 se ejecutarán.
 
-Es el _EntrenadorPlanificable_ quien se mueve entre los estados de planificacion.
+Es el _HiloEntrenadorPlanificable_ quien se mueve entre los estados de planificacion.
 
 ## Entrenadores a NEW
 
-Una vez creados los _EntrenadorPlanificable_, se los insertará en NEW con la ayuda del _ServicioDePlanificacion_,
+Una vez creados los _HiloEntrenadorPlanificable_, se los insertará en NEW con la ayuda del _ServicioDePlanificacion_,
 una clase que sabe como interactuar con el _Planificador_ en base a las implicancias de los eventos del sistema.
 
 
