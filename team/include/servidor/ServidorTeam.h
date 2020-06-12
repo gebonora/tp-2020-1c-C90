@@ -15,6 +15,8 @@
 #include "app/Global.h"
 #include "app/Servicios.h"
 
+
+
 #include <commons/log.h>
 #include <commons/config.h>
 
@@ -22,6 +24,8 @@ typedef struct {
 	void* mensaje;
 	uint32_t idMensaje;
 } ArgumentosHilo;
+
+void atenderConexiones();
 
 void atenderAppeared();
 void esperarBrokerAppeared(int socketDeEscucha);
@@ -43,6 +47,5 @@ char* traducirResult(Result result);
 
 
 void atenderGameboy();
-
 
 #endif //TEAM_SERVIDORTEAM_H

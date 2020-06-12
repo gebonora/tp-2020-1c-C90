@@ -30,7 +30,7 @@ void atenderConexiones() {
 
 
 void atenderAppeared() {
-	int socketDeEscucha = subscribirseACola(APPEARED, loggerAppeared, &mtx_loggerAppeared);
+	int socketDeEscucha = subscribirseACola(APPEARED,INTERNAL_LOGGER, &MTX_INTERNAL_LOG);
 	esperarBrokerAppeared(socketDeEscucha);
 }
 
@@ -58,7 +58,7 @@ void procesarHiloAppeared(Pokemon* unPokemon) {
 }
 
 void atenderCaught() {
-	int socketDeEscucha = subscribirseACola(CAUGHT, loggerCaught, &mtx_loggerCaught);
+	int socketDeEscucha = subscribirseACola(CAUGHT, INTERNAL_LOGGER, &MTX_INTERNAL_LOG);
 	esperarBrokerCaught(socketDeEscucha);
 }
 
@@ -87,7 +87,7 @@ void procesarHiloCaught(ArgumentosHilo* argumentosHilo) {
 	//procesar
 	Caught* unCaught = (Caught*) (argumentosHilo->mensaje);
 	uint32_t idMensaje = argumentosHilo->idMensaje;
-	logearCaughtRecibido(unCaught, idMensaje);
+	//logearCaughtRecibido(unCaught, idMensaje);
 
 
 	//			clienteAtiendeCaught(unCaught,idMensaje);
@@ -100,7 +100,7 @@ void procesarHiloCaught(ArgumentosHilo* argumentosHilo) {
 }
 
 void atenderLocalized() {
-	int socketDeEscucha = subscribirseACola(LOCALIZED, loggerLocalized, &mtx_loggerLocalized);
+	int socketDeEscucha = subscribirseACola(LOCALIZED, INTERNAL_LOGGER, &MTX_INTERNAL_LOG);
 	esperarBrokerLocalized(socketDeEscucha);
 }
 
@@ -122,11 +122,11 @@ void esperarBrokerLocalized(int socketDeEscucha) {
 
 }
 
-void procesarHiloLocalized(Localized* unLocalized) {
+void procesarHiloLocalized(ArgumentosHilo* argumentosHilo) {
 	//procesar
 	Localized* unLocalized = (Localized*) (argumentosHilo->mensaje);
 	uint32_t idMensaje = argumentosHilo->idMensaje;
-	logearLocalizedRecibido(unLocalized, idMensaje);
+	//logearLocalizedRecibido(unLocalized, idMensaje);
 
 	//			clienteAtiendeLocalized(unLocalized,idMensaje);
 	//crear socket descartable al broker
@@ -144,24 +144,30 @@ void procesarHiloLocalized(Localized* unLocalized) {
 
 void atenderGameboy() {
 	int socketServidor = crearSocketServidor(IP_TEAM_GAMEBOY, PUERTO_TEAM_GAMEBOY);
-	log_info(loggerGameboy, "Esperando Gameboys en el socket: '%d'", socketServidor);
+
+	pthread_mutex_lock(&MTX_INTERNAL_LOG);
+	log_info(INTERNAL_LOGGER, "Esperando Gameboys en el socket: '%d'", socketServidor);
+	pthread_mutex_unlock(&MTX_INTERNAL_LOG);
+
 	while (1) {
 
 		pthread_t thread;
-		uint32_t idMensaje;
-		ArgumentosHilo* argumentosHilo = malloc(sizeof(ArgumentosHilo));
 
 		struct sockaddr_in dir_cliente;
 		socklen_t tam_direccion = sizeof(struct sockaddr_in);
 
 		int socketCliente = accept(socketServidor, (void*) &dir_cliente, &tam_direccion);
 
-		log_info(loggerGameboy, "Se conectó un Gameboy en el socket: '%d'", socketCliente);
+		pthread_mutex_lock(&MTX_INTERNAL_LOG);
+		log_info(INTERNAL_LOGGER, "Se conectó un Gameboy en el socket: '%d'", socketCliente);
+		pthread_mutex_unlock(&MTX_INTERNAL_LOG);
 
 		int codOp;
 		recv(socketCliente, &codOp, sizeof(int), MSG_WAITALL);
 
-		log_info(loggerGameboy, "Se recibió un: '%s',Procesando....", traducirOperacion(codOp));
+		pthread_mutex_lock(&MTX_INTERNAL_LOG);
+		log_info(INTERNAL_LOGGER, "Se recibió un: '%s' a traves de un gameboy,Procesando....", traducirOperacion(codOp));
+		pthread_mutex_unlock(&MTX_INTERNAL_LOG);
 
 		if(codOp == APPEARED) {
 			Pokemon* unPokemon = recv_unPokemon(socketCliente,0);
@@ -170,9 +176,10 @@ void atenderGameboy() {
 			pthread_create(&thread, NULL, (void*) procesarHiloAppeared, unPokemon);
 			pthread_detach(thread);
 		}else{
-			log_error(loggerGameboy,"El gameboy envio un mensaje erroneo");
+			log_info(INTERNAL_LOGGER,"El gameboy envio un mensaje erroneo");
 			pthread_detach(thread);
 		}
+	}
 }
 
 int iniciarSocketDeEscucha(Operation cola, t_log* logger, pthread_mutex_t* mutex) {
@@ -214,9 +221,9 @@ int subscribirseACola(Operation cola, t_log* logger, pthread_mutex_t* mutex) {
 	int socketDeEscucha = iniciarSocketDeEscucha(cola, logger, mutex);
 	while (socketDeEscucha == -1) {
 		pthread_mutex_lock(mutex);
-		log_info(logger, "Error al conectar con Broker. Reintentando en '%d' segundos...", TIEMPO_DE_REINTENTO_CONEXION);
+		log_info(logger, "Error al conectar con Broker. Reintentando en '%d' segundos...", TIEMPO_RECONEXION);
 		pthread_mutex_unlock(mutex);
-		sleep(TIEMPO_DE_REINTENTO_CONEXION);
+		sleep(TIEMPO_RECONEXION);
 		socketDeEscucha = iniciarSocketDeEscucha(cola, logger, mutex);
 	}
 	pthread_mutex_lock(mutex);
@@ -246,8 +253,4 @@ char* traducirResult(Result result) {
 		return "RESULTADO DESCONOCIDO. ALGO ANDA MAL!";
 	}
 }
-
-/////////////////////////////////////////////////////////////////////////////////////////////
-// falta revisar logger, loguearXrecibido  para adaptarlo a team
-// REVISAR RESULT
 
