@@ -13,6 +13,12 @@ para que envíe a un _Entrenador_ a capturarlo.
 Filtra los mensajes por id de correlatividad y por repetido
 en el caso de que me lleguen 2 localized de la misma especie pokemonon.
 
+Si llega otro LOCALIZED SQUIRTLE, no le tengo que dar bola mientras resuelva
+
+Si bien me pueden llegar mas ubicaciones en el localized, la planificación toma la primera.
+
+El resto de los pokemones se guardan en el mapa por si falla la captura.
+
 #### Aclaracion:
 > - Si vienen N ejemplares pero necesito M < N, mando M entrenadores, ¡¡¡NO mas!!!  
 > - Si fallo la captura, puedo probar con los otros ejemplares en el mapa.
@@ -45,10 +51,18 @@ para completar el objetivo global.
 El _ServicioDePlanificacion_ determina que hay que procesar un **LOCALIZED**, asi que lo primero que tenemos que hacer
 es ver que entrenador/es estan mas cerca del pokemon a capturar (puede haber empate) y mandarlos a **READY**.
 
+#### Aclaración
+> La transicion de **NEW**/**BLOCKED** a **READY** se hace por cercania (solo 1). En caso de empate, el primero.
+> Por regla general, voy a querer planificar al entrenador mas cercano libre, eso quiere decir que si tengo uno en 
+> BLOCKED a la espera de pokemones, y otro en en NEW (poco problable que ocurra), 
+> tengo que mandar a **READY** al mas cercano.
+
+
 Nos valemos de la ayuda del _Mapa_ para calcular distancias.
 
-Ya con la lista de entrenadores cercanos, le decimos al _Planificador_ que los mueva a **READY** y que seleccione
-uno para mandarlo a **EXEC**.
+Con la lista de entrenadores en READY (pueden entrar entrenadores por otras razones, como necesitar ir a la posicion 
+de otro entrenador para intercambiar pokemones), le decimos al _Planificador_ 
+que seleccione a uno para mandarlo a **EXEC**.
 
 Esta clase notifica del su nuevo estado al _HiloEntrenadorPlanificable_,
 por lo que este va a poder levantar su semaforo, dando lugar al ciclo de ejecucion del entrenador.
@@ -61,21 +75,59 @@ No interactua con los objetos Entrenador directamente, sino que lo hace mediante
 ya que es necesario que el entrenador corra en un hilo y además sea activable con el signal que le proporcionara
 el pase a **EXEC**.
 
+TODO: Definir la arquitectura para que la llegada de eventos corra separado de la seleccion de los varios entrenadores.
+Osea, en mi cola de trabajo puedo dejar un localized, que si lo proceso me va a dejar 1 entrenador en READY.
+A su vez un entrenador puede querer ir a intercambiar, ambos deben competir por llegar a EXEC.
+
+> Idea 1
+> * Tal vez mientras tengo en exec a un entrenador, me lleno mientras de cosas para hacer, las puedo procesar en bache, y
+> finalmente volver a **armar mi conjunto ready**.  
+
+> Idea 2
+> * Sigo teniendo una cola de tareas a planificar, la idea es que no haga solo un pop, sino que me lleve todos los que 
+> haya en ese momento para asi generar todos los candidatos a **READY**, de esta forma pueden competir uno que 
+> vaya a cazar y otro que quiera ir a resolver un deadlock. 
+> * Como solo uno va a ganar, necesito que los que perdieron sigan ahi.
+> * La clave de esta idea es que haya un "while (algo en ready)" corre planificacion.
+> * En consecuencia, necesito que mi _HiloEntrenadorPlanificable_ pueda guardar la causa por la que fue planificado, asi
+> lo puedo seleecionar en otra vuelta, tambien de paso para que sepa que hacer cuando le confirmen la ejecución.
+
 ### Algoritmo de planificacion
 
 Con la ayuda del algoritmo de planificación configurado, vamos a seleccionar a uno de los entrenadores en **READY**
 y mandarlo a **EXEC**.
+
+Detallaremos lo que ocurre en el caso de que sea un entrenador que va a capturar a un pokemon.
 
 ### Ciclos de CPU
 
 El entrenador debe moverse hacia la posicion del pokemon. Esto conlleva gastar un **ciclo de CPU** (duran 1 segundo)
 por cada pasito hasta llegar a destino.
 
+Dependiendo el algoritmo, es probable que necesitemos avisarle al _HiloEntrenadorPlanificable_ de cuanto GAS tiene.
+
 ## Entrenador
 
 Esta clase tiene conocimiento de como efectuar las acciones propias de un entrenador.  
 
 TODO: Averiguar si me pueden cortar la ejecucion mientras estoy haciendo algo (RR?).
+> Posiblemente tenga que modelar el hilo de tal forma que sabiendo cuantos ciclos se le permite correr
+> pueda realizar esas acciones atomicamente. Lo importante es que termine consistente como 
+> para que se pueda retomar en una proxima planificación.
+
+> Idea 1
+> * Solo el movimiento y el envio de mensaje al Broker ratonean ciclos de CPU.
+> * Ambas son acciones atomicas.
+> * Sabiendo eso puedo garantizar que el entrenador va a quedar en un estado consistente si al menos
+> le doy 1 ciclo de CPU.
+> * Para concretar esta idea necesito separar las acciones que consumen CPU del resto.
+> * Voy a manejar la idea de una "tarea parcialmente completada", asi puedo retomar desde donde la dejé.
+> * Al tener guardada como atributo su tarea, puede dejar a un costado anotado donde quedó, para retomar de ahí.
+> * La tarea pueden ser modelada como una lista de cosas para hacer.
+> * Usaria funciones aplicables parcialmente #jojoó_pdp_feelings.
+> * La cantidad de ciclos de cpu determina cuanto avanzo el puntero de instrucciones y ademas si lo guardo
+> puedo trackear cuanto me falta.
+> * Un entrenador con tarea asignada no puede calificar para otras cosas, a.k.a no esta libre.
 
 ### Cliente Broker
 
