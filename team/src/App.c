@@ -7,9 +7,9 @@ int main() {
 
     // Config
     log_debug(INTERNAL_LOGGER, "Levantando configuracion...");
-    /*
+
     servicioDeConfiguracion = ServicioDeConfiguracionConstructor.new(TEAM_CONFIG_FILE, TEAM_INTERNAL_LOG_FILE);
-    */
+
     pthread_mutex_init(&MTX_INTERNAL_LOG, NULL);
 
     // Logger obligatorio

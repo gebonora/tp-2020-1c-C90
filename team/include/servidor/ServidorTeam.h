@@ -2,7 +2,6 @@
 // Created by Alan Zhao on 07/05/2020.
 //
 
-// TODO: agregar aca los parametros del config necesarios y luego armar funcion que los tome del .config y los cargue.
 
 
 

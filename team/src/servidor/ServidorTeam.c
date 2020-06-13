@@ -26,8 +26,6 @@ void eliminarConfigServer(){
 
 
 void atenderConexiones() {
-    // TODO: convertir el request con delibird/libs.
-    //  A futuro se va a utilizar un controlador para routear el pedido, como ocurre en GameBoy.
 
 	pthread_t threadAppeared, threadCaught, threadLocalized, threadGameboy;
 
@@ -65,13 +63,14 @@ void esperarBrokerAppeared(int socketDeEscucha) {
 void procesarHiloAppeared(Pokemon* unPokemon) {
 	//procesar
 
-	//clienteAtiendeAppeared(unPokemon);
-
 	//enviar respuesta al cliente
 
+
+
 	//int socketDescartable = crearSocketCliente(IP_BROKER, PUERTO_BROKER); -> debo pasarlo al cliente
-	//esperar confirmacion?
-	//liberar memoriar y cerrar socket
+
+	//liberar memoriar
+	free_pokemon(unPokemon);
 	//termina el hilo
 }
 
@@ -108,13 +107,13 @@ void procesarHiloCaught(ArgumentosHilo* argumentosHilo) {
 	//logearCaughtRecibido(unCaught, idMensaje);
 
 
-	//clienteAtiendeCaught(unCaught,idMensaje);
+	//enviar al cliente
 	//int socketDescartable = crearSocketHaciaBroker(); -> debe ponerse en el cliente
-	//... enviar al cliente
+
 	//liberar memoriar y cerrar socket
-	//termina el hilo
 	free(unCaught);
 	free(argumentosHilo);
+	//termina el hilo
 }
 
 void atenderLocalized() {
@@ -146,15 +145,14 @@ void procesarHiloLocalized(ArgumentosHilo* argumentosHilo) {
 	uint32_t idMensaje = argumentosHilo->idMensaje;
 	//logearLocalizedRecibido(unLocalized, idMensaje);
 
-	//clienteAtiendeLocalized(unLocalized,idMensaje);
-	//crear socket descartable al broker
+	//enviar al cliente
+
 	//int socketDescartable = crearSocketHaciaBroker(); -> mover al cliente
-	//enviar respuesta al broker
-	//esperar confirmacion del broker?
-	//liberar memoriar y cerrar socket
-	//termina el hilo
+
+	//liberar memoriar
 	free_localized(unLocalized);
 	free(argumentosHilo);
+	//termina el hilo
 }
 
 
