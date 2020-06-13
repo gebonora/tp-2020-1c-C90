@@ -2,6 +2,10 @@
 // Created by Alan Zhao on 07/05/2020.
 //
 
+// TODO: agregar aca los parametros del config necesarios y luego armar funcion que los tome del .config y los cargue.
+
+
+
 #ifndef TEAM_SERVIDORTEAM_H
 #define TEAM_SERVIDORTEAM_H
 
@@ -12,8 +16,10 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <pthread.h>
 #include "app/Global.h"
 #include "app/Servicios.h"
+#include "utils/sockets/Sockets.h"
 
 
 
@@ -24,6 +30,16 @@ typedef struct {
 	void* mensaje;
 	uint32_t idMensaje;
 } ArgumentosHilo;
+
+t_config* configServer;
+char* IP_Broker;
+char* IP_Team_Gameboy;
+char* Puerto_Broker;
+char* Puerto_Team_Gameboy;
+int Tiempo_Reconexion;
+
+void configurarServer();
+void eliminarConfigServer();
 
 void atenderConexiones();
 

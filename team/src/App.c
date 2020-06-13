@@ -7,7 +7,9 @@ int main() {
 
     // Config
     log_debug(INTERNAL_LOGGER, "Levantando configuracion...");
+    /*
     servicioDeConfiguracion = ServicioDeConfiguracionConstructor.new(TEAM_CONFIG_FILE, TEAM_INTERNAL_LOG_FILE);
+    */
     pthread_mutex_init(&MTX_INTERNAL_LOG, NULL);
 
     // Logger obligatorio
@@ -16,19 +18,22 @@ int main() {
     MANDATORY_LOGGER = log_create(mandatoryLogPath, "LogObligatorio", 1, LOG_LEVEL_INFO);
 
     // Server
-    //atenderConexiones();
+    configurarServer();
+    atenderConexiones();
 
     // Liberacion
+
     log_debug(INTERNAL_LOGGER, "Finalizando proceso Team...");
     //terminar();
     log_debug(INTERNAL_LOGGER, "Liberando logger obligatorio");
     log_destroy(MANDATORY_LOGGER);
     log_debug(INTERNAL_LOGGER, "Liberando servicios");
+    eliminarConfigServer();
     servicioDeConfiguracion.destruir(&servicioDeConfiguracion);
     log_debug(INTERNAL_LOGGER, "Saliendo...");
     log_info(INTERNAL_LOGGER, "============================ Fin de ejecución ============================");
-
     log_destroy(INTERNAL_LOGGER);
+    pthread_mutex_destroy(&MTX_INTERNAL_LOG);
     return 0;
 }
 

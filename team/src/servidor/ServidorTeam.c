@@ -5,6 +5,24 @@
 
 #include "servidor/ServidorTeam.h"
 
+void configurarServer(){
+
+	configServer = config_create(TEAM_CONFIG_FILE);
+
+	IP_Broker = config_get_string_value(configServer, "IP_BROKER");
+	Puerto_Broker = config_get_string_value(configServer, "PUERTO_BROKER");
+
+	IP_Team_Gameboy = config_get_string_value(configServer,"IP_TEAM_GAMEBOY");
+	Puerto_Team_Gameboy = config_get_string_value(configServer,"PUERTO_TEAM_GAMEBOY");
+
+	Tiempo_Reconexion = config_get_int_value(configServer,"TIEMPO_RECONEXION");
+
+}
+
+void eliminarConfigServer(){
+	config_destroy(configServer);
+}
+
 
 
 void atenderConexiones() {
@@ -47,7 +65,7 @@ void esperarBrokerAppeared(int socketDeEscucha) {
 void procesarHiloAppeared(Pokemon* unPokemon) {
 	//procesar
 
-	//			clienteAtiendeAppeared(unPokemon);
+	//clienteAtiendeAppeared(unPokemon);
 
 	//enviar respuesta al cliente
 
@@ -69,7 +87,7 @@ void esperarBrokerCaught(int socketDeEscucha) {
 	while (1) {
 
 		uint32_t idMensaje;
-		Caught* unCaught = recv_Caught(socketDeEscucha);
+		Caught* unCaught = recv_caught(socketDeEscucha);
 		recv(socketDeEscucha, &idMensaje, sizeof(uint32_t), 0);
 
 		ArgumentosHilo* argumentosHilo = malloc(sizeof(ArgumentosHilo));
@@ -90,12 +108,12 @@ void procesarHiloCaught(ArgumentosHilo* argumentosHilo) {
 	//logearCaughtRecibido(unCaught, idMensaje);
 
 
-	//			clienteAtiendeCaught(unCaught,idMensaje);
+	//clienteAtiendeCaught(unCaught,idMensaje);
 	//int socketDescartable = crearSocketHaciaBroker(); -> debe ponerse en el cliente
 	//... enviar al cliente
 	//liberar memoriar y cerrar socket
 	//termina el hilo
-	free_Caught(unCaught);
+	free(unCaught);
 	free(argumentosHilo);
 }
 
@@ -108,7 +126,7 @@ void esperarBrokerLocalized(int socketDeEscucha) {
 
 	while (1) {
 		uint32_t idMensaje;
-		Localized* unLocalized = recv_Localized(socketDeEscucha);
+		Localized* unLocalized = recv_localized(socketDeEscucha);
 		recv(socketDeEscucha, &idMensaje, sizeof(uint32_t), 0);
 
 		ArgumentosHilo* argumentosHilo = malloc(sizeof(ArgumentosHilo));
@@ -128,14 +146,14 @@ void procesarHiloLocalized(ArgumentosHilo* argumentosHilo) {
 	uint32_t idMensaje = argumentosHilo->idMensaje;
 	//logearLocalizedRecibido(unLocalized, idMensaje);
 
-	//			clienteAtiendeLocalized(unLocalized,idMensaje);
+	//clienteAtiendeLocalized(unLocalized,idMensaje);
 	//crear socket descartable al broker
 	//int socketDescartable = crearSocketHaciaBroker(); -> mover al cliente
 	//enviar respuesta al broker
 	//esperar confirmacion del broker?
 	//liberar memoriar y cerrar socket
 	//termina el hilo
-	free_Localized(unLocalized);
+	free_localized(unLocalized);
 	free(argumentosHilo);
 }
 
@@ -143,7 +161,7 @@ void procesarHiloLocalized(ArgumentosHilo* argumentosHilo) {
 
 
 void atenderGameboy() {
-	int socketServidor = crearSocketServidor(IP_TEAM_GAMEBOY, PUERTO_TEAM_GAMEBOY);
+	int socketServidor = crearSocketServidor(IP_Team_Gameboy, Puerto_Team_Gameboy);
 
 	pthread_mutex_lock(&MTX_INTERNAL_LOG);
 	log_info(INTERNAL_LOGGER, "Esperando Gameboys en el socket: '%d'", socketServidor);
@@ -170,7 +188,7 @@ void atenderGameboy() {
 		pthread_mutex_unlock(&MTX_INTERNAL_LOG);
 
 		if(codOp == APPEARED) {
-			Pokemon* unPokemon = recv_unPokemon(socketCliente,0);
+			Pokemon* unPokemon = recv_pokemon(socketCliente,0);
 			close(socketCliente);
 
 			pthread_create(&thread, NULL, (void*) procesarHiloAppeared, unPokemon);
@@ -183,7 +201,7 @@ void atenderGameboy() {
 }
 
 int iniciarSocketDeEscucha(Operation cola, t_log* logger, pthread_mutex_t* mutex) {
-	int socketDeEscucha = crearSocketCliente(IP_BROKER, PUERTO_BROKER);
+	int socketDeEscucha = crearSocketCliente(IP_Broker, Puerto_Broker);
 	if (socketDeEscucha == -1) {
 		return -1;
 	}
@@ -223,7 +241,7 @@ int subscribirseACola(Operation cola, t_log* logger, pthread_mutex_t* mutex) {
 		pthread_mutex_lock(mutex);
 		log_info(logger, "Error al conectar con Broker. Reintentando en '%d' segundos...", TIEMPO_RECONEXION);
 		pthread_mutex_unlock(mutex);
-		sleep(TIEMPO_RECONEXION);
+		sleep(Tiempo_Reconexion);
 		socketDeEscucha = iniciarSocketDeEscucha(cola, logger, mutex);
 	}
 	pthread_mutex_lock(mutex);
