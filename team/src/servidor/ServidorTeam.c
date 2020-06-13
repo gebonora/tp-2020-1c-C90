@@ -17,6 +17,8 @@ void configurarServer(){
 
 	Tiempo_Reconexion = config_get_int_value(configServer,"TIEMPO_RECONEXION");
 
+	printf("%d",Tiempo_Reconexion);
+
 }
 
 void eliminarConfigServer(){
@@ -237,7 +239,7 @@ int subscribirseACola(Operation cola, t_log* logger, pthread_mutex_t* mutex) {
 	int socketDeEscucha = iniciarSocketDeEscucha(cola, logger, mutex);
 	while (socketDeEscucha == -1) {
 		pthread_mutex_lock(mutex);
-		log_info(logger, "Error al conectar con Broker. Reintentando en '%d' segundos...", TIEMPO_RECONEXION);
+		log_info(logger, "Error al conectar con Broker. Reintentando en '%d' segundos...", Tiempo_Reconexion);
 		pthread_mutex_unlock(mutex);
 		sleep(Tiempo_Reconexion);
 		socketDeEscucha = iniciarSocketDeEscucha(cola, logger, mutex);
