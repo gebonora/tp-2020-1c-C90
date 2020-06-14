@@ -38,6 +38,7 @@ pthread_mutex_t MUTEX_LOCALIZED_QUEUE;
 pthread_mutex_t MUTEX_CATCH_QUEUE;
 pthread_mutex_t MUTEX_CAUGHT_QUEUE;
 pthread_mutex_t MUTEX_MESSAGE_ID;
+pthread_mutex_t MUTEX_MEMORY;
 sem_t NEW_MESSAGES;
 sem_t APPEARED_MESSAGES;
 sem_t GET_MESSAGES;
@@ -49,6 +50,24 @@ t_dictionary* SUBSCRIBERS_BY_QUEUE;
 pthread_mutex_t MUTEX_SUBSCRIBERS_BY_QUEUE;
 sem_t SUBSCRIBERS;
 
+
+typedef struct {
+	void* memory;
+	t_list* partitions;
+} Memory;
+
+typedef struct {
+	uint32_t number;
+	uint32_t partition_size;
+	uint32_t* start;
+	uint32_t data_size;
+	uint32_t isFree;
+	uint32_t buddy;
+} Partition;
+
+Memory* memory;
+
+void init_memory();
 void init_config();
 void init_queues();
 void init_semaphores();
