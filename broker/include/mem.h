@@ -1,9 +1,9 @@
-/*
-#ifndef BROKER_INCLUDE_MEMORY_H_
-#define BROKER_INCLUDE_MEMORY_H_
+#ifndef BROKER_INCLUDE_MEM_H_
+#define BROKER_INCLUDE_MEM_H_
 
 #include "constants.h"
 #include <string.h>
+#include <stdbool.h>
 
 void add();
 void choose_victim();
@@ -23,4 +23,4 @@ void fifo();
 void best_fit();
 void first_fit();
 
-#endif /* BROKER_INCLUDE_MEMORY_H_ */
+#endif /* BROKER_INCLUDE_MEM_H_ */

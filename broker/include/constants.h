@@ -63,6 +63,7 @@ typedef struct {
 	uint32_t data_size;
 	uint32_t isFree;
 	uint32_t buddy;
+	double access_time;
 } Partition;
 
 Memory* memory;
