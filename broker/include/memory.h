@@ -1,3 +1,4 @@
+/*
 #ifndef BROKER_INCLUDE_MEMORY_H_
 #define BROKER_INCLUDE_MEMORY_H_
 

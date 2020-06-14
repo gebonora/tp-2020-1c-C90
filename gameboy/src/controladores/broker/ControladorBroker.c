@@ -9,6 +9,8 @@
 #include <stdlib.h>
 #include <netdb.h>
 
+bool is_alive = true;
+
 void atenderPedidoBroker(PedidoGameBoy pedidoGameBoy, t_log * logger) {
     log_info(logger, "Se atendio el pedido en el controlador de BROKER");
     char* ip = servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, IP_BROKER);
@@ -84,6 +86,7 @@ void atenderPedidoBroker(PedidoGameBoy pedidoGameBoy, t_log * logger) {
 
     break;
     case SUBSCRIBE: ;
+    	log_info(logger, "ENTRE A SUBSCRIBE");
     	Operation destination_queue = get_operation(list_get(pedidoGameBoy.argumentos, 0));
     	uint32_t operation = SUBSCRIBE;
     	uint32_t process_gameboy = GAMEBOY;
@@ -91,14 +94,35 @@ void atenderPedidoBroker(PedidoGameBoy pedidoGameBoy, t_log * logger) {
     	send(socket_broker, &operation, sizeof(uint32_t), 0);
     	send(socket_broker, &process_gameboy, sizeof(uint32_t), 0);
     	send(socket_broker, &destination_queue, sizeof(uint32_t), 0);
-    	send(socket_broker, &suscription_time, sizeof(uint32_t), 0);
 
-    	Result result;
-    	recv(socket_broker, &result, sizeof(Result), MSG_WAITALL);
+    	socket_with_logger* swl = malloc(sizeof(socket_with_logger));
+    	swl->logger = logger;
+    	swl->socket = socket_broker;
 
-    	log_info(logger, "Resultado: %d", result);
-    break;
+    	pthread_t listener_thread;
+    	// este listen_messages tiene qu recibir el tipo de cola asi puedo leer el mensaje
+    	// que me llega correctamente en un switch
+    	pthread_create(&listener_thread,NULL,(void*)listen_messages, swl);
+    	pthread_detach(listener_thread);
+
+    	log_info(logger, "Starting timer of: %d", suscription_time);
+    	sleep(suscription_time);
+    	is_alive = false;
+    	log_info(logger, "End of timer...shutting down connection");
+    	break;
     }
+    close(socket_broker);
+}
+
+void listen_messages(socket_with_logger* swl) {
+	// crear un switch para atender el tipo de mensaje puntual
+	while(is_alive) {
+		Result result;
+		if(recv(swl->socket, &result, sizeof(Result), MSG_WAITALL) < 0) {
+			break;
+		}
+		log_info(swl->logger, "New message: %d", result);
+	}
 }
 
 Operation get_operation(char* operation_name) {
