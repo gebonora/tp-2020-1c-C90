@@ -104,6 +104,7 @@ compactar_buddy_si_puedo(){
 
 }
 
+// siempre que mato una particion, tengo que consolidar, siempre
 choose_victims() {
 	// usar strcmp?
 	if(strcmp(ALGORITMO_REEMPLAZO, "FIFO")) {
