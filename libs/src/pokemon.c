@@ -1,16 +1,27 @@
 #include "../include/interface.h"
 
-Pokemon* recv_pokemon(int socket_e, bool multiple_coordinates) {
+Pokemon* recv_pokemon(int socket_e, bool multiple_coordinates) { //changed
 	Pokemon* pokemon = malloc(sizeof(Pokemon));
 	pokemon->name = recv_name(socket_e);
 
+	if (pokemon->name == NULL) {
+		return pokemon;
+		return NULL;
+	}
+
 	pokemon->coordinates = recv_coordinates(socket_e, multiple_coordinates);
+
+	if (pokemon->coordinates == NULL) {
+		free(pokemon->name);
+		free(pokemon);
+		return NULL;
+	}
 	return pokemon;
 }
 
 void free_pokemon(Pokemon* pokemon) {
 	free_name(pokemon->name);
-	list_destroy(pokemon->coordinates);
+	list_destroy_and_destroy_elements(pokemon->coordinates,&free_coordinate);
 	free(pokemon);
 }
 
@@ -41,13 +52,17 @@ void* serialize_pokemon(Pokemon* pokemon, Operation operation, int bytes) {
 	return serialized;
 }
 
-void send_pokemon(Pokemon* pokemon, Operation operation, int socket_e) {
+int send_pokemon(Pokemon* pokemon, Operation operation, int socket_e) { //changed. esta si necesita ser int, usar flag MSG_NOSIGNAL!!!!!
 	int bytes = calculate_pokemon_bytes(pokemon);
+	int resultado = 0;
 	void* serialized = serialize_pokemon(pokemon, operation, bytes);
-	send(socket_e, serialized, bytes, 0);
+	if (send(socket_e, serialized, bytes, MSG_NOSIGNAL) < 0) {
+		resultado = -1;
+	}
 
 	free(serialized);
 	free_pokemon(pokemon);
+	return resultado;
 }
 
 Pokemon* create_pokemon(char* name, uint32_t posx, uint32_t posy) {

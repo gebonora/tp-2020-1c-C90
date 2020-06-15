@@ -188,20 +188,14 @@ void laburar() {
 	log_info(LOGGER, "Entre a laburar");
 	pthread_mutex_init(&mutex_queue, NULL);
 	sem_init(&mensajes_en_queue, 0, 0);
-
 	message_queue = queue_create();
-
 	pthread_t producer;
-
 	pthread_create(&producer,NULL,(void*)productor, NULL);
-
 	pthread_t consumer;
-
 	pthread_create(&consumer,NULL,(void*)consumidor, NULL);
 	pthread_detach(producer);
 	pthread_detach(consumer);
 }
-
 void productor() {
 	log_info(LOGGER,"Arranca el producer");
 	int valor = 0;
@@ -215,7 +209,6 @@ void productor() {
 		//sleep(1);
 	}
 }
-
 void consumidor() {
 	log_info(LOGGER,"Arranca el consumer");
 	int mensajes_consumidos = 0;
@@ -230,4 +223,3 @@ void consumidor() {
 	}
 }
 */
-

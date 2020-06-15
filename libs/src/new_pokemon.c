@@ -36,20 +36,37 @@ int calculate_new_bytes(New* new_pokemon) {
 	return sizeof(int) + calculate_pokemon_bytes(new_pokemon->pokemon);
 }
 
-void send_new(New* new_pokemon, int socket_e) {
+int send_new(New* new_pokemon, int socket_e) { //changed. int y nosignal
 	int bytes = calculate_new_bytes(new_pokemon);
+	int resultado = 0;
 	void* serialized = serialize_new(new_pokemon, bytes);
 
-	send(socket_e, serialized, bytes, 0);
+	if (send(socket_e, serialized, bytes, MSG_NOSIGNAL) < 0) {
+		resultado = -1;
+	}
 
 	free(serialized);
 	free_new(new_pokemon);
+	return resultado;
 }
 
-New* recv_new(int socket_e) {
+New* recv_new(int socket_e) { //changed
 	New* new_pokemon = malloc(sizeof(New));
 	new_pokemon->pokemon = recv_pokemon(socket_e, false);
+
+	if (new_pokemon->pokemon == NULL) {
+		free(new_pokemon);
+		return NULL;
+	}
+
 	new_pokemon->quantity = recv_uint32(socket_e);
+
+	if (new_pokemon->quantity < 0) {
+		free(new_pokemon->pokemon);
+		free(new_pokemon);
+		return NULL;
+	}
+
 	return new_pokemon;
 }
 
