@@ -90,7 +90,7 @@ Localized* procesarLocalized(Get* unGet) {
 
 	//bloque para pruebas, aunque parte se usara en la funcion del fs
 	Pokemon* unPokemon = malloc(sizeof(unPokemon));
-	unPokemon->name = nombreLocalized; //ver memoria, pasar copiar quizas para que no choque con el Get*
+	unPokemon->name->value = nombreLocalized; //ver memoria, pasar copiar quizas para que no choque con el Get*
 	unPokemon->coordinates= list_create();
 	list_add(unPokemon->coordinates,create_coordinate(2, 3));
 	list_add(unPokemon->coordinates,create_coordinate(6, 7));
@@ -98,7 +98,7 @@ Localized* procesarLocalized(Get* unGet) {
 	//no hay funcion en libs para crear localized, lo creo a mano.
 	Localized* localized = malloc(sizeof(localized));
 	localized->pokemon = unPokemon;
-	localized->pokemon = unPokemon->coordinates->elements_count;
+	localized->coordinates_quantity = unPokemon->coordinates->elements_count;
 
 	return localized;
 }

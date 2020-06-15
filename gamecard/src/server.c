@@ -54,31 +54,40 @@ void esperarBrokerNew(int socketDeEscucha) {
 	 */
 
 	while (1) {
+
 		uint32_t idMensaje;
 		New* unNew = recv_new(socketDeEscucha); //cheqyear socket caidp y reconectar
+		int flagError = 0;
 		if (unNew == NULL) {
 			//reconectar.
-			return;
+			flagError = 1;
+
 		}
 		if (recv(socketDeEscucha, &idMensaje, sizeof(uint32_t), 0) <= 0) {
-			free_new(unNew);
 			//reconectar
-			return;
+			flagError = 1;
+
 		}
 		Result ack = ACKNOWLEDGE;
 		if (send(socketDeEscucha, &ack, sizeof(int), MSG_NOSIGNAL) < 0) {
-			free_new(unNew);
 			//reconectar
-			return;
+			flagError = 1;
 		}
 
-		ArgumentosHilo* argumentosHilo = malloc(sizeof(ArgumentosHilo));
-		argumentosHilo->mensaje = unNew;
-		argumentosHilo->idMensaje = idMensaje;
+		if (flagError) {
+			log_info(loggerMain, "Se perdió la conexión con el Broker. Iniciando reconexión.");
+			close(socketDeEscucha);
+			socketDeEscucha = subscribirseACola(NEW, loggerNew, &m_loggerNew);
+		} else {
 
-		pthread_t thread;
-		pthread_create(&thread, NULL, (void*) procesarHiloNew, argumentosHilo);
-		pthread_detach(thread);
+			ArgumentosHilo* argumentosHilo = malloc(sizeof(ArgumentosHilo));
+			argumentosHilo->mensaje = unNew;
+			argumentosHilo->idMensaje = idMensaje;
+
+			pthread_t thread;
+			pthread_create(&thread, NULL, (void*) procesarHiloNew, argumentosHilo);
+			pthread_detach(thread);
+		}
 	}
 }
 
@@ -103,7 +112,7 @@ void procesarHiloNew(ArgumentosHilo* argumentosHilo) {
 	if (send_pokemon(pokemonAppeared, APPEARED, socketDescartable) < 0) {
 		flagBrokerCaido = 1;
 	}
-	if (send(socketDescartable, &idMensaje, sizeof(uint32_t), MSG_NOSIGNAL)) {
+	if (send(socketDescartable, &idMensaje, sizeof(uint32_t), MSG_NOSIGNAL) < 0) {
 		flagBrokerCaido = 1;
 	}
 
@@ -116,13 +125,11 @@ void procesarHiloNew(ArgumentosHilo* argumentosHilo) {
 
 	//liberar memoriar y cerrar socket
 	free_new(unNew);
-	free_pokemon(pokemonAppeared);
 	free(argumentosHilo);
 	close(socketDescartable);
 	pthread_mutex_lock(&m_loggerNew);
 	log_info(loggerNew, "Se terminó con éxito un hilo"); //medio al pedo logear esto en la version final
 	pthread_mutex_unlock(&m_loggerNew);
-	return;
 	//termina el hilo
 }
 
@@ -138,30 +145,37 @@ void esperarBrokerCatch(int socketDeEscucha) {
 	 * Crea un hilo para atenderlo
 	 */
 	while (1) {
-
-		Pokemon* unCatch = recv_pokemon(socketDeEscucha, false);
-		if (unCatch == NULL) {
-
-		}
 		uint32_t idMensaje;
-		if (recv(socketDeEscucha, &idMensaje, sizeof(uint32_t), 0) <= 0) {
+		Pokemon* unCatch = recv_pokemon(socketDeEscucha, false);
+		int flagError = 0;
 
+		if (unCatch == NULL) {
+			flagError = 1;
+		}
+
+		if (recv(socketDeEscucha, &idMensaje, sizeof(uint32_t), 0) <= 0) {
+			flagError = 1;
 		}
 		Result ack = ACKNOWLEDGE;
 
 		if (send(socketDeEscucha, &ack, sizeof(int), MSG_NOSIGNAL) < 0) {
-			free(unCatch);
-			//reconectar
-			return;
+			flagError = 1;
 		}
 
-		ArgumentosHilo* argumentosHilo = malloc(sizeof(ArgumentosHilo));
-		argumentosHilo->mensaje = unCatch;
-		argumentosHilo->idMensaje = idMensaje;
+		if (flagError) {
+			log_info(loggerMain, "Se perdió la conexión con el Broker. Iniciando reconexión.");
+			close(socketDeEscucha);
+			socketDeEscucha = subscribirseACola(CATCH, loggerCatch, &m_loggerCatch);
+		} else {
 
-		pthread_t thread;
-		pthread_create(&thread, NULL, (void*) procesarHiloCatch, argumentosHilo);
-		pthread_detach(thread);
+			ArgumentosHilo* argumentosHilo = malloc(sizeof(ArgumentosHilo));
+			argumentosHilo->mensaje = unCatch;
+			argumentosHilo->idMensaje = idMensaje;
+
+			pthread_t thread;
+			pthread_create(&thread, NULL, (void*) procesarHiloCatch, argumentosHilo);
+			pthread_detach(thread);
+		}
 	}
 }
 
@@ -197,13 +211,12 @@ void procesarHiloCatch(ArgumentosHilo* argumentosHilo) {
 
 	//liberar memoriar y cerrar socket
 	free_pokemon(unPokemon);
-	free(pokemonCaught);
 	free(argumentosHilo);
 	close(socketDescartable);
 	pthread_mutex_lock(&m_loggerCatch);
 	log_info(loggerCatch, "Se terminó con éxito un hilo");
 	pthread_mutex_unlock(&m_loggerCatch);
-
+	return;
 	//termina el hilo
 }
 
@@ -220,26 +233,36 @@ void esperarBrokerGet(int socketDeEscucha) {
 	 */
 
 	while (1) {
-		Get* unGet = recv_get(socketDeEscucha);
-		if (unGet == NULL) {
-			//reconectar
-		}
 		uint32_t idMensaje;
+		Get* unGet = recv_get(socketDeEscucha);
+		int flagError = 0;
+
+		if (unGet == NULL) {
+			flagError = 1;
+		}
+
 		if (recv(socketDeEscucha, &idMensaje, sizeof(uint32_t), 0) <= 0) {
-			//reconectar
+			flagError = 1;
 		}
 		Result ack = ACKNOWLEDGE;
 		if (send(socketDeEscucha, &ack, sizeof(int), MSG_NOSIGNAL) < 0) {
-			//reconectar
+			flagError = 1;
 		}
 
-		ArgumentosHilo* argumentosHilo = malloc(sizeof(ArgumentosHilo));
-		argumentosHilo->mensaje = unGet;
-		argumentosHilo->idMensaje = idMensaje;
+		if (flagError) {
+			log_info(loggerMain, "Se perdió la conexión con el Broker. Iniciando reconexión.");
+			close(socketDeEscucha);
+			socketDeEscucha = subscribirseACola(GET, loggerGet, &m_loggerGet);
+		} else {
 
-		pthread_t thread;
-		pthread_create(&thread, NULL, (void*) procesarHiloGet, argumentosHilo);
-		pthread_detach(thread);
+			ArgumentosHilo* argumentosHilo = malloc(sizeof(ArgumentosHilo));
+			argumentosHilo->mensaje = unGet;
+			argumentosHilo->idMensaje = idMensaje;
+
+			pthread_t thread;
+			pthread_create(&thread, NULL, (void*) procesarHiloGet, argumentosHilo);
+			pthread_detach(thread);
+		}
 	}
 }
 
@@ -274,13 +297,12 @@ void procesarHiloGet(ArgumentosHilo* argumentosHilo) {
 
 	//liberar memoriar y cerrar socket
 	free_get(unGet);
-	free_localized(pokemonLocalized);
 	free(argumentosHilo);
 	close(socketDescartable);
 	pthread_mutex_lock(&m_loggerGet);
 	log_info(loggerGet, "Se terminó con éxito un hilo");
 	pthread_mutex_unlock(&m_loggerGet);
-
+	return;
 	//termina el hilo
 }
 
