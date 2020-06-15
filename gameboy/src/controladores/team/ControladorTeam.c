@@ -6,7 +6,7 @@
 
 void atenderPedidoTeam(PedidoGameBoy pedidoGameBoy, t_log * logger) {
 	log_info(logger, "Se atendio el pedido en el controlador de TEAM");
-	//TODO: Implementar atencion
+
 	char* ip = servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion,
 	IP_TEAM);
 	char* puerto = servicioDeConfiguracion.obtenerString(
@@ -15,9 +15,14 @@ void atenderPedidoTeam(PedidoGameBoy pedidoGameBoy, t_log * logger) {
 
 	switch (pedidoGameBoy.tipoMensaje) {
 	case APPEARED_POKEMON:
-		//implementar
+		;
+		//[POKEMON] [POSX] [POSY]
+		Pokemon* appeared_pokemon = create_pokemon(
+				list_get(pedidoGameBoy.argumentos, 0),
+				atoi(list_get(pedidoGameBoy.argumentos, 1)),
+				atoi(list_get(pedidoGameBoy.argumentos, 2)));
+		send_pokemon(appeared_pokemon, APPEARED, socketCliente);
 		break;
-
 	}
 }
 
