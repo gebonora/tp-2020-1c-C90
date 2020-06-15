@@ -12,6 +12,8 @@
 #include <readline/readline.h>
 #include <pthread.h>
 #include <semaphore.h>
+#include <stdbool.h>
+#include <delibird/protocol.h>
 #include "broker.h"
 
 char* IP;
@@ -52,18 +54,32 @@ sem_t SUBSCRIBERS;
 
 
 typedef struct {
-	void* memory;
+	void* cache;
 	t_list* partitions;
 } Memory;
 
 typedef struct {
-	uint32_t number;
-	uint32_t partition_size;
-	uint32_t* start;
+	Operation operation_code;
+	uint32_t message_id;
+	uint32_t correlational_id;
 	uint32_t data_size;
-	uint32_t isFree;
-	uint32_t buddy;
-	double access_time;
+} Message;
+
+typedef struct {
+	Process* process;
+	uint32_t id;
+	int socket;
+} Suscriber;
+
+typedef struct {
+	uint32_t* start; // puntero de la memoria cache
+	uint32_t number; // numero de particion
+	uint32_t partition_size; // tamanio de particion
+	bool free; // si esta libre o no
+	uint32_t buddy; // numero de particion de su buddy
+	double access_time; // timestamp del ultimo acceso a esta particion
+	Message* message; // datos administrativos del mensaje (id, id correlacional, cod op)
+	t_list* notified_suscribers; // suscriptores que ya devolvieron ACK para este mensaje
 } Partition;
 
 Memory* memory;

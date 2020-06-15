@@ -6,6 +6,7 @@ int main(){
 	init_semaphores();
 	init_context();
 	init_threads();
+	//init_memory();
 	init_server();
 	return 0;
 }

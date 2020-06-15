@@ -1,10 +1,10 @@
+/*
 #include "mem.h"
 
-void add(){
+void add (void* dato_que_termina_en_cache, Message message)
 	if(strcmp(ALGORITMO_MEMORIA, "BS")) add_buddy_system();
 	else add_dynamic_partitions();
 }
-
 
 void add_dynamic_partitions() {
 	Partition* particion = find_partition(tamanioQueQuieroGuardar);
@@ -41,15 +41,15 @@ guardar_dato(dato, particion) {
 
 }
 
-/* 1) filtramos las particiones libres que satisfacen el tamañoAGuardar
- * 2) buscamos la particion en base al algoritmo FF / BF
- * 3) si encontre una, la rompo si hace falta en 2 particiones (1 del tamanioQueVoyAGuardar)
- *  y la otra de lo que le quedo libre
- *  Ej: guardo 30, tengo libre una de 80 (nro 7)
- *  me queda -> particion a usar (nro 7) tamanio 30 + particion (nro8) tamanio 50
- *  // TODO: ver lo del tamanioMinioDeParticion
- * 4) devolvemos la particion encontrada o un NULL si no encontre ninguna
-*/
+// 1) filtramos las particiones libres que satisfacen el tamañoAGuardar
+// 2) buscamos la particion en base al algoritmo FF / BF
+// 3) si encontre una, la rompo si hace falta en 2 particiones (1 del tamanioQueVoyAGuardar)
+//  y la otra de lo que le quedo libre
+//  Ej: guardo 30, tengo libre una de 80 (nro 7)
+//  me queda -> particion a usar (nro 7) tamanio 30 + particion (nro8) tamanio 50
+//  // TODO: ver lo del tamanioMinioDeParticion
+// 4) devolvemos la particion encontrada o un NULL si no encontre ninguna
+
 // first . filter(free && tamanio>=tamanioABuscar)
 Partition* find_partition(tamanioABuscar) {
 
@@ -76,13 +76,12 @@ bool menorTamanio(Partition* partition_1, Partition* partition_2) {
 	return partition_1->partition_size < partition_2->partition_size;
 }
 
-/* 1) calculo la potencia de 2 mas cercana (hacia arriba) al valor de tamanioDeMiDato
- * 2) busco una particion libre de tamanio = pot2
-   	   2.a) si la encuentro guardo el dato
-   	   2.b.i) si no la encuentro, busco la particion libre mas cercana a la pot2 calculada
-   	   2.b.ii) genero n buddys particionando hasta que me queda el tamanio del buddy = pot2 calculadass
-   3) si no encontre ninguna particion, elijo una victima y vuelvo a lanzar la busqueda
-*/
+// 1) calculo la potencia de 2 mas cercana (hacia arriba) al valor de tamanioDeMiDato
+//  2) busco una particion libre de tamanio = pot2
+//   	   2.a) si la encuentro guardo el dato
+//   	   2.b.i) si no la encuentro, busco la particion libre mas cercana a la pot2 calculada
+//   	   2.b.ii) genero n buddys particionando hasta que me queda el tamanio del buddy = pot2 calculadass
+//   3) si no encontre ninguna particion, elijo una victima y vuelvo a lanzar la busqueda
 void add_buddy_system(dato) {
 
 	int pot2 = calcular_potencia_2(tamanioAGuardar); // me tiene que dar el max entre pot2 mas cercana a mi tamanio y TAMANIO_MINIO_PARTICION
@@ -146,3 +145,4 @@ void fifo(){
 void lru() {
 
 }
+*/

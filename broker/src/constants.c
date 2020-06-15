@@ -86,6 +86,6 @@ void init_threads() {
 }
 
 void init_memory() {
-	memory->memory = malloc(TAMANO_MEMORIA);
+	memory->cache = malloc(TAMANO_MEMORIA);
 	memory->partitions = list_create();
 }
