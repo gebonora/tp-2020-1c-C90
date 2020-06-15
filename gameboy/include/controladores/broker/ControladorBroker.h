@@ -6,8 +6,15 @@
 #define GAMEBOY_CONTROLADORBROKER_H
 
 #include "modelo/controladorGameBoy/ControladorGameBoy.h"
+#include "pthread.h"
+
+typedef struct {
+	t_log* logger;
+	int socket;
+} socket_with_logger;
 
 void atenderPedidoBroker(PedidoGameBoy pedidoGameBoy, t_log * logger);
 Operation get_operation(char*);
+void listen_messages(socket_with_logger* swl);
 
 #endif //GAMEBOY_CONTROLADORBROKER_H

@@ -31,6 +31,8 @@ void init_semaphores() {
 	pthread_mutex_init(&MUTEX_CATCH_QUEUE, NULL);
 	pthread_mutex_init(&MUTEX_CAUGHT_QUEUE, NULL);
 	pthread_mutex_init(&MUTEX_SUBSCRIBERS_BY_QUEUE, NULL);
+	pthread_mutex_init(&MUTEX_MEMORY, NULL);
+
 	sem_init(&NEW_MESSAGES, 0, 0);
 	sem_init(&APPEARED_MESSAGES, 0, 0);
 	sem_init(&GET_MESSAGES, 0, 0);
@@ -81,4 +83,9 @@ void init_threads() {
 
 	pthread_create(&thread_caught, NULL,(void*)consumer_caught_queue, NULL);
 	pthread_detach(thread_caught);
+}
+
+void init_memory() {
+	memory->cache = malloc(TAMANO_MEMORIA);
+	memory->partitions = list_create();
 }
