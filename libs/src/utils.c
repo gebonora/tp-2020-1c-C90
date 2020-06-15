@@ -4,7 +4,7 @@ Name* recv_name(int socket_e) { //changed cuando falla una funcion que recibe, h
 	Name* name = malloc(sizeof(Name));
 	uint32_t name_size;
 
-	if (recv(socket_e, &name_size, sizeof(uint32_t), 0)) {
+	if (recv(socket_e, &name_size, sizeof(uint32_t), 0) <= 0) {
 		free(name);
 		return NULL;
 	}
