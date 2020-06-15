@@ -14,7 +14,6 @@
 #include <netdb.h>
 #include "protocol.h"
 
-uint32_t recv_uint32(int);
 Name* recv_name(int);
 Coordinate* recv_coordinate(int);
 void free_name(Name*);

@@ -59,13 +59,15 @@ New* recv_new(int socket_e) { //changed
 		return NULL;
 	}
 
-	new_pokemon->quantity = recv_uint32(socket_e);
+	uint32_t quantity;
 
-	if (new_pokemon->quantity < 0) {
+	if (recv(socket_e, &quantity, sizeof(uint32_t), 0) <= 0) {
 		free(new_pokemon->pokemon);
 		free(new_pokemon);
 		return NULL;
 	}
+
+	new_pokemon->quantity = quantity;
 
 	return new_pokemon;
 }

@@ -1,18 +1,10 @@
 #include "../include/interface.h"
 
-uint32_t recv_uint32(int socket_e) { //changed
-	uint32_t recibido;
-	if (recv(socket_e, &recibido, sizeof(uint32_t), 0) <= 0) {
-		return -1;
-	}
-	return recibido;
-}
-
 Name* recv_name(int socket_e) { //changed cuando falla una funcion que recibe, hace free -> se devuelve puntero a NULL.
 	Name* name = malloc(sizeof(Name));
-	uint32_t name_size = recv_uint32(socket_e);
+	uint32_t name_size;
 
-	if (name_size < 0) {
+	if (recv(socket_e, &name_size, sizeof(uint32_t), 0)) {
 		free(name);
 		return NULL;
 	}
@@ -32,16 +24,15 @@ Name* recv_name(int socket_e) { //changed cuando falla una funcion que recibe, h
 
 Coordinate* recv_coordinate(int socket_e) { //changed
 	Coordinate* coordinate = malloc(sizeof(Coordinate));
-	uint32_t pos_x = recv_uint32(socket_e);
+	uint32_t pos_x;
 
-	if (pos_x < 0) {
+	if (recv(socket_e, &pos_x, sizeof(uint32_t), 0) <= 0) {
 		free(coordinate);
 		return NULL;
 	}
 
-	uint32_t pos_y = recv_uint32(socket_e);
-
-	if (pos_y < 0) {
+	uint32_t pos_y;
+	if (recv(socket_e, &pos_y, sizeof(uint32_t), 0) <= 0) {
 		free(coordinate);
 		return NULL;
 	}
@@ -61,9 +52,9 @@ Coordinate* create_coordinate(uint32_t posx, uint32_t posy) {
 t_list* recv_coordinates(int socket_e, bool multiple_coordinates) { //changed
 	t_list* coordinates = list_create();
 	if (multiple_coordinates) {
-		uint32_t number_of_coordinates = recv_uint32(socket_e);
+		uint32_t number_of_coordinates;
 
-		if (number_of_coordinates < 0) {
+		if (recv(socket_e, &number_of_coordinates, sizeof(uint32_t), 0) <= 0) {
 			free(coordinates);
 			return NULL;
 		}
@@ -73,7 +64,7 @@ t_list* recv_coordinates(int socket_e, bool multiple_coordinates) { //changed
 
 			if (coor == NULL) {
 				//free elemenots dde la lista: sirve esto? NOTA: usar siempre destroy_and_elemnts??
-				list_destroy_and_destroy_elements(coordinates,&free_coordinate );
+				list_destroy_and_destroy_elements(coordinates, &free_coordinate);
 				return NULL;
 			}
 
@@ -94,7 +85,7 @@ t_list* recv_coordinates(int socket_e, bool multiple_coordinates) { //changed
 }
 
 void free_coordinate(void* coor) {
-	free((Coordinate*)coor);
+	free((Coordinate*) coor);
 }
 
 void free_name(Name* name) {

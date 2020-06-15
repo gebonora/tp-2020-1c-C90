@@ -30,17 +30,18 @@ int send_caught(Caught* caught_pokemon, int socket) { //changed int y nosignal.
 Caught* recv_caught(int socket) { //changed
 	Caught* caught_pokemon = malloc(sizeof(Caught));
 
-	caught_pokemon->result = recv_uint32(socket);
-	if (caught_pokemon->result < 0) {
+	uint32_t result;
+	if (recv(socket, &result, sizeof(uint32_t), 0) <= 0) {
 		free(caught_pokemon);
 		return NULL;
 	}
+	caught_pokemon->result = result;
 
 	return caught_pokemon;
 }
 
 Caught* create_caught_pokemon(uint32_t result) {
-	Caught* caught_pokemon =malloc(sizeof(Caught));
+	Caught* caught_pokemon = malloc(sizeof(Caught));
 
 	caught_pokemon->result = result;
 

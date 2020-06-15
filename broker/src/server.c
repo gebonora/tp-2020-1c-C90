@@ -76,7 +76,8 @@ void process_request(int cod_op, int socket) {
 		break;
 	case CAUGHT: ;
 		Caught* caught_pokemon = recv_caught(socket);
-		id_correlational = recv_uint32(socket);
+		//id_correlational = recv_uint32(socket);
+		recv(socket,&id_correlational,sizeof(uint32_t),0); //cambio por un recv solo.
 		log_info(LOGGER, "Me llego un caught");
 		log_info(LOGGER, "Resultado: %d", caught_pokemon->result);
 		log_info(LOGGER, "Id correlational: %d", id_correlational);
@@ -122,7 +123,8 @@ void process_request(int cod_op, int socket) {
 		break;
 	case APPEARED: ;
 		Pokemon* appeared_pokemon = recv_pokemon(socket, false);
-		id_correlational = recv_uint32(socket);
+		//id_correlational = recv_uint32(socket);
+		recv(socket,&id_correlational,sizeof(uint32_t),0); //cambio por un recv solo.
 		log_info(LOGGER, "Me llego un appeared");
 		log_info(LOGGER, "Nombre del pokemon: %s", appeared_pokemon->name->value);
 		log_info(LOGGER, "Id correlational: %d", id_correlational);
