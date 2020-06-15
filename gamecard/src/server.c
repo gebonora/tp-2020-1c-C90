@@ -27,7 +27,7 @@
 #include "server.h"
 
 void atenderConexiones() {
-	pthread_t threadNew, threadCatch, threadGet, threadGameboy;
+	pthread_t threadNew, threadCatch, threadGet;
 
 	pthread_create(&threadNew, NULL, (void*) atenderNew, NULL);
 	pthread_detach(threadNew);
@@ -38,11 +38,7 @@ void atenderConexiones() {
 	pthread_create(&threadGet, NULL, (void*) atenderGet, NULL);
 	pthread_detach(threadGet);
 
-	pthread_create(&threadGameboy, NULL, (void*) atenderGameboy, NULL);
-	pthread_detach(threadGameboy);
-	while (1)
-		;
-
+	atenderGameboy();
 }
 
 void atenderNew() {
@@ -60,7 +56,21 @@ void esperarBrokerNew(int socketDeEscucha) {
 	while (1) {
 		uint32_t idMensaje;
 		New* unNew = recv_new(socketDeEscucha); //cheqyear socket caidp y reconectar
-		recv(socketDeEscucha, &idMensaje, sizeof(uint32_t), 0); //chequear socket caido y reconectar
+		if (unNew == NULL) {
+			//reconectar.
+			return;
+		}
+		if (recv(socketDeEscucha, &idMensaje, sizeof(uint32_t), 0) <= 0) {
+			free_new(unNew);
+			//reconectar
+			return;
+		}
+		Result ack = ACKNOWLEDGE;
+		if (send(socketDeEscucha, &ack, sizeof(int), MSG_NOSIGNAL) < 0) {
+			free_new(unNew);
+			//reconectar
+			return;
+		}
 
 		ArgumentosHilo* argumentosHilo = malloc(sizeof(ArgumentosHilo));
 		argumentosHilo->mensaje = unNew;
@@ -76,25 +86,43 @@ void procesarHiloNew(ArgumentosHilo* argumentosHilo) {
 	//procesar
 	New* unNew = (New*) (argumentosHilo->mensaje);
 	uint32_t idMensaje = argumentosHilo->idMensaje;
+	int flagBrokerCaido = 0;
+
 	logearNewRecibido(unNew, idMensaje);
 
 	//filesystem acá
 	Pokemon* pokemonAppeared = procesarNew(unNew); //FS
 
 	//crear socket descartable al broker
-	//int socketDescartable = crearSocketCliente(IP_BROKER, PUERTO_BROKER);
+	int socketDescartable = crearSocketCliente(IP_BROKER, PUERTO_BROKER);
+	if (socketDescartable == -1) {
+		flagBrokerCaido = 1;
+	}
 
 	//enviar respuesta al broker
+	if (send_pokemon(pokemonAppeared, APPEARED, socketDescartable) < 0) {
+		flagBrokerCaido = 1;
+	}
+	if (send(socketDescartable, &idMensaje, sizeof(uint32_t), MSG_NOSIGNAL)) {
+		flagBrokerCaido = 1;
+	}
 
-	//esperar confirmacion del broker?
+	//si no pudo mandar el mensaje, logeo y sigo.
+	if (flagBrokerCaido) {
+		pthread_mutex_lock(&m_loggerNew);
+		log_info(loggerNew, "No se pudo enviar el APPEARED como respuesta al mensaje: '%d' hacia el Broker. Continuando ejecución... ", idMensaje);
+		pthread_mutex_unlock(&m_loggerNew);
+	}
 
 	//liberar memoriar y cerrar socket
 	free_new(unNew);
+	free_pokemon(pokemonAppeared);
 	free(argumentosHilo);
-	//close(socketDescartable);
+	close(socketDescartable);
 	pthread_mutex_lock(&m_loggerNew);
 	log_info(loggerNew, "Se terminó con éxito un hilo"); //medio al pedo logear esto en la version final
 	pthread_mutex_unlock(&m_loggerNew);
+	return;
 	//termina el hilo
 }
 
@@ -111,9 +139,21 @@ void esperarBrokerCatch(int socketDeEscucha) {
 	 */
 	while (1) {
 
-		uint32_t idMensaje;
 		Pokemon* unCatch = recv_pokemon(socketDeEscucha, false);
-		recv(socketDeEscucha, &idMensaje, sizeof(uint32_t), 0);
+		if (unCatch == NULL) {
+
+		}
+		uint32_t idMensaje;
+		if (recv(socketDeEscucha, &idMensaje, sizeof(uint32_t), 0) <= 0) {
+
+		}
+		Result ack = ACKNOWLEDGE;
+
+		if (send(socketDeEscucha, &ack, sizeof(int), MSG_NOSIGNAL) < 0) {
+			free(unCatch);
+			//reconectar
+			return;
+		}
 
 		ArgumentosHilo* argumentosHilo = malloc(sizeof(ArgumentosHilo));
 		argumentosHilo->mensaje = unCatch;
@@ -129,22 +169,37 @@ void procesarHiloCatch(ArgumentosHilo* argumentosHilo) {
 	//procesar
 	Pokemon* unPokemon = (Pokemon*) (argumentosHilo->mensaje);
 	uint32_t idMensaje = argumentosHilo->idMensaje;
+	int flagBrokerCaido = 0;
+
 	logearCatchRecibido(unPokemon, idMensaje);
 
-	Caught* pokemonCatch = procesarCatch(unPokemon); //FS
-
+	//Filesystem aca:
+	Caught* pokemonCaught = procesarCatch(unPokemon);
 
 	//crear socket descartable al broker
-	//int socketDescartable = crearSocketCliente(IP_BROKER, PUERTO_BROKER);
-
+	int socketDescartable = crearSocketCliente(IP_BROKER, PUERTO_BROKER);
+	if (socketDescartable < 0) {
+		flagBrokerCaido = 1;
+	}
 	//enviar respuesta al broker
 
-	//esperar confirmacion del broker?
+	if (send_caught(pokemonCaught, socketDescartable) < 0) {
+		flagBrokerCaido = 1;
+	}
+	if (send(socketDescartable, &idMensaje, sizeof(uint32_t), MSG_NOSIGNAL) < 0) {
+		flagBrokerCaido = 1;
+	}
+	if (flagBrokerCaido) {
+		pthread_mutex_lock(&m_loggerCatch);
+		log_info(loggerCatch, "No se pudo enviar el CAUGHT como respuesta al mensaje: '%d' hacia el Broker. Continuando ejecución... ", idMensaje);
+		pthread_mutex_unlock(&m_loggerCatch);
+	}
 
 	//liberar memoriar y cerrar socket
-	free_pokemon( unPokemon);
+	free_pokemon(unPokemon);
+	free(pokemonCaught);
 	free(argumentosHilo);
-	//close(socketDescatable);
+	close(socketDescartable);
 	pthread_mutex_lock(&m_loggerCatch);
 	log_info(loggerCatch, "Se terminó con éxito un hilo");
 	pthread_mutex_unlock(&m_loggerCatch);
@@ -163,10 +218,27 @@ void esperarBrokerGet(int socketDeEscucha) {
 	 * Recibe un New
 	 * Crea un hilo para atenderlo
 	 */
+
 	while (1) {
 		Get* unGet = recv_get(socketDeEscucha);
+		if (unGet == NULL) {
+			//reconectar
+		}
+		uint32_t idMensaje;
+		if (recv(socketDeEscucha, &idMensaje, sizeof(uint32_t), 0) <= 0) {
+			//reconectar
+		}
+		Result ack = ACKNOWLEDGE;
+		if (send(socketDeEscucha, &ack, sizeof(int), MSG_NOSIGNAL) < 0) {
+			//reconectar
+		}
+
+		ArgumentosHilo* argumentosHilo = malloc(sizeof(ArgumentosHilo));
+		argumentosHilo->mensaje = unGet;
+		argumentosHilo->idMensaje = idMensaje;
+
 		pthread_t thread;
-		pthread_create(&thread, NULL, (void*) procesarHiloGet, unGet);
+		pthread_create(&thread, NULL, (void*) procesarHiloGet, argumentosHilo);
 		pthread_detach(thread);
 	}
 }
@@ -175,21 +247,36 @@ void procesarHiloGet(ArgumentosHilo* argumentosHilo) {
 	//procesar
 	Get* unGet = (Get*) (argumentosHilo->mensaje);
 	uint32_t idMensaje = argumentosHilo->idMensaje;
+	int flagBrokerCaido = 0;
+
 	logearGetRecibido(unGet, idMensaje);
 
+	//fs aca:
 	Localized* pokemonLocalized = procesarLocalized(unGet);
 
 	//crear socket descartable al broker
-	//int socketDescartable = crearSocketCliente(IP_BROKER, PUERTO_BROKER);
+	int socketDescartable = crearSocketCliente(IP_BROKER, PUERTO_BROKER);
 
 	//enviar respuesta al broker
+	if (send_localized(pokemonLocalized, socketDescartable) < 0) {
+		flagBrokerCaido = 1;
+	}
 
-	//esperar confirmacion del broker?
+	if (send(socketDescartable, &idMensaje, sizeof(uint32_t), MSG_NOSIGNAL) < 0) {
+		flagBrokerCaido = 1;
+	}
+
+	if (flagBrokerCaido) {
+		pthread_mutex_lock(&m_loggerGet);
+		log_info(loggerGet, "No se pudo enviar el LOCALIZED como respuesta al mensaje: '%d' hacia el Broker. Continuando ejecución... ", idMensaje);
+		pthread_mutex_unlock(&m_loggerGet);
+	}
 
 	//liberar memoriar y cerrar socket
 	free_get(unGet);
+	free_localized(pokemonLocalized);
 	free(argumentosHilo);
-	//close(socketDescartable);
+	close(socketDescartable);
 	pthread_mutex_lock(&m_loggerGet);
 	log_info(loggerGet, "Se terminó con éxito un hilo");
 	pthread_mutex_unlock(&m_loggerGet);
