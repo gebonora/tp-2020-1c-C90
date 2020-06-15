@@ -76,7 +76,8 @@ void process_request(int cod_op, int socket) {
 		break;
 	case CAUGHT: ;
 		Caught* caught_pokemon = recv_caught(socket);
-		id_correlational = recv_uint32(socket);
+		//id_correlational = recv_uint32(socket);
+		recv(socket,&id_correlational,sizeof(uint32_t),0); //cambio por un recv solo.
 		log_info(LOGGER, "Me llego un caught");
 		log_info(LOGGER, "Resultado: %d", caught_pokemon->result);
 		log_info(LOGGER, "Id correlational: %d", id_correlational);
@@ -122,7 +123,8 @@ void process_request(int cod_op, int socket) {
 		break;
 	case APPEARED: ;
 		Pokemon* appeared_pokemon = recv_pokemon(socket, false);
-		id_correlational = recv_uint32(socket);
+		//id_correlational = recv_uint32(socket);
+		recv(socket,&id_correlational,sizeof(uint32_t),0); //cambio por un recv solo.
 		log_info(LOGGER, "Me llego un appeared");
 		log_info(LOGGER, "Nombre del pokemon: %s", appeared_pokemon->name->value);
 		log_info(LOGGER, "Id correlational: %d", id_correlational);
@@ -158,10 +160,6 @@ void process_request(int cod_op, int socket) {
 		recv(socket, &cod_process, sizeof(int), MSG_WAITALL);
 		int cod_cola;
 		recv(socket, &cod_cola, sizeof(int), MSG_WAITALL);
-		int suscription_time;
-		if(GAMEBOY == cod_process) {
-			recv(socket, &suscription_time, sizeof(int), MSG_WAITALL);
-		}
 		char* op = get_operation_by_value(cod_cola);
 		pthread_mutex_lock(&MUTEX_SUBSCRIBERS_BY_QUEUE);
 		t_list* subscribers = dictionary_get(SUBSCRIBERS_BY_QUEUE, op);
@@ -170,10 +168,17 @@ void process_request(int cod_op, int socket) {
 
 		log_info(LOGGER, "Suscripcion del proceso: %d", cod_process);
 		log_info(LOGGER, "Suscripcion en cola: %d", cod_cola);
-		log_info(LOGGER, "Suscripcion time en segundos: %d", suscription_time);
 
-		Result result =  OK;
-		send(socket, &result, sizeof(Result), 0);
+		// esto es de prueba nomas, cuando funcionen las queues y los envios hay que borrarlo
+		while(1) {
+			Result result =  OK;
+			if(send(socket, &result, sizeof(Result), MSG_NOSIGNAL) < 0) {
+				log_info(LOGGER, "Client is down, closing connection");
+				break;
+			}
+			log_info(LOGGER, "Message sent");
+			sleep(1);
+		}
 
 		break;
 	case 0:
@@ -188,20 +193,14 @@ void laburar() {
 	log_info(LOGGER, "Entre a laburar");
 	pthread_mutex_init(&mutex_queue, NULL);
 	sem_init(&mensajes_en_queue, 0, 0);
-
 	message_queue = queue_create();
-
 	pthread_t producer;
-
 	pthread_create(&producer,NULL,(void*)productor, NULL);
-
 	pthread_t consumer;
-
 	pthread_create(&consumer,NULL,(void*)consumidor, NULL);
 	pthread_detach(producer);
 	pthread_detach(consumer);
 }
-
 void productor() {
 	log_info(LOGGER,"Arranca el producer");
 	int valor = 0;
@@ -215,7 +214,6 @@ void productor() {
 		//sleep(1);
 	}
 }
-
 void consumidor() {
 	log_info(LOGGER,"Arranca el consumer");
 	int mensajes_consumidos = 0;
@@ -230,4 +228,3 @@ void consumidor() {
 	}
 }
 */
-

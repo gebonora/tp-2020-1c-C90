@@ -13,25 +13,35 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <delibird/interface.h>
+#include "support/utils/sockets/Sockets.h"
 #include <netdb.h>
 #include <config.h>
+#include <sys/sem.h>
+
+typedef struct {
+	void* mensaje;
+	uint32_t idMensaje;
+} ArgumentosHilo;
 
 void atenderConexiones();
 void atenderNew();
 void esperarBrokerNew(int socketDeEscucha);
-void procesarHiloNew(New* unNew);
+void procesarHiloNew(ArgumentosHilo* argumentosHilo);
 
 void atenderCatch();
 void esperarBrokerCatch(int socketDeEscucha);
-void procesarHiloCatch(Pokemon* unCatch);
+void procesarHiloCatch(ArgumentosHilo* argumentosHilo);
 
 void atenderGet();
 void esperarBrokerGet(int socketDeEscucha);
-void procesarHiloGet(Get* unGet);
+void procesarHiloGet(ArgumentosHilo* argumentosHilo);
 
-int iniciarSocketDeEscucha() ;
-int crearSocketHaciaBroker();
+int iniciarSocketDeEscucha(Operation cola, t_log* logger, pthread_mutex_t* mutex);
+int subscribirseACola(Operation cola, t_log* logger, pthread_mutex_t* mutex);
 
 void atenderGameboy();
+
+char* traducirOperacion(Operation operacion);
+char* traducirResult(Result result);
 
 #endif /* GAMECARD_INCLUDE_SERVER_H_ */
