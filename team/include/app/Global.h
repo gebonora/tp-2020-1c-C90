@@ -7,6 +7,9 @@
 
 #include <commons/log.h>
 #include <commons/config.h>
+#include <commons/string.h>
+#include <stdlib.h>
+#include <commons/collections/list.h>
 #include "delibird/protocol.h"
 #include "delibird/interface.h"
 

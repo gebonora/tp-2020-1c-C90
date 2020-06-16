@@ -17,14 +17,29 @@ int main() {
     char * mandatoryLogPath = servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, LOG_FILE);
     MANDATORY_LOGGER = log_create(mandatoryLogPath, "LogObligatorio", 1, LOG_LEVEL_INFO);
 
+    // Setup de los componentes del sistema
+    log_info(INTERNAL_LOGGER, "Inicializando componentes del sistema...");
+    inicializarAlgoritmosDePlanificacion();
+
+    // Reservado a pruebas de integracion
+    log_info(INTERNAL_LOGGER, "Realizando pruebas de integracion antes de comenzar...");
+    testDeIntegracion();
+    log_info(INTERNAL_LOGGER, "Pruebas finalizadas");
+
+    // Estado inicial del proceso Team
+    log_info(INTERNAL_LOGGER, "Instanciando entrenadores y armando el equipo...");
+    Equipo equipo = crearEquipoPorConfiguracion();
+
     // Server
     configurarServer();
     atenderConexiones();
 
+    // Por cada pokemon del objetivo global, enviar un GET [POKEMON].
+
     // Liberacion
 
     log_debug(INTERNAL_LOGGER, "Finalizando proceso Team...");
-    //terminar();
+
     log_debug(INTERNAL_LOGGER, "Liberando logger obligatorio");
     log_destroy(MANDATORY_LOGGER);
     log_debug(INTERNAL_LOGGER, "Liberando servicios");
