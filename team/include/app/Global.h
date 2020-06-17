@@ -10,6 +10,7 @@
 #include <commons/string.h>
 #include <stdlib.h>
 #include <commons/collections/list.h>
+#include <commons/collections/dictionary.h>
 #include "delibird/protocol.h"
 #include "delibird/interface.h"
 

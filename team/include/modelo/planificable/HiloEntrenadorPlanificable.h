@@ -6,7 +6,7 @@
 #define TEAM_HILOENTRENADORPLANIFICABLE_H
 
 #include "app/Global.h"
-#include "modelo/entrenador/Entrenador.h"
+#include "modelo/equipo/entrenador/Entrenador.h"
 
 /**
  * La idea es que esta clase sea planificable, dando lugar a la ejecucion de las acciones propias del entrenador

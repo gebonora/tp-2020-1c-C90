@@ -5,9 +5,9 @@
 #ifndef TEAM_ENTRENADOR_H
 #define TEAM_ENTRENADOR_H
 
+
 #include "app/Global.h"
-#include <commons/collections/dictionary.h>
-#include <commons/collections/list.h>
+#include "delibird/servicios/servicioDeConfiguracion/ServicioDeConfiguracion.h"
 #include "delibird/interface.h"
 
 /**
@@ -28,12 +28,9 @@ typedef struct Entrenador {
 } Entrenador;
 
 extern const struct EntrenadorClass {
-    Entrenador *(*new)();
+    Entrenador *(*new)(char * posicionInicial);
 } EntrenadorConstructor;
 
-
-typedef t_list * Equipo; // Un equipo es una lista de entrenadores
-
-Equipo crearEquipoPorConfiguracion(); // Devuelve una lista de entrenadores en base a la config.
+Coordinate parsearPosicion(char * posicion); // Toma '1|2' y devuelve las coordenadas (1,2)
 
 #endif //TEAM_ENTRENADOR_H

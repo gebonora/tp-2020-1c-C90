@@ -11,7 +11,7 @@ void testDeIntegracion() {
 
     AlgoritmoPlanificador miAlgoritmo = obtenerAlgoritmo("FIFO");
     t_list * listaReady = list_create();
-    Entrenador * entrenador = EntrenadorConstructor.new();
+    Entrenador * entrenador = EntrenadorConstructor.new("1|2");
     HiloEntrenadorPlanificable * hiloEntrenadorPlanificable = HiloEntrenadorPlanificableConstructor.new(entrenador);
     list_add(listaReady, hiloEntrenadorPlanificable);
     miAlgoritmo.proximoAEjecutar(&miAlgoritmo, listaReady);

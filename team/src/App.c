@@ -7,10 +7,7 @@ int main() {
 
     // Config
     log_debug(INTERNAL_LOGGER, "Levantando configuracion...");
-
     servicioDeConfiguracion = ServicioDeConfiguracionConstructor.new(TEAM_CONFIG_FILE, TEAM_INTERNAL_LOG_FILE);
-
-    pthread_mutex_init(&MTX_INTERNAL_LOG, NULL);
 
     // Logger obligatorio
     log_debug(INTERNAL_LOGGER, "Configurando logger obligatorio...");
@@ -20,8 +17,9 @@ int main() {
     // Setup de los componentes del sistema
     log_info(INTERNAL_LOGGER, "Inicializando componentes del sistema...");
     inicializarAlgoritmosDePlanificacion();
+    pthread_mutex_init(&MTX_INTERNAL_LOG, NULL); //TODO: por ahi conviene moverlo a configurarServer()
 
-    // Reservado a pruebas de integracion
+    // Reservado a pruebas de integracion, eventualmente lo vamos a volar
     log_info(INTERNAL_LOGGER, "Realizando pruebas de integracion antes de comenzar...");
     testDeIntegracion();
     log_info(INTERNAL_LOGGER, "Pruebas finalizadas");
@@ -31,24 +29,27 @@ int main() {
     Equipo equipo = crearEquipoPorConfiguracion();
 
     // Server
-    configurarServer();
-    atenderConexiones();
+    log_info(INTERNAL_LOGGER, "Levantando el server...");
+    configurarServer(); //TODO: Usar como fuente de datos el servicio de config
+    //atenderConexiones();
 
     // Por cada pokemon del objetivo global, enviar un GET [POKEMON].
+    log_info(INTERNAL_LOGGER, "Solicitando la ubicacion de los pokemones objetivo para comenzar...");
+    //TODO: for loop -> cliente broker -> mover logica a objetivo global
 
     // Liberacion
-
-    log_debug(INTERNAL_LOGGER, "Finalizando proceso Team...");
-
-    log_debug(INTERNAL_LOGGER, "Liberando logger obligatorio");
-    log_destroy(MANDATORY_LOGGER);
-    log_debug(INTERNAL_LOGGER, "Liberando servicios");
+    log_info(INTERNAL_LOGGER, "Finalizando proceso Team...");
+    //TODO: Apagar el server
     eliminarConfigServer();
+    log_debug(INTERNAL_LOGGER, "Liberando logger obligatorio...");
+    log_destroy(MANDATORY_LOGGER);
+    log_debug(INTERNAL_LOGGER, "Liberando servicios...");
     servicioDeConfiguracion.destruir(&servicioDeConfiguracion);
-    log_debug(INTERNAL_LOGGER, "Saliendo...");
+    log_debug(INTERNAL_LOGGER, "Liberando componentes del sistema...");
+    pthread_mutex_destroy(&MTX_INTERNAL_LOG);
+    destruirEquipo(equipo);
     log_info(INTERNAL_LOGGER, "============================ Fin de ejecución ============================");
     log_destroy(INTERNAL_LOGGER);
-    pthread_mutex_destroy(&MTX_INTERNAL_LOG);
     return 0;
 }
 
