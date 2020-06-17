@@ -1,7 +1,16 @@
 #!/usr/bin/env bash
 
-readonly DELIBIRD_PATH=/home/utnso/tp-2020-1c-C90
-readonly DEPLOY_PATH=${DELIBIRD_PATH}/gameboy/deploy
+RELATIVE_MODE="-r"
+GAMEBOY_PATH=/home/utnso/tp-2020-1c-C90/gameboy
+
+if [ "${RELATIVE_MODE}" == "$1" ]; then
+    GAMEBOY_PATH=`pwd`
+fi
+
+DEPLOY_PATH=${GAMEBOY_PATH}/deploy
+
+echo "deploy.sh gameboy path: " ${GAMEBOY_PATH}
+echo "deploy.sh deploy path: " ${DEPLOY_PATH}
 
 GREEN='\033[0;32m'
 NC='\033[0m'

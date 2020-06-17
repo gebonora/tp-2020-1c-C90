@@ -1,9 +1,17 @@
 #!/usr/bin/env bash
 
-readonly DELIBIRD_PATH=/home/utnso/tp-2020-1c-C90
-readonly LIBS_PATH=${DELIBIRD_PATH}/libs
-readonly DEPLOY_PATH=${LIBS_PATH}/deploy
-readonly MANIFEST=install_manifest.txt
+RELATIVE_MODE="-r"
+LIBS_PATH=/home/utnso/tp-2020-1c-C90/libs
+
+if [ "${RELATIVE_MODE}" == "$1" ]; then
+    LIBS_PATH=`pwd`
+fi
+
+DEPLOY_PATH=${LIBS_PATH}/deploy
+MANIFEST=install_manifest.txt
+
+echo "install.sh libs path: " ${LIBS_PATH}
+echo "install.sh deploy path: " ${DEPLOY_PATH}
 
 GREEN='\033[0;32m'
 NC='\033[0m'
