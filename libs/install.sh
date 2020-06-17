@@ -1,13 +1,16 @@
-mkdir deploy
-cd deploy
-cmake ..
-sudo make install
-cd ..
-cp deploy/install_manifest.txt install_manifest.txt
-sudo rm -r deploy
-if [ $? -eq 0 ]
-then
-  echo "$(tput setaf 2)Libreria compartida -Delibird- instalada!$(tput sgr0)"
-else
-  echo "$(tput setaf 1)Error al instalar libreria compartida$(tput sgr0)"
-fi
+#!/usr/bin/env bash
+
+readonly DELIBIRD_PATH=/home/utnso/tp-2020-1c-C90
+readonly LIBS_PATH=${DELIBIRD_PATH}/libs
+readonly DEPLOY_PATH=${LIBS_PATH}/deploy
+readonly MANIFEST=install_manifest.txt
+
+GREEN='\033[0;32m'
+NC='\033[0m'
+
+mkdir -p ${DEPLOY_PATH}
+rm -rf ${DEPLOY_PATH}/*
+cd ${DEPLOY_PATH} && cmake .. && sudo make install
+cp ${DEPLOY_PATH}/${MANIFEST} ${LIBS_PATH}/${MANIFEST}
+rm -rf ${DEPLOY_PATH}
+echo -e "${GREEN}Libreria compartida -Delibird- instalada!${NC}"

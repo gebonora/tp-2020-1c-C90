@@ -44,7 +44,7 @@ void logearCatchRecibido(Pokemon* unPokemon, uint32_t idMensaje) {
 
 void logearGetRecibido(Get* unGet, uint32_t idMensaje) {
 	pthread_mutex_lock(&m_loggerGet);
-	log_info(loggerNew, "Llegó un Get. idMensaje: '%d', pokemon: '%s", idMensaje, unGet->name->value);
+	log_info(loggerGet, "Llegó un Get. idMensaje: '%d', pokemon: '%s", idMensaje, unGet->name->value);
 	pthread_mutex_unlock(&m_loggerGet);
 }
 

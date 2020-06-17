@@ -14,8 +14,8 @@
 
 #include "broker.h"
 #include "constants.h"
-#include "include/interface.h"
-#include "include/protocol.h"
+#include "delibird/interface.h"
+#include "delibird/protocol.h"
 
 void productor();
 void consumidor();

@@ -14,10 +14,15 @@
 #include "config.h"
 #include "logger.h"
 #include <stdbool.h>
-
+#include <delibird/interface.h>
+#include "server.h"
 
 void crearDirectoriosBase(char* subPath);
 void crearArchivosBase(char* subPath);
 int fileExists(char * path);
+
+Pokemon* procesarNew(New* unNew);
+Caught* procesarCatch(Pokemon* unPokemon);
+Localized* procesarLocalized(Get* unGet);
 
 #endif /* GAMECARD_INCLUDE_FILESYSTEM_H_ */
