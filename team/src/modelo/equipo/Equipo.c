@@ -13,7 +13,7 @@ Equipo crearEquipoPorConfiguracion() {
 
     for (int i=0; i < list_size(posicionDeLosEntrenadores); i++) {
         char * posicionInicial = list_get(posicionDeLosEntrenadores, i);
-        Entrenador * entrenador = EntrenadorConstructor.new(posicionInicial);
+        Entrenador * entrenador = EntrenadorConstructor.new(posicionInicial, "", "");
         list_add(equipo, entrenador);
     }
 
