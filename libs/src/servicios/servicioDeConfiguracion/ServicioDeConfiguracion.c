@@ -86,6 +86,7 @@ static double obtenerDouble(ServicioDeConfiguracion *this, char *clave) {
     return valor;
 }
 
+// Debe liberarse el array y su contenido
 static char ** obtenerArrayDePunteros(ServicioDeConfiguracion *this, char *clave) {
     char ** valor;
     pthread_mutex_lock(&mutexServicioDeConfiguracion);
@@ -96,13 +97,16 @@ static char ** obtenerArrayDePunteros(ServicioDeConfiguracion *this, char *clave
     return valor;
 }
 
+// Debe liberarse la lista y su contenido
 static t_list * obtenerLista(ServicioDeConfiguracion *this, char *clave) {
     char ** puntero = this->obtenerArrayDePunteros(this, clave);
+    char ** comienzoPuntero = puntero;
     t_list * lista = list_create();
     while(*puntero != NULL) {
         list_add(lista, *puntero);
         puntero++;
     }
+    free(comienzoPuntero);
     return lista;
 }
 
