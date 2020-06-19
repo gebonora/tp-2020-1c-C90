@@ -29,7 +29,7 @@ char* PUERTO_GAMECARD_GAMEBOY;
 
 #define PATH_CONFIG "config/gameCard.config"
 
-void cargarConfigConexiones();
-
+void cargarConfig();
+void cerrarVariablesConfig();
 
 #endif /* GAMECARD_INCLUDE_CONFIG_H_ */

@@ -6,7 +6,7 @@
  */
 #include "main.h"
 
-int main() {
+int main111() {
 	char *title = "\n"
 			"===================================================================\n"
 			" ██████   █████  ███    ███ ███████ ███████  █████  ██████  ██████ \n"
@@ -16,11 +16,12 @@ int main() {
 			" ██████  ██   ██ ██      ██ ███████ ███████ ██   ██ ██    █ ██████ \n"
 			"====================================================================";
 
-	puts(title);
-
 	iniciarLoggers();
-	cargarConfigConexiones();
+	log_info(loggerMain, title);
+	log_info(loggerMain, "Se inició el programa.");
+	cargarConfig();
 	atenderConexiones();
-	//atenderNew();
+	cerrarLoggers();
+	return 0;
 }
 

@@ -5,58 +5,97 @@
  *      Author: GONZALO BONORA
  */
 
-/* Paso inicial: Crear la estructura del Filesystem:
- * 					- Leer configs.
- * 					- Crear directorios necesarios para metadata .
- * 					- Implementar Logs.
- *
- * Segundo paso: Iniciar desarrollo de funciones del FS:
- * 					- Logica de creacion de directorios y guardado de informacion en metadata.
- * 					- Crear archivos pokemon vacios.
- *
- */
-
-/* Dudas:
- *  1- El fs es single thread? Pareceria que si...
- *  2- Es un hilo para "Server Broker" y otro para "Server socket gameboy"?
- */
 #include "fileSystem.h"
 
-int main232() {
-	puts("arranco el main");
-	cargarConfigConexiones();
-	//iniciarLoggers();
-	crearDirectoriosBase("Metadata");
-	crearDirectoriosBase("Files");
-	crearArchivosBase("Metadata/Metadata.bin");
-	crearArchivosBase("Metadata/Bitmap.bin");
+/*
+ * -Al FS hay que proveerle un punto de montaje valido con un Metadata/Metadata.bin cargado con valores correctos.
+ *
+ * -Si se lee el argumento -format se formatea el disco, es decir se eliminan todos los archivos y directorios salvo Metadata/Metadata.bin
+ * 		Luego se crean de nuevo, y se generan los bloques y un bitmap en 0, según lo leído en Metadata/Metadata.bin.
+ *
+ * -FileSystem en ejecución normal.
+ *
+ * */
+
+int main(int argc, char* argv[]) { //de pruebas, luego sacar a iniciarFileSystem
+
+	iniciarLoggers();
+	cargarConfig();
+	iniciarSemaforosFS();
+
+	char* rutaMetadata = crearRuta(PATH_ARCHIVO_METADATA);
+	if (!fileExists(rutaMetadata)) {
+		log_error(loggerMain, "No se encontró un Metadata de FileSystem en el punto de montaje. Provea en PuntoDeMontaje/Metadata/Metadata.bin un"
+				"archivo válido y formaetee ejecutando con -format. Abortando ejecución...");
+		//liberar memoria y loggers.
+		log_info(loggerMain, "ruta:%s", rutaMetadata);
+		exit(1);
+	} else {
+		log_info(loggerMain, "Metadata del FileSystem encontrada. Leyendo...");
+	}
+	free(rutaMetadata);
+	leerMetadataFileSystem();
+
+	if (argc == 2) {
+		if (!strcmp(argv[1], "-format"))
+			formatearTallGrass();
+
+	}
+	cargarBitmap();
+
+	//dumpeos de test
+	dumpBitmap(g_bitmap, 10);
+	printf("bloqueLibre:%d", asignarBloqueLibre());
+	puts(crearRutaPokemon("pika"));
+	//dumpeos de test
+
+	crearPokemon("pikachu");
+
 	return 0;
 }
 
-// Al FS hay que proveerle un punto de montaje valido, a partir de ahi él crea toddo lo que necesita
+void leerMetadataFileSystem() {
+	g_numberOfBlocks = leerClaveValorInt(PATH_ARCHIVO_METADATA, "BLOCKS");
+	log_info(loggerMain, "Metadata: NUMBER OF BLOCKS: '%d'", g_numberOfBlocks);
+	g_blockSize = leerClaveValorInt(PATH_ARCHIVO_METADATA, "BLOCK_SIZE");
+	log_info(loggerMain, "Metadata: BLOCK_SIZE: '%d'", g_blockSize);
+	char* magicNumber = leerClaveValorString(PATH_ARCHIVO_METADATA, "MAGIC_NUMBER");
+	log_info(loggerMain, "Metadata: MAGIC NUMBER: '%s'", magicNumber);
+	free(magicNumber);
 
-void crearDirectoriosBase(char* subPath) {
-	char* path = string_new();
-	string_append_with_format(&path, "%s/%s", PUNTO_MONTAJE_TALLGRASS, subPath);
-	if (!fileExists(path)) {
-		mkdir(path, 0777);
-	}
+	log_info(loggerMain, "Listo!");
+	puts("\n");
+}
+
+void formatearTallGrass() {
+	log_info(loggerMain, "Formateando el Disco...");
+	borrarDirectorioYContenido("Blocks");
+	borrarDirectorioYContenido("Files");
+	char* pathBitmap = crearRuta(PATH_ARCHIVO_BITMAP);
+	remove(pathBitmap);
+
+	crearDirectoriosBase("Files");
+	crearDirectoriosBase("Blocks");
+	crearFilesMetadataDirectorio();
+	crearBitmap();
+	crearBloques();
+
+	log_info(loggerMain, "Listo!");
+	puts("\n");
+}
+
+void crearFilesMetadataDirectorio() {
+	crearArchivosBase("Files/Metadata.bin");
+	char* path = crearRuta("Files/Metadata.bin");
+	FILE* fp = fopen(path, "w+");
+	fputs("DIRECTORY=Y", fp);
+	fclose(fp);
 	free(path);
 }
 
-void crearArchivosBase(char* subPath) {
-	char* path = string_new();
-	string_append_with_format(&path, "%s/%s", PUNTO_MONTAJE_TALLGRASS, subPath);
-	if (!fileExists(path)) {
-		FILE* fp = fopen(path, "w");
-		fclose(fp);
-	}
-	free(path);
-}
-
-int fileExists(char* path) { //check existence of files and directories
-	struct stat buffer;
-	return (stat(path, &buffer) == 0);
+void iniciarSemaforosFS() {
+	pthread_mutex_init(&m_bitmap, NULL);
+	pthread_mutex_init(&m_abrirArchivo, NULL);
 }
 
 Pokemon* procesarNew(New* unNew) {
@@ -64,39 +103,45 @@ Pokemon* procesarNew(New* unNew) {
 	Coordinate* coordenadaAppeared = list_get(unNew->pokemon->coordinates, 0);
 	uint32_t posXAppeared = coordenadaAppeared->pos_x;
 	uint32_t posYAppeared = coordenadaAppeared->pos_y;
-	//tengo que liberar la memoria del new afuera de esta funcion, y cuando haga el send, el create_pokemon se libera
-	//ver que no haya un double free, que pasaria si los dos frees apuntan a lo mismo. capaz copiar el contenido del new para pasarle al create?
+	uint32_t cantidad = unNew->quantity;
+//tengo que liberar la memoria del new afuera de esta funcion, y cuando haga el send, el create_pokemon se libera
+//ver que no haya un double free, que pasaria si los dos frees apuntan a lo mismo. capaz copiar el contenido del new para pasarle al create?
 
-	//cosas de fileSystem acá...
+//cosas de fileSystem acá...
+	if (!existePokemon(nombreAppeared)) {
+		crearPokemon(nombreAppeared);
+	}
+	//agregarPosicion.
 
 	return create_pokemon(nombreAppeared, posXAppeared, posYAppeared);
 }
 
 Caught* procesarCatch(Pokemon* unPokemon) {
 	uint32_t resultado;
-	//acá el problema de New con la memoria no pasa, porque caught lleva solo un uint32_t
+//acá el problema de New con la memoria no pasa, porque caught lleva solo un uint32_t
 
-	//cosas de fileSystem acá...
+//cosas de fileSystem acá...
 
 	return create_caught_pokemon(resultado = 1);
 }
 
 Localized* procesarLocalized(Get* unGet) {
 	char* nombreLocalized = unGet->name->value;
-	//mismo problema que en New.
+//mismo problema que en New.
 
-	//cosas de fileSystem acá. debería retornar un Pokemon* cargado con su lista de posiciones. Que retorna si no localizo nada? elements 0 y lista null?
-	//Pokemon* unPokemon = fuciondeeFS
+//cosas de fileSystem acá. debería retornar un Pokemon* cargado con su lista de posiciones. Que retorna si no localizo nada? elements 0 y lista null?
+//Pokemon* unPokemon = fuciondeeFS
 
-	//bloque para pruebas, aunque parte se usara en la funcion del fs
-	Pokemon* unPokemon = malloc(sizeof(unPokemon));
-	unPokemon->name->value = nombreLocalized; //ver memoria, pasar copiar quizas para que no choque con el Get*
-	unPokemon->coordinates= list_create();
-	list_add(unPokemon->coordinates,create_coordinate(2, 3));
-	list_add(unPokemon->coordinates,create_coordinate(6, 7));
+//bloque para pruebas, aunque parte se usara en la funcion del fs
+	Pokemon* unPokemon = malloc(sizeof(Pokemon));
+	Name* unName = create_name(nombreLocalized);
+	unPokemon->name = unName; //ver memoria, pasar copiar quizas para que no choque con el Get*
+	unPokemon->coordinates = list_create();
+	list_add(unPokemon->coordinates, create_coordinate(2, 3));
+	list_add(unPokemon->coordinates, create_coordinate(6, 7));
 
-	//no hay funcion en libs para crear localized, lo creo a mano.
-	Localized* localized = malloc(sizeof(localized));
+//no hay funcion en libs para crear localized, lo creo a mano.
+	Localized* localized = malloc(sizeof(Localized));
 	localized->pokemon = unPokemon;
 	localized->coordinates_quantity = unPokemon->coordinates->elements_count;
 

@@ -27,6 +27,7 @@ pthread_mutex_t m_loggerCatch;
 pthread_mutex_t m_loggerGet;
 
 void iniciarLoggers();
+void cerrarLoggers();
 
 void logearNewRecibido(New* unNew, uint32_t idMensaje);
 void logearCatchRecibido(Pokemon* unPokemon, uint32_t idMensaje);

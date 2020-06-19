@@ -25,13 +25,13 @@ void iniciarLoggers() {
 
 	loggerGameboy = log_create(PATH_LOGGER_GAMEBOY, "Gameboy", 1, LOG_LEVEL_INFO);
 	log_info(loggerGameboy, "Logger Gameboy iniciado");
+	puts("\n");
 }
 
 void logearNewRecibido(New* unNew, uint32_t idMensaje) {
 	pthread_mutex_lock(&m_loggerNew);
-	log_info(loggerNew, "Llegó un New. idMensaje: '%d', pokemon: '%s', posX: '%d', posY: '%d', cantidad: '%d'", idMensaje,
-			unNew->pokemon->name->value, ((Coordinate*) (unNew->pokemon->coordinates->head->data))->pos_x,
-			((Coordinate*) (unNew->pokemon->coordinates->head->data))->pos_y, unNew->quantity);
+	log_info(loggerNew, "Llegó un New. idMensaje: '%d', pokemon: '%s', posX: '%d', posY: '%d', cantidad: '%d'", idMensaje, unNew->pokemon->name->value,
+			((Coordinate*) (unNew->pokemon->coordinates->head->data))->pos_x, ((Coordinate*) (unNew->pokemon->coordinates->head->data))->pos_y, unNew->quantity);
 	pthread_mutex_unlock(&m_loggerNew);
 }
 
@@ -46,5 +46,13 @@ void logearGetRecibido(Get* unGet, uint32_t idMensaje) {
 	pthread_mutex_lock(&m_loggerGet);
 	log_info(loggerGet, "Llegó un Get. idMensaje: '%d', pokemon: '%s", idMensaje, unGet->name->value);
 	pthread_mutex_unlock(&m_loggerGet);
+}
+
+void cerrarLoggers() {
+	log_destroy(loggerMain);
+	log_destroy(loggerNew);
+	log_destroy(loggerCatch);
+	log_destroy(loggerGet);
+	log_destroy(loggerGameboy);
 }
 

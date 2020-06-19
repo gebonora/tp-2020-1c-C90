@@ -126,7 +126,9 @@ void procesarHiloNew(ArgumentosHilo* argumentosHilo) {
 	//liberar memoriar y cerrar socket
 	free_new(unNew);
 	free(argumentosHilo);
-	close(socketDescartable);
+	if (socketDescartable >= 0) { //para no hacer close en un fd = -1. Es interno de nuestro programa el setearlo a mano al socketen -1.
+		close(socketDescartable);
+	}
 	pthread_mutex_lock(&m_loggerNew);
 	log_info(loggerNew, "Se terminó con éxito un hilo"); //medio al pedo logear esto en la version final
 	pthread_mutex_unlock(&m_loggerNew);
@@ -212,7 +214,9 @@ void procesarHiloCatch(ArgumentosHilo* argumentosHilo) {
 	//liberar memoriar y cerrar socket
 	free_pokemon(unPokemon);
 	free(argumentosHilo);
-	close(socketDescartable);
+	if (socketDescartable >= 0) {
+		close(socketDescartable);
+	}
 	pthread_mutex_lock(&m_loggerCatch);
 	log_info(loggerCatch, "Se terminó con éxito un hilo");
 	pthread_mutex_unlock(&m_loggerCatch);
@@ -279,6 +283,9 @@ void procesarHiloGet(ArgumentosHilo* argumentosHilo) {
 
 	//crear socket descartable al broker
 	int socketDescartable = crearSocketCliente(IP_BROKER, PUERTO_BROKER);
+	if (socketDescartable < 0) {
+		flagBrokerCaido = 1;
+	}
 
 	//enviar respuesta al broker
 	if (send_localized(pokemonLocalized, socketDescartable) < 0) {
@@ -298,7 +305,9 @@ void procesarHiloGet(ArgumentosHilo* argumentosHilo) {
 	//liberar memoriar y cerrar socket
 	free_get(unGet);
 	free(argumentosHilo);
-	close(socketDescartable);
+	if (socketDescartable >= 0) {
+		close(socketDescartable);
+	}
 	pthread_mutex_lock(&m_loggerGet);
 	log_info(loggerGet, "Se terminó con éxito un hilo");
 	pthread_mutex_unlock(&m_loggerGet);
@@ -332,7 +341,8 @@ void atenderGameboy() {
 			;
 			New* unNew = recv_new(socketCliente);
 			recv(socketCliente, &idMensaje, sizeof(uint32_t), 0);
-			close(socketCliente);
+			if (socketCliente > 0)
+				close(socketCliente);
 
 			argumentosHilo->mensaje = unNew;
 			argumentosHilo->idMensaje = idMensaje;
@@ -344,7 +354,8 @@ void atenderGameboy() {
 			;
 			Pokemon* unCatch = recv_pokemon(socketCliente, false);
 			recv(socketCliente, &idMensaje, sizeof(uint32_t), 0);
-			close(socketCliente);
+			if (socketCliente > 0)
+				close(socketCliente);
 
 			argumentosHilo->mensaje = unCatch;
 			argumentosHilo->idMensaje = idMensaje;
@@ -356,7 +367,8 @@ void atenderGameboy() {
 			;
 			Get* unGet = recv_get(socketCliente);
 			recv(socketCliente, &idMensaje, sizeof(uint32_t), 0);
-			close(socketCliente);
+			if (socketCliente > 0)
+				close(socketCliente);
 
 			argumentosHilo->mensaje = unGet;
 			argumentosHilo->idMensaje = idMensaje;
