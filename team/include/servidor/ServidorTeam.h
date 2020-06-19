@@ -17,13 +17,7 @@
 #include <netdb.h>
 #include <pthread.h>
 #include "app/Global.h"
-#include "app/Servicios.h"
 #include "utils/sockets/Sockets.h"
-
-
-
-#include <commons/log.h>
-#include <commons/config.h>
 
 typedef struct {
 	void* mensaje;

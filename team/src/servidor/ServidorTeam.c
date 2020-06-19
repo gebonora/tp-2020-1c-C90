@@ -17,7 +17,7 @@ void configurarServer(){
 
 	Tiempo_Reconexion = config_get_int_value(configServer,"TIEMPO_RECONEXION");
 
-	printf("%d",Tiempo_Reconexion);
+	printf("%d\n",Tiempo_Reconexion);
 
 }
 

@@ -87,7 +87,7 @@ static double obtenerDouble(ServicioDeConfiguracion *this, char *clave) {
 }
 
 // Debe liberarse el array y su contenido
-static char ** obtenerArrayDePunteros(ServicioDeConfiguracion *this, char *clave) {
+static char ** obtenerArray(ServicioDeConfiguracion *this, char *clave) {
     char ** valor;
     pthread_mutex_lock(&mutexServicioDeConfiguracion);
     valor = config_get_array_value(this->config, clave);
@@ -99,14 +99,14 @@ static char ** obtenerArrayDePunteros(ServicioDeConfiguracion *this, char *clave
 
 // Debe liberarse la lista y su contenido
 static t_list * obtenerLista(ServicioDeConfiguracion *this, char *clave) {
-    char ** puntero = this->obtenerArrayDePunteros(this, clave);
-    char ** comienzoPuntero = puntero;
+    char ** array = this->obtenerArray(this, clave);
+    char ** puntero = array;
     t_list * lista = list_create();
     while(*puntero != NULL) {
         list_add(lista, *puntero);
         puntero++;
     }
-    free(comienzoPuntero);
+    free(array);
     return lista;
 }
 
@@ -140,7 +140,7 @@ static ServicioDeConfiguracion new(char * configPath, char * logPath) {
             .tiempoDeRefresco = 1,
             &obtenerEntero,
             &obtenerDouble,
-            &obtenerArrayDePunteros,
+            &obtenerArray,
             &obtenerLista,
             &obtenerString,
             &actualizarConfiguracion,

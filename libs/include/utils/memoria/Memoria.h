@@ -7,8 +7,8 @@
 
 #include <stdlib.h>
 
-void liberarArrayDePunterosContados(void ** arrayDePunteros, int size);
-void liberarArrayDePunteros(void ** arrayDePunteros);
-int cantidadPunterosEnArray(void ** arrayDePunteros);
+void liberarArrayContado(void ** array, int size);
+void liberarArray(void ** array);
+int cantidadElementosEnArray(void ** array);
 
 #endif //DELIBIRD_MEMORIA_H
