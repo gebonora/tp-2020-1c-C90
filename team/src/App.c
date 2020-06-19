@@ -31,7 +31,7 @@ int main() {
     // Server
     log_info(INTERNAL_LOGGER, "Levantando el server...");
     configurarServer(); //TODO: Usar como fuente de datos el servicio de config
-    //atenderConexiones();
+    atenderConexiones(); //TODO: Hacer apagable
 
     // Por cada pokemon del objetivo global, enviar un GET [POKEMON].
     log_info(INTERNAL_LOGGER, "Solicitando la ubicacion de los pokemones objetivo para comenzar...");
