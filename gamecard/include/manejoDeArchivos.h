@@ -23,7 +23,9 @@ void borrarDirectorioYContenido(char* subPath);
 char* crearRutaPokemon(char* nombrePokemon);
 int existePokemon(char* nombrePokemon);
 
-int leerClaveValorInt(char* subPath, char* clave);
-char* leerClaveValorString(char* subPath, char* clave);
+int leerClaveValorInt(char* path, char* clave);
+char* leerClaveValorString(char* path, char* clave);
+char** leerClaveValorArray(char* path, char* clave);
+void freeArrayChars(char** arr);
 
 #endif /* GAMECARD_INCLUDE_MANEJODEARCHIVOS_H_ */

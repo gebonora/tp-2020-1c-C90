@@ -17,5 +17,9 @@ void crearBitmap();
 int calcularTamanioBitArray(int bloques);
 void cargarBitmap();
 void dumpBitmap(t_bitarray* bitmap, int cantidadMostrada);
+void cerrarBitmap();
+
+char* l_mapeo;
+int l_bitmapFD;
 
 #endif /* GAMECARD_INCLUDE_BITMAP_H_ */

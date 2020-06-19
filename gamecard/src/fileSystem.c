@@ -45,27 +45,48 @@ int main(int argc, char* argv[]) { //de pruebas, luego sacar a iniciarFileSystem
 
 	//dumpeos de test
 	dumpBitmap(g_bitmap, 10);
-	printf("bloqueLibre:%d", asignarBloqueLibre());
-	puts(crearRutaPokemon("pika"));
 	//dumpeos de test
 
-	crearPokemon("pikachu");
+	//crearPokemon("pikachu");
 
-	return 0;
+	char* ruta = crearRutaMetadataPokemon("pikachu");
+	char** arr = leerClaveValorArray(ruta, "BLOCKS");
+	int a = 0;
+	while (arr[a] != NULL) {
+		printf("%s\n", arr[a]); //puts no anda con esto.
+		a++;
+	}
+	freeArrayChars(arr);
+
+	free(ruta);
+	cerrarLoggers();
+	cerrarVariablesConfig();
+	cerrarBitmap();
 }
 
+//FUNCIONES DE INICIALIZACION
+
 void leerMetadataFileSystem() {
-	g_numberOfBlocks = leerClaveValorInt(PATH_ARCHIVO_METADATA, "BLOCKS");
+	char * path = crearRuta(PATH_ARCHIVO_METADATA);
+	g_numberOfBlocks = leerClaveValorInt(path, "BLOCKS");
 	log_info(loggerMain, "Metadata: NUMBER OF BLOCKS: '%d'", g_numberOfBlocks);
-	g_blockSize = leerClaveValorInt(PATH_ARCHIVO_METADATA, "BLOCK_SIZE");
+	g_blockSize = leerClaveValorInt(path, "BLOCK_SIZE");
 	log_info(loggerMain, "Metadata: BLOCK_SIZE: '%d'", g_blockSize);
-	char* magicNumber = leerClaveValorString(PATH_ARCHIVO_METADATA, "MAGIC_NUMBER");
+	char* magicNumber = leerClaveValorString(path, "MAGIC_NUMBER");
 	log_info(loggerMain, "Metadata: MAGIC NUMBER: '%s'", magicNumber);
 	free(magicNumber);
+	free(path);
 
 	log_info(loggerMain, "Listo!");
 	puts("\n");
 }
+
+void iniciarSemaforosFS() {
+	pthread_mutex_init(&m_bitmap, NULL);
+	pthread_mutex_init(&m_abrirArchivo, NULL);
+}
+
+//FUNCIONES DE FORMATEADOR
 
 void formatearTallGrass() {
 	log_info(loggerMain, "Formateando el Disco...");
@@ -93,10 +114,7 @@ void crearFilesMetadataDirectorio() {
 	free(path);
 }
 
-void iniciarSemaforosFS() {
-	pthread_mutex_init(&m_bitmap, NULL);
-	pthread_mutex_init(&m_abrirArchivo, NULL);
-}
+//FUNCIONES DE PROCESADO DE REQUESTS
 
 Pokemon* procesarNew(New* unNew) {
 	char* nombreAppeared = unNew->pokemon->name->value;

@@ -22,34 +22,75 @@ void crearPokemon(char* nombrePokemon) {
 	free(rutaMetadata);
 }
 
-int agregarCoordenadaPokemon(char* nombrePokemon, uint32_t posX, uint32_t posY, uint32_t cantidad);
+int agregarCoordenadaPokemon(char* nombrePokemon, uint32_t posX, uint32_t posY, uint32_t cantidad) {
+	char* rutaPokemon = crearRutaPokemon(nombrePokemon);
+	char* rutaMetadata = crearRutaMetadataPokemon(nombrePokemon);
 
-int leerClaveValorInt(char* subPath, char* clave) {
-	char* path = crearRuta(subPath);
+}
+
+//FUNCIONES PARA LECTURA DE ARCHIVOS
+
+int leerClaveValorInt(char* path, char* clave) {
 	if (!fileExists(path)) {
-		free(path);
 		return -1;
 	}
 	t_config* metadata = config_create(path);
+	if (!config_has_property(metadata, clave)) {
+		config_destroy(metadata);
+	}
 	int retorno = config_get_int_value(metadata, clave);
-	free(path);
 	config_destroy(metadata);
 	return retorno;
 }
 
-char* leerClaveValorString(char* subPath, char* clave) {
-	char* path = crearRuta(subPath);
+char* leerClaveValorString(char* path, char* clave) {
 	if (!fileExists(path)) {
-		free(path);
 		return NULL;
 	}
 	t_config* metadata = config_create(path);
+	if (!config_has_property(metadata, clave)) {
+		config_destroy(metadata);
+		return NULL;
+	}
 	char* retorno = string_new();
 	string_append(&retorno, config_get_string_value(metadata, clave));
-	free(path);
 	config_destroy(metadata);
 	return retorno;
 }
+
+char** leerClaveValorArray(char* path, char* clave) {
+	if (!fileExists(path)) {
+		return NULL;
+	}
+	t_config* metadata = config_create(path);
+	if (!config_has_property(metadata, clave)) {
+		config_destroy(metadata);
+		return NULL;
+	}
+	char** retorno = config_get_array_value(metadata, clave);
+
+	/* una forma de ver el contenido del char**
+	 int a = 0;
+	 while (retorno[a] != NULL) {
+	 printf("%s\n", retorno[a]); //puts no anda con esto.
+	 a++;
+	 }
+	 if (retorno[0]==NULL) puts("arr vacio");
+	 */
+	config_destroy(metadata);
+	return retorno;
+}
+
+void freeArrayChars(char** arr) {
+	int a = 0;
+	while (arr[a] != NULL) {
+		free(arr[a]);
+		a++;
+	}
+	free(arr);
+}
+
+//FUNCIONES DE CHEQUEO DE EXISTENCIA
 
 int existePokemon(char* nombrePokemon) {
 	char* rutaPokemon = crearRutaPokemon(nombrePokemon);
@@ -62,6 +103,8 @@ int fileExists(char* path) {
 	struct stat buffer;
 	return (stat(path, &buffer) == 0);
 }
+
+//FUNCIONES DE GENERACION DE RUTAS
 
 char* crearRuta(char* subPath) {
 	char* path = string_new();
@@ -84,6 +127,8 @@ char* crearRutaMetadataPokemon(char* nombrePokemon) {
 	free(pathPokemon);
 	return fileMetadata;
 }
+
+//FUNCIONES DEL FORMATEADOR
 
 void crearDirectoriosBase(char* subPath) {
 	char* path = crearRuta(subPath);
