@@ -10,8 +10,13 @@ static void destruir(Entrenador * this) {
 }
 
 Coordinate parsearPosicion(char * posicion) {
-    char ** punto = string_split(posicion, "|");
+    char ** punto = string_n_split(posicion, 2, "|");
     Coordinate coordenada = {.pos_x=atoi(punto[0]), .pos_y=atoi(punto[1])};
+
+    free(punto[0]);
+    free(punto[1]);
+    free(punto);
+
     return coordenada;
 }
 

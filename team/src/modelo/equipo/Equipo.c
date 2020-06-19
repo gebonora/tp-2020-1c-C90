@@ -8,7 +8,8 @@
 Equipo crearEquipoPorConfiguracion() {
     Equipo equipo = list_create();
 
-    t_list * posicionDeLosEntrenadores = servicioDeConfiguracion.obtenerLista(&servicioDeConfiguracion, POSICIONES_ENTRENADORES);
+    t_list * posicionDeLosEntrenadores = servicioDeConfiguracion
+            .obtenerLista(&servicioDeConfiguracion, POSICIONES_ENTRENADORES);
 
     for (int i=0; i < list_size(posicionDeLosEntrenadores); i++) {
         char * posicionInicial = list_get(posicionDeLosEntrenadores, i);
@@ -16,7 +17,7 @@ Equipo crearEquipoPorConfiguracion() {
         list_add(equipo, entrenador);
     }
 
-    list_destroy(posicionDeLosEntrenadores);
+    list_destroy_and_destroy_elements(posicionDeLosEntrenadores, free);
 
     return equipo;
 }
