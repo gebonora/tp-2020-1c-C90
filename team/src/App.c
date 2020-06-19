@@ -40,7 +40,7 @@ int main() {
     // Liberacion
     log_info(INTERNAL_LOGGER, "Finalizando proceso Team...");
     //TODO: Apagar el server
-    eliminarConfigServer();
+    eliminarConfigServer(); //TODO: Parte del apagado seria esto
     log_debug(INTERNAL_LOGGER, "Liberando logger obligatorio...");
     log_destroy(MANDATORY_LOGGER);
     log_debug(INTERNAL_LOGGER, "Liberando servicios...");
