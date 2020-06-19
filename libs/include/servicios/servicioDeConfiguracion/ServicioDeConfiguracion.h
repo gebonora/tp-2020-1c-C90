@@ -36,7 +36,7 @@ typedef struct ServicioDeConfiguracion {
 
     double (*obtenerDouble)(struct ServicioDeConfiguracion *this, char *clave);
 
-    char ** (*obtenerArrayDePunteros)(struct ServicioDeConfiguracion *this, char *clave);
+    char ** (*obtenerArray)(struct ServicioDeConfiguracion *this, char *clave);
 
     t_list * (*obtenerLista)(struct ServicioDeConfiguracion *this, char *clave);
 

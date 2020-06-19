@@ -4,25 +4,24 @@
 
 #include "utils/memoria/Memoria.h"
 
-void liberarArrayDePunterosContados(void ** arrayDePunteros, int size) {
+void liberarArrayContado(void ** array, int size) {
     for (int i = 0; i < size; i++) {
-        free(arrayDePunteros[i]);
+        free(array[i]);
     }
-    free(arrayDePunteros);
+    free(array);
 }
 
-void liberarArrayDePunteros(void ** arrayDePunteros) {
-    int cantidad = cantidadPunterosEnArray(arrayDePunteros);
-    liberarArrayDePunterosContados(arrayDePunteros, cantidad);
+void liberarArray(void ** array) {
+    int cantidad = cantidadElementosEnArray(array);
+    liberarArrayContado(array, cantidad);
 }
 
-int cantidadPunterosEnArray(void ** arrayDePunteros) {
+int cantidadElementosEnArray(void ** array) {
     int cantidad = 0;
-    void ** comienzo = arrayDePunteros;
-    while(*arrayDePunteros != NULL) {
-        arrayDePunteros++;
+    void ** comienzo = array;
+    while(*comienzo != NULL) {
+        comienzo++;
         cantidad++;
     }
-    arrayDePunteros = comienzo; //Para recuperar el estado inicial del puntero al array
     return cantidad;
 }
