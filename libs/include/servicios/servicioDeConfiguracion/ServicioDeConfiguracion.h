@@ -6,10 +6,12 @@
 #define DELIBIRD_SERVICIODECONFIGURACION_H
 
 #include <commons/config.h>
+#include <commons/collections/list.h>
 #include <commons/log.h>
 #include <unistd.h>
 #include <pthread.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/inotify.h>
@@ -34,7 +36,9 @@ typedef struct ServicioDeConfiguracion {
 
     double (*obtenerDouble)(struct ServicioDeConfiguracion *this, char *clave);
 
-    char ** (*obtenerLista)(struct ServicioDeConfiguracion *this, char *clave);
+    char ** (*obtenerArray)(struct ServicioDeConfiguracion *this, char *clave);
+
+    t_list * (*obtenerLista)(struct ServicioDeConfiguracion *this, char *clave);
 
     char *(*obtenerString)(struct ServicioDeConfiguracion *this, char *clave);
 

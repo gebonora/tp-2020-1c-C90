@@ -8,6 +8,8 @@
 #include "app/Global.h"
 #include "app/Servicios.h"
 #include "servidor/ServidorTeam.h"
+#include "modelo/equipo/Equipo.h"
+#include "test/TestDeIntegracion.h"
 
 void mostrarTitulo(t_log * logger);
 

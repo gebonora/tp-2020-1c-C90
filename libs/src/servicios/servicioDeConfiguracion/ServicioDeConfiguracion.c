@@ -86,7 +86,8 @@ static double obtenerDouble(ServicioDeConfiguracion *this, char *clave) {
     return valor;
 }
 
-static char ** obtenerLista(ServicioDeConfiguracion *this, char *clave) {
+// Debe liberarse el array y su contenido
+static char ** obtenerArray(ServicioDeConfiguracion *this, char *clave) {
     char ** valor;
     pthread_mutex_lock(&mutexServicioDeConfiguracion);
     valor = config_get_array_value(this->config, clave);
@@ -94,6 +95,19 @@ static char ** obtenerLista(ServicioDeConfiguracion *this, char *clave) {
     pthread_mutex_unlock(&mutexServicioDeConfiguracion);
     log_debug(this->logger, "Se obtuvo un valor lista de la configuracion: %s -> %s", clave, valorComoString);
     return valor;
+}
+
+// Debe liberarse la lista y su contenido
+static t_list * obtenerLista(ServicioDeConfiguracion *this, char *clave) {
+    char ** array = this->obtenerArray(this, clave);
+    char ** puntero = array;
+    t_list * lista = list_create();
+    while(*puntero != NULL) {
+        list_add(lista, *puntero);
+        puntero++;
+    }
+    free(array);
+    return lista;
 }
 
 static char *obtenerString(ServicioDeConfiguracion *this, char *clave) {
@@ -126,6 +140,7 @@ static ServicioDeConfiguracion new(char * configPath, char * logPath) {
             .tiempoDeRefresco = 1,
             &obtenerEntero,
             &obtenerDouble,
+            &obtenerArray,
             &obtenerLista,
             &obtenerString,
             &actualizarConfiguracion,

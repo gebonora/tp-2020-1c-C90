@@ -7,7 +7,13 @@
 
 #include <commons/log.h>
 #include <commons/config.h>
+#include <commons/string.h>
+#include <stdlib.h>
+#include <commons/collections/list.h>
+#include <commons/collections/dictionary.h>
 #include "delibird/protocol.h"
+#include "delibird/interface.h"
+
 
 // Paths a archivos
 #define TEAM_CONFIG_FILE "config/team.config"
@@ -26,9 +32,15 @@
 #define IP_BROKER "IP_BROKER"
 #define PUERTO_BROKER "PUERTO_BROKER"
 #define LOG_FILE "LOG_FILE"
+#define IP_TEAM_GAMEBOY "IP_TEAM_GAMEBOY"
+#define PUERTO_TEAM_GAMEBOY "PUERTO_TEAM_GAMEBOY"
 
 // Constantes
 #define SHOW_INTERNAL_CONSOLE 1 // Setear en 1 para mostrar la consola de uso interno. Dejar en 0 para la entrega.
+
+//mutex de los recursos compartidos
+
+pthread_mutex_t MTX_INTERNAL_LOG;
 
 // Variables globales
 t_log * MANDATORY_LOGGER;
