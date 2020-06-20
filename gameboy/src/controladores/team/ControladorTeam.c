@@ -11,7 +11,7 @@ void atenderPedidoTeam(PedidoGameBoy pedidoGameBoy, t_log * logger) {
 	IP_TEAM);
 	char* puerto = servicioDeConfiguracion.obtenerString(
 			&servicioDeConfiguracion, PUERTO_TEAM);
-	int socketCliente = crearSocketCliente(IP_TEAM, PUERTO_TEAM);
+	int socketCliente = crearSocketCliente(ip, puerto);
 
 	switch (pedidoGameBoy.tipoMensaje) {
 	case APPEARED_POKEMON:
