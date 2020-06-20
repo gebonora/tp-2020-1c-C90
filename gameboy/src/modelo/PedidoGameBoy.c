@@ -13,7 +13,7 @@ PedidoGameBoy crearPedidoGameBoy(int cantidadArgumentos, char** arrayArgumentos)
     int inicioArgumentos = 3;
 
     if (proceso == SUSCRIPTOR) {
-        pedidoGameBoy.tipoMensaje = SUBSCRIBE;
+        pedidoGameBoy.tipoMensaje = SUBSCRIBE_POKEMON;
         inicioArgumentos = 2;
     } else {
         pedidoGameBoy.tipoMensaje = obtenerTipoMensaje(arrayArgumentos[2]);
@@ -56,6 +56,8 @@ TipoMensaje obtenerTipoMensaje(char * tipoMensaje) {
         return GET_POKEMON;
     } else if (string_equals_ignore_case("LOCALIZED_POKEMON", tipoMensaje)) {
         return LOCALIZED_POKEMON;
+    } else if (string_equals_ignore_case("SUBSCRIBE_POKEMON", tipoMensaje)) {
+        return SUBSCRIBE_POKEMON;
     } else {
         log_error(INTERNAL_LOGGER, "Tipo de mensaje no soportado: %s", tipoMensaje);
         exit(EXIT_FAILURE);
@@ -89,6 +91,8 @@ char * nombreTipoMensaje(TipoMensaje tipoMensaje) {
             return "CAUGHT_POKEMON";
         case GET_POKEMON:
             return "GET_POKEMON";
+        case SUBSCRIBE_POKEMON: ;
+        	return "SUBSCRIBE_POKEMON";
         default:
             return "UNKNOWN_MESSAGE";
     }

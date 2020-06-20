@@ -60,3 +60,15 @@ void consumer_caught_queue() {
 	log_info(LOGGER, "Saque de la cola: %d", caught->result);
 
 }
+
+void init_dump() {
+	if(signal(SIGUSR1, dump_handler) == SIG_ERR) {
+		log_info(LOGGER, "Error catching signal SIGUSR1");
+	}
+}
+
+void dump_handler(int signum) {
+	if(signum == SIGUSR1) {
+		log_info(LOGGER, "Received SIGUSR1");
+	}
+}
