@@ -9,16 +9,6 @@
 #include <stdlib.h>
 #include <netdb.h>
 
-/*
-#define NEW_POKEMON 1
-#define LOCALIZED_POKEMON 2
-#define GET_POKEMON 3
-#define APPEARED_POKEMON 4
-#define CATCH_POKEMON 5
-#define CAUGHT_POKEMON 6
-#define SUBSCRIBE_POKEMON 7
-*/
-
 bool is_alive = true;
 
 void atenderPedidoBroker(PedidoGameBoy pedidoGameBoy, t_log * logger) {
@@ -189,39 +179,6 @@ void listen_messages(socket_with_logger* swl) {
 
 
 Operation get_operation(char* operation_name) {
-	/*
-	Operation operation;
-
-	switch(operation_name) {
-	case NEW_POKEMON: ;
-		operation = NEW;
-		break;
-	case APPEARED_POKEMON: ;
-		operation = APPEARED;
-		break;
-	case GET_POKEMON: ;
-		operation = GET;
-		break;
-	case LOCALIZED_POKEMON: ;
-		operation = LOCALIZED;
-		break;
-	case CATCH_POKEMON: ;
-		operation = CATCH;
-		break;
-	case CAUGHT_POKEMON: ;
-		operation = CAUGHT;
-		break;
-	case SUBSCRIBE_POKEMON: ;
-		operation = SUBSCRIBE;
-		break;
-	default : ;
-		log_error(INTERNAL_LOGGER, "Tipo de operacion no soportada: %s", operation_name);
-		exit(EXIT_FAILURE);
-	}
-
-	return operation;
-*/
-
 	if (string_equals_ignore_case("NEW_POKEMON", operation_name)) {
 		return NEW;
 	} else if (string_equals_ignore_case("APPEARED_POKEMON", operation_name)) {
