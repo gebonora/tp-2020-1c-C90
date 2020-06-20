@@ -6,6 +6,8 @@
 #include "delibird/utils/tiempo/Tiempo.h"
 #include <signal.h>
 
+#define DUMP_PATH "dump.log"
+
 uint32_t get_id();
 void consumer_new_queue();
 void consumer_appeared_queue();

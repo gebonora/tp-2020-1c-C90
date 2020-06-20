@@ -6,7 +6,7 @@ NC='\033[0m'
 
 echo "Looking for broker PID"
 
-PID=$(ps -ef | awk '/broker.app$/ { print $2 }')
+PID=$(pidof broker.app)
 
 if [ -z "${PID}" ]
 then

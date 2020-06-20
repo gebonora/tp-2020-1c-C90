@@ -37,9 +37,6 @@ char* current_date_time_as_string() {
 	// time() returns the current time of the system as a time_t value
 	time(&now);
 
-	// Convert to local time format and print to stdout
-	printf("Today is : %s", ctime(&now));
-
 	// localtime converts a time_t value to calendar time and
 	// returns a pointer to a tm structure with its members
 	// filled with the corresponding values
