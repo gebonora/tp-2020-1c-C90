@@ -1,22 +1,35 @@
 #/!usr/bin/env bash
 
+function get_pid() {
+    PID=""
+    local BROKER_PID=$(pidof broker.app)
+    local VALGRIND_PID=$(pidof valgrind.bin)
+
+    if [ ! -z "${BROKER_PID}" ]; then
+        PID=${BROKER_PID}
+    fi
+    if [ ! -z "${VALGRIND_PID}" ]; then
+        PID=${VALGRIND_PID}
+    fi
+}
+
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 YELLOW='\033[0;33m'
 NC='\033[0m'
 
-PID=$(pidof broker.app)
+get_pid
 
 if [ -z "${PID}" ]; then
 
     case $1 in
         -v)
             echo -e "${YELLOW}Starting broker in valgrind mode${NC}"
-            #valgrind --show-leak-kinds=all --leak-check=full --log-file="valgrind.log" -v ./broker.app &
+            #valgrind --show-leak-kinds=all --leak-check=full --log-file="broker.log" -v ./broker.app &
             ;;
         -h)
             echo -e "${YELLOW}Starting broker in helgrind mode${NC}"
-            #valgrind --tool="helgrind" --show-leak-kinds=all --leak-check=full --log-file="helgrind.log" -v ./broker.app &
+            #valgrind --tool="helgrind" --show-leak-kinds=all --leak-check=full --log-file="broker.log" -v ./broker.app &
             ;;
         *)
             echo -e "${YELLOW}Starting broker${NC}"
@@ -24,7 +37,7 @@ if [ -z "${PID}" ]; then
             ;;
     esac
 
-    PID=$(pidof broker.app)
+    get_pid
 
     if [ -z "${PID}" ]; then
         echo -e "${RED}Broker failed to start${NC}"
@@ -38,7 +51,7 @@ elif [ "-k" == "$1" ]; then
     
     kill -s SIGTERM ${PID}
 
-    PID=$(pidof broker.app)
+    get_pid
 
     if [ -z "${PID}" ]
     then
