@@ -18,6 +18,7 @@
 #include <pthread.h>
 #include "app/Global.h"
 #include "utils/sockets/Sockets.h"
+#include "cliente/ClienteBroker.h"
 
 typedef struct {
 	void* mensaje;

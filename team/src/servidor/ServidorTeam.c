@@ -29,7 +29,7 @@ void eliminarConfigServer(){
 
 void atenderConexiones() {
 
-	pthread_t threadAppeared, threadCaught, threadLocalized, threadGameboy;
+	pthread_t threadAppeared, threadCaught, threadLocalized;
 
 	pthread_create(&threadAppeared, NULL, (void*) atenderAppeared, NULL);
 	pthread_detach(threadAppeared);
@@ -40,10 +40,10 @@ void atenderConexiones() {
 	pthread_create(&threadCaught, NULL, (void*) atenderCaught, NULL);
 	pthread_detach(threadCaught);
 
-	pthread_create(&threadGameboy, NULL, (void*) atenderGameboy, NULL);
-	pthread_detach(threadGameboy);
+	atenderGameboy();
 
-	while(1);
+
+
 }
 
 
@@ -110,6 +110,7 @@ void procesarHiloCaught(ArgumentosHilo* argumentosHilo) {
 
 
 	//enviar al cliente
+	//atenderCaughtRecibido(unCaught,idMensaje);
 	//int socketDescartable = crearSocketHaciaBroker(); -> debe ponerse en el cliente
 
 	//liberar memoriar y cerrar socket
