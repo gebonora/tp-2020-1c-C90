@@ -8,6 +8,7 @@
 #include "manejadorDeEventos/ManejadorDeEventos.h"
 #include "planificador/algoritmos/AlgoritmoPlanificador.h"
 #include "planificador/algoritmos/fifo/FirstInFirstOut.h"
+#include "modelo/mapa/Mapa.h"
 
 void testDeIntegracion();
 

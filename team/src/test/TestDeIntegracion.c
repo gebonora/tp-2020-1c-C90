@@ -5,12 +5,8 @@
 #include "test/TestDeIntegracion.h"
 
 void testDeIntegracion() {
-    manejadorDeEventos = ManejadorDeEventosConstructor.new();
-    manejadorDeEventos.notificarEventoLocalized(&manejadorDeEventos);
-    manejadorDeEventos.destruir(&manejadorDeEventos);
 
-    AlgoritmoPlanificador miAlgoritmo = obtenerAlgoritmo("FIFO");
-    t_list * listaReady = list_create();
+    // Entrenadores
     Entrenador * entrenador = EntrenadorConstructor.new("1|2", "A|B", "A|D|D");
     Entrenador * entrenador2 = EntrenadorConstructor.new("2|4", "A|B", "A|B");
 
@@ -21,12 +17,26 @@ void testDeIntegracion() {
     if (entrenador2->objetivoCompletado(entrenador2) != true || entrenador2->puedeAtraparPokemones(entrenador2) != false) {
         exit(EXIT_FAILURE);
     }
+    entrenador->destruir(entrenador);
+    entrenador2->destruir(entrenador2);
 
-    HiloEntrenadorPlanificable * hiloEntrenadorPlanificable = HiloEntrenadorPlanificableConstructor.new(entrenador);
+    // Mapa
+    Mapa mapita = MapaConstructor.new();
+    mapita.destruir(&mapita);
+
+    // Planificacion
+    AlgoritmoPlanificador miAlgoritmo = obtenerAlgoritmo("FIFO");
+    t_list * listaReady = list_create();
+    Entrenador * entrenadorPiola = EntrenadorConstructor.new("1|2", "A|B", "A|D|D");
+    HiloEntrenadorPlanificable * hiloEntrenadorPlanificable = HiloEntrenadorPlanificableConstructor.new(entrenadorPiola);
     list_add(listaReady, hiloEntrenadorPlanificable);
     miAlgoritmo.proximoAEjecutar(&miAlgoritmo, listaReady);
     miAlgoritmo.destruir(&miAlgoritmo);
-    entrenador->destruir(entrenador);
-    entrenador2->destruir(entrenador2);
+    entrenadorPiola->destruir(entrenadorPiola);
     list_destroy_and_destroy_elements(listaReady, (void (*)(void *)) hiloEntrenadorPlanificable->destruir);
+
+    // Eventos
+    manejadorDeEventos = ManejadorDeEventosConstructor.new();
+    manejadorDeEventos.notificarEventoLocalized(&manejadorDeEventos);
+    manejadorDeEventos.destruir(&manejadorDeEventos);
 }
