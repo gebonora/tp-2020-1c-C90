@@ -25,11 +25,11 @@ if [ -z "${PID}" ]; then
     case $1 in
         -v)
             echo -e "${YELLOW}Starting broker in valgrind mode${NC}"
-            #valgrind --show-leak-kinds=all --leak-check=full --log-file="broker.log" -v ./broker.app &
+            valgrind --show-leak-kinds=all --leak-check=full --log-file="broker.log" -v ./broker.app &
             ;;
         -h)
             echo -e "${YELLOW}Starting broker in helgrind mode${NC}"
-            #valgrind --tool="helgrind" --show-leak-kinds=all --leak-check=full --log-file="broker.log" -v ./broker.app &
+            valgrind --tool="helgrind" --log-file="broker.log" -v ./broker.app &
             ;;
         *)
             echo -e "${YELLOW}Starting broker${NC}"
@@ -61,5 +61,5 @@ elif [ "-k" == "$1" ]; then
     fi
 
 else
-    echo -e "${YELLOW}Broker running with PID: ${PID}${NC}"
+    echo -e "${YELLOW}Broker already running with PID: ${PID}${NC}"
 fi
