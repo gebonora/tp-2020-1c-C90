@@ -47,18 +47,10 @@ int main(int argc, char* argv[]) { //de pruebas, luego sacar a iniciarFileSystem
 	dumpBitmap(g_bitmap, 10);
 	//dumpeos de test
 
-	//crearPokemon("pikachu");
+	New* newTest = create_new_pokemon("pikachu", 1, 2, 43);
 
-	char* ruta = crearRutaMetadataPokemon("pikachu");
-	char** arr = leerClaveValorArray(ruta, "BLOCKS");
-	int a = 0;
-	while (arr[a] != NULL) {
-		printf("%s\n", arr[a]); //puts no anda con esto.
-		a++;
-	}
-	freeArrayChars(arr);
+	procesarNew(newTest);
 
-	free(ruta);
 	cerrarLoggers();
 	cerrarVariablesConfig();
 	cerrarBitmap();
@@ -125,22 +117,41 @@ Pokemon* procesarNew(New* unNew) {
 //tengo que liberar la memoria del new afuera de esta funcion, y cuando haga el send, el create_pokemon se libera
 //ver que no haya un double free, que pasaria si los dos frees apuntan a lo mismo. capaz copiar el contenido del new para pasarle al create?
 
-//cosas de fileSystem acá...
 	if (!existePokemon(nombreAppeared)) {
 		crearPokemon(nombreAppeared);
+		//agregar semaforo a lista
 	}
-	//agregarPosicion.
+
+	//if abrirArchivo implementar semaforo.
+	agregarCoordenadaPokemon(nombreAppeared, posXAppeared, posYAppeared, cantidad);
+
+	sleep(TIEMPO_RETARDO_OPERACION);
+	//cerrar archivo
 
 	return create_pokemon(nombreAppeared, posXAppeared, posYAppeared);
 }
 
 Caught* procesarCatch(Pokemon* unPokemon) {
 	uint32_t resultado;
-//acá el problema de New con la memoria no pasa, porque caught lleva solo un uint32_t
+	char* nombreCaught = unPokemon->name->value;
+	Coordinate* coordenadaCaught = list_get(unPokemon->coordinates, 0);
+	uint32_t posXCaught = coordenadaCaught->pos_x;
+	uint32_t posYCaught = coordenadaCaught->pos_y;
+	//acá el problema de New con la memoria no pasa, porque caught lleva solo un uint32_t
 
-//cosas de fileSystem acá...
+	if (!existePokemon(nombreCaught)) {
+		return create_caught_pokemon(FAIL);
+	}
 
-	return create_caught_pokemon(resultado = 1);
+	// if abrirArchivo
+
+	//cosas de fileSystem acá...
+	resultado = quitarCoordenadaPokemon(nombreCaught, posXCaught, posYCaught);
+
+	sleep(TIEMPO_RETARDO_OPERACION);
+	//cerrar archivo
+
+	return create_caught_pokemon(resultado);
 }
 
 Localized* procesarLocalized(Get* unGet) {

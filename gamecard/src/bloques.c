@@ -6,6 +6,8 @@
  */
 #include "bloques.h"
 
+//FUNCIONES DEL FORMATEADOR
+
 void crearBloques() {
 	log_info(loggerMain, "----Creando '%d' bloques de '%d'...", g_numberOfBlocks, g_blockSize);
 	for (int a = 0; a < g_numberOfBlocks; a++) {
@@ -18,12 +20,14 @@ void crearBloques() {
 	log_info(loggerMain, "----Listo!");
 }
 
+//FUNCIONES DE ASIGNACION / LIBERACION DE BLOQUES
+
 int asignarBloqueLibre() { // RETORNA -1 SI NO HAY BLOQUES LIBRES.
 	int bloqueLibre = -1;
 	pthread_mutex_lock(&m_bitmap);
-	for(int a = 0; a< g_numberOfBlocks; a++){
-		if(!bitarray_test_bit(g_bitmap,a)){
-			bitarray_set_bit(g_bitmap,a);
+	for (int a = 0; a < g_numberOfBlocks; a++) {
+		if (!bitarray_test_bit(g_bitmap, a)) {
+			bitarray_set_bit(g_bitmap, a);
 			bloqueLibre = a;
 			break;
 		}
@@ -37,6 +41,12 @@ void liberarBloque(int numeroDeBloque) {
 	bitarray_clean_bit(g_bitmap, numeroDeBloque);
 	pthread_mutex_unlock(&m_bitmap);
 }
+
+int calcularNumeroDeBloquesNecesarios(int size) {
+	return size / g_blockSize + 1;
+}
+
+//FUNCIONES PARA RUTAS DE BLOQUES
 
 char* crearRutaBloque(int numeroDeBloque) {
 	char* pathDirectorio = crearRuta("Blocks");

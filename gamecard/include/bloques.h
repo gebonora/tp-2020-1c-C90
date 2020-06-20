@@ -15,5 +15,6 @@ void crearBloques();
 char* crearRutaBloque(int numeroDeBloque);
 int asignarBloqueLibre();
 void liberarBloque(int numeroDeBloque);
+int calcularNumeroDeBloquesNecesarios(int size);
 
 #endif /* GAMECARD_INCLUDE_BLOQUES_H_ */

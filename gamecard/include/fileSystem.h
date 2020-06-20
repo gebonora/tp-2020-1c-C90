@@ -29,6 +29,7 @@
 #include "manejoDeArchivos.h"
 #include "bitmap.h"
 #include "bloques.h"
+#include "mapeo.h"
 
 void formatearTallGrass();
 void crearFilesMetadataDirectorio();
@@ -46,6 +47,7 @@ int g_numberOfBlocks;
 
 pthread_mutex_t m_bitmap;
 pthread_mutex_t m_abrirArchivo;
+
 
 #define MAGIC_NUMBER "TALL_GRASS"
 #define SHELL_COMMAND_DELETE "exec rm -r /"
