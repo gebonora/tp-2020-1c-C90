@@ -88,13 +88,15 @@ void atenderPedidoBroker(PedidoGameBoy pedidoGameBoy, t_log * logger) {
     case SUBSCRIBE_POKEMON: ;
     	log_info(logger, "ENTRE A SUBSCRIBE");
     	Operation destination_queue = get_operation(list_get(pedidoGameBoy.argumentos, 0));
-    	//Operation destination_queue = list_get(pedidoGameBoy.argumentos, 0);
     	uint32_t operation = SUBSCRIBE;
     	uint32_t process_gameboy = GAMEBOY;
     	int suscription_time = atoi(list_get(pedidoGameBoy.argumentos, 1));
+    	uint32_t id_gameboy = servicioDeConfiguracion.obtenerEntero(&servicioDeConfiguracion, ID_GAMEBOY);
+
     	send(socket_broker, &operation, sizeof(uint32_t), 0);
     	send(socket_broker, &process_gameboy, sizeof(uint32_t), 0);
     	send(socket_broker, &destination_queue, sizeof(uint32_t), 0);
+    	send(socket_broker, &id_gameboy, sizeof(uint32_t), 0);
 
     	socket_with_logger* swl = malloc(sizeof(socket_with_logger));
     	swl->logger = logger;
@@ -102,7 +104,8 @@ void atenderPedidoBroker(PedidoGameBoy pedidoGameBoy, t_log * logger) {
     	swl->operation = destination_queue;
 
     	pthread_t listener_thread;
-    	pthread_create(&listener_thread,NULL,(void*)listen_messages, swl);
+    	//pthread_create(&listener_thread,NULL,(void*)listen_messages, swl);
+    	pthread_create(&listener_thread,NULL,(void*)listen_messages_test, swl);
     	pthread_detach(listener_thread);
 
     	log_info(logger, "Starting timer of: %d", suscription_time);
@@ -112,6 +115,16 @@ void atenderPedidoBroker(PedidoGameBoy pedidoGameBoy, t_log * logger) {
     	break;
     }
     close(socket_broker);
+}
+
+void listen_messages_test(socket_with_logger* swl) {
+	while(is_alive) {
+		Result result;
+		if(recv(swl->socket, &result, sizeof(Result), MSG_WAITALL) < 0) {
+			break;
+		}
+		log_info(swl->logger, "Message received: %d", result);
+	}
 }
 
 void listen_messages(socket_with_logger* swl) {
