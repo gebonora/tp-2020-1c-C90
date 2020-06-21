@@ -8,9 +8,9 @@
 
 #include "app/Global.h"
 #include "delibird/servicios/servicioDeConfiguracion/ServicioDeConfiguracion.h"
-#include "delibird/interface.h"
 #include "delibird/utils/memoria/Memoria.h"
 #include "delibird/utils/colecciones/ExtensionColecciones.h"
+#include "modelo/mapa/Mapa.h"
 
 /**
  * El entrenador se mueve y caza pokemones. La idea es llevar ese registro acá.
@@ -20,6 +20,7 @@ typedef t_dictionary * ContadorPokemones; // La key es el nombre del pokemon, el
 
 typedef struct Entrenador {
     t_log * logger;
+    char * uuid;
     Coordinate posicionInicial;
     ContadorPokemones pokemonesCapturados;
     ContadorPokemones pokemonesObjetivo;

@@ -4,6 +4,10 @@
 
 #include "modelo/mapa/Mapa.h"
 
+char * registrarPosicion(Coordinate posicion, Posicionable posicionable) {
+    return generateUUID();
+}
+
 static void destruir(Mapa *this) {
     log_destroy(this->logger);
     dictionary_destroy(this->plano);
@@ -18,6 +22,7 @@ static Mapa new() {
     return (Mapa) {
             .logger = log_create(TEAM_INTERNAL_LOG_FILE, "Mapa", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_INFO),
             .plano = crearPlano(),
+            &registrarPosicion,
             &destruir
     };
 }
