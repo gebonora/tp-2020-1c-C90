@@ -10,13 +10,11 @@ void testDeIntegracion() {
     Entrenador * entrenador = EntrenadorConstructor.new("1|2", "A|B", "A|D|D");
     Entrenador * entrenador2 = EntrenadorConstructor.new("2|4", "A|B", "A|B");
 
-    if (entrenador->objetivoCompletado(entrenador) != false || entrenador->puedeAtraparPokemones(entrenador) != true) {
-        exit(EXIT_FAILURE);
-    }
+    assert(entrenador->objetivoCompletado(entrenador) == false);
+    assert(entrenador->puedeAtraparPokemones(entrenador) == true);
+    assert(entrenador2->objetivoCompletado(entrenador2) == true);
+    assert(entrenador2->puedeAtraparPokemones(entrenador2) == false);
 
-    if (entrenador2->objetivoCompletado(entrenador2) != true || entrenador2->puedeAtraparPokemones(entrenador2) != false) {
-        exit(EXIT_FAILURE);
-    }
     entrenador->destruir(entrenador);
     entrenador2->destruir(entrenador2);
 
