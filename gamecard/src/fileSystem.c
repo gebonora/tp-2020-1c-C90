@@ -39,7 +39,6 @@ int main(int argc, char* argv[]) { //de pruebas, luego sacar a iniciarFileSystem
 	if (argc == 2) {
 		if (!strcmp(argv[1], "-format"))
 			formatearTallGrass();
-
 	}
 	cargarBitmap();
 

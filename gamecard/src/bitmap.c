@@ -2,7 +2,7 @@
  * bitmap.c
  *
  *  Created on: 18 jun. 2020
- *      Author: utnso
+ *      Author: GONZALO BONORA
  */
 
 #include "bitmap.h"

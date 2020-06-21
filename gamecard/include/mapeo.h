@@ -2,7 +2,7 @@
  * mapeo.h
  *
  *  Created on: 20 jun. 2020
- *      Author: utnso
+ *      Author: GONZALO BONORA
  */
 
 #ifndef GAMECARD_INCLUDE_MAPEO_H_

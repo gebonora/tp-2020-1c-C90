@@ -2,7 +2,7 @@
  * manejoDeArchivos.h
  *
  *  Created on: 18 jun. 2020
- *      Author: utnso
+ *      Author: GONZALO BONORA
  */
 
 #ifndef GAMECARD_INCLUDE_MANEJODEARCHIVOS_H_
