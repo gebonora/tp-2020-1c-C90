@@ -159,16 +159,20 @@ void process_request(int cod_op, int socket) {
 	case SUBSCRIBE: ;
 		log_info(LOGGER, "Me llego un suscribe");
 		int cod_process;
+		int process_id;
 		recv(socket, &cod_process, sizeof(int), MSG_WAITALL);
 		int cod_cola;
 		recv(socket, &cod_cola, sizeof(int), MSG_WAITALL);
+
+		recv(socket, &process_id, sizeof(int), MSG_WAITALL);
+
 		char* op = get_operation_by_value(cod_cola);
 		pthread_mutex_lock(&MUTEX_SUBSCRIBERS_BY_QUEUE);
 		t_list* subscribers = dictionary_get(SUBSCRIBERS_BY_QUEUE, op);
 		list_add(subscribers, socket);
 		pthread_mutex_unlock(&MUTEX_SUBSCRIBERS_BY_QUEUE);
 
-		log_info(LOGGER, "Suscripcion del proceso: %d", cod_process);
+		log_info(LOGGER, "Suscripcion del proceso: %d, con id: %d", cod_process, process_id);
 		log_info(LOGGER, "Suscripcion en cola: %d", cod_cola);
 
 		// esto es de prueba nomas, cuando funcionen las queues y los envios hay que borrarlo
