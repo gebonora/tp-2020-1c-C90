@@ -20,7 +20,23 @@ NC='\033[0m'
 
 get_pid
 
-if [ -z "${PID}" ]; then
+if [ "-k" == "$1" ]; then
+    if [ -z "${PID}" ]; then
+        echo -e "${RED}Broker is not running${NC}"
+    else
+        echo -e "${YELLOW}Sending SIGTERM signal to broker with PID: ${PID}${NC}"
+    
+        kill -s SIGTERM ${PID}
+
+        get_pid
+
+        if [ -z "${PID}" ]; then
+            echo -e "${GREEN}Broker terminated succesfully${NC}"
+        else
+            echo -e "${RED}Something went wrong${NC}"
+        fi
+    fi
+elif [ -z "${PID}" ]; then
 
     case $1 in
         -v)
@@ -44,22 +60,6 @@ if [ -z "${PID}" ]; then
     else
         echo -e "${GREEN}Broker started with PID: ${PID}${NC}"
     fi
-
-elif [ "-k" == "$1" ]; then
-
-    echo -e "${YELLOW}Sending SIGTERM signal to broker with PID: ${PID}${NC}"
-    
-    kill -s SIGTERM ${PID}
-
-    get_pid
-
-    if [ -z "${PID}" ]
-    then
-        echo -e "${GREEN}Broker terminated succesfully${NC}"
-    else
-        echo -e "${RED}Something went wrong${NC}"
-    fi
-
 else
     echo -e "${YELLOW}Broker already running with PID: ${PID}${NC}"
 fi
