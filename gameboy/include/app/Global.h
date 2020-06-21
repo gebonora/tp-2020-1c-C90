@@ -21,6 +21,7 @@
 #define PUERTO_TEAM "PUERTO_TEAM"
 #define PUERTO_GAMECARD "PUERTO_GAMECARD"
 #define MANDATORY_LOG "MANDATORY_LOG"
+#define ID_GAMEBOY "ID_GAMEBOY"
 
 // Constantes
 #define SHOW_INTERNAL_CONSOLE 1 // Setear en 1 para mostrar la consola de uso interno. Dejar en 0 para la entrega.

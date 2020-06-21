@@ -18,4 +18,6 @@ double milisegundosHastaAhora(struct timeval tiempoInicio);
 
 double milisegundos(struct timeval tiempo);
 
+char* current_date_time_as_string();
+
 #endif //DELIBIRD_TIEMPO_H
