@@ -6,6 +6,7 @@
 #define GAMEBOY_CONTROLADORBROKER_H
 
 #include "modelo/controladorGameBoy/ControladorGameBoy.h"
+#include "delibird/protocol.h"
 #include <pthread.h>
 
 typedef struct {
