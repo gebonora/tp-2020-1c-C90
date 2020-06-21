@@ -85,23 +85,25 @@ void process_request(int cod_op, int socket) {
 	case CAUGHT: ;
 		Caught* caught_pokemon = recv_caught(socket);
 		 //cambio por un recv solo.
-		int result = recv(socket,&id_correlational,sizeof(uint32_t),0);
 
-		if(caught_pokemon != NULL && result > 0){
-			log_info(LOGGER, "Me llego un caught");
-			log_info(LOGGER, "Resultado: %d", caught_pokemon->result);
-			log_info(LOGGER, "Id correlational: %d", id_correlational);
+		if(caught_pokemon != NULL){
+			int result = recv(socket,&id_correlational,sizeof(uint32_t),0);
+			if(result > 0){
+				log_info(LOGGER, "Me llego un caught");
+				log_info(LOGGER, "Resultado: %d", caught_pokemon->result);
+				log_info(LOGGER, "Id correlational: %d", id_correlational);
 
-			pthread_mutex_lock(&MUTEX_CAUGHT_QUEUE);
-			queue_push(CAUGHT_QUEUE, caught_pokemon);
-			pthread_mutex_unlock(&MUTEX_CAUGHT_QUEUE);
-			sem_post(&CAUGHT_MESSAGES);
+				pthread_mutex_lock(&MUTEX_CAUGHT_QUEUE);
+				queue_push(CAUGHT_QUEUE, caught_pokemon);
+				pthread_mutex_unlock(&MUTEX_CAUGHT_QUEUE);
+				sem_post(&CAUGHT_MESSAGES);
 
-			if(send(socket, &generated_id, sizeof(uint32_t), 0) < 0){
-				close(socket);
-				break;
+				if(send(socket, &generated_id, sizeof(uint32_t), 0) < 0){
+					close(socket);
+					break;
+				}
+				free(caught_pokemon);
 			}
-			free(caught_pokemon);
 		} else {
 			log_info(LOGGER, "Se cayo el cliente: %d", socket);
 		}
@@ -131,27 +133,28 @@ void process_request(int cod_op, int socket) {
 	case LOCALIZED: ;
 		Localized* localized_pokemon = recv_localized(socket);
 
-		int result = recv(socket,&id_correlational,sizeof(uint32_t),0);
+		if(localized_pokemon != NULL){
+			int result = recv(socket,&id_correlational,sizeof(uint32_t),0);
+			if (result > 0) {
+				log_info(LOGGER, "Me llego un localized");
+				log_info(LOGGER, "Nombre del pokemon: %s", localized_pokemon->pokemon->name->value);
+				log_info(LOGGER, "Cantidad de coordenadas: %d", localized_pokemon->coordinates_quantity);
+				for(int i = 0; i < localized_pokemon->coordinates_quantity; i++) {
+					Coordinate* loc_coordinate = list_get(localized_pokemon->pokemon->coordinates, i);
+					log_info(LOGGER, "Coordenada: x=%d, y=%d", loc_coordinate->pos_x, loc_coordinate->pos_y);
+				}
 
-		if(localized_pokemon != NULL && result > 0){
-			log_info(LOGGER, "Me llego un localized");
-			log_info(LOGGER, "Nombre del pokemon: %s", localized_pokemon->pokemon->name->value);
-			log_info(LOGGER, "Cantidad de coordenadas: %d", localized_pokemon->coordinates_quantity);
-			for(int i = 0; i < localized_pokemon->coordinates_quantity; i++) {
-				Coordinate* loc_coordinate = list_get(localized_pokemon->pokemon->coordinates, i);
-				log_info(LOGGER, "Coordenada: x=%d, y=%d", loc_coordinate->pos_x, loc_coordinate->pos_y);
+				pthread_mutex_lock(&MUTEX_LOCALIZED_QUEUE);
+				queue_push(LOCALIZED_QUEUE, localized_pokemon);
+				pthread_mutex_unlock(&MUTEX_LOCALIZED_QUEUE);
+				sem_post(&LOCALIZED_MESSAGES);
+
+				if(send(socket, &generated_id, sizeof(uint32_t), 0) < 0){
+					close(socket);
+					break;
+				}
+				free_localized(localized_pokemon);
 			}
-
-			pthread_mutex_lock(&MUTEX_LOCALIZED_QUEUE);
-			queue_push(LOCALIZED_QUEUE, localized_pokemon);
-			pthread_mutex_unlock(&MUTEX_LOCALIZED_QUEUE);
-			sem_post(&LOCALIZED_MESSAGES);
-
-			if(send(socket, &generated_id, sizeof(uint32_t), 0) < 0){
-				close(socket);
-				break;
-			}
-			free_localized(localized_pokemon);
 		} else {
 			log_info(LOGGER, "Se cayo el cliente: %d", socket);
 		}
@@ -159,25 +162,27 @@ void process_request(int cod_op, int socket) {
 		break;
 	case APPEARED: ;
 		Pokemon* appeared_pokemon = recv_pokemon(socket, false);
-		int result = recv(socket,&id_correlational,sizeof(uint32_t),0);
 
-		if(appeared_pokemon != NULL && result > 0){
-			log_info(LOGGER, "Me llego un appeared");
-			log_info(LOGGER, "Nombre del pokemon: %s", appeared_pokemon->name->value);
-			log_info(LOGGER, "Id correlational: %d", id_correlational);
-			Coordinate* coordinate = list_get(appeared_pokemon->coordinates, 0);
-			log_info(LOGGER, "Coordenada: x=%d, y=%d", coordinate->pos_x, coordinate->pos_y);
+		if(appeared_pokemon != NULL){
+			int result = recv(socket,&id_correlational,sizeof(uint32_t),0);
+			if(result > 0){
+				log_info(LOGGER, "Me llego un appeared");
+				log_info(LOGGER, "Nombre del pokemon: %s", appeared_pokemon->name->value);
+				log_info(LOGGER, "Id correlational: %d", id_correlational);
+				Coordinate* coordinate = list_get(appeared_pokemon->coordinates, 0);
+				log_info(LOGGER, "Coordenada: x=%d, y=%d", coordinate->pos_x, coordinate->pos_y);
 
-			pthread_mutex_lock(&MUTEX_APPEARED_QUEUE);
-			queue_push(APPEARED_QUEUE, appeared_pokemon);
-			pthread_mutex_unlock(&MUTEX_APPEARED_QUEUE);
-			sem_post(&APPEARED_MESSAGES);
+				pthread_mutex_lock(&MUTEX_APPEARED_QUEUE);
+				queue_push(APPEARED_QUEUE, appeared_pokemon);
+				pthread_mutex_unlock(&MUTEX_APPEARED_QUEUE);
+				sem_post(&APPEARED_MESSAGES);
 
-			if(send(socket, &generated_id, sizeof(uint32_t), 0) < 0){
-				close(socket);
-				break;
+				if(send(socket, &generated_id, sizeof(uint32_t), 0) < 0){
+					close(socket);
+					break;
+				}
+				free_pokemon(appeared_pokemon);
 			}
-			free_pokemon(appeared_pokemon);
 		} else {
 			log_info(LOGGER, "Se cayo el cliente: %d", socket);
 		}
@@ -212,15 +217,24 @@ void process_request(int cod_op, int socket) {
 
 		int cod_process;
 		result = recv(socket, &cod_process, sizeof(int), MSG_WAITALL);
-		if(result <= 0) close(socket);
+		if(result <= 0) {
+			close(socket);
+			break;
+		}
 
 		int cod_cola;
 		result = recv(socket, &cod_cola, sizeof(int), MSG_WAITALL);
-		if(result <= 0) close(socket);
+		if(result <= 0) {
+			close(socket);
+			break;
+		}
 
 		int id_process;
 		result = recv(socket, &id_process, sizeof(int), MSG_WAITALL);
-		if(result <= 0) close(socket);
+		if(result <= 0) {
+			close(socket);
+			break;
+		}
 
 		char* op = get_operation_by_value(cod_cola);
 		pthread_mutex_lock(&MUTEX_SUBSCRIBERS_BY_QUEUE);
@@ -247,6 +261,7 @@ void process_request(int cod_op, int socket) {
 	case 0:
 	case -1:
 		close(socket);
+		break;
 	}
 
 }
