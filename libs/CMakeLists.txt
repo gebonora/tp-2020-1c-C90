@@ -5,6 +5,7 @@ set(CMAKE_C_STANDARD 11)
 
 # Include header files
 include_directories(include)
+include_directories(usr/include/delibird)
 
 # Link custom path
 if(DEFINED CMAKE_LIBRARY_PATH)
