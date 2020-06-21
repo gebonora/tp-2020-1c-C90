@@ -4,8 +4,8 @@
 
 #include "modelo/mapa/Mapa.h"
 
-char * registrarPosicion(Coordinate posicion, Posicionable posicionable) {
-    return generateUUID();
+char * registrarPosicion(Mapa * this, Coordinate posicion, Posicionable posicionable) {
+    return generateUUID(30);
 }
 
 static void destruir(Mapa *this) {

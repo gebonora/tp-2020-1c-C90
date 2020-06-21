@@ -58,6 +58,7 @@ void mostrarTitulo(t_log * logger) {
 }
 
 void inicializarComponentesDelSistema() {
+    srandom(time(NULL));
     inicializarAlgoritmosDePlanificacion();
     log_debug(INTERNAL_LOGGER, "Creando el terreno de captura");
     mapa = MapaConstructor.new();
