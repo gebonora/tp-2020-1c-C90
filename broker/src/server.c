@@ -24,8 +24,6 @@ void init_server() {
         break;
     }
 
-    LOGGER = log_create("/home/utnso/tp-2020-1c-C90/broker/logs/server.log", "Broker Server", 1, LOG_LEVEL_INFO);
-
 	listen(socket_servidor, SOMAXCONN);
 
     freeaddrinfo(servinfo);
@@ -102,8 +100,6 @@ void process_request(int cod_op, int socket) {
 
 		send(socket, &generated_id, sizeof(uint32_t), 0);
 		free_get(get_pokemon);
-
-		show_partitions();
 		break;
 	case LOCALIZED: ;
 		Localized* localized_pokemon = recv_localized(socket);

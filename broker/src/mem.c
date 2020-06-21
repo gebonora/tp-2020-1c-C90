@@ -147,17 +147,6 @@ void lru() {
 }
 */
 
-void show_partitions() {
-	t_list* partitions = list_create();
-	list_add(partitions, create_partition(0, 10, malloc(sizeof(uint32_t)), create_message(NEW, 19, 16, 14)));
-	sleep(2);
-	list_add(partitions, create_partition(1, 5, malloc(sizeof(uint32_t)), create_message(CATCH, 20, -1, 8)));
-	sleep(2);
-	list_add(partitions, create_partition(3, 19, malloc(sizeof(uint32_t)), create_message(LOCALIZED, 13, 7, 25)));
-	log_info(LOGGER, "--------------------------------");
-	list_iterate(partitions, &show_partition);
-}
-
 Message* create_message(Operation operation, uint32_t message_id, uint32_t correlational_id, uint32_t data_size) {
 	Message* message = malloc(sizeof(Message));
 	message->operation_code = operation;
@@ -176,6 +165,12 @@ Partition* create_partition(uint32_t partition_number, uint32_t partition_size, 
 	partition->start = partition_start;
 	partition->message = message;
 	return partition;
+}
+
+void show_partitions() {
+	log_info(LOGGER, "--------------------------------");
+	log_info(LOGGER, "Partitions size: %d", memory->partitions->elements_count);
+	list_iterate(memory->partitions, &show_partition);
 }
 
 void show_partition(Partition* partition) {

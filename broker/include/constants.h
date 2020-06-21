@@ -16,6 +16,8 @@
 #include <delibird/protocol.h>
 #include "broker.h"
 
+#define LOGGER_PATH "/home/utnso/tp-2020-1c-C90/broker/logs/server.log"
+
 char* IP;
 char* PUERTO;
 int TAMANO_MEMORIA;
@@ -85,11 +87,13 @@ typedef struct {
 
 Memory* memory;
 
-void init_memory();
+void init_logger();
 void init_config();
 void init_queues();
 void init_semaphores();
 void init_context();
 void init_threads();
+void init_memory();
+void create_partitions_test();
 
 #endif
