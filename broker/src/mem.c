@@ -1,6 +1,5 @@
-/*
 #include "mem.h"
-
+/*
 void add (void* dato_que_termina_en_cache, Message message)
 	if(strcmp(ALGORITMO_MEMORIA, "BS")) add_buddy_system();
 	else add_dynamic_partitions();
@@ -147,3 +146,18 @@ void lru() {
 
 }
 */
+
+void show_partitions() {
+	log_info(LOGGER, "Partitions state");
+	t_list* partitionss = list_create();
+	list_add(partitionss, "holasss");
+	list_add(partitionss, "como");
+	list_add(partitionss, "estas");
+	list_add(partitionss, "seba");
+
+	list_iterate(partitionss, &show_partition);
+}
+
+void show_partition(void* partition) {
+	log_info(LOGGER, "Partition: %s", (char*) partition);
+}

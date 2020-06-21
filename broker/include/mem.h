@@ -1,11 +1,11 @@
-/*
 #ifndef BROKER_INCLUDE_MEM_H_
 #define BROKER_INCLUDE_MEM_H_
 
 #include "constants.h"
 #include <string.h>
 #include <stdbool.h>
-
+#include <commons/collections/list.h>
+/*
 void add();
 void choose_victim();
 void delete_data();
@@ -23,5 +23,8 @@ void lru();
 void fifo();
 void best_fit();
 void first_fit();
+*/
+void show_partitions();
+void show_partition(void* partition);
 
 #endif /* BROKER_INCLUDE_MEM_H_ */
