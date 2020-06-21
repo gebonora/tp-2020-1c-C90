@@ -37,7 +37,9 @@ static void destruir(Entrenador * this) {
     log_destroy(this->logger);
     dictionary_destroy(this->pokemonesCapturados);
     dictionary_destroy(this->pokemonesObjetivo);
-    free(this->uuid);
+    if (this->uuid != NULL) {
+        free(this->uuid);
+    }
     free(this);
 }
 
@@ -89,7 +91,7 @@ static Entrenador *new(char * posicionInicial, char * pokemonesIniciales, char *
 
     entrenador->logger = log_create(TEAM_INTERNAL_LOG_FILE, "Entrenador", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_INFO);
     entrenador->posicionInicial = parsearPosicion(posicionInicial);
-    entrenador->uuid = mapa.registrarPosicion(entrenador->posicionInicial, ENTRENADOR);
+    entrenador->uuid = NULL;
     entrenador->pokemonesCapturados = agruparPokemonesPorNombre(pokemonesIniciales);
     entrenador->pokemonesObjetivo = agruparPokemonesPorNombre(pokemonesObjetivos);
     entrenador->limiteDeCaptura = totalDePokemones(entrenador->pokemonesObjetivo);

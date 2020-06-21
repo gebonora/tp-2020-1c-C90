@@ -27,7 +27,7 @@ typedef enum Posicionable {
 } Posicionable;
 
 typedef struct Presencia {
-    char * hashId;
+    char * uuid;
     Posicionable posicionable;
 } Presencia;
 
@@ -43,6 +43,9 @@ typedef struct Mapa {
 extern const struct MapaClass {
     Mapa (*new)();
 } MapaConstructor;
+
+Presencia * crearPresencia(Posicionable posicionable);
+char * coordenadaImprimible(Coordinate posicion);
 
 Mapa mapa;
 
