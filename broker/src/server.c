@@ -24,8 +24,6 @@ void init_server() {
         break;
     }
 
-    LOGGER = log_create("/home/utnso/tp-2020-1c-C90/broker/logs/server.log", "Broker Server", 1, LOG_LEVEL_INFO);
-
 	listen(socket_servidor, SOMAXCONN);
 
     freeaddrinfo(servinfo);
@@ -234,7 +232,7 @@ void process_request(int cod_op, int socket) {
 		if(result <= 0) {
 			close(socket);
 			break;
-		}
+    }
 
 		char* op = get_operation_by_value(cod_cola);
 		pthread_mutex_lock(&MUTEX_SUBSCRIBERS_BY_QUEUE);
@@ -243,7 +241,7 @@ void process_request(int cod_op, int socket) {
 		pthread_mutex_unlock(&MUTEX_SUBSCRIBERS_BY_QUEUE);
 
 		log_info(LOGGER, "Suscripcion del proceso: %d", cod_process);
-		log_info(LOGGER, "Id proceso: %d", id_process);
+		log_info(LOGGER, "Suscripcion del proceso: %d, con id: %d", cod_process, process_id);
 		log_info(LOGGER, "Suscripcion en cola: %d", cod_cola);
 
 		// esto es de prueba nomas, cuando funcionen las queues y los envios hay que borrarlo
@@ -265,43 +263,3 @@ void process_request(int cod_op, int socket) {
 	}
 
 }
-/*
-void laburar() {
-	log_info(LOGGER, "Entre a laburar");
-	pthread_mutex_init(&mutex_queue, NULL);
-	sem_init(&mensajes_en_queue, 0, 0);
-	message_queue = queue_create();
-	pthread_t producer;
-	pthread_create(&producer,NULL,(void*)productor, NULL);
-	pthread_t consumer;
-	pthread_create(&consumer,NULL,(void*)consumidor, NULL);
-	pthread_detach(producer);
-	pthread_detach(consumer);
-}
-void productor() {
-	log_info(LOGGER,"Arranca el producer");
-	int valor = 0;
-	while(valor != 10) {
- 	 	pthread_mutex_lock(&mutex_queue);
-		log_info(LOGGER,"Entra a la queue: %d", valor);
-		queue_push(message_queue, valor);
-		pthread_mutex_unlock(&mutex_queue);
-		sem_post(&mensajes_en_queue);
-		valor++;
-		//sleep(1);
-	}
-}
-void consumidor() {
-	log_info(LOGGER,"Arranca el consumer");
-	int mensajes_consumidos = 0;
-	while(mensajes_consumidos != 10) {
-		sem_wait(&mensajes_en_queue);
-		pthread_mutex_lock(&mutex_queue);
-		int valor = queue_pop(message_queue);
-		pthread_mutex_unlock(&mutex_queue);
-		log_info(LOGGER,"Sale de la queue: %d", valor);
-		mensajes_consumidos++;
-		//sleep(1);
-	}
-}
-*/
