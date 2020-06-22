@@ -16,6 +16,8 @@ int agregarCoordenadaPokemon(char* nombrePokemon, uint32_t posX, uint32_t posY, 
 
 int quitarCoordenadaPokemon(char* nombrePokemon, uint32_t posX, uint32_t posY);
 
+Pokemon* obtenerCoordenadasPokemon(char* nombrePokemon);
+
 int fileExists(char * path);
 char* crearRuta(char* subPath);
 void crearDirectoriosBase(char* subPath);

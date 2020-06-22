@@ -13,7 +13,6 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <delibird/interface.h>
-#include "support/utils/sockets/Sockets.h"
 #include <netdb.h>
 #include <config.h>
 #include <sys/sem.h>

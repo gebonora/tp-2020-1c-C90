@@ -16,4 +16,6 @@ void testCreacionCoordenadaPokemon(char* nombrePokemon, int cantidadIteraciones,
 
 void testRemocionCoordenadaPokemon(char* nombrePokemon, int cantidadIteraciones, int corX, int corY);
 
+void testGetPokemon(char* nombrePokemon);
+
 #endif /* GAMECARD_INCLUDE_TESTS_H_ */

@@ -35,3 +35,10 @@ void testRemocionCoordenadaPokemon(char* nombrePokemon, int cantidadIteraciones,
 	}
 }
 
+void testGetPokemon(char* nombrePokemon){
+	Get* getTest = create_get_pokemon(nombrePokemon);
+	Localized* res= procesarLocalized(getTest);
+	free_get(getTest);
+	free_localized(res);
+}
+

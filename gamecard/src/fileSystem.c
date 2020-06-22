@@ -36,7 +36,7 @@ int iniciarFileSystem(int argc, char* argv[]) { //de pruebas, luego sacar a inic
 			formatearTallGrass();
 	}
 	cargarBitmap();
-	log_info(loggerMain,"FileSystem iniciado!");
+	log_info(loggerMain, "FileSystem iniciado!");
 	puts("\n");
 	return 0;
 }
@@ -141,23 +141,34 @@ Caught* procesarCatch(Pokemon* unPokemon) {
 
 Localized* procesarLocalized(Get* unGet) {
 	char* nombreLocalized = unGet->name->value;
-//mismo problema que en New.
-
-//cosas de fileSystem acá. debería retornar un Pokemon* cargado con su lista de posiciones. Que retorna si no localizo nada? elements 0 y lista null?
-//Pokemon* unPokemon = fuciondeeFS
-
-//bloque para pruebas, aunque parte se usara en la funcion del fs
-	Pokemon* unPokemon = malloc(sizeof(Pokemon));
-	Name* unName = create_name(nombreLocalized);
-	unPokemon->name = unName; //ver memoria, pasar copiar quizas para que no choque con el Get*
-	unPokemon->coordinates = list_create();
-	list_add(unPokemon->coordinates, create_coordinate(2, 3));
-	list_add(unPokemon->coordinates, create_coordinate(6, 7));
-
-//no hay funcion en libs para crear localized, lo creo a mano.
 	Localized* localized = malloc(sizeof(Localized));
-	localized->pokemon = unPokemon;
-	localized->coordinates_quantity = unPokemon->coordinates->elements_count;
+	//mismo problema que en New.
+
+	puts(nombreLocalized);
+	if (!existePokemon(nombreLocalized)) {
+		Pokemon* pokemonNulo = malloc(sizeof(Pokemon));
+		pokemonNulo->name = create_name(nombreLocalized);
+		pokemonNulo->coordinates = list_create();
+		localized->pokemon = pokemonNulo;
+		localized->coordinates_quantity = pokemonNulo->coordinates->elements_count; //DEBERIA SER 0
+
+		return localized; //hacer que retorne lo mismo que si existe y no tiene coordenadas.
+	}
+
+	//abrir archivo
+
+	//cosas de fileSystem acá. debería retornar un Pokemon* cargado con su lista de posiciones. Que retorna si no localizo nada? elements 0 y lista null?
+	Pokemon* pokemonLocalized = obtenerCoordenadasPokemon(nombreLocalized);
+
+
+
+	//cerrarArchivo;
+
+
+	//no hay funcion en libs para crear localized, lo creo a mano.
+
+	localized->pokemon = pokemonLocalized;
+	localized->coordinates_quantity = pokemonLocalized->coordinates->elements_count;
 
 	return localized;
 }

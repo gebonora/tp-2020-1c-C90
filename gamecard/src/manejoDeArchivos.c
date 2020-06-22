@@ -136,6 +136,37 @@ int quitarCoordenadaPokemon(char* nombrePokemon, uint32_t posX, uint32_t posY) {
 
 }
 
+Pokemon* obtenerCoordenadasPokemon(char* nombrePokemon) {
+	Pokemon * pokemon = malloc(sizeof(Pokemon));
+	pokemon->name = create_name(nombrePokemon);
+	t_list* listaCoor = list_create();
+
+	char* rutaMetadata = crearRutaMetadataPokemon(nombrePokemon);
+
+	int size = leerClaveValorInt(rutaMetadata, "SIZE");
+	if (size == 0) { //SI SIZE ES 0 => NO TIENE COORDENADAS. SI SIZE !=0 => DEBE TENER ALGUNA COORDENADA.
+		//que retornamos? pokemon con lista vacia?
+		return pokemon;
+	}
+
+	t_list* listaBloques = leerClaveValorList(rutaMetadata, "BLOCKS");
+	char* archivoMapeado = mapearArchivoEnString(listaBloques, size);
+	char** arr = string_split(archivoMapeado, "\n");
+	int a = 0;
+	while (arr[a] != NULL) {
+		Coordinate* coor = obtenerCoordenadaDeString(arr[a]);
+		list_add(listaCoor, coor);
+		a++;
+	}
+	pokemon->coordinates = listaCoor;
+
+	freeArrayChars(arr);
+	list_destroy_and_destroy_elements(listaBloques, freeElem);
+	free(rutaMetadata);
+	free(archivoMapeado);
+	return pokemon;
+}
+
 //FUNCIONES PARA LECTURA/ESCRITURA DE ARCHIVOS METADATA
 
 int leerClaveValorInt(char* path, char* clave) {

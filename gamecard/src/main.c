@@ -34,6 +34,7 @@ int main(int argc, char* argv[]) {
 	//testCreacionCoordenadaPokemon("charmander", 3, 1, 2);
 
 	//testRemocionCoordenadaPokemon("charmander", 1, 1, 2);
+
 	testRemocionCoordenadaPokemon("pikachu", 1, 0, 2);
 	testRemocionCoordenadaPokemon("pikachu", 1, 1, 2);
 	testRemocionCoordenadaPokemon("pikachu", 1, 2, 2);
@@ -41,8 +42,9 @@ int main(int argc, char* argv[]) {
 	testRemocionCoordenadaPokemon("pikachu", 1, 4, 2);
 	testRemocionCoordenadaPokemon("pikachu", 1, 5, 2);
 
-	//end testing
+	testGetPokemon("pikachu");
 
+	//end testing
 	//atenderConexiones();
 	cerrarLoggers();
 	cerrarVariablesConfig();

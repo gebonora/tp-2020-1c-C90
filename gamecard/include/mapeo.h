@@ -17,5 +17,7 @@ char* operarNew(char* archivoMapeado, int posX, int posY, int cantidad);
 char* operarCatch(char* archivoMapeado, int posX, int posY);
 
 char* obtenerValorEnString(char* string, char* clave);
+char* obtenerClaveEnString(char* string);
+Coordinate* obtenerCoordenadaDeString(char* string);
 
 #endif /* GAMECARD_INCLUDE_MAPEO_H_ */
