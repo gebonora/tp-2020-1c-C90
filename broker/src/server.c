@@ -70,10 +70,7 @@ void process_request(int cod_op, int socket) {
 			pthread_mutex_unlock(&MUTEX_NEW_QUEUE);
 			sem_post(&NEW_MESSAGES);
 
-			if(send(socket, &generated_id, sizeof(uint32_t), 0) < 0){
-				close(socket);
-				break;
-			}
+			send(socket, &generated_id, sizeof(uint32_t), 0);
 			free_new(new_pokemon);
 		} else {
 			log_info(LOGGER, "Se cayo el cliente: %d", socket);
@@ -96,10 +93,7 @@ void process_request(int cod_op, int socket) {
 				pthread_mutex_unlock(&MUTEX_CAUGHT_QUEUE);
 				sem_post(&CAUGHT_MESSAGES);
 
-				if(send(socket, &generated_id, sizeof(uint32_t), 0) < 0){
-					close(socket);
-					break;
-				}
+				send(socket, &generated_id, sizeof(uint32_t), 0)
 				free(caught_pokemon);
 			}
 		} else {
@@ -118,10 +112,7 @@ void process_request(int cod_op, int socket) {
 			pthread_mutex_unlock(&MUTEX_GET_QUEUE);
 			sem_post(&GET_MESSAGES);
 
-			if(send(socket, &generated_id, sizeof(uint32_t), 0) < 0){
-				close(socket);
-				break;
-			}
+			send(socket, &generated_id, sizeof(uint32_t), 0);
 			free_get(get_pokemon);
 		} else {
 			log_info(LOGGER, "Se cayo el cliente: %d", socket);
@@ -147,10 +138,7 @@ void process_request(int cod_op, int socket) {
 				pthread_mutex_unlock(&MUTEX_LOCALIZED_QUEUE);
 				sem_post(&LOCALIZED_MESSAGES);
 
-				if(send(socket, &generated_id, sizeof(uint32_t), 0) < 0){
-					close(socket);
-					break;
-				}
+				send(socket, &generated_id, sizeof(uint32_t), 0);
 				free_localized(localized_pokemon);
 			}
 		} else {
@@ -175,10 +163,7 @@ void process_request(int cod_op, int socket) {
 				pthread_mutex_unlock(&MUTEX_APPEARED_QUEUE);
 				sem_post(&APPEARED_MESSAGES);
 
-				if(send(socket, &generated_id, sizeof(uint32_t), 0) < 0){
-					close(socket);
-					break;
-				}
+				send(socket, &generated_id, sizeof(uint32_t), 0);
 				free_pokemon(appeared_pokemon);
 			}
 		} else {
@@ -199,10 +184,7 @@ void process_request(int cod_op, int socket) {
 			pthread_mutex_unlock(&MUTEX_CATCH_QUEUE);
 			sem_post(&CATCH_MESSAGES);
 
-			if(send(socket, &generated_id, sizeof(uint32_t), 0) < 0){
-				close(socket);
-				break;
-			}
+			send(socket, &generated_id, sizeof(uint32_t), 0);
 			free_pokemon(catch_pokemon);
 		} else {
 			log_info(LOGGER, "Se cayo el cliente: %d", socket);
