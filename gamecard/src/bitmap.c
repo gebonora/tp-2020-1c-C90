@@ -13,7 +13,7 @@ void crearBitmap() {
 	log_info(loggerMain, "----Creando Bitmap...");
 
 	int bitarraySize = calcularTamanioBitArray(g_numberOfBlocks);
-	log_info(loggerMain, "----Tamanio del bitarray: %d", bitarraySize);
+	log_info(loggerMain, "----Tamanio del bitarray: '%d'.", bitarraySize);
 	char* aux = malloc(bitarraySize);
 	t_bitarray* bitmap = bitarray_create_with_mode(aux, bitarraySize, MSB_FIRST);
 
@@ -62,9 +62,9 @@ void dumpBitmap(t_bitarray* bitmap, int cantidadMostrada) {
 	puts("\n");
 	for (int a = 0; a < cantidadMostrada; a++) {
 		if (bitarray_test_bit(g_bitmap, a))
-			printf("Bloque %d, valor 1\n", a);
+			printf("		Bloque %d, valor 1\n", a);
 		else
-			printf("Bloque %d, valor 0\n", a);
+			printf("		Bloque %d, valor 0\n", a);
 	}
 }
 

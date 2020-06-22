@@ -23,6 +23,7 @@
 #include <commons/bitarray.h>
 
 #include <delibird/interface.h>
+
 #include "config.h"
 #include "logger.h"
 #include "server.h"

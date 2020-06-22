@@ -8,14 +8,18 @@
 #ifndef GAMECARD_INCLUDE_SERVER_H_
 #define GAMECARD_INCLUDE_SERVER_H_
 
-#include "fileSystem.h"
+
 #include <sys/socket.h>
 #include <unistd.h>
 #include <pthread.h>
-#include <delibird/interface.h>
 #include <netdb.h>
 #include <config.h>
 #include <sys/sem.h>
+
+#include <delibird/interface.h>
+#include <delibird/utils/sockets/Sockets.h>
+
+#include "fileSystem.h"
 
 typedef struct {
 	void* mensaje;

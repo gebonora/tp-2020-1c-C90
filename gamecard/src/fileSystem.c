@@ -46,11 +46,11 @@ int iniciarFileSystem(int argc, char* argv[]) { //de pruebas, luego sacar a inic
 void leerMetadataFileSystem() {
 	char * path = crearRuta(PATH_ARCHIVO_METADATA);
 	g_numberOfBlocks = leerClaveValorInt(path, "BLOCKS");
-	log_info(loggerMain, "Metadata: NUMBER OF BLOCKS: '%d'", g_numberOfBlocks);
+	log_info(loggerMain, "Metadata: NUMBER OF BLOCKS: '%d'.", g_numberOfBlocks);
 	g_blockSize = leerClaveValorInt(path, "BLOCK_SIZE");
-	log_info(loggerMain, "Metadata: BLOCK_SIZE: '%d'", g_blockSize);
+	log_info(loggerMain, "Metadata: BLOCK_SIZE: '%d'.", g_blockSize);
 	char* magicNumber = leerClaveValorString(path, "MAGIC_NUMBER");
-	log_info(loggerMain, "Metadata: MAGIC NUMBER: '%s'", magicNumber);
+	log_info(loggerMain, "Metadata: MAGIC NUMBER: '%s'.", magicNumber);
 	free(magicNumber);
 	free(path);
 
@@ -151,8 +151,7 @@ Localized* procesarLocalized(Get* unGet) {
 		pokemonNulo->coordinates = list_create();
 		localized->pokemon = pokemonNulo;
 		localized->coordinates_quantity = pokemonNulo->coordinates->elements_count; //DEBERIA SER 0
-
-		return localized; //hacer que retorne lo mismo que si existe y no tiene coordenadas.
+		return localized;
 	}
 
 	//abrir archivo
@@ -161,12 +160,8 @@ Localized* procesarLocalized(Get* unGet) {
 	Pokemon* pokemonLocalized = obtenerCoordenadasPokemon(nombreLocalized);
 
 
-
+	sleep(TIEMPO_RETARDO_OPERACION);
 	//cerrarArchivo;
-
-
-	//no hay funcion en libs para crear localized, lo creo a mano.
-
 	localized->pokemon = pokemonLocalized;
 	localized->coordinates_quantity = pokemonLocalized->coordinates->elements_count;
 

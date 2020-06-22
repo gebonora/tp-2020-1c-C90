@@ -102,6 +102,8 @@ void procesarHiloNew(ArgumentosHilo* argumentosHilo) {
 	//filesystem acá
 	Pokemon* pokemonAppeared = procesarNew(unNew); //FS
 
+	logearAppearedProcesado(pokemonAppeared, idMensaje);
+
 	//crear socket descartable al broker
 	int socketDescartable = crearSocketCliente(IP_BROKER, PUERTO_BROKER);
 	if (socketDescartable == -1) {
@@ -119,7 +121,11 @@ void procesarHiloNew(ArgumentosHilo* argumentosHilo) {
 	//si no pudo mandar el mensaje, logeo y sigo.
 	if (flagBrokerCaido) {
 		pthread_mutex_lock(&m_loggerNew);
-		log_info(loggerNew, "No se pudo enviar el APPEARED como respuesta al mensaje: '%d' hacia el Broker. Continuando ejecución... ", idMensaje);
+		log_info(loggerNew, "No se pudo enviar el Appeared como respuesta al mensaje: '%d' hacia el Broker. Continuando ejecución... ", idMensaje);
+		pthread_mutex_unlock(&m_loggerNew);
+	} else {
+		pthread_mutex_lock(&m_loggerNew);
+		log_info(loggerNew, "Se envió el Appeared como respuesta al mensaje: '%d' hacia el Broker.", idMensaje); //medio al pedo logear esto en la version final
 		pthread_mutex_unlock(&m_loggerNew);
 	}
 
@@ -130,7 +136,7 @@ void procesarHiloNew(ArgumentosHilo* argumentosHilo) {
 		close(socketDescartable);
 	}
 	pthread_mutex_lock(&m_loggerNew);
-	log_info(loggerNew, "Se terminó con éxito un hilo"); //medio al pedo logear esto en la version final
+	log_info(loggerNew, "Se terminó con éxito un hilo."); //medio al pedo logear esto en la version final
 	pthread_mutex_unlock(&m_loggerNew);
 	//termina el hilo
 }
@@ -192,6 +198,8 @@ void procesarHiloCatch(ArgumentosHilo* argumentosHilo) {
 	//Filesystem aca:
 	Caught* pokemonCaught = procesarCatch(unPokemon);
 
+	logearCaughtProcesado(pokemonCaught, idMensaje);
+
 	//crear socket descartable al broker
 	int socketDescartable = crearSocketCliente(IP_BROKER, PUERTO_BROKER);
 	if (socketDescartable < 0) {
@@ -207,8 +215,13 @@ void procesarHiloCatch(ArgumentosHilo* argumentosHilo) {
 	}
 	if (flagBrokerCaido) {
 		pthread_mutex_lock(&m_loggerCatch);
-		log_info(loggerCatch, "No se pudo enviar el CAUGHT como respuesta al mensaje: '%d' hacia el Broker. Continuando ejecución... ", idMensaje);
+		log_info(loggerCatch, "No se pudo enviar el Caught como respuesta al mensaje: '%d' hacia el Broker. Continuando ejecución... ", idMensaje);
 		pthread_mutex_unlock(&m_loggerCatch);
+	} else {
+		pthread_mutex_lock(&m_loggerCatch);
+		log_info(loggerCatch, "Se envió el Caught como respuesta al mensaje: '%d' hacia el Broker.", idMensaje);
+		pthread_mutex_unlock(&m_loggerCatch);
+
 	}
 
 	//liberar memoriar y cerrar socket
@@ -218,7 +231,7 @@ void procesarHiloCatch(ArgumentosHilo* argumentosHilo) {
 		close(socketDescartable);
 	}
 	pthread_mutex_lock(&m_loggerCatch);
-	log_info(loggerCatch, "Se terminó con éxito un hilo");
+	log_info(loggerCatch, "Se terminó con éxito un hilo.");
 	pthread_mutex_unlock(&m_loggerCatch);
 	return;
 	//termina el hilo

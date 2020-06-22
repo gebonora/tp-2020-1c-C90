@@ -33,14 +33,14 @@ void cargarConfig() {
 
 	config_destroy(config);
 
-	log_info(loggerMain, "Config: PUERTO_BROKER: '%s'", PUERTO_BROKER);
-	log_info(loggerMain, "Config: IP_BROKER: '%s'", IP_BROKER);
-	log_info(loggerMain, "Config: PUNTO_MONTAJE_TALLGRASS: '%s'", PUNTO_MONTAJE_TALLGRASS);
-	log_info(loggerMain, "Config: TIEMPO_DE_REINTENTO_CONEXION: '%d'", TIEMPO_DE_REINTENTO_CONEXION);
-	log_info(loggerMain, "Config: TIEMPO_DE_REINTENTO_OPERACION: '%d'", TIEMPO_DE_REINTENTO_OPERACION);
-	log_info(loggerMain, "Config: TIEMPO_RETARDO_OPERACION: '%d'", TIEMPO_RETARDO_OPERACION);
-	log_info(loggerMain, "Config: PUERTO_GAMECARD_GAMEBOY: '%s'", PUERTO_GAMECARD_GAMEBOY);
-	log_info(loggerMain, "Config: IP_GAMECARD_GAMEBOY: '%s'", IP_GAMECARD_GAMEBOY);
+	log_info(loggerMain, "Config: PUERTO_BROKER: '%s'.", PUERTO_BROKER);
+	log_info(loggerMain, "Config: IP_BROKER: '%s'.", IP_BROKER);
+	log_info(loggerMain, "Config: PUNTO_MONTAJE_TALLGRASS: '%s'.", PUNTO_MONTAJE_TALLGRASS);
+	log_info(loggerMain, "Config: TIEMPO_DE_REINTENTO_CONEXION: '%d'.", TIEMPO_DE_REINTENTO_CONEXION);
+	log_info(loggerMain, "Config: TIEMPO_DE_REINTENTO_OPERACION: '%d'.", TIEMPO_DE_REINTENTO_OPERACION);
+	log_info(loggerMain, "Config: TIEMPO_RETARDO_OPERACION: '%d'.", TIEMPO_RETARDO_OPERACION);
+	log_info(loggerMain, "Config: PUERTO_GAMECARD_GAMEBOY: '%s'.", PUERTO_GAMECARD_GAMEBOY);
+	log_info(loggerMain, "Config: IP_GAMECARD_GAMEBOY: '%s'.", IP_GAMECARD_GAMEBOY);
 	log_info(loggerMain, "Listo!");
 	puts("\n");
 }
