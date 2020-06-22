@@ -15,6 +15,9 @@ void iniciarListaSemaforosDeArchivo() {
 	while ((dirPokemon = readdir(dirFiles))) {
 		if (esDirectorioPokemon(dirPokemon->d_name)) {
 			agregarSemaforoALista(dirPokemon->d_name);
+			char* metadata = crearRutaMetadataPokemon(dirPokemon->d_name);
+			setClaveValor(metadata,"OPEN","N");
+			free(metadata);
 		}
 	}
 	free(rutaFiles);
