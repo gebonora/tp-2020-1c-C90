@@ -29,22 +29,23 @@ int main(int argc, char* argv[]) {
 
 	//testing
 
-	testCreacionCoordenadasMultiplesPokemon("pikachu", 40);
+	//testCreacionCoordenadasMultiplesPokemon("pikachu", 40);
 
-	//testCreacionCoordenadaPokemon("charmander", 3, 1, 2);
+	testCreacionCoordenadaPokemon("charmander", 1, 1, 2);
 
-	//testRemocionCoordenadaPokemon("charmander", 1, 1, 2);
-
+	testRemocionCoordenadaPokemon("charmander", 1, 1, 2);
+/*
 	testRemocionCoordenadaPokemon("pikachu", 1, 0, 2);
 	testRemocionCoordenadaPokemon("pikachu", 1, 1, 2);
 	testRemocionCoordenadaPokemon("pikachu", 1, 2, 2);
 	testRemocionCoordenadaPokemon("pikachu", 1, 3, 2);
 	testRemocionCoordenadaPokemon("pikachu", 1, 4, 2);
 	testRemocionCoordenadaPokemon("pikachu", 1, 5, 2);
-
+*/
 	testGetPokemon("pikachu");
 
 	//end testing
+
 	//atenderConexiones();
 	cerrarLoggers();
 	cerrarVariablesConfig();

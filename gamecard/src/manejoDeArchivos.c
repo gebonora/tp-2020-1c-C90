@@ -108,6 +108,7 @@ int quitarCoordenadaPokemon(char* nombrePokemon, uint32_t posX, uint32_t posY) {
 
 		free(archivoMapeado);
 		free(rutaMetadata);
+		free(clave);
 		list_destroy_and_destroy_elements(listaBloques, freeElem);
 		return OK;
 	}
@@ -145,7 +146,7 @@ Pokemon* obtenerCoordenadasPokemon(char* nombrePokemon) {
 
 	int size = leerClaveValorInt(rutaMetadata, "SIZE");
 	if (size == 0) { //SI SIZE ES 0 => NO TIENE COORDENADAS. SI SIZE !=0 => DEBE TENER ALGUNA COORDENADA.
-		//que retornamos? pokemon con lista vacia?
+		pokemon->coordinates = listaCoor;
 		return pokemon;
 	}
 
