@@ -10,7 +10,7 @@
 
 #include "fileSystem.h"
 
-char* mapearArchivoEnString(t_list* listaBloques);
+char* mapearArchivoEnString(t_list* listaBloques, int tamanioArchivo);
 void dumpearArchivo(t_list* listaBloques, char* archivoMapeado);
 
 char* operarNew(char* archivoMapeado, int posX, int posY, int cantidad);

@@ -42,9 +42,9 @@ int agregarCoordenadaPokemon(char* nombrePokemon, uint32_t posX, uint32_t posY, 
 	 *
 	 */
 	if (size == 0) { //arreglar, cambiado para test
-		archivoMapeado = string_from_format("%d-%d=%d", posX, posY, cantidad);
+		archivoMapeado = string_from_format("%d-%d=%d\n", posX, posY, cantidad);
 	} else {
-		archivoMapeado = mapearArchivoEnString(listaBloques);
+		archivoMapeado = mapearArchivoEnString(listaBloques, size);
 		archivoMapeado = operarNew(archivoMapeado, posX, posY, cantidad);
 	}
 
@@ -85,7 +85,7 @@ int quitarCoordenadaPokemon(char* nombrePokemon, uint32_t posX, uint32_t posY) {
 		return FAIL;
 	}
 	t_list* listaBloques = leerClaveValorList(rutaMetadata, "BLOCKS");
-	char* archivoMapeado = mapearArchivoEnString(listaBloques);
+	char* archivoMapeado = mapearArchivoEnString(listaBloques, size);
 	char* clave = string_from_format("%d-%d", posX, posY);
 	if (!string_contains(archivoMapeado, clave)) {
 		free(rutaMetadata);

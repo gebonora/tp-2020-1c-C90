@@ -31,6 +31,8 @@
 #include "bloques.h"
 #include "mapeo.h"
 
+int iniciarFileSystem(int argc, char* argv[]);
+
 void formatearTallGrass();
 void crearFilesMetadataDirectorio();
 void leerMetadataFileSystem();

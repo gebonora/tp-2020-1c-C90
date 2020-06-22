@@ -17,19 +17,14 @@
  *
  * */
 
-int main(int argc, char* argv[]) { //de pruebas, luego sacar a iniciarFileSystem
-
-	iniciarLoggers();
-	cargarConfig();
+int iniciarFileSystem(int argc, char* argv[]) { //de pruebas, luego sacar a iniciarFileSystem
 	iniciarSemaforosFS();
 
 	char* rutaMetadata = crearRuta(PATH_ARCHIVO_METADATA);
 	if (!fileExists(rutaMetadata)) {
-		log_error(loggerMain, "No se encontró un Metadata de FileSystem en el punto de montaje. Provea en PuntoDeMontaje/Metadata/Metadata.bin un"
-				"archivo válido y formaetee ejecutando con -format. Abortando ejecución...");
-		//liberar memoria y loggers.
-		log_info(loggerMain, "ruta:%s", rutaMetadata);
-		exit(1);
+		log_error(loggerMain, "No se encontró un Metadata de FileSystem en el punto de montaje. Provea el archivo %s/Metadata/Metadata.bin"
+				" y formatee ejecutando con -format. Abortando ejecución...", PUNTO_MONTAJE_TALLGRASS);
+		return -1;
 	} else {
 		log_info(loggerMain, "Metadata del FileSystem encontrada. Leyendo...");
 	}
@@ -41,18 +36,9 @@ int main(int argc, char* argv[]) { //de pruebas, luego sacar a iniciarFileSystem
 			formatearTallGrass();
 	}
 	cargarBitmap();
-
-	//dumpeos de test
-	dumpBitmap(g_bitmap, 10);
-	//dumpeos de test
-
-	New* newTest = create_new_pokemon("pikachu", 1, 2, 43);
-
-	procesarNew(newTest);
-
-	cerrarLoggers();
-	cerrarVariablesConfig();
-	cerrarBitmap();
+	log_info(loggerMain,"FileSystem iniciado!");
+	puts("\n");
+	return 0;
 }
 
 //FUNCIONES DE INICIALIZACION
@@ -124,7 +110,7 @@ Pokemon* procesarNew(New* unNew) {
 	//if abrirArchivo implementar semaforo.
 	agregarCoordenadaPokemon(nombreAppeared, posXAppeared, posYAppeared, cantidad);
 
-	sleep(TIEMPO_RETARDO_OPERACION);
+	//sleep(TIEMPO_RETARDO_OPERACION);
 	//cerrar archivo
 
 	return create_pokemon(nombreAppeared, posXAppeared, posYAppeared);
@@ -147,7 +133,7 @@ Caught* procesarCatch(Pokemon* unPokemon) {
 	//cosas de fileSystem acá...
 	resultado = quitarCoordenadaPokemon(nombreCaught, posXCaught, posYCaught);
 
-	sleep(TIEMPO_RETARDO_OPERACION);
+	//sleep(TIEMPO_RETARDO_OPERACION);
 	//cerrar archivo
 
 	return create_caught_pokemon(resultado);

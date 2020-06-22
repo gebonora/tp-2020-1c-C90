@@ -14,7 +14,8 @@ void crearBitmap() {
 
 	int bitarraySize = calcularTamanioBitArray(g_numberOfBlocks);
 	log_info(loggerMain, "----Tamanio del bitarray: %d", bitarraySize);
-	t_bitarray* bitmap = bitarray_create_with_mode(malloc(bitarraySize), bitarraySize, MSB_FIRST);
+	char* aux = malloc(bitarraySize);
+	t_bitarray* bitmap = bitarray_create_with_mode(aux, bitarraySize, MSB_FIRST);
 
 	truncate(path, bitarraySize);
 	int bitmapFD = open(path, O_RDWR, 0);
@@ -32,6 +33,7 @@ void crearBitmap() {
 	close(bitmapFD);
 	bitarray_destroy(bitmap);
 	free(path);
+	free(aux);
 	log_info(loggerMain, "----Listo!");
 }
 
@@ -46,11 +48,13 @@ void cargarBitmap() {
 	if (l_mapeo == MAP_FAILED)
 		perror("mmap:");
 
-	g_bitmap = bitarray_create_with_mode(malloc(bitarraySize), bitarraySize, MSB_FIRST);
+	char* aux = malloc(bitarraySize);
+	g_bitmap = bitarray_create_with_mode(aux, bitarraySize, MSB_FIRST);
 
 	g_bitmap->bitarray = l_mapeo;
 
 	free(path);
+	free(aux);
 	//dejamos g_bitmap, mapeo y bitmapFD sin cerrar porque los usaremos hasta aue termine el programa.
 }
 
