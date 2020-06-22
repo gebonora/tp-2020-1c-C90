@@ -61,6 +61,11 @@ void iniciarSemaforosFS() {
 	iniciarListaSemaforosDeArchivo();
 }
 
+void cerrarSemaforosFS() {
+	pthread_mutex_destroy(&m_bitmap);
+	freeListaSemaforos();
+}
+
 //FUNCIONES DE FORMATEADOR
 
 void formatearTallGrass() {
@@ -91,7 +96,7 @@ void crearFilesMetadataDirectorio() {
 
 //FUNCIONES DE PROCESADO DE REQUESTS
 
-Pokemon* procesarNew(New* unNew) {
+Pokemon* procesarNew(New* unNew, uint32_t idMensaje) {
 	char* nombreAppeared = unNew->pokemon->name->value;
 	Coordinate* coordenadaAppeared = list_get(unNew->pokemon->coordinates, 0);
 	uint32_t posXAppeared = coordenadaAppeared->pos_x;
@@ -102,19 +107,29 @@ Pokemon* procesarNew(New* unNew) {
 
 	if (!existePokemon(nombreAppeared)) {
 		crearPokemon(nombreAppeared);
-		//agregar semaforo a lista
+		agregarSemaforoALista(nombreAppeared);
+		log_info(loggerMain, "Se inicializo un semaforo para el archivo pokemon: '%s'.", nombreAppeared);
 	}
 
 	//if abrirArchivo implementar semaforo.
+	while (!puedeAccederAArchivo(nombreAppeared)) {
+		pthread_mutex_lock(&m_loggerNew);
+		log_info(loggerNew, "El archivo: '%s' esta abierto. Reintentando la operacion New asociada al idMensaje: '%d' en '%d' segundos...", nombreAppeared, idMensaje,
+				TIEMPO_DE_REINTENTO_OPERACION);
+		pthread_mutex_unlock(&m_loggerNew);
+		sleep(TIEMPO_DE_REINTENTO_OPERACION);
+	}
+
 	agregarCoordenadaPokemon(nombreAppeared, posXAppeared, posYAppeared, cantidad);
 
 	sleep(TIEMPO_RETARDO_OPERACION);
+	cerrarArchivo(nombreAppeared);
 	//cerrar archivo
 
 	return create_pokemon(nombreAppeared, posXAppeared, posYAppeared);
 }
 
-Caught* procesarCatch(Pokemon* unPokemon) {
+Caught* procesarCatch(Pokemon* unPokemon, uint32_t idMensaje) {
 	uint32_t resultado;
 	char* nombreCaught = unPokemon->name->value;
 	Coordinate* coordenadaCaught = list_get(unPokemon->coordinates, 0);
@@ -128,16 +143,25 @@ Caught* procesarCatch(Pokemon* unPokemon) {
 
 	// if abrirArchivo
 
+	while (!puedeAccederAArchivo(nombreCaught)) {
+		pthread_mutex_lock(&m_loggerCatch);
+		log_info(loggerCatch, "El archivo: '%s' esta abierto. Reintentando la operacion Catch asociada al idMensaje: '%d' en '%d' segundos...", nombreCaught, idMensaje,
+				TIEMPO_DE_REINTENTO_OPERACION);
+		pthread_mutex_unlock(&m_loggerCatch);
+		sleep(TIEMPO_DE_REINTENTO_OPERACION);
+	}
+
 	//cosas de fileSystem acá...
 	resultado = quitarCoordenadaPokemon(nombreCaught, posXCaught, posYCaught);
 
 	sleep(TIEMPO_RETARDO_OPERACION);
+	cerrarArchivo(nombreCaught);
 	//cerrar archivo
 
 	return create_caught_pokemon(resultado);
 }
 
-Localized* procesarLocalized(Get* unGet) {
+Localized* procesarLocalized(Get* unGet, uint32_t idMensaje) {
 	char* nombreLocalized = unGet->name->value;
 	Localized* localized = malloc(sizeof(Localized));
 	//mismo problema que en New.
@@ -154,11 +178,19 @@ Localized* procesarLocalized(Get* unGet) {
 
 	//abrir archivo
 
+	while (!puedeAccederAArchivo(nombreLocalized)) {
+		pthread_mutex_lock(&m_loggerGet);
+		log_info(loggerGet, "El archivo: '%s' esta abierto. Reintentando la operacion Get asociada al idMensaje: '%d' en '%d' segundos...", nombreLocalized, idMensaje,
+				TIEMPO_DE_REINTENTO_OPERACION);
+		pthread_mutex_unlock(&m_loggerGet);
+		sleep(TIEMPO_DE_REINTENTO_OPERACION);
+	}
+
 	//cosas de fileSystem acá. debería retornar un Pokemon* cargado con su lista de posiciones. Que retorna si no localizo nada? elements 0 y lista null?
 	Pokemon* pokemonLocalized = obtenerCoordenadasPokemon(nombreLocalized);
 
-
 	sleep(TIEMPO_RETARDO_OPERACION);
+	cerrarArchivo(nombreLocalized);
 	//cerrarArchivo;
 	localized->pokemon = pokemonLocalized;
 	localized->coordinates_quantity = pokemonLocalized->coordinates->elements_count;

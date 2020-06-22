@@ -100,7 +100,7 @@ void procesarHiloNew(ArgumentosHilo* argumentosHilo) {
 	logearNewRecibido(unNew, idMensaje);
 
 	//filesystem acá
-	Pokemon* pokemonAppeared = procesarNew(unNew); //FS
+	Pokemon* pokemonAppeared = procesarNew(unNew, idMensaje); //FS
 
 	logearAppearedProcesado(pokemonAppeared, idMensaje);
 
@@ -196,7 +196,7 @@ void procesarHiloCatch(ArgumentosHilo* argumentosHilo) {
 	logearCatchRecibido(unPokemon, idMensaje);
 
 	//Filesystem aca:
-	Caught* pokemonCaught = procesarCatch(unPokemon);
+	Caught* pokemonCaught = procesarCatch(unPokemon, idMensaje);
 
 	logearCaughtProcesado(pokemonCaught, idMensaje);
 
@@ -292,7 +292,7 @@ void procesarHiloGet(ArgumentosHilo* argumentosHilo) {
 	logearGetRecibido(unGet, idMensaje);
 
 	//fs aca:
-	Localized* pokemonLocalized = procesarLocalized(unGet);
+	Localized* pokemonLocalized = procesarLocalized(unGet, idMensaje);
 
 	logearLocalizedProcesado(pokemonLocalized, idMensaje);
 

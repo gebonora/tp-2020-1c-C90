@@ -17,12 +17,24 @@ typedef struct {
 	pthread_mutex_t mutexArchivo;
 } FileMutex;
 
+int puedeAccederAArchivo(char* nombreArchivo);
+
+void cerrarArchivo(char* nombreArchivo);
+
 void iniciarListaSemaforosDeArchivo();
 
 void agregarSemaforoALista(char* nombreArchivo);
 
+int obtenerPosicionEnLista(char* nombrePokemon);
+
 void dumpListaSemaforosDeArchivo();
 
 int esDirectorioPokemon(char* directorio);
+
+int estaAbierto(char* nombrePokemon);
+
+void freeListaSemaforos();
+
+void freeFileMutex(void* elem);
 
 #endif /* GAMECARD_INCLUDE_REINTENTOOPERACION_H_ */

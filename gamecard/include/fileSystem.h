@@ -41,9 +41,11 @@ void leerMetadataFileSystem();
 void formatearTallGrass();
 void iniciarSemaforosFS();
 
-Pokemon* procesarNew(New* unNew);
-Caught* procesarCatch(Pokemon* unPokemon);
-Localized* procesarLocalized(Get* unGet);
+void cerrarSemaforosFS();
+
+Pokemon* procesarNew(New* unNew, uint32_t idMensaje);
+Caught* procesarCatch(Pokemon* unPokemon, uint32_t idMensaje);
+Localized* procesarLocalized(Get* unGet, uint32_t idMensaje);
 
 t_bitarray* g_bitmap;
 int g_blockSize;

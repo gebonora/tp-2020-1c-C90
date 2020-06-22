@@ -87,5 +87,8 @@ void cerrarLoggers() {
 	log_destroy(loggerCatch);
 	log_destroy(loggerGet);
 	log_destroy(loggerGameboy);
+	pthread_mutex_destroy(&m_loggerNew);
+	pthread_mutex_destroy(&m_loggerCatch);
+	pthread_mutex_destroy(&m_loggerGet);
 }
 

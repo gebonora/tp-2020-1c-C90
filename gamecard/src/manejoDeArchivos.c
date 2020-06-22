@@ -261,9 +261,10 @@ void freeElem(void* elem) {
 }
 
 int setClaveValor(char* path, char* clave, char* valor) {
-	if (!fileExists(path)) {
+	/*if (!fileExists(path)) {
+		perror("no existspath en setclavevalor");
 		return -1;
-	}
+	}*/
 	t_config* metadata = config_create(path);
 	if (!config_has_property(metadata, clave)) {
 		config_destroy(metadata);

@@ -18,4 +18,6 @@ void testRemocionCoordenadaPokemon(char* nombrePokemon, int cantidadIteraciones,
 
 void testGetPokemon(char* nombrePokemon);
 
+void testAbrirArchivo(char* nombrePokemon);
+
 #endif /* GAMECARD_INCLUDE_TESTS_H_ */
