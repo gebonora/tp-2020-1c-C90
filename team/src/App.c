@@ -18,7 +18,7 @@ int main() {
     log_info(INTERNAL_LOGGER, "Inicializando componentes del sistema...");
     inicializarComponentesDelSistema();
 
-    // Reservado a pruebas de integracion, eventualmente lo vamos a volar
+    // Reservado a pruebas de integracion. Si logica de negocio rompe, explota el programa aca.
     log_info(INTERNAL_LOGGER, "Realizando pruebas de integracion antes de comenzar...");
     testDeIntegracion();
 
