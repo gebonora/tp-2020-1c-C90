@@ -56,6 +56,9 @@ void dumpearArchivo(t_list* listaBloques, char* archivoMapeado) {
 		desplazamiento += escrituraActual;
 
 		fclose(fp);
+
+		truncate(rutaBloque,g_blockSize);
+
 		free(rutaBloque);
 	}
 	printf("tamanio escrito : %d\n", desplazamiento);
