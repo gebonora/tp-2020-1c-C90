@@ -92,6 +92,7 @@ static Entrenador *new(char * posicionInicial, char * pokemonesIniciales, char *
     entrenador->logger = log_create(TEAM_INTERNAL_LOG_FILE, "Entrenador", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_INFO);
     entrenador->posicionInicial = parsearPosicion(posicionInicial);
     entrenador->uuid = NULL;
+    entrenador->tipoPosicionable = ENTRENADOR;
     entrenador->pokemonesCapturados = agruparPokemonesPorNombre(pokemonesIniciales);
     entrenador->pokemonesObjetivo = agruparPokemonesPorNombre(pokemonesObjetivos);
     entrenador->limiteDeCaptura = totalDePokemones(entrenador->pokemonesObjetivo);

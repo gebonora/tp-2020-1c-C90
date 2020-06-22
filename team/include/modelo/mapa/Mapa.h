@@ -21,14 +21,14 @@
 
 typedef t_dictionary * Plano;
 
-typedef enum Posicionable {
+typedef enum TipoPosicionable {
     ENTRENADOR,
     POKEMON
-} Posicionable;
+} TipoPosicionable;
 
 typedef struct Presencia {
     char * uuid;
-    Posicionable posicionable;
+    TipoPosicionable tipoPosicionable;
 } Presencia;
 
 typedef struct Mapa {
@@ -36,7 +36,7 @@ typedef struct Mapa {
     Plano plano;
     // Interfaz publica
     // hayPokemonesAtrapables() : bool - Es true si hay pokemones para atrapar.
-    char * (*registrarPosicion)(struct Mapa * this, Coordinate posicionInicial, Posicionable posicionable);
+    char * (*registrarPosicion)(struct Mapa * this, Coordinate posicion, TipoPosicionable tipoPosicionable);
     void (*destruir)(struct Mapa * this);
 } Mapa;
 
@@ -44,7 +44,7 @@ extern const struct MapaClass {
     Mapa (*new)();
 } MapaConstructor;
 
-Presencia * crearPresencia(Posicionable posicionable);
+Presencia * crearPresencia(TipoPosicionable posicionable);
 char * coordenadaImprimible(Coordinate posicion);
 
 Mapa mapa;

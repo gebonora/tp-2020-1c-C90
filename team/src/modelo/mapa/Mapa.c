@@ -4,9 +4,9 @@
 
 #include "modelo/mapa/Mapa.h"
 
-char * registrarPosicion(Mapa * this, Coordinate posicion, Posicionable posicionable) {
+char * registrarPosicion(Mapa * this, Coordinate posicion, TipoPosicionable tipoPosicionable) {
     char * posicionComoClave = coordenadaImprimible(posicion);
-    Presencia * presencia = crearPresencia(posicionable);
+    Presencia * presencia = crearPresencia(tipoPosicionable);
     if (dictionary_has_key(this->plano, posicionComoClave)) {
         t_list * casilla = dictionary_get(this->plano, posicionComoClave);
         list_add(casilla, presencia);
@@ -30,10 +30,10 @@ Plano crearPlano() {
     return plano;
 }
 
-Presencia * crearPresencia(Posicionable posicionable) {
+Presencia * crearPresencia(TipoPosicionable tipoPosicionable) {
     Presencia * presencia = malloc(sizeof(Presencia));
     presencia->uuid = generateUUID(30);
-    presencia->posicionable = posicionable;
+    presencia->tipoPosicionable = tipoPosicionable;
     return presencia;
 }
 

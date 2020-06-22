@@ -22,12 +22,11 @@ void testDeIntegracion() {
     Mapa mapita = MapaConstructor.new();
     Entrenador * entrenadorARegistrar = EntrenadorConstructor.new("3|3", "A", "B");
 
-    //TODO: Esto hay que moverlo a una funcion, ya sea estatica o del entrenador, pokemon, etc.
-    char * uuid = mapita.registrarPosicion(&mapita, entrenadorARegistrar->posicionInicial, ENTRENADOR);
-    entrenadorARegistrar->uuid = uuid;
+    registrarEnMapaPosicionEntrenador(&mapita, entrenadorARegistrar);
 
     t_list * casilla = dictionary_get(mapita.plano, "(3,3)");
     Presencia * presencia = list_get(casilla, 0);
+
     assert(entrenadorARegistrar->uuid == presencia->uuid);
 
     entrenadorARegistrar->destruir(entrenadorARegistrar);
