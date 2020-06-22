@@ -75,7 +75,7 @@ void esperarBrokerNew(int socketDeEscucha) {
 		}
 
 		if (flagError) {
-			log_info(loggerMain, "Se perdió la conexión con el Broker. Iniciando reconexión.");
+			log_error(loggerMain, "Se perdió la conexión con el Broker. Iniciando reconexión.");
 			close(socketDeEscucha);
 			socketDeEscucha = subscribirseACola(NEW, loggerNew, &m_loggerNew);
 		} else {
@@ -121,7 +121,7 @@ void procesarHiloNew(ArgumentosHilo* argumentosHilo) {
 	//si no pudo mandar el mensaje, logeo y sigo.
 	if (flagBrokerCaido) {
 		pthread_mutex_lock(&m_loggerNew);
-		log_info(loggerNew, "No se pudo enviar el Appeared como respuesta al mensaje: '%d' hacia el Broker. Continuando ejecución... ", idMensaje);
+		log_warning(loggerNew, "No se pudo enviar el Appeared como respuesta al mensaje: '%d' hacia el Broker. Continuando ejecución... ", idMensaje);
 		pthread_mutex_unlock(&m_loggerNew);
 	} else {
 		pthread_mutex_lock(&m_loggerNew);
@@ -215,7 +215,7 @@ void procesarHiloCatch(ArgumentosHilo* argumentosHilo) {
 	}
 	if (flagBrokerCaido) {
 		pthread_mutex_lock(&m_loggerCatch);
-		log_info(loggerCatch, "No se pudo enviar el Caught como respuesta al mensaje: '%d' hacia el Broker. Continuando ejecución... ", idMensaje);
+		log_warning(loggerCatch, "No se pudo enviar el Caught como respuesta al mensaje: '%d' hacia el Broker. Continuando ejecución... ", idMensaje);
 		pthread_mutex_unlock(&m_loggerCatch);
 	} else {
 		pthread_mutex_lock(&m_loggerCatch);
@@ -313,7 +313,7 @@ void procesarHiloGet(ArgumentosHilo* argumentosHilo) {
 
 	if (flagBrokerCaido) {
 		pthread_mutex_lock(&m_loggerGet);
-		log_info(loggerGet, "No se pudo enviar el Localized como respuesta al mensaje: '%d' hacia el Broker. Continuando ejecución... ", idMensaje);
+		log_warning(loggerGet, "No se pudo enviar el Localized como respuesta al mensaje: '%d' hacia el Broker. Continuando ejecución... ", idMensaje);
 		pthread_mutex_unlock(&m_loggerGet);
 	} else {
 		pthread_mutex_lock(&m_loggerGet);
@@ -439,7 +439,7 @@ int subscribirseACola(Operation cola, t_log* logger, pthread_mutex_t* mutex) {
 	int socketDeEscucha = iniciarSocketDeEscucha(cola, logger, mutex);
 	while (socketDeEscucha == -1) {
 		pthread_mutex_lock(mutex);
-		log_info(logger, "Error al conectar con Broker. Reintentando en '%d' segundos...", TIEMPO_DE_REINTENTO_CONEXION);
+		log_error(logger, "Error al conectar con Broker. Reintentando en '%d' segundos...", TIEMPO_DE_REINTENTO_CONEXION);
 		pthread_mutex_unlock(mutex);
 		sleep(TIEMPO_DE_REINTENTO_CONEXION);
 		socketDeEscucha = iniciarSocketDeEscucha(cola, logger, mutex);

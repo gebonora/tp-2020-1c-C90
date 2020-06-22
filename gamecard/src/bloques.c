@@ -9,7 +9,7 @@
 //FUNCIONES DEL FORMATEADOR
 
 void crearBloques() {
-	log_info(loggerMain, "----Creando '%d' bloques de '%d'...", g_numberOfBlocks, g_blockSize);
+	log_debug(loggerMain, "----Creando '%d' bloques de '%d'...", g_numberOfBlocks, g_blockSize);
 	for (int a = 0; a < g_numberOfBlocks; a++) {
 		char* rutaBloque = crearRutaBloque(a);
 		FILE * fp = fopen(rutaBloque, "w+");
@@ -17,7 +17,7 @@ void crearBloques() {
 		truncate(rutaBloque, g_blockSize);
 		free(rutaBloque);
 	}
-	log_info(loggerMain, "----Listo!");
+	log_debug(loggerMain, "----Listo!");
 }
 
 //FUNCIONES DE ASIGNACION / LIBERACION DE BLOQUES

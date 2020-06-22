@@ -64,11 +64,11 @@ void cerrarArchivo(char* nombreArchivo) {
 }
 
 void dumpListaSemaforosDeArchivo() {
-	log_info(loggerMain, "Semaforos: Inicializando...");
+	log_debug(loggerMain, "Semaforos: Inicializando...");
 	for (int a = 0; a < listaSemaforos->elements_count; a++) {
-		log_info(loggerMain, "Se inicializo un semaforo para el archivo pokemon: '%s'.", ((FileMutex*) (list_get(listaSemaforos, a)))->nombreArchivo);
+		log_debug(loggerMain, "Se inicializo un semaforo para el archivo pokemon: '%s'.", ((FileMutex*) (list_get(listaSemaforos, a)))->nombreArchivo);
 	}
-	log_info(loggerMain, "Listo!");
+	log_debug(loggerMain, "Listo!");
 	puts("\n");
 }
 

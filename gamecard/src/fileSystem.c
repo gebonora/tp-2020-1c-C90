@@ -24,7 +24,7 @@ int iniciarFileSystem(int argc, char* argv[]) { //de pruebas, luego sacar a inic
 				" y formatee ejecutando con -format. Abortando ejecución...", PUNTO_MONTAJE_TALLGRASS);
 		return -1;
 	} else {
-		log_info(loggerMain, "Metadata del FileSystem encontrada. Leyendo...");
+		log_debug(loggerMain, "Metadata del FileSystem encontrada. Leyendo...");
 	}
 	free(rutaMetadata);
 	leerMetadataFileSystem();
@@ -34,7 +34,7 @@ int iniciarFileSystem(int argc, char* argv[]) { //de pruebas, luego sacar a inic
 			formatearTallGrass();
 	}
 	cargarBitmap();
-	log_info(loggerMain, "FileSystem iniciado!");
+	log_debug(loggerMain, "FileSystem iniciado!");
 	puts("\n");
 	return 0;
 }
@@ -44,15 +44,15 @@ int iniciarFileSystem(int argc, char* argv[]) { //de pruebas, luego sacar a inic
 void leerMetadataFileSystem() {
 	char * path = crearRuta(PATH_ARCHIVO_METADATA);
 	g_numberOfBlocks = leerClaveValorInt(path, "BLOCKS");
-	log_info(loggerMain, "Metadata: NUMBER OF BLOCKS: '%d'.", g_numberOfBlocks);
+	log_debug(loggerMain, "Metadata: NUMBER OF BLOCKS: '%d'.", g_numberOfBlocks);
 	g_blockSize = leerClaveValorInt(path, "BLOCK_SIZE");
-	log_info(loggerMain, "Metadata: BLOCK_SIZE: '%d'.", g_blockSize);
+	log_debug(loggerMain, "Metadata: BLOCK_SIZE: '%d'.", g_blockSize);
 	char* magicNumber = leerClaveValorString(path, "MAGIC_NUMBER");
-	log_info(loggerMain, "Metadata: MAGIC NUMBER: '%s'.", magicNumber);
+	log_debug(loggerMain, "Metadata: MAGIC NUMBER: '%s'.", magicNumber);
 	free(magicNumber);
 	free(path);
 
-	log_info(loggerMain, "Listo!");
+	log_debug(loggerMain, "Listo!");
 	puts("\n");
 }
 
@@ -69,7 +69,7 @@ void cerrarSemaforosFS() {
 //FUNCIONES DE FORMATEADOR
 
 void formatearTallGrass() {
-	log_info(loggerMain, "Formateando el Disco...");
+	log_debug(loggerMain, "Formateando el Disco...");
 	borrarDirectorioYContenido("Blocks");
 	borrarDirectorioYContenido("Files");
 	char* pathBitmap = crearRuta(PATH_ARCHIVO_BITMAP);
@@ -81,7 +81,7 @@ void formatearTallGrass() {
 	crearBitmap();
 	crearBloques();
 
-	log_info(loggerMain, "Listo!");
+	log_debug(loggerMain, "Listo!");
 	puts("\n");
 }
 
@@ -108,13 +108,13 @@ Pokemon* procesarNew(New* unNew, uint32_t idMensaje) {
 	if (!existePokemon(nombreAppeared)) {
 		crearPokemon(nombreAppeared);
 		agregarSemaforoALista(nombreAppeared);
-		log_info(loggerMain, "Se inicializo un semaforo para el archivo pokemon: '%s'.", nombreAppeared);
+		log_debug(loggerMain, "Se inicializo un semaforo para el archivo pokemon: '%s'.", nombreAppeared);
 	}
 
 	//if abrirArchivo implementar semaforo.
 	while (!puedeAccederAArchivo(nombreAppeared)) {
 		pthread_mutex_lock(&m_loggerNew);
-		log_info(loggerNew, "El archivo: '%s' esta abierto. Reintentando la operacion New asociada al idMensaje: '%d' en '%d' segundos...", nombreAppeared, idMensaje,
+		log_warning(loggerNew, "El archivo: '%s' esta abierto. Reintentando la operacion New asociada al idMensaje: '%d' en '%d' segundos...", nombreAppeared, idMensaje,
 				TIEMPO_DE_REINTENTO_OPERACION);
 		pthread_mutex_unlock(&m_loggerNew);
 		sleep(TIEMPO_DE_REINTENTO_OPERACION);
@@ -145,7 +145,7 @@ Caught* procesarCatch(Pokemon* unPokemon, uint32_t idMensaje) {
 
 	while (!puedeAccederAArchivo(nombreCaught)) {
 		pthread_mutex_lock(&m_loggerCatch);
-		log_info(loggerCatch, "El archivo: '%s' esta abierto. Reintentando la operacion Catch asociada al idMensaje: '%d' en '%d' segundos...", nombreCaught, idMensaje,
+		log_warning(loggerCatch, "El archivo: '%s' esta abierto. Reintentando la operacion Catch asociada al idMensaje: '%d' en '%d' segundos...", nombreCaught, idMensaje,
 				TIEMPO_DE_REINTENTO_OPERACION);
 		pthread_mutex_unlock(&m_loggerCatch);
 		sleep(TIEMPO_DE_REINTENTO_OPERACION);
@@ -180,7 +180,7 @@ Localized* procesarLocalized(Get* unGet, uint32_t idMensaje) {
 
 	while (!puedeAccederAArchivo(nombreLocalized)) {
 		pthread_mutex_lock(&m_loggerGet);
-		log_info(loggerGet, "El archivo: '%s' esta abierto. Reintentando la operacion Get asociada al idMensaje: '%d' en '%d' segundos...", nombreLocalized, idMensaje,
+		log_warning(loggerGet, "El archivo: '%s' esta abierto. Reintentando la operacion Get asociada al idMensaje: '%d' en '%d' segundos...", nombreLocalized, idMensaje,
 				TIEMPO_DE_REINTENTO_OPERACION);
 		pthread_mutex_unlock(&m_loggerGet);
 		sleep(TIEMPO_DE_REINTENTO_OPERACION);
