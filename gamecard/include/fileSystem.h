@@ -49,8 +49,7 @@ int g_blockSize;
 int g_numberOfBlocks;
 
 pthread_mutex_t m_bitmap;
-pthread_mutex_t m_abrirArchivo;
-
+t_list* listaSemaforos;
 
 #define MAGIC_NUMBER "TALL_GRASS"
 #define SHELL_COMMAND_DELETE "exec rm -r /"

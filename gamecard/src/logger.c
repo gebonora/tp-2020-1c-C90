@@ -61,6 +61,11 @@ void logearCaughtProcesado(Caught* unCaught, uint32_t idMensaje) {
 	pthread_mutex_unlock(&m_loggerCatch);
 }
 
+void logearLocalizedProcesado(Localized* unLocalized, uint32_t idMensaje) {
+	pthread_mutex_lock(&m_loggerGet);
+	log_info(loggerGet, "Se generó un Localized como respuesta al idMensaje: '%d', agregar", idMensaje);
+	pthread_mutex_unlock(&m_loggerGet);
+}
 void cerrarLoggers() {
 	log_destroy(loggerMain);
 	log_destroy(loggerNew);
