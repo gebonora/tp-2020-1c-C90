@@ -10,6 +10,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+
 #include <commons/string.h>
 #include <commons/log.h>
 #include <commons/config.h>
@@ -21,6 +22,7 @@ t_config* config;
 int TIEMPO_DE_REINTENTO_CONEXION;
 int TIEMPO_DE_REINTENTO_OPERACION;
 int TIEMPO_RETARDO_OPERACION;
+int ID_GAMECARD;
 char* PUNTO_MONTAJE_TALLGRASS;
 char* IP_BROKER;
 char* PUERTO_BROKER;
@@ -29,7 +31,7 @@ char* PUERTO_GAMECARD_GAMEBOY;
 
 #define PATH_CONFIG "config/gameCard.config"
 
-void cargarConfigConexiones();
-
+void cargarConfig();
+void cerrarVariablesConfig();
 
 #endif /* GAMECARD_INCLUDE_CONFIG_H_ */

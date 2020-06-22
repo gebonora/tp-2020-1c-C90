@@ -6,7 +6,7 @@
  */
 #include "main.h"
 
-int main() {
+int main(int argc, char* argv[]) {
 	char *title = "\n"
 			"===================================================================\n"
 			" ██████   █████  ███    ███ ███████ ███████  █████  ██████  ██████ \n"
@@ -16,11 +16,42 @@ int main() {
 			" ██████  ██   ██ ██      ██ ███████ ███████ ██   ██ ██    █ ██████ \n"
 			"====================================================================";
 
-	puts(title);
-
 	iniciarLoggers();
-	cargarConfigConexiones();
+	log_info(loggerMain, title);
+	log_info(loggerMain, "Se inició el programa.");
+	puts("\n");
+	cargarConfig();
+
+	if (iniciarFileSystem(argc, argv) < 0) {
+		cerrarLoggers();
+		cerrarVariablesConfig();
+	}
+
+	//testing
+
+	//testCreacionCoordenadasMultiplesPokemon("pikachu", 40);
+
+	//testCreacionCoordenadaPokemon("charmander", 1, 1, 2);
+
+	//testRemocionCoordenadaPokemon("charmander", 1, 1, 2);
+	/*
+	 testRemocionCoordenadaPokemon("pikachu", 1, 0, 2);
+	 testRemocionCoordenadaPokemon("pikachu", 1, 1, 2);
+	 testRemocionCoordenadaPokemon("pikachu", 1, 2, 2);
+	 testRemocionCoordenadaPokemon("pikachu", 1, 3, 2);
+	 testRemocionCoordenadaPokemon("pikachu", 1, 4, 2);
+	 testRemocionCoordenadaPokemon("pikachu", 1, 5, 2);
+	 */
+	//testGetPokemon("pikachu");
+	//testAbrirArchivo("charmander");
+	//end testing
+
 	atenderConexiones();
-	//atenderNew();
+
+	cerrarLoggers();
+	cerrarVariablesConfig();
+	cerrarBitmap();
+	cerrarSemaforosFS();
+	return 0;
 }
 
