@@ -39,6 +39,9 @@ void logearGetRecibido(Get* unGet, uint32_t idMensaje);
 
 void logearAppearedProcesado(Pokemon* unAppeared, uint32_t idMensaje);
 void logearCaughtProcesado(Caught* unCaught, uint32_t idMensaje);
+void logearLocalizedProcesado(Localized* unLocalized, uint32_t idMensaje);
+
+char* logCoordenadas(t_list* listaCoor);
 
 #define PATH_LOGGER_MAIN "logs/loggerMain.log"
 #define PATH_LOGGER_NEW "logs/loggerNew.log"

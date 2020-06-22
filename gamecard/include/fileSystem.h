@@ -31,6 +31,7 @@
 #include "bitmap.h"
 #include "bloques.h"
 #include "mapeo.h"
+#include "reintentoOperacion.h"
 
 int iniciarFileSystem(int argc, char* argv[]);
 

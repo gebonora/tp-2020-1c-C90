@@ -294,6 +294,8 @@ void procesarHiloGet(ArgumentosHilo* argumentosHilo) {
 	//fs aca:
 	Localized* pokemonLocalized = procesarLocalized(unGet);
 
+	logearLocalizedProcesado(pokemonLocalized, idMensaje);
+
 	//crear socket descartable al broker
 	int socketDescartable = crearSocketCliente(IP_BROKER, PUERTO_BROKER);
 	if (socketDescartable < 0) {
@@ -311,8 +313,13 @@ void procesarHiloGet(ArgumentosHilo* argumentosHilo) {
 
 	if (flagBrokerCaido) {
 		pthread_mutex_lock(&m_loggerGet);
-		log_info(loggerGet, "No se pudo enviar el LOCALIZED como respuesta al mensaje: '%d' hacia el Broker. Continuando ejecución... ", idMensaje);
+		log_info(loggerGet, "No se pudo enviar el Localized como respuesta al mensaje: '%d' hacia el Broker. Continuando ejecución... ", idMensaje);
 		pthread_mutex_unlock(&m_loggerGet);
+	} else {
+		pthread_mutex_lock(&m_loggerGet);
+		log_info(loggerGet, "Se envió el Localized como respuesta al mensaje: '%d' hacia el Broker.", idMensaje);
+		pthread_mutex_unlock(&m_loggerGet);
+
 	}
 
 	//liberar memoriar y cerrar socket
@@ -322,7 +329,7 @@ void procesarHiloGet(ArgumentosHilo* argumentosHilo) {
 		close(socketDescartable);
 	}
 	pthread_mutex_lock(&m_loggerGet);
-	log_info(loggerGet, "Se terminó con éxito un hilo");
+	log_info(loggerGet, "Se terminó con éxito un hilo.");
 	pthread_mutex_unlock(&m_loggerGet);
 	return;
 	//termina el hilo

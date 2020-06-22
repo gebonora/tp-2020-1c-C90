@@ -63,9 +63,24 @@ void logearCaughtProcesado(Caught* unCaught, uint32_t idMensaje) {
 
 void logearLocalizedProcesado(Localized* unLocalized, uint32_t idMensaje) {
 	pthread_mutex_lock(&m_loggerGet);
-	log_info(loggerGet, "Se generó un Localized como respuesta al idMensaje: '%d', agregar", idMensaje);
+	char* stringCoor = logCoordenadas(unLocalized->pokemon->coordinates);
+	log_info(loggerGet, "Se generó un Localized como respuesta al idMensaje: '%d', pokemon: '%s', cantidadCoordenadas: '%d'%s.", idMensaje,
+			unLocalized->pokemon->name->value, unLocalized->coordinates_quantity, stringCoor);
+	free(stringCoor);
 	pthread_mutex_unlock(&m_loggerGet);
 }
+
+char* logCoordenadas(t_list* listaCoor) {
+	char* ret = string_new();
+	for (int a = 0; a < listaCoor->elements_count; a++) {
+		if (a == 0)
+			string_append_with_format(&ret, " ,coordenadas: '(%d,%d)'", ((Coordinate*) (list_get(listaCoor, a)))->pos_x, ((Coordinate*) (list_get(listaCoor, a)))->pos_y);
+		else
+			string_append_with_format(&ret, "|'(%d,%d)'", ((Coordinate*) (list_get(listaCoor, a)))->pos_x, ((Coordinate*) (list_get(listaCoor, a)))->pos_y);
+	}
+	return ret;
+}
+
 void cerrarLoggers() {
 	log_destroy(loggerMain);
 	log_destroy(loggerNew);

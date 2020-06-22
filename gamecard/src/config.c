@@ -31,6 +31,8 @@ void cargarConfig() {
 	IP_GAMECARD_GAMEBOY = string_new();
 	string_append(&IP_GAMECARD_GAMEBOY, config_get_string_value(config, "IP_GAMECARD_GAMEBOY"));
 
+	ID_GAMECARD = config_get_int_value(config, "ID_GAMECARD");
+
 	config_destroy(config);
 
 	log_info(loggerMain, "Config: PUERTO_BROKER: '%s'.", PUERTO_BROKER);
@@ -41,6 +43,7 @@ void cargarConfig() {
 	log_info(loggerMain, "Config: TIEMPO_RETARDO_OPERACION: '%d'.", TIEMPO_RETARDO_OPERACION);
 	log_info(loggerMain, "Config: PUERTO_GAMECARD_GAMEBOY: '%s'.", PUERTO_GAMECARD_GAMEBOY);
 	log_info(loggerMain, "Config: IP_GAMECARD_GAMEBOY: '%s'.", IP_GAMECARD_GAMEBOY);
+	log_info(loggerMain, "Config: ID_GAMECARD: '%d'.", ID_GAMECARD);
 	log_info(loggerMain, "Listo!");
 	puts("\n");
 }

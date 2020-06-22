@@ -4,9 +4,7 @@
  *  Created on: 19 abr. 2020
  *      Author: GONZALO BONORA
  */
-
 #include "fileSystem.h"
-
 /*
  * -Al FS hay que proveerle un punto de montaje valido con un Metadata/Metadata.bin cargado con valores correctos.
  *
@@ -60,6 +58,7 @@ void leerMetadataFileSystem() {
 
 void iniciarSemaforosFS() {
 	pthread_mutex_init(&m_bitmap, NULL);
+	iniciarListaSemaforosDeArchivo();
 }
 
 //FUNCIONES DE FORMATEADOR
@@ -109,7 +108,7 @@ Pokemon* procesarNew(New* unNew) {
 	//if abrirArchivo implementar semaforo.
 	agregarCoordenadaPokemon(nombreAppeared, posXAppeared, posYAppeared, cantidad);
 
-	//sleep(TIEMPO_RETARDO_OPERACION);
+	sleep(TIEMPO_RETARDO_OPERACION);
 	//cerrar archivo
 
 	return create_pokemon(nombreAppeared, posXAppeared, posYAppeared);
@@ -132,7 +131,7 @@ Caught* procesarCatch(Pokemon* unPokemon) {
 	//cosas de fileSystem acá...
 	resultado = quitarCoordenadaPokemon(nombreCaught, posXCaught, posYCaught);
 
-	//sleep(TIEMPO_RETARDO_OPERACION);
+	sleep(TIEMPO_RETARDO_OPERACION);
 	//cerrar archivo
 
 	return create_caught_pokemon(resultado);

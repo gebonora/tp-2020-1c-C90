@@ -21,4 +21,8 @@ void iniciarListaSemaforosDeArchivo();
 
 void agregarSemaforoALista(char* nombreArchivo);
 
+void dumpListaSemaforosDeArchivo();
+
+int esDirectorioPokemon(char* directorio);
+
 #endif /* GAMECARD_INCLUDE_REINTENTOOPERACION_H_ */
