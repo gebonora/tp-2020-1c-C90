@@ -1,31 +1,32 @@
-
 //
 // Created by Alan Zhao on 07/05/2020.
 //
 
 #include "servidor/ServidorTeam.h"
 
-void configurarServer(){
+void configurarServer() {
 
 	configServer = config_create(TEAM_CONFIG_FILE);
 
 	IP_Broker = config_get_string_value(configServer, "IP_BROKER");
 	Puerto_Broker = config_get_string_value(configServer, "PUERTO_BROKER");
 
-	IP_Team_Gameboy = config_get_string_value(configServer,"IP_TEAM_GAMEBOY");
-	Puerto_Team_Gameboy = config_get_string_value(configServer,"PUERTO_TEAM_GAMEBOY");
+	IP_Team_Gameboy = config_get_string_value(configServer, "IP_TEAM_GAMEBOY");
+	Puerto_Team_Gameboy = config_get_string_value(configServer, "PUERTO_TEAM_GAMEBOY");
 
-	Tiempo_Reconexion = config_get_int_value(configServer,"TIEMPO_RECONEXION");
+	Tiempo_Reconexion = config_get_int_value(configServer, "TIEMPO_RECONEXION");
 
-	printf("%d\n",Tiempo_Reconexion);
+	printf("%d\n", Tiempo_Reconexion);
 
 }
 
-void eliminarConfigServer(){
+void eliminarConfigServer() {
+	free(IP_Broker);
+	free(Puerto_Broker);
+	free(IP_Team_Gameboy);
+	free(Puerto_Team_Gameboy);
 	config_destroy(configServer);
 }
-
-
 
 void atenderConexiones() {
 
@@ -42,38 +43,50 @@ void atenderConexiones() {
 
 	atenderGameboy();
 
-
-
 }
 
-
 void atenderAppeared() {
-	int socketDeEscucha = subscribirseACola(APPEARED,INTERNAL_LOGGER, &MTX_INTERNAL_LOG);
+	int socketDeEscucha = subscribirseACola(APPEARED, INTERNAL_LOGGER, &MTX_INTERNAL_LOG);
 	esperarBrokerAppeared(socketDeEscucha);
 }
 
-
 void esperarBrokerAppeared(int socketDeEscucha) {
 	while (1) {
-		Pokemon* unPokemon = recv_pokemon(socketDeEscucha,0);
-		pthread_t thread;
-		pthread_create(&thread, NULL, (void*) procesarHiloAppeared, unPokemon);
-		pthread_detach(thread);
+
+		uint32_t idMensaje;
+		Pokemon* unPokemon = recv_pokemon(socketDeEscucha, 0);
+		int flagError = 0;
+
+		if (unPokemon == NULL) {
+			flagError = 1;
+		}
+		if (recv(socketDeEscucha, &idMensaje, sizeof(uint32_t), 0) <= 0) {
+			flagError = 1;
+		}
+		Result ack = ACKNOWLEDGE;
+		if (send(socketDeEscucha, &ack, sizeof(int), MSG_NOSIGNAL) < 0) {
+			flagError = 1;
+		}
+
+		if (flagError) {
+			log_error(MANDATORY_LOGGER, "Se perdió la conexión con el Broker. Iniciando reconexión.");
+			close(socketDeEscucha);
+			socketDeEscucha = subscribirseACola(APPEARED, INTERNAL_LOGGER, &MTX_INTERNAL_LOG);
+		} else {
+			ArgumentosHilo* argumentosHilo = malloc(sizeof(ArgumentosHilo));
+			argumentosHilo->mensaje = unPokemon;
+			argumentosHilo->idMensaje = idMensaje;
+
+			pthread_t thread;
+			pthread_create(&thread, NULL, (void*) procesarHiloAppeared, argumentosHilo);
+			pthread_detach(thread);
+		}
 	}
 }
 
-void procesarHiloAppeared(Pokemon* unPokemon) {
-	//procesar
-
-	//enviar respuesta al cliente
-
-
-
-	//int socketDescartable = crearSocketCliente(IP_BROKER, PUERTO_BROKER); -> debo pasarlo al cliente
-
-	//liberar memoriar
-	free_pokemon(unPokemon);
-	//termina el hilo
+void procesarHiloAppeared(ArgumentosHilo* argumentosHilo) {
+	//decider de qué se va a encargar esta función. Puede ser un pasamano a otro hilo, cerrandose este.
+	//o tener comportamiento.
 }
 
 void atenderCaught() {
@@ -81,42 +94,45 @@ void atenderCaught() {
 	esperarBrokerCaught(socketDeEscucha);
 }
 
-
-
 void esperarBrokerCaught(int socketDeEscucha) {
 
 	while (1) {
-
 		uint32_t idMensaje;
 		Caught* unCaught = recv_caught(socketDeEscucha);
-		recv(socketDeEscucha, &idMensaje, sizeof(uint32_t), 0);
+		int flagError = 0;
+		if (unCaught == NULL) {
+			flagError = 1;
+		}
 
-		ArgumentosHilo* argumentosHilo = malloc(sizeof(ArgumentosHilo));
-		argumentosHilo->mensaje = unCaught;
-		argumentosHilo->idMensaje = idMensaje;
+		if (recv(socketDeEscucha, &idMensaje, sizeof(uint32_t), 0) <= 0) {
+			flagError = 1;
+		}
 
-		pthread_t thread;
-		pthread_create(&thread, NULL, (void*) procesarHiloCaught, argumentosHilo);
-		pthread_detach(thread);
+		Result ack = ACKNOWLEDGE;
+		if (send(socketDeEscucha, &ack, sizeof(int), MSG_NOSIGNAL) < 0) {
+			flagError = 1;
+		}
+
+		if (flagError) {
+			log_error(MANDATORY_LOGGER, "Se perdió la conexión con el Broker. Iniciando reconexión.");
+			close(socketDeEscucha);
+			socketDeEscucha = subscribirseACola(CAUGHT, MANDATORY_LOGGER, &MTX_INTERNAL_LOG);
+		} else {
+
+			ArgumentosHilo* argumentosHilo = malloc(sizeof(ArgumentosHilo));
+			argumentosHilo->mensaje = unCaught;
+			argumentosHilo->idMensaje = idMensaje;
+
+			pthread_t thread;
+			pthread_create(&thread, NULL, (void*) procesarHiloCaught, argumentosHilo);
+			pthread_detach(thread);
+		}
 	}
 }
 
-
 void procesarHiloCaught(ArgumentosHilo* argumentosHilo) {
-	//procesar
-	Caught* unCaught = (Caught*) (argumentosHilo->mensaje);
-	uint32_t idMensaje = argumentosHilo->idMensaje;
-	//logearCaughtRecibido(unCaught, idMensaje);
-
-
-	//enviar al cliente
-	//atenderCaughtRecibido(unCaught,idMensaje);
-	//int socketDescartable = crearSocketHaciaBroker(); -> debe ponerse en el cliente
-
-	//liberar memoriar y cerrar socket
-	free(unCaught);
-	free(argumentosHilo);
-	//termina el hilo
+	//decider de qué se va a encargar esta función. Puede ser un pasamano a otro hilo, cerrandose este.
+	//o tener comportamiento.
 }
 
 void atenderLocalized() {
@@ -127,39 +143,46 @@ void atenderLocalized() {
 void esperarBrokerLocalized(int socketDeEscucha) {
 
 	while (1) {
+
 		uint32_t idMensaje;
 		Localized* unLocalized = recv_localized(socketDeEscucha);
-		recv(socketDeEscucha, &idMensaje, sizeof(uint32_t), 0);
+		int flagError = 0;
 
-		ArgumentosHilo* argumentosHilo = malloc(sizeof(ArgumentosHilo));
-		argumentosHilo->mensaje = unLocalized;
-		argumentosHilo->idMensaje = idMensaje;
+		if (unLocalized == NULL) {
+			flagError = 1;
 
-		pthread_t thread;
-		pthread_create(&thread, NULL, (void*) procesarHiloLocalized, argumentosHilo);
-		pthread_detach(thread);
+		}
+		if (recv(socketDeEscucha, &idMensaje, sizeof(uint32_t), 0) <= 0) {
+			flagError = 1;
+
+		}
+		Result ack = ACKNOWLEDGE;
+		if (send(socketDeEscucha, &ack, sizeof(int), MSG_NOSIGNAL) < 0) {
+			flagError = 1;
+		}
+
+		if (flagError) {
+			log_error(MANDATORY_LOGGER, "Se perdió la conexión con el Broker. Iniciando reconexión.");
+			close(socketDeEscucha);
+			socketDeEscucha = subscribirseACola(LOCALIZED, MANDATORY_LOGGER, &MTX_INTERNAL_LOG);
+		} else {
+
+			ArgumentosHilo* argumentosHilo = malloc(sizeof(ArgumentosHilo));
+			argumentosHilo->mensaje = unLocalized;
+			argumentosHilo->idMensaje = idMensaje;
+
+			pthread_t thread;
+			pthread_create(&thread, NULL, (void*) procesarHiloLocalized, argumentosHilo);
+			pthread_detach(thread);
+		}
 	}
 
 }
 
 void procesarHiloLocalized(ArgumentosHilo* argumentosHilo) {
-	//procesar
-	Localized* unLocalized = (Localized*) (argumentosHilo->mensaje);
-	uint32_t idMensaje = argumentosHilo->idMensaje;
-	//logearLocalizedRecibido(unLocalized, idMensaje);
-
-	//enviar al cliente
-
-	//int socketDescartable = crearSocketHaciaBroker(); -> mover al cliente
-
-	//liberar memoriar
-	free_localized(unLocalized);
-	free(argumentosHilo);
-	//termina el hilo
+	//decider de qué se va a encargar esta función. Puede ser un pasamano a otro hilo, cerrandose este.
+	//o tener comportamiento.
 }
-
-
-
 
 void atenderGameboy() {
 	int socketServidor = crearSocketServidor(IP_Team_Gameboy, Puerto_Team_Gameboy);
@@ -185,18 +208,22 @@ void atenderGameboy() {
 		recv(socketCliente, &codOp, sizeof(int), MSG_WAITALL);
 
 		pthread_mutex_lock(&MTX_INTERNAL_LOG);
-		log_info(INTERNAL_LOGGER, "Se recibió un: '%s' a traves de un gameboy,Procesando....", traducirOperacion(codOp));
+		log_info(INTERNAL_LOGGER, "Se recibió un: '%s' a traves de un Gameboy. Procesando....", traducirOperacion(codOp));
 		pthread_mutex_unlock(&MTX_INTERNAL_LOG);
 
-		if(codOp == APPEARED) {
-			Pokemon* unPokemon = recv_pokemon(socketCliente,0);
+		if (codOp == APPEARED) {
+			Pokemon* unPokemon = recv_pokemon(socketCliente, 0);
 			close(socketCliente);
+
+			ArgumentosHilo* argumentosHilo = malloc(sizeof(ArgumentosHilo));
+			argumentosHilo->mensaje = unPokemon;
+			argumentosHilo->idMensaje = 999;
 
 			pthread_create(&thread, NULL, (void*) procesarHiloAppeared, unPokemon);
 			pthread_detach(thread);
-		}else{
-			log_info(INTERNAL_LOGGER,"El gameboy envio un mensaje erroneo");
-			pthread_detach(thread);
+		} else {
+			log_error(INTERNAL_LOGGER, "El gameboy envio un mensaje erroneo.");
+			close(socketCliente);
 		}
 	}
 }
@@ -240,7 +267,7 @@ int subscribirseACola(Operation cola, t_log* logger, pthread_mutex_t* mutex) {
 	int socketDeEscucha = iniciarSocketDeEscucha(cola, logger, mutex);
 	while (socketDeEscucha == -1) {
 		pthread_mutex_lock(mutex);
-		log_info(logger, "Error al conectar con Broker. Reintentando en '%d' segundos...", Tiempo_Reconexion);
+		log_error(logger, "Error al conectar con Broker. Reintentando en '%d' segundos...", Tiempo_Reconexion);
 		pthread_mutex_unlock(mutex);
 		sleep(Tiempo_Reconexion);
 		socketDeEscucha = iniciarSocketDeEscucha(cola, logger, mutex);
@@ -253,9 +280,9 @@ int subscribirseACola(Operation cola, t_log* logger, pthread_mutex_t* mutex) {
 }
 
 char* traducirOperacion(Operation operacion) {
-	if(operacion == APPEARED){
+	if (operacion == APPEARED) {
 		return "APPEARED";
-	}else{
+	} else {
 		return "MENSAJE ERRONEO";
 	}
 }

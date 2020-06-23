@@ -39,7 +39,7 @@ void atenderConexiones();
 
 void atenderAppeared();
 void esperarBrokerAppeared(int socketDeEscucha);
-void procesarHiloAppeared(Pokemon* unPokemon);
+void procesarHiloAppeared(ArgumentosHilo* argumentosHilo);
 
 void atenderCaught();
 void esperarBrokerCaught(int socketDeEscucha);
