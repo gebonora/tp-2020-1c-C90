@@ -396,6 +396,9 @@ void atenderGameboy() {
 			pthread_create(&thread, NULL, (void*) procesarHiloGet, argumentosHilo);
 			pthread_detach(thread);
 			break;
+		default:
+			log_error(loggerGameboy,"Se recibió una operación desconocida. Se cerró el socket: '%d", socketCliente);
+			close(socketCliente);
 		}
 	}
 }
