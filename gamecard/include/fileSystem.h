@@ -61,5 +61,6 @@ t_list* listaSemaforos;
 #define PATH_ARCHIVO_BITMAP "Metadata/Bitmap.bin"
 #define PATH_FILES "Files"
 #define PATH_BLOCKS "Blocks"
+#define FILE_METADATA "Metadata.bin"
 
 #endif /* GAMECARD_INCLUDE_FILESYSTEM_H_ */

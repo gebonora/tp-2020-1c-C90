@@ -82,7 +82,7 @@ int obtenerPosicionEnLista(char* nombrePokemon) {
 }
 
 int esDirectorioPokemon(char* directorio) {
-	return !(string_equals_ignore_case(directorio, ".") || string_equals_ignore_case(directorio, "..") || string_equals_ignore_case(directorio, "Metadata.bin"));
+	return !(string_equals_ignore_case(directorio, ".") || string_equals_ignore_case(directorio, "..") || string_equals_ignore_case(directorio, FILE_METADATA));
 }
 
 int estaAbierto(char* nombrePokemon) {

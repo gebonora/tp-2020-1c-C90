@@ -309,7 +309,7 @@ char* crearRutaPokemon(char* nombrePokemon) {
 char* crearRutaMetadataPokemon(char* nombrePokemon) {
 	char* pathPokemon = crearRutaPokemon(nombrePokemon);
 	char* fileMetadata = string_new();
-	string_append_with_format(&fileMetadata, "%s/Metadata.bin", pathPokemon);
+	string_append_with_format(&fileMetadata, "%s/%s", pathPokemon, FILE_METADATA);
 	free(pathPokemon);
 	return fileMetadata;
 }
