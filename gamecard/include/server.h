@@ -13,13 +13,13 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <netdb.h>
-#include <config.h>
 #include <sys/sem.h>
 
 #include <delibird/interface.h>
 #include <delibird/utils/sockets/Sockets.h>
 
 #include "fileSystem.h"
+#include "config.h"
 
 typedef struct {
 	void* mensaje;

@@ -54,10 +54,12 @@ int g_numberOfBlocks;
 pthread_mutex_t m_bitmap;
 t_list* listaSemaforos;
 
-#define MAGIC_NUMBER "TALL_GRASS"
+#define MAGIC_NUMBER "TALL_GRASS" //No se está usando, se podría agregar una validación sobre el Metadata del FS para que coincida con esto.
 #define SHELL_COMMAND_DELETE "exec rm -r /"
 
 #define PATH_ARCHIVO_METADATA "Metadata/Metadata.bin"
 #define PATH_ARCHIVO_BITMAP "Metadata/Bitmap.bin"
+#define PATH_FILES "Files"
+#define PATH_BLOCKS "Blocks"
 
 #endif /* GAMECARD_INCLUDE_FILESYSTEM_H_ */

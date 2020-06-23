@@ -53,7 +53,7 @@ int calcularNumeroDeBloquesNecesarios(int size) {
 //FUNCIONES PARA RUTAS DE BLOQUES
 
 char* crearRutaBloque(int numeroDeBloque) {
-	char* pathDirectorio = crearRuta("Blocks");
+	char* pathDirectorio = crearRuta(PATH_BLOCKS);
 	char* rutaBloque = string_new();
 	string_append_with_format(&rutaBloque, "%s/%d.bin", pathDirectorio, numeroDeBloque);
 	free(pathDirectorio);

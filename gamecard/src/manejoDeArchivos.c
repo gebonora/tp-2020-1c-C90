@@ -299,7 +299,7 @@ char* crearRuta(char* subPath) {
 }
 
 char* crearRutaPokemon(char* nombrePokemon) {
-	char* pathDirectorio = crearRuta("Files");
+	char* pathDirectorio = crearRuta(PATH_FILES);
 	char* filePokemon = string_new();
 	string_append_with_format(&filePokemon, "%s/%s", pathDirectorio, nombrePokemon);
 	free(pathDirectorio);

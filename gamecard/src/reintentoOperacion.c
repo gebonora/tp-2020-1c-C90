@@ -9,7 +9,7 @@
 void iniciarListaSemaforosDeArchivo() {
 	listaSemaforos = list_create();
 	//leer el directorio Files, guardando en lista el nombre y el semaforo inicializado.
-	char* rutaFiles = crearRuta("Files");
+	char* rutaFiles = crearRuta(PATH_FILES);
 	DIR* dirFiles = opendir(rutaFiles);
 	struct dirent* dirPokemon;
 	while ((dirPokemon = readdir(dirFiles))) {
