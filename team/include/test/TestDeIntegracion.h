@@ -10,6 +10,7 @@
 #include "planificador/algoritmos/AlgoritmoPlanificador.h"
 #include "planificador/algoritmos/fifo/FirstInFirstOut.h"
 #include "modelo/mapa/Mapa.h"
+#include "modelo/mapa/registro/RegistradorDePosiciones.h"
 
 void testDeIntegracion();
 

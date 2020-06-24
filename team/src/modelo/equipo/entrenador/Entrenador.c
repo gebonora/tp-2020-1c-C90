@@ -34,12 +34,34 @@ bool puedeAtraparPokemones(Entrenador * this) {
 }
 
 static void destruir(Entrenador * this) {
+    log_debug(this->logger, "Se procede a destruir un entrenador");
     log_destroy(this->logger);
     dictionary_destroy(this->pokemonesCapturados);
     dictionary_destroy(this->pokemonesObjetivo);
-    free(this->uuid);
+    if (this->uuid != NULL) {
+        free(this->uuid);
+    }
     free(this);
 }
+
+static Entrenador *new(char * posicionInicial, char * pokemonesIniciales, char * pokemonesObjetivos) {
+    Entrenador * entrenador = malloc(sizeof(Entrenador));
+
+    entrenador->logger = log_create(TEAM_INTERNAL_LOG_FILE, "Entrenador", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_INFO);
+    entrenador->posicionInicial = parsearPosicion(posicionInicial);
+    entrenador->uuid = NULL;
+    entrenador->tipoPosicionable = ENTRENADOR;
+    entrenador->pokemonesCapturados = agruparPokemonesPorNombre(pokemonesIniciales);
+    entrenador->pokemonesObjetivo = agruparPokemonesPorNombre(pokemonesObjetivos);
+    entrenador->limiteDeCaptura = totalDePokemones(entrenador->pokemonesObjetivo);
+    entrenador->objetivoCompletado = &objetivoCompletado;
+    entrenador->puedeAtraparPokemones = &puedeAtraparPokemones;
+    entrenador->destruir = &destruir;
+
+    return entrenador;
+}
+
+const struct EntrenadorClass EntrenadorConstructor = {.new=&new};
 
 // Funciones estaticas
 Coordinate parsearPosicion(char * posicion) {
@@ -83,21 +105,3 @@ int totalDePokemones(ContadorPokemones contadorPokemones) {
     dictionary_iterator(contadorPokemones, sumar_al_total);
     return total;
 }
-
-static Entrenador *new(char * posicionInicial, char * pokemonesIniciales, char * pokemonesObjetivos) {
-    Entrenador * entrenador = malloc(sizeof(Entrenador));
-
-    entrenador->logger = log_create(TEAM_INTERNAL_LOG_FILE, "Entrenador", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_INFO);
-    entrenador->posicionInicial = parsearPosicion(posicionInicial);
-    entrenador->uuid = mapa.registrarPosicion(entrenador->posicionInicial, ENTRENADOR);
-    entrenador->pokemonesCapturados = agruparPokemonesPorNombre(pokemonesIniciales);
-    entrenador->pokemonesObjetivo = agruparPokemonesPorNombre(pokemonesObjetivos);
-    entrenador->limiteDeCaptura = totalDePokemones(entrenador->pokemonesObjetivo);
-    entrenador->objetivoCompletado = &objetivoCompletado;
-    entrenador->puedeAtraparPokemones = &puedeAtraparPokemones;
-    entrenador->destruir = &destruir;
-
-    return entrenador;
-}
-
-const struct EntrenadorClass EntrenadorConstructor = {.new=&new};
