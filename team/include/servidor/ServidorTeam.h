@@ -13,6 +13,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <pthread.h>
+#include <signal.h>
 #include "app/Global.h"
 #include "utils/sockets/Sockets.h"
 #include "cliente/ClienteBroker.h"
@@ -22,7 +23,7 @@ typedef struct {
 	uint32_t idMensaje;
 } ArgumentosHilo;
 
-t_config* configServer;
+
 char* IP_Broker;
 char* IP_Team_Gameboy;
 char* Puerto_Broker;
@@ -58,6 +59,11 @@ void atenderGameboy();
 void killer();
 
 // Variables globales del server
-int FLAG_SERVER_ACTIVO;
+int SOCKET_APPEARED;
+int SOCKET_CAUGHT;
+int SOCKET_LOCALIZED;
+int SOCKET_GAMEBOY;
+
+pthread_t threadAppeared, threadCaught, threadLocalized, threadGameboy;
 
 #endif //TEAM_SERVIDORTEAM_H

@@ -6,33 +6,37 @@
 
 void configurarServer() {
 
-	configServer = config_create(TEAM_CONFIG_FILE);
+	t_config* configServer = config_create(TEAM_CONFIG_FILE);
 
-	IP_Broker = config_get_string_value(configServer, "IP_BROKER");
-	Puerto_Broker = config_get_string_value(configServer, "PUERTO_BROKER");
+	IP_Broker = string_new();
+	string_append(&IP_Broker, config_get_string_value(configServer, "IP_BROKER"));
 
-	IP_Team_Gameboy = config_get_string_value(configServer, "IP_TEAM_GAMEBOY");
-	Puerto_Team_Gameboy = config_get_string_value(configServer, "PUERTO_TEAM_GAMEBOY");
+	Puerto_Broker = string_new();
+	string_append(&Puerto_Broker, config_get_string_value(configServer, "PUERTO_BROKER"));
+
+	IP_Team_Gameboy = string_new();
+	string_append(&IP_Team_Gameboy, config_get_string_value(configServer, "IP_TEAM_GAMEBOY"));
+
+	Puerto_Team_Gameboy = string_new();
+	string_append(&Puerto_Team_Gameboy, config_get_string_value(configServer, "PUERTO_TEAM_GAMEBOY"));
 
 	Tiempo_Reconexion = config_get_int_value(configServer, "TIEMPO_RECONEXION");
+
+	config_destroy(configServer);
 
 	printf("%d\n", Tiempo_Reconexion);
 
 }
 
 void eliminarConfigServer() {
-	//Llamar a esta función luego de
+	//Llamar a esta función en apagarServer
 	free(IP_Broker);
 	free(Puerto_Broker);
 	free(IP_Team_Gameboy);
 	free(Puerto_Team_Gameboy);
-	config_destroy(configServer);
 }
 
 void atenderConexiones() {
-	FLAG_SERVER_ACTIVO = 1;
-
-	pthread_t threadAppeared, threadCaught, threadLocalized;
 
 	pthread_create(&threadAppeared, NULL, (void*) atenderAppeared, NULL);
 	pthread_detach(threadAppeared);
@@ -43,26 +47,37 @@ void atenderConexiones() {
 	pthread_create(&threadCaught, NULL, (void*) atenderCaught, NULL);
 	pthread_detach(threadCaught);
 
-	pthread_t threadKiller;
-	pthread_create(&threadKiller, NULL, (void*) killer, NULL);
-	pthread_detach(threadKiller);
+	pthread_create(&threadGameboy, NULL, (void*) atenderGameboy, NULL);
+	pthread_detach(threadGameboy);
 
-	atenderGameboy();
+	sleep(2);
+	//while (1)
+	//sleep(10); //esto se va cuando se acople el server al flujo del main. es solo para probar server.
 
 }
 
-void killer() {
-	sleep(15);
-	FLAG_SERVER_ACTIVO = 0;
+void apagarServer() {
+	close(SOCKET_APPEARED);
+	close(SOCKET_CAUGHT);
+	close(SOCKET_LOCALIZED);
+	close(SOCKET_GAMEBOY);
+
+	pthread_cancel(threadGameboy);
+	pthread_cancel(threadAppeared);
+	pthread_cancel(threadLocalized);
+	pthread_cancel(threadCaught);
+	log_info(INTERNAL_LOGGER, "El servidor fue apagado.");
+	eliminarConfigServer();
+	//con esta tecnica el leakeo, que deberia ser del tipo still reachable, va a ser solo cuando cerremos team, en memoria pedida por funciones que hacen recv.
 }
 
 void atenderAppeared() {
-	int socketDeEscucha = subscribirseACola(APPEARED, MANDATORY_LOGGER);
-	esperarBrokerAppeared(socketDeEscucha);
+	SOCKET_APPEARED = subscribirseACola(APPEARED, MANDATORY_LOGGER);
+	esperarBrokerAppeared(SOCKET_APPEARED);
 }
 
 void esperarBrokerAppeared(int socketDeEscucha) {
-	while (FLAG_SERVER_ACTIVO) {
+	while (1) {
 
 		uint32_t idMensaje;
 		Pokemon* unPokemon = recv_pokemon(socketDeEscucha, 0);
@@ -113,12 +128,12 @@ void procesarHiloAppeared(ArgumentosHilo* argumentosHilo) {
 }
 
 void atenderCaught() {
-	int socketDeEscucha = subscribirseACola(CAUGHT, MANDATORY_LOGGER);
-	esperarBrokerCaught(socketDeEscucha);
+	SOCKET_CAUGHT = subscribirseACola(CAUGHT, MANDATORY_LOGGER);
+	esperarBrokerCaught(SOCKET_CAUGHT);
 }
 
 void esperarBrokerCaught(int socketDeEscucha) {
-	while (FLAG_SERVER_ACTIVO) {
+	while (1) {
 		uint32_t idMensaje;
 		Caught* unCaught = recv_caught(socketDeEscucha);
 		int flagError = 0;
@@ -162,12 +177,12 @@ void procesarHiloCaught(ArgumentosHilo* argumentosHilo) {
 }
 
 void atenderLocalized() {
-	int socketDeEscucha = subscribirseACola(LOCALIZED, MANDATORY_LOGGER);
-	esperarBrokerLocalized(socketDeEscucha);
+	SOCKET_LOCALIZED = subscribirseACola(LOCALIZED, MANDATORY_LOGGER);
+	esperarBrokerLocalized(SOCKET_LOCALIZED);
 }
 
 void esperarBrokerLocalized(int socketDeEscucha) {
-	while (FLAG_SERVER_ACTIVO) {
+	while (1) {
 
 		uint32_t idMensaje;
 		Localized* unLocalized = recv_localized(socketDeEscucha);
@@ -201,7 +216,6 @@ void esperarBrokerLocalized(int socketDeEscucha) {
 			pthread_detach(thread);
 		}
 	}
-
 }
 
 void procesarHiloLocalized(ArgumentosHilo* argumentosHilo) {
@@ -217,20 +231,20 @@ void procesarHiloLocalized(ArgumentosHilo* argumentosHilo) {
 }
 
 void atenderGameboy() {
-	int socketServidor = crearSocketServidor(IP_Team_Gameboy, Puerto_Team_Gameboy);
+	SOCKET_GAMEBOY = crearSocketServidor(IP_Team_Gameboy, Puerto_Team_Gameboy);
 
 	pthread_mutex_lock(&MTX_INTERNAL_LOG);
-	log_info(INTERNAL_LOGGER, "Esperando Gameboys en el socket: '%d'", socketServidor);
+	log_info(INTERNAL_LOGGER, "Esperando Gameboys en el socket: '%d'", SOCKET_GAMEBOY);
 	pthread_mutex_unlock(&MTX_INTERNAL_LOG);
 
-	while (FLAG_SERVER_ACTIVO) {
+	while (1) {
 
 		pthread_t thread;
 
 		struct sockaddr_in dir_cliente;
 		socklen_t tam_direccion = sizeof(struct sockaddr_in);
 
-		int socketCliente = accept(socketServidor, (void*) &dir_cliente, &tam_direccion);
+		int socketCliente = accept(SOCKET_GAMEBOY, (void*) &dir_cliente, &tam_direccion);
 
 		pthread_mutex_lock(&MTX_INTERNAL_LOG);
 		log_info(INTERNAL_LOGGER, "Se conectó un Gameboy en el socket: '%d'", socketCliente);
@@ -302,8 +316,9 @@ int subscribirseACola(Operation cola, t_log* logger) {
 		sleep(Tiempo_Reconexion);
 		socketDeEscucha = iniciarSocketDeEscucha(cola);
 	}
-	log_info(logger, "Subscripto al Broker con el socket: '%d' Escuchando mensajes...", socketDeEscucha);
-
+	if (socketDeEscucha > 0) {
+		log_info(logger, "Subscripto al Broker con el socket: '%d' Escuchando mensajes...", socketDeEscucha);
+	}
 	return socketDeEscucha;
 }
 
