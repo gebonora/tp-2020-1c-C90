@@ -7,7 +7,7 @@
 #include "reintentoOperacion.h"
 
 void iniciarListaSemaforosDeArchivo() {
-	listaSemaforos = list_create();
+	g_listaSemaforos = list_create();
 	//leer el directorio Files, guardando en lista el nombre y el semaforo inicializado.
 	char* rutaFiles = crearRuta(PATH_FILES);
 	DIR* dirFiles = opendir(rutaFiles);
@@ -29,13 +29,13 @@ void agregarSemaforoALista(char* nombreArchivo) {
 	FileMutex* nuevaEntrada = malloc(sizeof(FileMutex));
 	nuevaEntrada->nombreArchivo = string_duplicate(nombreArchivo);
 	pthread_mutex_init(&(nuevaEntrada->mutexArchivo), NULL);
-	list_add(listaSemaforos, nuevaEntrada);
+	list_add(g_listaSemaforos, nuevaEntrada);
 }
 
 int puedeAccederAArchivo(char* nombreArchivo) { //por fuera de esta funcion tenemos un while con el sleep de reintento operacion
 	int resultado = 0;
 	//espera por el mutex del archivo.
-	FileMutex* fileMutex = list_get(listaSemaforos, obtenerPosicionEnLista(nombreArchivo));
+	FileMutex* fileMutex = list_get(g_listaSemaforos, obtenerPosicionEnLista(nombreArchivo));
 	pthread_mutex_lock(&(fileMutex->mutexArchivo));
 
 	if (estaAbierto(nombreArchivo)) {
@@ -55,7 +55,7 @@ int puedeAccederAArchivo(char* nombreArchivo) { //por fuera de esta funcion tene
 }
 
 void cerrarArchivo(char* nombreArchivo) {
-	FileMutex* fileMutex = list_get(listaSemaforos, obtenerPosicionEnLista(nombreArchivo));
+	FileMutex* fileMutex = list_get(g_listaSemaforos, obtenerPosicionEnLista(nombreArchivo));
 	char* path = crearRutaMetadataPokemon(nombreArchivo);
 	pthread_mutex_lock(&(fileMutex->mutexArchivo));
 	setClaveValor(path, "OPEN", "N");
@@ -65,16 +65,16 @@ void cerrarArchivo(char* nombreArchivo) {
 
 void dumpListaSemaforosDeArchivo() {
 	log_debug(loggerMain, "Semaforos: Inicializando...");
-	for (int a = 0; a < listaSemaforos->elements_count; a++) {
-		log_debug(loggerMain, "Se inicializo un semaforo para el archivo pokemon: '%s'.", ((FileMutex*) (list_get(listaSemaforos, a)))->nombreArchivo);
+	for (int a = 0; a < g_listaSemaforos->elements_count; a++) {
+		log_debug(loggerMain, "Se inicializo un semaforo para el archivo pokemon: '%s'.", ((FileMutex*) (list_get(g_listaSemaforos, a)))->nombreArchivo);
 	}
 	log_debug(loggerMain, "Listo!");
 	puts("\n");
 }
 
 int obtenerPosicionEnLista(char* nombrePokemon) {
-	for (int a = 0; a < listaSemaforos->elements_count; a++) {
-		if (string_equals_ignore_case(nombrePokemon, ((FileMutex*) (list_get(listaSemaforos, a)))->nombreArchivo)) {
+	for (int a = 0; a < g_listaSemaforos->elements_count; a++) {
+		if (string_equals_ignore_case(nombrePokemon, ((FileMutex*) (list_get(g_listaSemaforos, a)))->nombreArchivo)) {
 			return a;
 		}
 	}
@@ -95,7 +95,7 @@ int estaAbierto(char* nombrePokemon) {
 }
 
 void freeListaSemaforos() {
-	list_destroy_and_destroy_elements(listaSemaforos, freeFileMutex);
+	list_destroy_and_destroy_elements(g_listaSemaforos, freeFileMutex);
 }
 
 void freeFileMutex(void* elem) {

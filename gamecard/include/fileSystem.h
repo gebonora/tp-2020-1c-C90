@@ -52,7 +52,7 @@ int g_blockSize;
 int g_numberOfBlocks;
 
 pthread_mutex_t m_bitmap;
-t_list* listaSemaforos;
+t_list* g_listaSemaforos;
 
 #define MAGIC_NUMBER "TALL_GRASS" //No se está usando, se podría agregar una validación sobre el Metadata del FS para que coincida con esto.
 #define SHELL_COMMAND_DELETE "exec rm -r /"

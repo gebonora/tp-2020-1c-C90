@@ -15,6 +15,8 @@
  *
  * */
 
+//PUNTO DE ENTRADA AL FILESYSTEM
+
 int iniciarFileSystem(int argc, char* argv[]) { //de pruebas, luego sacar a iniciarFileSystem
 	iniciarSemaforosFS();
 
@@ -66,7 +68,7 @@ void cerrarSemaforosFS() {
 	freeListaSemaforos();
 }
 
-//FUNCIONES DE FORMATEADOR
+//FUNCIONES DEL FORMATEADOR
 
 void formatearTallGrass() {
 	log_debug(loggerMain, "Formateando el Disco...");
