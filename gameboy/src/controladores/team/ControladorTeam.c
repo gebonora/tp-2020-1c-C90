@@ -12,9 +12,7 @@ void atenderPedidoTeam(PedidoGameBoy pedidoGameBoy, t_log * logger) {
 	char* puerto = servicioDeConfiguracion.obtenerString(
 			&servicioDeConfiguracion, PUERTO_TEAM);
 	int socketCliente = crearSocketCliente(ip, puerto);
-	if(socketCliente < 0){
-		puts("error");
-	}
+
 	switch (pedidoGameBoy.tipoMensaje) {
 	case APPEARED_POKEMON:
 		;
