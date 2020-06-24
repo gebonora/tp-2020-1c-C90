@@ -55,4 +55,9 @@ char* logCoordenadas(t_list* listaCoor);
 
 void atenderGameboy();
 
+void killer();
+
+// Variables globales del server
+int FLAG_SERVER_ACTIVO;
+
 #endif //TEAM_SERVIDORTEAM_H

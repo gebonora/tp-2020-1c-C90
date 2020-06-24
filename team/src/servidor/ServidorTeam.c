@@ -21,6 +21,7 @@ void configurarServer() {
 }
 
 void eliminarConfigServer() {
+	//Llamar a esta función luego de
 	free(IP_Broker);
 	free(Puerto_Broker);
 	free(IP_Team_Gameboy);
@@ -29,6 +30,7 @@ void eliminarConfigServer() {
 }
 
 void atenderConexiones() {
+	FLAG_SERVER_ACTIVO = 1;
 
 	pthread_t threadAppeared, threadCaught, threadLocalized;
 
@@ -41,8 +43,17 @@ void atenderConexiones() {
 	pthread_create(&threadCaught, NULL, (void*) atenderCaught, NULL);
 	pthread_detach(threadCaught);
 
+	pthread_t threadKiller;
+	pthread_create(&threadKiller, NULL, (void*) killer, NULL);
+	pthread_detach(threadKiller);
+
 	atenderGameboy();
 
+}
+
+void killer() {
+	sleep(15);
+	FLAG_SERVER_ACTIVO = 0;
 }
 
 void atenderAppeared() {
@@ -51,7 +62,7 @@ void atenderAppeared() {
 }
 
 void esperarBrokerAppeared(int socketDeEscucha) {
-	while (1) {
+	while (FLAG_SERVER_ACTIVO) {
 
 		uint32_t idMensaje;
 		Pokemon* unPokemon = recv_pokemon(socketDeEscucha, 0);
@@ -107,8 +118,7 @@ void atenderCaught() {
 }
 
 void esperarBrokerCaught(int socketDeEscucha) {
-
-	while (1) {
+	while (FLAG_SERVER_ACTIVO) {
 		uint32_t idMensaje;
 		Caught* unCaught = recv_caught(socketDeEscucha);
 		int flagError = 0;
@@ -157,8 +167,7 @@ void atenderLocalized() {
 }
 
 void esperarBrokerLocalized(int socketDeEscucha) {
-
-	while (1) {
+	while (FLAG_SERVER_ACTIVO) {
 
 		uint32_t idMensaje;
 		Localized* unLocalized = recv_localized(socketDeEscucha);
@@ -214,7 +223,7 @@ void atenderGameboy() {
 	log_info(INTERNAL_LOGGER, "Esperando Gameboys en el socket: '%d'", socketServidor);
 	pthread_mutex_unlock(&MTX_INTERNAL_LOG);
 
-	while (1) {
+	while (FLAG_SERVER_ACTIVO) {
 
 		pthread_t thread;
 
