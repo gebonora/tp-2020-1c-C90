@@ -46,7 +46,7 @@ void atenderConexiones() {
 }
 
 void atenderAppeared() {
-	int socketDeEscucha = subscribirseACola(APPEARED, INTERNAL_LOGGER, &MTX_INTERNAL_LOG);
+	int socketDeEscucha = subscribirseACola(APPEARED, MANDATORY_LOGGER);
 	esperarBrokerAppeared(socketDeEscucha);
 }
 
@@ -71,7 +71,7 @@ void esperarBrokerAppeared(int socketDeEscucha) {
 		if (flagError) {
 			log_error(MANDATORY_LOGGER, "Se perdió la conexión con el Broker. Iniciando reconexión.");
 			close(socketDeEscucha);
-			socketDeEscucha = subscribirseACola(APPEARED, INTERNAL_LOGGER, &MTX_INTERNAL_LOG);
+			socketDeEscucha = subscribirseACola(APPEARED, MANDATORY_LOGGER);
 		} else {
 			ArgumentosHilo* argumentosHilo = malloc(sizeof(ArgumentosHilo));
 			argumentosHilo->mensaje = unPokemon;
@@ -85,12 +85,24 @@ void esperarBrokerAppeared(int socketDeEscucha) {
 }
 
 void procesarHiloAppeared(ArgumentosHilo* argumentosHilo) {
-	//decider de qué se va a encargar esta función. Puede ser un pasamano a otro hilo, cerrandose este.
-	//o tener comportamiento.
+	Pokemon* unAppeared = (Pokemon*) argumentosHilo->mensaje;
+	uint32_t idMensaje = argumentosHilo->idMensaje;
+	char* aux;
+	if (idMensaje == UINT32_MAX) {
+		aux = string_from_format("gameboy");
+	} else {
+		aux = string_from_format("%d", idMensaje);
+	}
+	log_info(MANDATORY_LOGGER, "Llegó un Appeared. idMensaje: '%s', pokemon: '%s', posX: '%d', posY: '%d'.", aux, unAppeared->name->value,
+			((Coordinate*) (unAppeared->coordinates->head->data))->pos_x, ((Coordinate*) (unAppeared->coordinates->head->data))->pos_y);
+	free(aux);
+	//Pasar el paquete y el id a otro subproceso. ver donde se va a liberar la memoria!
+	//Si se termina el hilo, la memoria se libera????? -> crear una copia y pasar la copia.
+	//cerrar hilo
 }
 
 void atenderCaught() {
-	int socketDeEscucha = subscribirseACola(CAUGHT, INTERNAL_LOGGER, &MTX_INTERNAL_LOG);
+	int socketDeEscucha = subscribirseACola(CAUGHT, MANDATORY_LOGGER);
 	esperarBrokerCaught(socketDeEscucha);
 }
 
@@ -116,7 +128,7 @@ void esperarBrokerCaught(int socketDeEscucha) {
 		if (flagError) {
 			log_error(MANDATORY_LOGGER, "Se perdió la conexión con el Broker. Iniciando reconexión.");
 			close(socketDeEscucha);
-			socketDeEscucha = subscribirseACola(CAUGHT, MANDATORY_LOGGER, &MTX_INTERNAL_LOG);
+			socketDeEscucha = subscribirseACola(CAUGHT, MANDATORY_LOGGER);
 		} else {
 
 			ArgumentosHilo* argumentosHilo = malloc(sizeof(ArgumentosHilo));
@@ -131,12 +143,16 @@ void esperarBrokerCaught(int socketDeEscucha) {
 }
 
 void procesarHiloCaught(ArgumentosHilo* argumentosHilo) {
-	//decider de qué se va a encargar esta función. Puede ser un pasamano a otro hilo, cerrandose este.
-	//o tener comportamiento.
+	Caught* unCaught = (Caught*) argumentosHilo->mensaje;
+	uint32_t idMensaje = argumentosHilo->idMensaje;
+	log_info(MANDATORY_LOGGER, "Llegó un Caught. idMensaje: '%d', resultado: '%s'.", idMensaje, traducirResult(unCaught->result));
+	//Pasar el paquete y el id a otro subproceso. ver donde se va a liberar la memoria!
+	//Si se termina el hilo, la memoria se libera????? -> crear una copia y pasar la copia.
+	//cerrar hilo
 }
 
 void atenderLocalized() {
-	int socketDeEscucha = subscribirseACola(LOCALIZED, INTERNAL_LOGGER, &MTX_INTERNAL_LOG);
+	int socketDeEscucha = subscribirseACola(LOCALIZED, MANDATORY_LOGGER);
 	esperarBrokerLocalized(socketDeEscucha);
 }
 
@@ -164,7 +180,7 @@ void esperarBrokerLocalized(int socketDeEscucha) {
 		if (flagError) {
 			log_error(MANDATORY_LOGGER, "Se perdió la conexión con el Broker. Iniciando reconexión.");
 			close(socketDeEscucha);
-			socketDeEscucha = subscribirseACola(LOCALIZED, MANDATORY_LOGGER, &MTX_INTERNAL_LOG);
+			socketDeEscucha = subscribirseACola(LOCALIZED, MANDATORY_LOGGER);
 		} else {
 
 			ArgumentosHilo* argumentosHilo = malloc(sizeof(ArgumentosHilo));
@@ -180,8 +196,15 @@ void esperarBrokerLocalized(int socketDeEscucha) {
 }
 
 void procesarHiloLocalized(ArgumentosHilo* argumentosHilo) {
-	//decider de qué se va a encargar esta función. Puede ser un pasamano a otro hilo, cerrandose este.
-	//o tener comportamiento.
+	Localized* unLocalized = (Localized*) argumentosHilo->mensaje;
+	uint32_t idMensaje;
+	char* stringCoor = logCoordenadas(unLocalized->pokemon->coordinates);
+	log_info(MANDATORY_LOGGER, "Llegó un Localized. idMensaje: '%d', pokemon: '%s', cantidadCoordenadas: '%d'%s.", idMensaje, unLocalized->pokemon->name->value,
+			unLocalized->coordinates_quantity, stringCoor);
+	free(stringCoor);
+	//Pasar el paquete y el id a otro subproceso. ver donde se va a liberar la memoria!
+	//Si se termina el hilo, la memoria se libera????? -> crear una copia y pasar la copia.
+	//cerrar hilo
 }
 
 void atenderGameboy() {
@@ -217,9 +240,9 @@ void atenderGameboy() {
 
 			ArgumentosHilo* argumentosHilo = malloc(sizeof(ArgumentosHilo));
 			argumentosHilo->mensaje = unPokemon;
-			argumentosHilo->idMensaje = 999;
+			argumentosHilo->idMensaje = UINT32_MAX;
 
-			pthread_create(&thread, NULL, (void*) procesarHiloAppeared, unPokemon);
+			pthread_create(&thread, NULL, (void*) procesarHiloAppeared, argumentosHilo);
 			pthread_detach(thread);
 		} else {
 			log_error(INTERNAL_LOGGER, "El gameboy envio un mensaje erroneo.");
@@ -228,7 +251,7 @@ void atenderGameboy() {
 	}
 }
 
-int iniciarSocketDeEscucha(Operation cola, t_log* logger, pthread_mutex_t* mutex) {
+int iniciarSocketDeEscucha(Operation cola) {
 	int socketDeEscucha = crearSocketCliente(IP_Broker, Puerto_Broker);
 	if (socketDeEscucha == -1) {
 		return -1;
@@ -263,18 +286,14 @@ int iniciarSocketDeEscucha(Operation cola, t_log* logger, pthread_mutex_t* mutex
 	return socketDeEscucha;
 }
 
-int subscribirseACola(Operation cola, t_log* logger, pthread_mutex_t* mutex) {
-	int socketDeEscucha = iniciarSocketDeEscucha(cola, logger, mutex);
+int subscribirseACola(Operation cola, t_log* logger) {
+	int socketDeEscucha = iniciarSocketDeEscucha(cola);
 	while (socketDeEscucha == -1) {
-		pthread_mutex_lock(mutex);
 		log_error(logger, "Error al conectar con Broker. Reintentando en '%d' segundos...", Tiempo_Reconexion);
-		pthread_mutex_unlock(mutex);
 		sleep(Tiempo_Reconexion);
-		socketDeEscucha = iniciarSocketDeEscucha(cola, logger, mutex);
+		socketDeEscucha = iniciarSocketDeEscucha(cola);
 	}
-	pthread_mutex_lock(mutex);
 	log_info(logger, "Subscripto al Broker con el socket: '%d' Escuchando mensajes...", socketDeEscucha);
-	pthread_mutex_unlock(mutex);
 
 	return socketDeEscucha;
 }
@@ -300,3 +319,13 @@ char* traducirResult(Result result) {
 	}
 }
 
+char* logCoordenadas(t_list* listaCoor) {
+	char* ret = string_new();
+	for (int a = 0; a < listaCoor->elements_count; a++) {
+		if (a == 0)
+			string_append_with_format(&ret, " ,coordenadas: '(%d,%d)'", ((Coordinate*) (list_get(listaCoor, a)))->pos_x, ((Coordinate*) (list_get(listaCoor, a)))->pos_y);
+		else
+			string_append_with_format(&ret, "|'(%d,%d)'", ((Coordinate*) (list_get(listaCoor, a)))->pos_x, ((Coordinate*) (list_get(listaCoor, a)))->pos_y);
+	}
+	return ret;
+}

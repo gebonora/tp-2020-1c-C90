@@ -2,9 +2,6 @@
 // Created by Alan Zhao on 07/05/2020.
 //
 
-
-
-
 #ifndef TEAM_SERVIDORTEAM_H
 #define TEAM_SERVIDORTEAM_H
 
@@ -49,12 +46,12 @@ void atenderLocalized();
 void esperarBrokerLocalized(int socketDeEscucha);
 void procesarHiloLocalized(ArgumentosHilo* argumentosHilo);
 
-
-int iniciarSocketDeEscucha(Operation cola, t_log* logger, pthread_mutex_t* mutex);
-int subscribirseACola(Operation cola, t_log* logger, pthread_mutex_t* mutex);
+int iniciarSocketDeEscucha(Operation cola);
+int subscribirseACola(Operation cola, t_log* logger);
 char* traducirOperacion(Operation operacion);
 char* traducirResult(Result result);
 
+char* logCoordenadas(t_list* listaCoor);
 
 void atenderGameboy();
 
