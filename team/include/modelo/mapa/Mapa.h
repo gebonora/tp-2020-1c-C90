@@ -20,6 +20,7 @@
  */
 
 typedef t_dictionary * Plano;
+typedef t_list * Casilla;
 
 typedef enum TipoPosicionable {
     ENTRENADOR,
@@ -44,8 +45,14 @@ extern const struct MapaClass {
     Mapa (*new)();
 } MapaConstructor;
 
+// Funciones estaticas
 Presencia * crearPresencia(TipoPosicionable posicionable);
+Plano crearPlano();
+Casilla crearCasilla();
+void destruirCasilla(Casilla casilla);
+void destruirPresencia(Presencia * presencia);
 char * coordenadaImprimible(Coordinate posicion);
+char * nombreTipoPosicionable(TipoPosicionable posicionable);
 
 Mapa mapa;
 
