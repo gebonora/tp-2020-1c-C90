@@ -4,7 +4,6 @@
  *  Created on: 18 jun. 2020
  *      Author: GONZALO BONORA
  */
-
 #include "bitmap.h"
 
 //PARA PERSISTIR EN BITMAP USAREMOS MMAP.
@@ -70,8 +69,9 @@ void dumpBitmap(t_bitarray* bitmap, int cantidadMostrada) {
 	}
 }
 
-int calcularTamanioBitArray(int bloques) { //Calcula el menor tamaño posible para que ocupen los bits del bitarray.
-	if (!bloques % 8) {                    //El malloc va a ocupar este numero*8bits, porque es un malloc de enteros.
+int calcularTamanioBitArray(int bloques) {
+	//Calcula el menor tamaño posible para que ocupen los bits del bitarray.
+	if (!bloques % 8) {
 		return bloques / 8;
 	} else {
 		return (bloques / 8) + 1;

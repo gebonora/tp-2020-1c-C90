@@ -2,7 +2,7 @@
  * mapeo.c
  *
  *  Created on: 20 jun. 2020
- *      Author: utnso
+ *      Author: GONZALO BONORA
  */
 #include "mapeo.h"
 

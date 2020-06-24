@@ -6,6 +6,8 @@
  */
 #include "reintentoOperacion.h"
 
+//FUNCIONES PARA SINCRONIZAR EL ACCESO A LOS ARCHIVOS METADATA POKEMON.
+
 void iniciarListaSemaforosDeArchivo() {
 	//Leer el directorio Files, guardando en la lista el nombre y el semaforo inicializado.
 	g_listaSemaforos = list_create();
@@ -66,6 +68,8 @@ void cerrarArchivo(char* nombreArchivo) {
 	pthread_mutex_unlock(&(fileMutex->mutexArchivo));
 	free(path);
 }
+
+//FUNCIONES AUXILIARES
 
 void dumpListaSemaforosDeArchivo() {
 	log_debug(loggerMain, "Semaforos: Inicializando...");

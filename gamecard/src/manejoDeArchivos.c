@@ -4,7 +4,6 @@
  *  Created on: 18 jun. 2020
  *      Author: GONZALO BONORA
  */
-
 #include "manejoDeArchivos.h"
 
 //FUNCIONES PARA EL FLUJO NEW/APPEARED
