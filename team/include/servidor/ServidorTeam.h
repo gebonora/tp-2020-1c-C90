@@ -56,7 +56,7 @@ char* logCoordenadas(t_list* listaCoor);
 
 void atenderGameboy();
 
-void killer();
+void apagarServer();
 
 // Variables globales del server
 int SOCKET_APPEARED;
