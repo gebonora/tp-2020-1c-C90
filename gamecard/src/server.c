@@ -359,7 +359,7 @@ void atenderGameboy() {
 	}
 }
 
-int iniciarSocketDeEscucha(Operation cola, t_log* logger, pthread_mutex_t* mutex) {
+int iniciarSocketDeEscucha(Operation cola) {
 	int socketDeEscucha = crearSocketCliente(IP_BROKER, PUERTO_BROKER);
 	if (socketDeEscucha == -1) {
 		return -1;
@@ -395,13 +395,13 @@ int iniciarSocketDeEscucha(Operation cola, t_log* logger, pthread_mutex_t* mutex
 }
 
 int subscribirseACola(Operation cola, t_log* logger, pthread_mutex_t* mutex) {
-	int socketDeEscucha = iniciarSocketDeEscucha(cola, logger, mutex);
+	int socketDeEscucha = iniciarSocketDeEscucha(cola);
 	while (socketDeEscucha == -1) {
 		pthread_mutex_lock(mutex);
 		log_error(logger, "Error al conectar con Broker. Reintentando en '%d' segundos...", TIEMPO_DE_REINTENTO_CONEXION);
 		pthread_mutex_unlock(mutex);
 		sleep(TIEMPO_DE_REINTENTO_CONEXION);
-		socketDeEscucha = iniciarSocketDeEscucha(cola, logger, mutex);
+		socketDeEscucha = iniciarSocketDeEscucha(cola);
 	}
 	pthread_mutex_lock(mutex);
 	log_info(logger, "Subscripto al Broker con el socket: '%d' Escuchando mensajes...", socketDeEscucha);
