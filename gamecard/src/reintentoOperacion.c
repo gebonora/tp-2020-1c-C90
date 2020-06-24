@@ -7,11 +7,12 @@
 #include "reintentoOperacion.h"
 
 void iniciarListaSemaforosDeArchivo() {
+	//Leer el directorio Files, guardando en la lista el nombre y el semaforo inicializado.
 	g_listaSemaforos = list_create();
-	//leer el directorio Files, guardando en lista el nombre y el semaforo inicializado.
 	char* rutaFiles = crearRuta(PATH_FILES);
 	DIR* dirFiles = opendir(rutaFiles);
 	struct dirent* dirPokemon;
+
 	while ((dirPokemon = readdir(dirFiles))) {
 		if (esDirectorioPokemon(dirPokemon->d_name)) {
 			agregarSemaforoALista(dirPokemon->d_name);
@@ -20,6 +21,7 @@ void iniciarListaSemaforosDeArchivo() {
 			free(metadata);
 		}
 	}
+
 	free(rutaFiles);
 	closedir(dirFiles);
 	dumpListaSemaforosDeArchivo();
@@ -32,9 +34,11 @@ void agregarSemaforoALista(char* nombreArchivo) {
 	list_add(g_listaSemaforos, nuevaEntrada);
 }
 
-int puedeAccederAArchivo(char* nombreArchivo) { //por fuera de esta funcion tenemos un while con el sleep de reintento operacion
+int puedeAccederAArchivo(char* nombreArchivo) {
+	//Por fuera de esta funcion tenemos un while con el sleep de reintento operacion.
 	int resultado = 0;
-	//espera por el mutex del archivo.
+
+	//Espera por el mutex del archivo.
 	FileMutex* fileMutex = list_get(g_listaSemaforos, obtenerPosicionEnLista(nombreArchivo));
 	pthread_mutex_lock(&(fileMutex->mutexArchivo));
 
@@ -46,10 +50,10 @@ int puedeAccederAArchivo(char* nombreArchivo) { //por fuera de esta funcion tene
 		setClaveValor(path, "OPEN", "Y");
 		free(path);
 	}
-	//consulta el OPEN. si está en Y sale. return -1
+	//Consulta el OPEN. si está en Y sale. return -1
 	//					si esá en N lo graba como Y y entra. return 0
 
-	//libera el semaforo
+	//Libera el semaforo.
 	pthread_mutex_unlock(&(fileMutex->mutexArchivo));
 	return resultado;
 }

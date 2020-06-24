@@ -9,9 +9,9 @@
 //FUNCIONES PARA LECTURA/ESCRITURA DE ARCHIVOS POKEMON
 
 char* mapearArchivoEnString(t_list* listaBloques, int tamanioArchivo) {
-
 	char* archivoMapeado = string_new();
 	int leido = 0;
+
 	for (int a = 0; a < listaBloques->elements_count; a++) {
 		int bloque = atoi(list_get(listaBloques, a));
 		char* rutaBloque = crearRutaBloque(bloque);
@@ -31,15 +31,14 @@ char* mapearArchivoEnString(t_list* listaBloques, int tamanioArchivo) {
 		free(rutaBloque);
 		free(subStringAux);
 	}
-
-
 	return archivoMapeado;
 }
 
 void dumpearArchivo(t_list* listaBloques, char* archivoMapeado) {
-	//esta funcion recibe los bloques necesarios y ya asignados, y dumpea el archivoMapeado.
+	//Esta funcion recibe los bloques necesarios ya asignados y dumpea en ellos el archivoMapeado.
 	int desplazamiento = 0;
 	int tamanioArchivo = string_length(archivoMapeado);
+
 	for (int a = 0; a < listaBloques->elements_count; a++) {
 		int bloque = atoi(list_get(listaBloques, a));
 		char*rutaBloque = crearRutaBloque(bloque);
@@ -61,18 +60,20 @@ void dumpearArchivo(t_list* listaBloques, char* archivoMapeado) {
 //FUNCIONES DE PROCESAMIENTO DE OPERACIONES
 
 char* operarNew(char* archivoMapeado, int posX, int posY, int cantidad) {
-
 	char* clave = string_from_format("%d-%d", posX, posY);
 	char* retorno = string_new();
+
 	if (!string_contains(archivoMapeado, clave)) {
 		string_append_with_format(&retorno, "%s%s=%d\n", archivoMapeado, clave, cantidad);
 		free(archivoMapeado);
 		free(clave);
 		return retorno;
 	}
-	char ** arrAux = string_split(archivoMapeado, "\n");	//cambiar esto???
+
+	char ** arrAux = string_split(archivoMapeado, "\n");
+
 	int a = 0;
-	while (arrAux[a] != NULL) { //buscar la coordenada y editar
+	while (arrAux[a] != NULL) {
 		if (string_starts_with(arrAux[a], clave)) {
 			char* valor = obtenerValorEnString(arrAux[a], clave);
 			int cantidadNueva = cantidad + atoi(valor);
@@ -83,6 +84,7 @@ char* operarNew(char* archivoMapeado, int posX, int posY, int cantidad) {
 		}
 		a++;
 	}
+
 	a = 0;
 	while (arrAux[a] != NULL) {
 		if (!string_equals_ignore_case(arrAux[a], "\n")) {
@@ -90,6 +92,7 @@ char* operarNew(char* archivoMapeado, int posX, int posY, int cantidad) {
 		}
 		a++;
 	}
+
 	freeArrayChars(arrAux);
 	free(clave);
 	free(archivoMapeado);
@@ -101,6 +104,7 @@ char* operarCatch(char* archivoMapeado, int posX, int posY) {
 	char* retorno = string_new();
 
 	char ** arrAux = string_split(archivoMapeado, "\n");
+
 	int a = 0;
 	while (arrAux[a] != NULL) {
 		if (string_starts_with(arrAux[a], clave)) {
@@ -117,6 +121,7 @@ char* operarCatch(char* archivoMapeado, int posX, int posY) {
 		}
 		a++;
 	}
+
 	a = 0;
 	while (arrAux[a] != NULL) {
 		if (!string_is_empty(arrAux[a])) { //filtro por vacio
@@ -124,6 +129,7 @@ char* operarCatch(char* archivoMapeado, int posX, int posY) {
 		}
 		a++;
 	}
+
 	freeArrayChars(arrAux);
 	free(clave);
 	free(archivoMapeado);
@@ -151,7 +157,6 @@ Coordinate* obtenerCoordenadaDeString(char* string) {
 	coor->pos_y = y;
 	freeArrayChars(arr);
 	free(clave);
-	//printf("posX; %d, posY: %d",coor->pos_x, coor->pos_y);
 	return coor;
 
 }
