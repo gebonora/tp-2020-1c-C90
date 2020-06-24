@@ -7,13 +7,15 @@
 
 #include "bitmap.h"
 
+//PARA PERSISTIR EN BITMAP USAREMOS MMAP.
+
 void crearBitmap() {
 	crearArchivosBase(PATH_ARCHIVO_BITMAP);
 	char* path = crearRuta(PATH_ARCHIVO_BITMAP);
-	log_info(loggerMain, "----Creando Bitmap...");
+	log_debug(loggerMain, "----Creando Bitmap...");
 
 	int bitarraySize = calcularTamanioBitArray(g_numberOfBlocks);
-	log_info(loggerMain, "----Tamanio del bitarray: '%d'.", bitarraySize);
+	log_debug(loggerMain, "----Tamanio del bitarray: '%d'.", bitarraySize);
 	char* aux = malloc(bitarraySize);
 	t_bitarray* bitmap = bitarray_create_with_mode(aux, bitarraySize, MSB_FIRST);
 
@@ -34,7 +36,7 @@ void crearBitmap() {
 	bitarray_destroy(bitmap);
 	free(path);
 	free(aux);
-	log_info(loggerMain, "----Listo!");
+	log_debug(loggerMain, "----Listo!");
 }
 
 void cargarBitmap() {
@@ -55,7 +57,7 @@ void cargarBitmap() {
 
 	free(path);
 	free(aux);
-	//dejamos g_bitmap, mapeo y bitmapFD sin cerrar porque los usaremos hasta aue termine el programa.
+	//Dejamos g_bitmap, l_mapeo y l_bitmapFD sin cerrar porque los usaremos hasta que termine el programa.
 }
 
 void dumpBitmap(t_bitarray* bitmap, int cantidadMostrada) {
@@ -69,7 +71,7 @@ void dumpBitmap(t_bitarray* bitmap, int cantidadMostrada) {
 }
 
 int calcularTamanioBitArray(int bloques) { //Calcula el menor tamaño posible para que ocupen los bits del bitarray.
-	if (!bloques % 8) {                            // El malloc va a ocupar este numero*8bits, porque es un malloc de enteros.
+	if (!bloques % 8) {                    //El malloc va a ocupar este numero*8bits, porque es un malloc de enteros.
 		return bloques / 8;
 	} else {
 		return (bloques / 8) + 1;
