@@ -41,10 +41,22 @@ int agregarCoordenadaPokemon(char* nombrePokemon, uint32_t posX, uint32_t posY, 
 
 	while (listaBloques->elements_count < cantidadBloquesRequeridos) {
 		int bloqueNuevo = asignarBloqueLibre();
-		list_add(listaBloques, string_itoa(bloqueNuevo));
-		//TODO si no tengo bloques para asignar, debería interrumpir este flujo y retornar -1. Liberar memoria interna de función.
-		//podemos logear error en la cola new, pero el tp no pide avisarle al broker que no hubo exito en el new. Quizas sea mejor logear
-		//afuera, así se ve más fácil en el flujo. Antes que nada preguntar si hay que contemplar este caso!
+		if (bloqueNuevo >= 0) {
+			list_add(listaBloques, string_itoa(bloqueNuevo));
+		}
+		//Si no tengo bloques para asignar, debería interrumpir este flujo y retornar -1. Liberar memoria interna de función.
+		//No se producirá efecto en el archivo.
+		else {
+			int cantidadBloquesOriginal = calcularNumeroDeBloquesNecesarios(size);
+			while (listaBloques->elements_count > cantidadBloquesOriginal) {
+				liberarBloque(atoi(list_get(listaBloques, listaBloques->elements_count - 1)));
+				list_remove_and_destroy_element(listaBloques, listaBloques->elements_count - 1, freeElem);
+			}
+			free(rutaMetadata);
+			free(archivoMapeado);
+			list_destroy_and_destroy_elements(listaBloques, freeElem);
+			return -1;
+		}
 	}
 
 	dumpearArchivo(listaBloques, archivoMapeado);
