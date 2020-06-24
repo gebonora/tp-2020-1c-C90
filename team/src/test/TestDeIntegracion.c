@@ -24,7 +24,7 @@ void testDeIntegracion() {
 
     registrarEnMapaPosicionEntrenador(&mapita, entrenadorARegistrar);
 
-    t_list * casilla = dictionary_get(mapita.plano, "(3,3)");
+    Casilla casilla = dictionary_get(mapita.plano, "(3,3)");
     Presencia * presencia = list_get(casilla, 0);
 
     assert(entrenadorARegistrar->uuid == presencia->uuid);

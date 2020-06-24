@@ -7,7 +7,7 @@
 #define defineRegistrarEnMapaPosicion(T) \
 char * registrarEnMapaPosicion##T(Mapa * mapaDeRegistro, T* posicionable){ \
     char * uuid = mapaDeRegistro->registrarPosicion(mapaDeRegistro, posicionable->posicionInicial, posicionable->tipoPosicionable); \
-    posicionable->uuid = uuid;\
+    posicionable->uuid = string_duplicate(uuid);\
     return uuid; \
 }
 
