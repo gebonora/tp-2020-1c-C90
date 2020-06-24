@@ -138,6 +138,7 @@ Caught* procesarCatch(Pokemon* unPokemon, uint32_t idMensaje) {
 	//acá el problema de New con la memoria no pasa, porque caught lleva solo un uint32_t
 
 	if (!existePokemon(nombreCaught)) {
+		sleep(TIEMPO_RETARDO_OPERACION);
 		return create_caught_pokemon(FAIL);
 	}
 
@@ -173,6 +174,7 @@ Localized* procesarLocalized(Get* unGet, uint32_t idMensaje) {
 		pokemonNulo->coordinates = list_create();
 		localized->pokemon = pokemonNulo;
 		localized->coordinates_quantity = pokemonNulo->coordinates->elements_count; //DEBERIA SER 0
+		sleep(TIEMPO_RETARDO_OPERACION);
 		return localized;
 	}
 
