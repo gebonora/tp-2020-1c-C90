@@ -87,18 +87,14 @@ void init_memory() {
 	memory = malloc(sizeof(Memory));
 	memory->cache = malloc(TAMANO_MEMORIA);
 	memory->partitions = list_create();
-	create_partitions_test();
-	show_memory_partitions();
+	//create_partitions_test();
+	//show_memory_partitions();
 	///log_info(LOGGER, "==============OCUPPIED============");
 	//t_list* occupied_partitions = get_occupied_partitions();
 	//show_partitions(occupied_partitions);
-	//log_info(LOGGER, "==============SORTED============");
-	//t_list* sorted = get_sorted_partitions();
-	//show_partitions(sorted);
-	log_info(LOGGER, "==============LRU============");
-	Partition* partition = memory_lru();
-	//Partition* partition = list_get(sorted, 0);
-	show_partition(partition);
+	//log_info(LOGGER, "==============LRU============");
+	//Partition* partition = memory_lru();
+	//show_partition(partition);
 
 }
 
