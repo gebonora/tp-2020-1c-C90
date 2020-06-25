@@ -11,6 +11,7 @@
 #include "planificador/algoritmos/fifo/FirstInFirstOut.h"
 #include "modelo/mapa/Mapa.h"
 #include "modelo/mapa/registro/RegistradorDePosiciones.h"
+#include "delibird/utils/strings/ExtensionStrings.h"
 
 void testDeIntegracion();
 

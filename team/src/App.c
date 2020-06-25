@@ -35,6 +35,8 @@ int main() {
     log_info(INTERNAL_LOGGER, "Solicitando la ubicacion de los pokemones objetivo para comenzar...");
     //TODO: for loop -> cliente broker -> mover logica a objetivo global
 
+    // Main loop. Traba el hilo main asi no se corta el programa. Se libera si se cumple el objetivo global.
+
     // Liberacion
     log_info(INTERNAL_LOGGER, "Finalizando proceso Team...");
     liberarRecursos();
