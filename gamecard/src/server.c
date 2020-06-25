@@ -78,7 +78,7 @@ void procesarHiloNew(ArgumentosHilo* argumentosHilo) {
 
 	logearAppearedProcesado(pokemonAppeared, idMensaje);
 
-	//Tratamos de enviar el mensaje de respuesta. TODO recibir id de broker y descartarlo.
+	//Tratamos de enviar el mensaje de respuesta.
 	int socketDescartable = crearSocketCliente(IP_BROKER, PUERTO_BROKER);
 	if (socketDescartable == -1) {
 		flagBrokerCaido = 1;
@@ -89,15 +89,19 @@ void procesarHiloNew(ArgumentosHilo* argumentosHilo) {
 	if (send(socketDescartable, &idMensaje, sizeof(uint32_t), MSG_NOSIGNAL) < 0) {
 		flagBrokerCaido = 1;
 	}
+	uint32_t idRespuesta;
+	if (recv(socketDescartable, &idRespuesta, sizeof(uint32_t), 0) <= 0) {
+		flagBrokerCaido = 1;
+	}
 
 	//Logeamos el resultado del envio del mensaje de respuesta.
 	if (flagBrokerCaido) {
 		pthread_mutex_lock(&m_loggerNew);
-		log_warning(loggerNew, "No se pudo enviar el Appeared como respuesta al mensaje: '%d' hacia el Broker. Continuando ejecución... ", idMensaje);
+		log_warning(loggerNew, "No se pudo enviar el Appeared como respuesta al idMensaje: '%d' hacia el Broker. Continuando ejecución... ", idMensaje);
 		pthread_mutex_unlock(&m_loggerNew);
 	} else {
 		pthread_mutex_lock(&m_loggerNew);
-		log_info(loggerNew, "Se envió el Appeared como respuesta al mensaje: '%d' hacia el Broker.", idMensaje);
+		log_info(loggerNew, "Se envió el Appeared como respuesta al idMensaje: '%d' hacia el Broker y éste le asignó el id: '%d'.", idMensaje, idRespuesta);
 		pthread_mutex_unlock(&m_loggerNew);
 	}
 
@@ -168,7 +172,7 @@ void procesarHiloCatch(ArgumentosHilo* argumentosHilo) {
 
 	logearCaughtProcesado(pokemonCaught, idMensaje);
 
-	//Tratamos de enviar el mensaje de respuesta. TODO recibir id de broker y descartarlo.
+	//Tratamos de enviar el mensaje de respuesta.
 	int socketDescartable = crearSocketCliente(IP_BROKER, PUERTO_BROKER);
 	if (socketDescartable < 0) {
 		flagBrokerCaido = 1;
@@ -179,15 +183,19 @@ void procesarHiloCatch(ArgumentosHilo* argumentosHilo) {
 	if (send(socketDescartable, &idMensaje, sizeof(uint32_t), MSG_NOSIGNAL) < 0) {
 		flagBrokerCaido = 1;
 	}
+	uint32_t idRespuesta;
+	if (recv(socketDescartable, &idRespuesta, sizeof(uint32_t), 0) <= 0) {
+		flagBrokerCaido = 1;
+	}
 
 	//Logeamos el resultado del envio del mensaje de respuesta.
 	if (flagBrokerCaido) {
 		pthread_mutex_lock(&m_loggerCatch);
-		log_warning(loggerCatch, "No se pudo enviar el Caught como respuesta al mensaje: '%d' hacia el Broker. Continuando ejecución... ", idMensaje);
+		log_warning(loggerCatch, "No se pudo enviar el Caught como respuesta al idMensaje: '%d' hacia el Broker. Continuando ejecución... ", idMensaje);
 		pthread_mutex_unlock(&m_loggerCatch);
 	} else {
 		pthread_mutex_lock(&m_loggerCatch);
-		log_info(loggerCatch, "Se envió el Caught como respuesta al mensaje: '%d' hacia el Broker.", idMensaje);
+		log_info(loggerCatch, "Se envió el Caught como respuesta al idMensaje: '%d' hacia el Broker y éste le asignó el id: '%d'.", idMensaje, idRespuesta);
 		pthread_mutex_unlock(&m_loggerCatch);
 	}
 
@@ -258,7 +266,7 @@ void procesarHiloGet(ArgumentosHilo* argumentosHilo) {
 
 	logearLocalizedProcesado(pokemonLocalized, idMensaje);
 
-	//Tratamos de enviar el mensaje de respuesta. TODO recibir id de broker y descartarlo.
+	//Tratamos de enviar el mensaje de respuesta.
 	int socketDescartable = crearSocketCliente(IP_BROKER, PUERTO_BROKER);
 	if (socketDescartable < 0) {
 		flagBrokerCaido = 1;
@@ -269,15 +277,19 @@ void procesarHiloGet(ArgumentosHilo* argumentosHilo) {
 	if (send(socketDescartable, &idMensaje, sizeof(uint32_t), MSG_NOSIGNAL) < 0) {
 		flagBrokerCaido = 1;
 	}
+	uint32_t idRespuesta;
+	if (recv(socketDescartable, &idRespuesta, sizeof(uint32_t), 0) <= 0) {
+		flagBrokerCaido = 1;
+	}
 
 	//Logeamos el resultado del envio del mensaje de respuesta.
 	if (flagBrokerCaido) {
 		pthread_mutex_lock(&m_loggerGet);
-		log_warning(loggerGet, "No se pudo enviar el Localized como respuesta al mensaje: '%d' hacia el Broker. Continuando ejecución... ", idMensaje);
+		log_warning(loggerGet, "No se pudo enviar el Localized como respuesta al idMensaje: '%d' hacia el Broker. Continuando ejecución... ", idMensaje);
 		pthread_mutex_unlock(&m_loggerGet);
 	} else {
 		pthread_mutex_lock(&m_loggerGet);
-		log_info(loggerGet, "Se envió el Localized como respuesta al mensaje: '%d' hacia el Broker.", idMensaje);
+		log_info(loggerGet, "Se envió el Localized como respuesta al idMensaje: '%d' hacia el Broker y éste le asignó el id: '%d'.", idMensaje, idRespuesta);
 		pthread_mutex_unlock(&m_loggerGet);
 	}
 
@@ -293,7 +305,7 @@ void procesarHiloGet(ArgumentosHilo* argumentosHilo) {
 
 void atenderGameboy() {
 	int socketServidor = crearSocketServidor(IP_GAMECARD_GAMEBOY, PUERTO_GAMECARD_GAMEBOY);
-	log_info(loggerGameboy, "Esperando Gameboys en el socket: '%d'", socketServidor);
+	log_info(loggerGameboy, "Esperando Gameboys en el socket: '%d'.", socketServidor);
 	while (1) {
 
 		pthread_t thread;
@@ -353,7 +365,7 @@ void atenderGameboy() {
 			pthread_detach(thread);
 			break;
 		default:
-			log_error(loggerGameboy, "Se recibió una operación desconocida. Se cerró el socket: '%d", socketCliente);
+			log_error(loggerGameboy, "Se recibió una operación desconocida. Se cerró el socket: '%d.", socketCliente);
 			close(socketCliente);
 		}
 	}
@@ -377,6 +389,10 @@ int iniciarSocketDeEscucha(Operation cola) {
 		return -1;
 	}
 	if (send(socketDeEscucha, &cola, sizeof(int), MSG_NOSIGNAL) < 0) {
+		close(socketDeEscucha);
+		return -1;
+	}
+	if (send(socketDeEscucha, &ID_GAMECARD, sizeof(int), MSG_NOSIGNAL) < 0) {
 		close(socketDeEscucha);
 		return -1;
 	}
@@ -419,7 +435,7 @@ char* traducirOperacion(Operation operacion) {
 	case GET:
 		return "GET";
 	default:
-		return "OPERACION DESCONOCIDA. ALGO ANDA MAL!";
+		return "OPERACIÓN DESCONOCIDA. ALGO ANDA MAL!";
 	}
 }
 
