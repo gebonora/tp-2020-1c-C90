@@ -7,7 +7,6 @@
 #define defineRegistrarEnMapaPosicion(T) \
 char * registrarEnMapaPosicion##T(Mapa * mapaDeRegistro, T* posicionable){ \
     char * uuid = mapaDeRegistro->registrarPosicion(mapaDeRegistro, posicionable->posicionInicial, posicionable->tipoPosicionable); \
-    posicionable->uuid = string_duplicate(uuid); \
     posicionable->gps = GpsConstructor.new(mapaDeRegistro, string_duplicate(uuid)); \
     return uuid; \
 }

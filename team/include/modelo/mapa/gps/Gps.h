@@ -12,7 +12,7 @@ typedef struct Gps {
     t_log * logger;
     char * uuid;
     Mapa * mapa;
-    Coordinate (*posicion)(struct Gps * this);
+    Coordinate (*posicionActual)(struct Gps * this);
     void (*destruir)(struct Gps * this);
 } Gps;
 

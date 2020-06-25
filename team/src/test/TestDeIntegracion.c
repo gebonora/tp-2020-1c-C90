@@ -24,10 +24,15 @@ void testDeIntegracion() {
 
     registrarEnMapaPosicionEntrenador(&mapita, entrenadorARegistrar);
 
+    Coordinate posicionDelEntrenadorRegistrado = entrenadorARegistrar->posicion(entrenadorARegistrar);
+
+    //TODO: Esta logica va a desaparecer cuando mapa.obtenerPosicion(uuid) se concrete. Por dentro va a hacer esto.
     Casilla casilla = dictionary_get(mapita.plano, "(3,3)");
     Presencia * presencia = list_get(casilla, 0);
-
     assert(string_equals(presencia->uuid, entrenadorARegistrar->gps->uuid));
+    //TODO: Hacer que sean coordenadas posta (3,3)
+    assert(posicionDelEntrenadorRegistrado.pos_x == 0);
+    assert(posicionDelEntrenadorRegistrado.pos_y == 0);
 
     entrenadorARegistrar->destruir(entrenadorARegistrar);
     mapita.destruir(&mapita);

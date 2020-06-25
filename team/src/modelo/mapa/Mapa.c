@@ -20,6 +20,11 @@ char * registrarPosicion(Mapa * this, Coordinate posicion, TipoPosicionable tipo
     return presencia->uuid;
 }
 
+Coordinate obtenerPosicion(Mapa * this, char * uuid) {
+    Coordinate coordinate = {.pos_x = 0, .pos_y = 0};
+    return coordinate;
+}
+
 static void destruir(Mapa *this) {
     log_debug(this->logger, "Se procede a destruir el mapa");
     log_destroy(this->logger);
@@ -31,6 +36,7 @@ static Mapa new() {
             .logger = log_create(TEAM_INTERNAL_LOG_FILE, "Mapa", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_INFO),
             .plano = crearPlano(),
             &registrarPosicion,
+            &obtenerPosicion,
             &destruir
     };
 }

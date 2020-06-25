@@ -63,7 +63,7 @@ void inicializarComponentesDelSistema() {
     srandom(time(NULL));
     inicializarAlgoritmosDePlanificacion();
     log_debug(INTERNAL_LOGGER, "Creando el terreno de captura");
-    mapa = MapaConstructor.new();
+    mapaProcesoTeam = MapaConstructor.new();
     pthread_mutex_init(&MTX_INTERNAL_LOG, NULL); //TODO: por ahi conviene moverlo a configurarServer()
 }
 
@@ -99,5 +99,5 @@ void liberarRecursos() {
     // Proceso Team
     log_debug(INTERNAL_LOGGER, "Liberando participantes del proceso Team...");
     destruirEquipo(equipo);
-    mapa.destruir(&mapa);
+    mapaProcesoTeam.destruir(&mapaProcesoTeam);
 }

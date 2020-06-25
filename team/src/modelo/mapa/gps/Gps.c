@@ -4,9 +4,9 @@
 
 #include "modelo/mapa/gps/Gps.h"
 
-Coordinate posicion(Gps * this) {
-    Coordinate coordinate = {.pos_x = 0, .pos_y = 0};
-    return coordinate;
+Coordinate posicionActual(Gps * this) {
+    Mapa * mapa = this->mapa;
+    return mapa->obtenerPosicion(mapa, this->uuid);
 }
 
 void destruir(Gps * this) {
@@ -21,7 +21,7 @@ static Gps * new(Mapa * mapaDeRegistro, char * uuid) {
     gps->logger = log_create(TEAM_INTERNAL_LOG_FILE, "Gps", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_INFO);
     gps->uuid = uuid;
     gps->mapa = mapaDeRegistro;
-    gps->posicion = &posicion;
+    gps->posicionActual = &posicionActual;
     gps->destruir = &destruir;
 
     return gps;

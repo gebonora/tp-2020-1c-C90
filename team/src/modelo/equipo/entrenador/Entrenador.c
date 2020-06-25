@@ -32,6 +32,11 @@ bool puedeAtraparPokemones(Entrenador * this) {
     return totalDePokemones(this->pokemonesCapturados) < this->limiteDeCaptura;
 }
 
+Coordinate posicion(Entrenador * this) {
+    Gps * gps = this->gps;
+    return gps->posicionActual(gps);
+}
+
 static void destruir(Entrenador * this) {
     log_debug(this->logger, "Se procede a destruir un entrenador");
     log_destroy(this->logger);
@@ -55,6 +60,7 @@ static Entrenador *new(char * posicionInicial, char * pokemonesIniciales, char *
     entrenador->limiteDeCaptura = totalDePokemones(entrenador->pokemonesObjetivo);
     entrenador->objetivoCompletado = &objetivoCompletado;
     entrenador->puedeAtraparPokemones = &puedeAtraparPokemones;
+    entrenador->posicion = &posicion;
     entrenador->destruir = &destruir;
 
     return entrenador;
