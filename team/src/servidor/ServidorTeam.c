@@ -50,10 +50,8 @@ void atenderConexiones() {
 	pthread_create(&threadGameboy, NULL, (void*) atenderGameboy, NULL);
 	pthread_detach(threadGameboy);
 
-	sleep(2);
-	//while (1)
-	//sleep(10); //esto se va cuando se acople el server al flujo del main. es solo para probar server.
-
+	while (1)
+		sleep(10); //esto se va cuando haya algo en main que impida que termine. existe solo para probar el server por ahora.
 }
 
 void apagarServer() {
