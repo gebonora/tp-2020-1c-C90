@@ -143,6 +143,18 @@ void fifo(){
 }
 */
 
+
+t_list* get_filtered_partitions(uint32_t size_to_compare) {
+	bool _greater_equals_and_free(Partition* partition) {
+		return greater_equals_and_free(size_to_compare, partition);
+	}
+	return list_filter(memory->partitions, &_greater_equals_and_free);
+}
+
+bool greater_equals_and_free(uint32_t to_compare, Partition* partition) {
+	return !partition->free && partition->number >= to_compare;
+}
+
 Partition* lru(t_list* partitions) {
 	t_list* occupied_partitions = list_filter(partitions, &is_occupied);
 

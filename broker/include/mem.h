@@ -31,6 +31,8 @@ Message* create_message(Operation operation, uint32_t message_id, uint32_t corre
 void show_partitions();
 void show_partition(Partition* partition);
 void show_message(Message* message);
+t_list* get_filtered_partitions(uint32_t);
+bool greater_equals_and_free(uint32_t, Partition*);
 Partition* lru(t_list* partitions);
 Partition* memory_lru();
 bool less_access_time(Partition* partition_a, Partition* partition_b);
