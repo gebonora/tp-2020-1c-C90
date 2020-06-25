@@ -1,7 +1,7 @@
 #include "cliente/ClienteBroker.h"
 
 uint32_t *VectorIDPendientesDelCatch;
-
+//TODO: El cliente broker no maneja logica de filtrado de mensajes. Solo devuelve struct con id correlativo del msj.
 void atenderCaughtRecibido(Caught* unCaught,uint32_t idMensaje){
 	  /*Al recibir uno de los mismos deberá realizar los siguientes pasos:
 	 *
