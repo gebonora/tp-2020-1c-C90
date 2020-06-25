@@ -152,7 +152,7 @@ t_list* get_filtered_partitions(uint32_t size_to_compare) {
 }
 
 bool greater_equals_and_free(uint32_t to_compare, Partition* partition) {
-	return !partition->free && partition->number >= to_compare;
+	return partition->free && partition->size >= to_compare;
 }
 
 Partition* lru(t_list* partitions) {

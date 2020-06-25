@@ -91,7 +91,7 @@ void init_memory() {
 	log_info(LOGGER, "==============MEMORY============");
 	show_memory_partitions();
 	log_info(LOGGER, "==============FILTERED============");
-	t_list* filtered = get_filtered_partitions(15);
+	t_list* filtered = get_filtered_partitions(5);
 	show_partitions(filtered);
 	//show_memory_partitions();
 	//log_info(LOGGER, "==============OCUPPIED============");
