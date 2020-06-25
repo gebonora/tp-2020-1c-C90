@@ -87,7 +87,8 @@ void init_memory() {
 	memory = malloc(sizeof(Memory));
 	memory->cache = malloc(TAMANO_MEMORIA);
 	memory->partitions = list_create();
-	//create_partitions_test();
+	create_partitions_test();
+	show_partitions();
 }
 
 void create_partitions_test() {

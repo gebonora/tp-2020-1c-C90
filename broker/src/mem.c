@@ -141,11 +141,26 @@ Partition* find_partition_buddys(potenciaDe2ABuscar) {
 void fifo(){
 
 }
-
-void lru() {
-
-}
 */
+
+Partition* lru() {
+	t_list* ocuppied_partitions = list_filter(memory->partitions, &is_ocuppied);
+
+	if(ocuppied_partitions->elements_count > 0) {
+		list_sorted(ocuppied_partitions, &less_access_time);
+		return ocuppied_partitions->head;
+	}
+	return NULL;
+}
+
+bool less_access_time(Partition* partition_a, Partition* partition_b) {
+	return partition_a->access_time < partition_b->access_time;
+}
+
+bool is_ocuppied(Partition* partition) {
+	return !partition->free;
+}
+
 
 Message* create_message(Operation operation, uint32_t message_id, uint32_t correlational_id, uint32_t data_size) {
 	Message* message = malloc(sizeof(Message));
@@ -178,6 +193,7 @@ void show_partition(Partition* partition) {
 	log_info(LOGGER, "Free: %s", partition->free ? "true" : "false");
 	log_info(LOGGER, "Start: %d - %06p", partition->position, partition->start);
 	log_info(LOGGER, "Size: %d", partition->size);
+	log_info(LOGGER, "Buddy: %06p", xor(partition->start, partition->size));
 	log_info(LOGGER, "Last access: %d", partition->access_time);
 	show_message(partition->message);
 	log_info(LOGGER, "--------------------------------");
