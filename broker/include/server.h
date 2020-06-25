@@ -13,6 +13,7 @@
 #include <semaphore.h>
 
 #include "broker.h"
+#include "mem.h"
 #include "constants.h"
 #include "delibird/interface.h"
 #include "delibird/protocol.h"

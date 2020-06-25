@@ -21,6 +21,7 @@ typedef t_dictionary * ContadorPokemones; // La key es el nombre del pokemon, el
 typedef struct Entrenador {
     t_log * logger;
     char * uuid;
+    TipoPosicionable tipoPosicionable;
     Coordinate posicionInicial;
     ContadorPokemones pokemonesCapturados;
     ContadorPokemones pokemonesObjetivo;
