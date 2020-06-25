@@ -27,7 +27,7 @@ void testDeIntegracion() {
     Casilla casilla = dictionary_get(mapita.plano, "(3,3)");
     Presencia * presencia = list_get(casilla, 0);
 
-    assert(entrenadorARegistrar->uuid == presencia->uuid);
+    assert(string_equals(presencia->uuid, entrenadorARegistrar->uuid));
 
     entrenadorARegistrar->destruir(entrenadorARegistrar);
     mapita.destruir(&mapita);
