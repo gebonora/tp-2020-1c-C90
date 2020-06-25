@@ -26,7 +26,7 @@ void configurarServer() {
 
 	config_destroy(configServer);
 
-	printf("%d\n", Tiempo_Reconexion);
+	printf("%d\n", Tiempo_Reconexion); //TODO: Volar o loguear en internal logger.
 
 }
 
