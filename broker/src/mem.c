@@ -1,5 +1,6 @@
-#include "mem.h"
 /*
+#include "mem.h"
+
 void add (void* dato_que_termina_en_cache, Message message)
 	if(strcmp(ALGORITMO_MEMORIA, "BS")) add_buddy_system();
 	else add_dynamic_partitions();
@@ -146,46 +147,3 @@ void lru() {
 
 }
 */
-
-Message* create_message(Operation operation, uint32_t message_id, uint32_t correlational_id, uint32_t data_size) {
-	Message* message = malloc(sizeof(Message));
-	message->operation_code = operation;
-	message->message_id = message_id;
-	message->correlational_id = correlational_id;
-	message->data_size = data_size;
-	return message;
-}
-
-Partition* create_partition(uint32_t partition_number, uint32_t partition_size, uint32_t* partition_start, Message* message) {
-	Partition* partition = malloc(sizeof(Partition));
-	partition->access_time = (int) ahoraEnTimeT();
-	partition->free = true;
-	partition->number = partition_number;
-	partition->size = partition_size;
-	partition->start = partition_start;
-	partition->message = message;
-	return partition;
-}
-
-void show_partitions() {
-	log_info(LOGGER, "--------------------------------");
-	log_info(LOGGER, "Partitions size: %d", memory->partitions->elements_count);
-	list_iterate(memory->partitions, &show_partition);
-}
-
-void show_partition(Partition* partition) {
-	log_info(LOGGER, "Partition #%d", partition->number);
-	log_info(LOGGER, "Free: %s", partition->free ? "true" : "false");
-	log_info(LOGGER, "Start: %d - %06p", partition->position, partition->start);
-	log_info(LOGGER, "Size: %d", partition->size);
-	log_info(LOGGER, "Last access: %d", partition->access_time);
-	show_message(partition->message);
-	log_info(LOGGER, "--------------------------------");
-}
-
-void show_message(Message* message) {
-	log_info(LOGGER, "Message Queue: %s", get_operation_by_value(message->operation_code));
-	log_info(LOGGER, "Message ID: %d", message->message_id);
-	log_info(LOGGER, "Correlative ID: %d", message->correlational_id);
-	log_info(LOGGER, "Message Size: %d", message->data_size);
-}

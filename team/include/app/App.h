@@ -12,8 +12,5 @@
 #include "test/TestDeIntegracion.h"
 
 void mostrarTitulo(t_log * logger);
-void inicializarComponentesDelSistema();
-void configurarEstadoInicialProcesoTeam();
-void liberarRecursos();
 
 #endif //TEAM_APP_H

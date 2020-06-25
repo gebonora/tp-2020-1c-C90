@@ -34,9 +34,11 @@ int asignarBloqueLibre() { // RETORNA -1 SI NO HAY BLOQUES LIBRES.
 	}
 	pthread_mutex_unlock(&m_bitmap);
 	// Vaciamos el bloque.
-	char* rutaBloque =crearRutaBloque(bloqueLibre);
-	fclose(fopen(rutaBloque,"w+"));
-	free(rutaBloque);
+	if (bloqueLibre >= 0) {
+		char* rutaBloque = crearRutaBloque(bloqueLibre);
+		fclose(fopen(rutaBloque, "w+"));
+		free(rutaBloque);
+	}
 	return bloqueLibre;
 }
 

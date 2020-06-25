@@ -121,7 +121,11 @@ Pokemon* procesarNew(New* unNew, uint32_t idMensaje) {
 	}
 
 	//Procesamiento del FileSystem. Escribe y puede asignar bloques.
-	agregarCoordenadaPokemon(nombreAppeared, posXAppeared, posYAppeared, cantidad);
+	if (agregarCoordenadaPokemon(nombreAppeared, posXAppeared, posYAppeared, cantidad) < 0) {
+		pthread_mutex_lock(&m_loggerNew);
+		log_error(loggerNew, "No hay suficientea bloques libres para realizar la operación asociada al idMensaje: '%d'", idMensaje);
+		pthread_mutex_unlock(&m_loggerNew);
+	}
 
 	//Sleep pedido por requerimiento y cerramos archivo.
 	sleep(TIEMPO_RETARDO_OPERACION);

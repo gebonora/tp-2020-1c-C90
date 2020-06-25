@@ -5,6 +5,6 @@
 #ifndef GAMEBOY_SERVICIOS_H
 #define GAMEBOY_SERVICIOS_H
 
-#include "delibird/servicios/servicioDeConfiguracion/ServicioDeConfiguracion.h"
+#include "support/servicios/servicioDeConfiguracion/ServicioDeConfiguracion.h"
 
 #endif //GAMEBOY_SERVICIOS_H
