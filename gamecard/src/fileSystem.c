@@ -15,6 +15,7 @@
  *
  * */
 
+//PUNTO DE ENTRADA AL FILESYSTEM
 int iniciarFileSystem(int argc, char* argv[]) { //de pruebas, luego sacar a iniciarFileSystem
 	iniciarSemaforosFS();
 
@@ -66,7 +67,7 @@ void cerrarSemaforosFS() {
 	freeListaSemaforos();
 }
 
-//FUNCIONES DE FORMATEADOR
+//FUNCIONES DEL FORMATEADOR
 
 void formatearTallGrass() {
 	log_debug(loggerMain, "Formateando el Disco...");
@@ -102,16 +103,15 @@ Pokemon* procesarNew(New* unNew, uint32_t idMensaje) {
 	uint32_t posXAppeared = coordenadaAppeared->pos_x;
 	uint32_t posYAppeared = coordenadaAppeared->pos_y;
 	uint32_t cantidad = unNew->quantity;
-//tengo que liberar la memoria del new afuera de esta funcion, y cuando haga el send, el create_pokemon se libera
-//ver que no haya un double free, que pasaria si los dos frees apuntan a lo mismo. capaz copiar el contenido del new para pasarle al create?
 
+	//Si no existe el archivo Pokemon, lo creamos y agregamos su semáforo a la lista global.
 	if (!existePokemon(nombreAppeared)) {
 		crearPokemon(nombreAppeared);
 		agregarSemaforoALista(nombreAppeared);
 		log_debug(loggerMain, "Se inicializo un semaforo para el archivo pokemon: '%s'.", nombreAppeared);
 	}
 
-	//if abrirArchivo implementar semaforo.
+	//Intentamos acceder al archivo. Hay un semáforo por archivo metadata para controlar el acceso y evitar condiciones de carrera. No hay espera activa porque tenemos un Sleep.
 	while (!puedeAccederAArchivo(nombreAppeared)) {
 		pthread_mutex_lock(&m_loggerNew);
 		log_warning(loggerNew, "El archivo: '%s' esta abierto. Reintentando la operacion New asociada al idMensaje: '%d' en '%d' segundos...", nombreAppeared, idMensaje,
@@ -120,11 +120,16 @@ Pokemon* procesarNew(New* unNew, uint32_t idMensaje) {
 		sleep(TIEMPO_DE_REINTENTO_OPERACION);
 	}
 
-	agregarCoordenadaPokemon(nombreAppeared, posXAppeared, posYAppeared, cantidad);
+	//Procesamiento del FileSystem. Escribe y puede asignar bloques.
+	if (agregarCoordenadaPokemon(nombreAppeared, posXAppeared, posYAppeared, cantidad) < 0) {
+		pthread_mutex_lock(&m_loggerNew);
+		log_error(loggerNew, "No hay suficientea bloques libres para realizar la operación asociada al idMensaje: '%d'", idMensaje);
+		pthread_mutex_unlock(&m_loggerNew);
+	}
 
+	//Sleep pedido por requerimiento y cerramos archivo.
 	sleep(TIEMPO_RETARDO_OPERACION);
 	cerrarArchivo(nombreAppeared);
-	//cerrar archivo
 
 	return create_pokemon(nombreAppeared, posXAppeared, posYAppeared);
 }
@@ -135,28 +140,28 @@ Caught* procesarCatch(Pokemon* unPokemon, uint32_t idMensaje) {
 	Coordinate* coordenadaCaught = list_get(unPokemon->coordinates, 0);
 	uint32_t posXCaught = coordenadaCaught->pos_x;
 	uint32_t posYCaught = coordenadaCaught->pos_y;
-	//acá el problema de New con la memoria no pasa, porque caught lleva solo un uint32_t
 
+	//Si no existe el archivo Pokemon, se hace el Sleep requerido y se retorna FAIL.
 	if (!existePokemon(nombreCaught)) {
+		sleep(TIEMPO_RETARDO_OPERACION);
 		return create_caught_pokemon(FAIL);
 	}
 
-	// if abrirArchivo
-
+	//Intentamos acceder al archivo. Hay un semáforo por archivo metadata para controlar el acceso y evitar condiciones de carrera. No hay espera activa porque tenemos un Sleep.
 	while (!puedeAccederAArchivo(nombreCaught)) {
 		pthread_mutex_lock(&m_loggerCatch);
-		log_warning(loggerCatch, "El archivo: '%s' esta abierto. Reintentando la operacion Catch asociada al idMensaje: '%d' en '%d' segundos...", nombreCaught, idMensaje,
-				TIEMPO_DE_REINTENTO_OPERACION);
+		log_warning(loggerCatch, "El archivo: '%s' esta abierto. Reintentando la operacion Catch asociada al idMensaje: '%d' en '%d' segundos...", nombreCaught,
+				idMensaje, TIEMPO_DE_REINTENTO_OPERACION);
 		pthread_mutex_unlock(&m_loggerCatch);
 		sleep(TIEMPO_DE_REINTENTO_OPERACION);
 	}
 
-	//cosas de fileSystem acá...
+	//Procesamiento del FileSystem. Lee y puede desasignar bloques. Se trata de quitar la coordenada y obtiene un resultado acorde.
 	resultado = quitarCoordenadaPokemon(nombreCaught, posXCaught, posYCaught);
 
+	//Sleep pedido por requerimiento y cerramos archivo.
 	sleep(TIEMPO_RETARDO_OPERACION);
 	cerrarArchivo(nombreCaught);
-	//cerrar archivo
 
 	return create_caught_pokemon(resultado);
 }
@@ -164,20 +169,19 @@ Caught* procesarCatch(Pokemon* unPokemon, uint32_t idMensaje) {
 Localized* procesarLocalized(Get* unGet, uint32_t idMensaje) {
 	char* nombreLocalized = unGet->name->value;
 	Localized* localized = malloc(sizeof(Localized));
-	//mismo problema que en New.
 
-	puts(nombreLocalized);
+	//Si no existe el archivo Pokemon, se hace el Sleep requerido y retorna un localized con lista vacía.
 	if (!existePokemon(nombreLocalized)) {
 		Pokemon* pokemonNulo = malloc(sizeof(Pokemon));
 		pokemonNulo->name = create_name(nombreLocalized);
 		pokemonNulo->coordinates = list_create();
 		localized->pokemon = pokemonNulo;
 		localized->coordinates_quantity = pokemonNulo->coordinates->elements_count; //DEBERIA SER 0
+		sleep(TIEMPO_RETARDO_OPERACION);
 		return localized;
 	}
 
-	//abrir archivo
-
+	//Intentamos acceder al archivo. Hay un semáforo por archivo metadata para controlar el acceso y evitar condiciones de carrera. No hay espera activa porque tenemos un Sleep.
 	while (!puedeAccederAArchivo(nombreLocalized)) {
 		pthread_mutex_lock(&m_loggerGet);
 		log_warning(loggerGet, "El archivo: '%s' esta abierto. Reintentando la operacion Get asociada al idMensaje: '%d' en '%d' segundos...", nombreLocalized, idMensaje,
@@ -186,15 +190,15 @@ Localized* procesarLocalized(Get* unGet, uint32_t idMensaje) {
 		sleep(TIEMPO_DE_REINTENTO_OPERACION);
 	}
 
-	//cosas de fileSystem acá. debería retornar un Pokemon* cargado con su lista de posiciones. Que retorna si no localizo nada? elements 0 y lista null?
+	//Procesamiento de FileSystem. Lee bloques. Obtiene una lista de coordenadas, vacía si no hay.
 	Pokemon* pokemonLocalized = obtenerCoordenadasPokemon(nombreLocalized);
 
+	//Sleep pedido por requerimiento y cerramos archivo.
 	sleep(TIEMPO_RETARDO_OPERACION);
 	cerrarArchivo(nombreLocalized);
-	//cerrarArchivo;
+
 	localized->pokemon = pokemonLocalized;
 	localized->coordinates_quantity = pokemonLocalized->coordinates->elements_count;
-
 	return localized;
 }
 

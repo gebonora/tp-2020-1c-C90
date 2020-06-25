@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
 
 	//testing
 
-	//testCreacionCoordenadasMultiplesPokemon("pikachu", 40);
+	//testCreacionCoordenadasMultiplesPokemon("pikachu", 30);
 
 	//testCreacionCoordenadaPokemon("charmander", 1, 1, 2);
 

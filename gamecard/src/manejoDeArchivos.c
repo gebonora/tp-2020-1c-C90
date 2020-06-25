@@ -4,7 +4,6 @@
  *  Created on: 18 jun. 2020
  *      Author: GONZALO BONORA
  */
-
 #include "manejoDeArchivos.h"
 
 //FUNCIONES PARA EL FLUJO NEW/APPEARED
@@ -30,18 +29,7 @@ int agregarCoordenadaPokemon(char* nombrePokemon, uint32_t posX, uint32_t posY, 
 	int size = leerClaveValorInt(rutaMetadata, "SIZE");
 	char* archivoMapeado;
 
-	/*
-	 * si size = 0 -> lista = {data}
-	 * else creamos a lista leyendo y procesamos el new:
-	 * dumpear lista  en los bloques:
-	 * 1ro: calcular los bloques necesarios, asignar si hace falta.
-	 * 2do: armar un gran char* con toda la info serializada.
-	 * 3ro: escribir de a BLOCK_SIZE en el bloque, con un desplazamiento acumulado.
-	 * size = desplazamiento acumulado.
-	 * blocks = actualizar con bloques usados(ver el char**)
-	 *
-	 */
-	if (size == 0) { //arreglar, cambiado para test
+	if (size == 0) {
 		archivoMapeado = string_from_format("%d-%d=%d\n", posX, posY, cantidad);
 	} else {
 		archivoMapeado = mapearArchivoEnString(listaBloques, size);
@@ -53,7 +41,22 @@ int agregarCoordenadaPokemon(char* nombrePokemon, uint32_t posX, uint32_t posY, 
 
 	while (listaBloques->elements_count < cantidadBloquesRequeridos) {
 		int bloqueNuevo = asignarBloqueLibre();
-		list_add(listaBloques, string_itoa(bloqueNuevo));
+		if (bloqueNuevo >= 0) {
+			list_add(listaBloques, string_itoa(bloqueNuevo));
+		}
+		//Si no tengo bloques para asignar, debería interrumpir este flujo y retornar -1. Liberar memoria interna de función.
+		//No se producirá efecto en el archivo.
+		else {
+			int cantidadBloquesOriginal = calcularNumeroDeBloquesNecesarios(size);
+			while (listaBloques->elements_count > cantidadBloquesOriginal) {
+				liberarBloque(atoi(list_get(listaBloques, listaBloques->elements_count - 1)));
+				list_remove_and_destroy_element(listaBloques, listaBloques->elements_count - 1, freeElem);
+			}
+			free(rutaMetadata);
+			free(archivoMapeado);
+			list_destroy_and_destroy_elements(listaBloques, freeElem);
+			return -1;
+		}
 	}
 
 	dumpearArchivo(listaBloques, archivoMapeado);
@@ -76,17 +79,18 @@ int agregarCoordenadaPokemon(char* nombrePokemon, uint32_t posX, uint32_t posY, 
 //FUNCIONES PARA EL FLUJO CATCH/CAUGHT
 
 int quitarCoordenadaPokemon(char* nombrePokemon, uint32_t posX, uint32_t posY) {
-
 	char* rutaMetadata = crearRutaMetadataPokemon(nombrePokemon);
-
 	int size = leerClaveValorInt(rutaMetadata, "SIZE");
+
 	if (size == 0) {
 		free(rutaMetadata);
 		return FAIL;
 	}
+
 	t_list* listaBloques = leerClaveValorList(rutaMetadata, "BLOCKS");
 	char* archivoMapeado = mapearArchivoEnString(listaBloques, size);
 	char* clave = string_from_format("%d-%d", posX, posY);
+
 	if (!string_contains(archivoMapeado, clave)) {
 		free(rutaMetadata);
 		free(archivoMapeado);
@@ -99,10 +103,10 @@ int quitarCoordenadaPokemon(char* nombrePokemon, uint32_t posX, uint32_t posY) {
 
 	int nuevoTamanio = string_length(archivoMapeado);
 	if (nuevoTamanio == 0) {
-		//liberar todos los bloques
 		for (int a = 0; a < listaBloques->elements_count; a++) {
 			liberarBloque(atoi(list_get(listaBloques, a)));
 		}
+
 		setClaveValor(rutaMetadata, "BLOCKS", "[]");
 		setClaveValor(rutaMetadata, "SIZE", "0");
 
@@ -134,7 +138,6 @@ int quitarCoordenadaPokemon(char* nombrePokemon, uint32_t posX, uint32_t posY) {
 	free(clave);
 	list_destroy_and_destroy_elements(listaBloques, freeElem);
 	return OK;
-
 }
 
 Pokemon* obtenerCoordenadasPokemon(char* nombrePokemon) {
@@ -154,11 +157,13 @@ Pokemon* obtenerCoordenadasPokemon(char* nombrePokemon) {
 	char* archivoMapeado = mapearArchivoEnString(listaBloques, size);
 	char** arr = string_split(archivoMapeado, "\n");
 	int a = 0;
+
 	while (arr[a] != NULL) {
 		Coordinate* coor = obtenerCoordenadaDeString(arr[a]);
 		list_add(listaCoor, coor);
 		a++;
 	}
+
 	pokemon->coordinates = listaCoor;
 
 	freeArrayChars(arr);
@@ -217,6 +222,7 @@ char** leerClaveValorArray(char* path, char* clave) {
 	 }
 	 if (retorno[0]==NULL) puts("arr vacio");
 	 */
+
 	config_destroy(metadata);
 	return retorno;
 }
@@ -261,10 +267,6 @@ void freeElem(void* elem) {
 }
 
 int setClaveValor(char* path, char* clave, char* valor) {
-	/*if (!fileExists(path)) {
-		perror("no existspath en setclavevalor");
-		return -1;
-	}*/
 	t_config* metadata = config_create(path);
 	if (!config_has_property(metadata, clave)) {
 		config_destroy(metadata);
@@ -299,7 +301,7 @@ char* crearRuta(char* subPath) {
 }
 
 char* crearRutaPokemon(char* nombrePokemon) {
-	char* pathDirectorio = crearRuta("Files");
+	char* pathDirectorio = crearRuta(PATH_FILES);
 	char* filePokemon = string_new();
 	string_append_with_format(&filePokemon, "%s/%s", pathDirectorio, nombrePokemon);
 	free(pathDirectorio);
@@ -309,7 +311,7 @@ char* crearRutaPokemon(char* nombrePokemon) {
 char* crearRutaMetadataPokemon(char* nombrePokemon) {
 	char* pathPokemon = crearRutaPokemon(nombrePokemon);
 	char* fileMetadata = string_new();
-	string_append_with_format(&fileMetadata, "%s/Metadata.bin", pathPokemon);
+	string_append_with_format(&fileMetadata, "%s/%s", pathPokemon, FILE_METADATA);
 	free(pathPokemon);
 	return fileMetadata;
 }
@@ -334,7 +336,7 @@ void crearArchivosBase(char* subPath) {
 }
 
 void borrarDirectorioYContenido(char* subPath) {
-//vamos a usar shell
+	//vamos a usar shell
 	char* ruta = crearRuta(subPath);
 	char* shell = string_new();
 	string_append_with_format(&shell, "%s%s", SHELL_COMMAND_DELETE, ruta);
