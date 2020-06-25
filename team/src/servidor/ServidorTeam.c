@@ -22,6 +22,8 @@ void configurarServer() {
 
 	Tiempo_Reconexion = config_get_int_value(configServer, "TIEMPO_RECONEXION");
 
+	Id_Team = config_get_int_value(configServer, "ID_TEAM");
+
 	config_destroy(configServer);
 
 	printf("%d\n", Tiempo_Reconexion);
@@ -290,6 +292,10 @@ int iniciarSocketDeEscucha(Operation cola) {
 		return -1;
 	}
 	if (send(socketDeEscucha, &cola, sizeof(int), MSG_NOSIGNAL) < 0) {
+		close(socketDeEscucha);
+		return -1;
+	}
+	if (send(socketDeEscucha, &Id_Team, sizeof(int), MSG_NOSIGNAL) < 0) {
 		close(socketDeEscucha);
 		return -1;
 	}

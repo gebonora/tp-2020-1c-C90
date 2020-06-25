@@ -23,13 +23,6 @@ typedef struct {
 	uint32_t idMensaje;
 } ArgumentosHilo;
 
-
-char* IP_Broker;
-char* IP_Team_Gameboy;
-char* Puerto_Broker;
-char* Puerto_Team_Gameboy;
-int Tiempo_Reconexion;
-
 void configurarServer();
 void eliminarConfigServer();
 
@@ -59,6 +52,14 @@ void atenderGameboy();
 void apagarServer();
 
 // Variables globales del server
+
+char* IP_Broker;
+char* IP_Team_Gameboy;
+char* Puerto_Broker;
+char* Puerto_Team_Gameboy;
+int Tiempo_Reconexion;
+int Id_Team;
+
 int SOCKET_APPEARED;
 int SOCKET_CAUGHT;
 int SOCKET_LOCALIZED;
