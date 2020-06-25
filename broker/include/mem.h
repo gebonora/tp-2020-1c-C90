@@ -31,8 +31,11 @@ Message* create_message(Operation operation, uint32_t message_id, uint32_t corre
 void show_partitions();
 void show_partition(Partition* partition);
 void show_message(Message* message);
-Partition* lru();
+Partition* lru(t_list* partitions);
+Partition* memory_lru();
 bool less_access_time(Partition* partition_a, Partition* partition_b);
-bool is_ocuppied(Partition* partition);
+bool is_occupied(Partition* partition);
+t_list* get_occupied_partitions();
+t_list* get_sorted_partitions();
 
 #endif /* BROKER_INCLUDE_MEM_H_ */

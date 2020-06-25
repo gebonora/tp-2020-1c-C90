@@ -143,24 +143,42 @@ void fifo(){
 }
 */
 
-Partition* lru() {
-	t_list* ocuppied_partitions = list_filter(memory->partitions, &is_ocuppied);
+Partition* lru(t_list* partitions) {
+	t_list* occupied_partitions = list_filter(partitions, &is_occupied);
 
-	if(ocuppied_partitions->elements_count > 0) {
-		list_sorted(ocuppied_partitions, &less_access_time);
-		return ocuppied_partitions->head;
+	if(occupied_partitions->elements_count > 0) {
+		list_sort(occupied_partitions, &less_access_time);
+		return list_get(occupied_partitions, 0);
 	}
 	return NULL;
+}
+
+Partition* memory_lru() {
+	t_list* occupied_partitions = list_sorted(list_filter(memory->partitions, &is_occupied), &less_access_time);
+
+	if(occupied_partitions->elements_count > 0) {
+		return list_get(occupied_partitions, 0);
+	}
+	return NULL;
+}
+
+t_list* get_occupied_partitions() {
+	return list_filter(memory->partitions, &is_occupied);
+}
+
+t_list* get_sorted_partitions() {
+	t_list* partitions = list_filter(memory->partitions, &is_occupied);
+	list_sort(partitions, &less_access_time);
+	return partitions;
 }
 
 bool less_access_time(Partition* partition_a, Partition* partition_b) {
 	return partition_a->access_time < partition_b->access_time;
 }
 
-bool is_ocuppied(Partition* partition) {
+bool is_occupied(Partition* partition) {
 	return !partition->free;
 }
-
 
 Message* create_message(Operation operation, uint32_t message_id, uint32_t correlational_id, uint32_t data_size) {
 	Message* message = malloc(sizeof(Message));
@@ -173,8 +191,8 @@ Message* create_message(Operation operation, uint32_t message_id, uint32_t corre
 
 Partition* create_partition(uint32_t partition_number, uint32_t partition_size, uint32_t* partition_start, uint32_t position, Message* message) {
 	Partition* partition = malloc(sizeof(Partition));
-	partition->access_time = (int) ahoraEnTimeT();
-	partition->free = true;
+	partition->access_time = (int) ahoraEnTimeT() - partition_number; // borrar la resta
+	partition->free = partition_number % 2 == 0 ? true : false;
 	partition->number = partition_number;
 	partition->size = partition_size;
 	partition->start = partition_start;
@@ -183,7 +201,13 @@ Partition* create_partition(uint32_t partition_number, uint32_t partition_size, 
 	return partition;
 }
 
-void show_partitions() {
+void show_partitions(t_list* partitions) {
+	log_info(LOGGER, "--------------------------------");
+	log_info(LOGGER, "Partitions size: %d", memory->partitions->elements_count);
+	list_iterate(partitions, &show_partition);
+}
+
+void show_memory_partitions() {
 	log_info(LOGGER, "--------------------------------");
 	log_info(LOGGER, "Partitions size: %d", memory->partitions->elements_count);
 	list_iterate(memory->partitions, &show_partition);
