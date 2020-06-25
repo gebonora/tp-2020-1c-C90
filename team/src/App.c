@@ -80,8 +80,7 @@ void configurarEstadoInicialProcesoTeam() {
 void liberarRecursos() {
     // Server
     log_debug(INTERNAL_LOGGER, "Apagando server...");
-    //TODO: Apagar el server
-    eliminarConfigServer(); //TODO: Parte del apagado seria esto
+    apagarServer(); //Cierra hilos server y elimina config server con sus variables.
 
     // Logger
     log_debug(INTERNAL_LOGGER, "Liberando logger obligatorio...");
