@@ -5,7 +5,7 @@
 #include "controladores/broker/ControladorBroker.h"
 #include <readline/readline.h>
 #include <stdio.h>
-#include "support/servicios/servicioDeConfiguracion/ServicioDeConfiguracion.h"
+#include "delibird/servicios/servicioDeConfiguracion/ServicioDeConfiguracion.h"
 #include <stdlib.h>
 #include <netdb.h>
 
@@ -232,6 +232,8 @@ Operation get_operation(char* operation_name) {
 		return CAUGHT;
 	} else if (string_equals_ignore_case("GET_POKEMON", operation_name)) {
 		return GET;
+	} else if (string_equals_ignore_case("SUBSCRIBE_POKEMON", operation_name)) {
+		return SUBSCRIBE;
 	} else {
 		log_error(INTERNAL_LOGGER, "Tipo de operacion no soportada: %s", operation_name);
 		exit(EXIT_FAILURE);
