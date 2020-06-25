@@ -5,7 +5,7 @@
 #ifndef TEAM_REGISTRADORDEPOSICIONES_H
 #define TEAM_REGISTRADORDEPOSICIONES_H
 
-#include "modelo/mapa/Mapa.h"
+#include "modelo/mapa/gps/Gps.h"
 #include "modelo/equipo/entrenador/Entrenador.h"
 
 char * registrarEnMapaPosicionEntrenador(Mapa * mapa, Entrenador * posicionable);

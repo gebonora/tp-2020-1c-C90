@@ -17,7 +17,6 @@ bool objetivoCompletado(Entrenador * this) {
         if (dictionary_has_key(this->pokemonesCapturados, pokemon)) {
             cantidadCapturada = (int) dictionary_get(this->pokemonesCapturados, pokemon);
         }
-
         if (cantidadCapturada != cantidadRequerida) {
             fueCompletado = false;
         }
@@ -38,8 +37,8 @@ static void destruir(Entrenador * this) {
     log_destroy(this->logger);
     dictionary_destroy(this->pokemonesCapturados);
     dictionary_destroy(this->pokemonesObjetivo);
-    if (this->uuid != NULL) {
-        free(this->uuid);
+    if (this->gps) {
+        this->gps->destruir(this->gps);
     }
     free(this);
 }
@@ -48,8 +47,8 @@ static Entrenador *new(char * posicionInicial, char * pokemonesIniciales, char *
     Entrenador * entrenador = malloc(sizeof(Entrenador));
 
     entrenador->logger = log_create(TEAM_INTERNAL_LOG_FILE, "Entrenador", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_INFO);
+    entrenador->gps = NULL;
     entrenador->posicionInicial = parsearPosicion(posicionInicial);
-    entrenador->uuid = NULL;
     entrenador->tipoPosicionable = ENTRENADOR;
     entrenador->pokemonesCapturados = agruparPokemonesPorNombre(pokemonesIniciales);
     entrenador->pokemonesObjetivo = agruparPokemonesPorNombre(pokemonesObjetivos);
