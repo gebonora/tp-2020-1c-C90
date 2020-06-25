@@ -92,9 +92,13 @@ void init_memory() {
 }
 
 void create_partitions_test() {
-	list_add(memory->partitions, create_partition(0, 10, malloc(sizeof(uint32_t)), create_message(NEW, 19, 16, 14)));
+	list_add(memory->partitions, create_partition(0, 8, malloc(sizeof(uint32_t)), 0, create_message(NEW, 19, 16, 14)));
 	sleep(2);
-	list_add(memory->partitions, create_partition(1, 5, malloc(sizeof(uint32_t)), create_message(CATCH, 20, -1, 8)));
+	list_add(memory->partitions, create_partition(1, 8, malloc(sizeof(uint32_t)), 8, create_message(CATCH, 20, -1, 8)));
 	sleep(2);
-	list_add(memory->partitions, create_partition(3, 19, malloc(sizeof(uint32_t)), create_message(LOCALIZED, 13, 7, 25)));
+	list_add(memory->partitions, create_partition(3, 8, malloc(sizeof(uint32_t)), 16, create_message(LOCALIZED, 13, 7, 25)));
+	sleep(2);
+	list_add(memory->partitions, create_partition(5, 4, malloc(sizeof(uint32_t)), 24, create_message(APPEARED, 12, -1, 45)));
+	sleep(2);
+	list_add(memory->partitions, create_partition(5, 4, malloc(sizeof(uint32_t)), 28, create_message(APPEARED, 12, -1, 45)));
 }

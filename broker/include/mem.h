@@ -26,7 +26,7 @@ void fifo();
 void best_fit();
 void first_fit();
 */
-Partition* create_partition(uint32_t partition_number, uint32_t partition_size, uint32_t* partition_start, Message* message);
+Partition* create_partition(uint32_t partition_number, uint32_t partition_size, uint32_t* partition_start, uint32_t position, Message* message);
 Message* create_message(Operation operation, uint32_t message_id, uint32_t correlational_id, uint32_t data_size);
 void show_partitions();
 void show_partition(Partition* partition);

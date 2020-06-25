@@ -171,13 +171,14 @@ Message* create_message(Operation operation, uint32_t message_id, uint32_t corre
 	return message;
 }
 
-Partition* create_partition(uint32_t partition_number, uint32_t partition_size, uint32_t* partition_start, Message* message) {
+Partition* create_partition(uint32_t partition_number, uint32_t partition_size, uint32_t* partition_start, uint32_t position, Message* message) {
 	Partition* partition = malloc(sizeof(Partition));
 	partition->access_time = (int) ahoraEnTimeT();
 	partition->free = true;
 	partition->number = partition_number;
 	partition->size = partition_size;
 	partition->start = partition_start;
+	partition->position = position;
 	partition->message = message;
 	return partition;
 }
@@ -193,7 +194,7 @@ void show_partition(Partition* partition) {
 	log_info(LOGGER, "Free: %s", partition->free ? "true" : "false");
 	log_info(LOGGER, "Start: %d - %06p", partition->position, partition->start);
 	log_info(LOGGER, "Size: %d", partition->size);
-	log_info(LOGGER, "Buddy: %06p", xor(partition->start, partition->size));
+	log_info(LOGGER, "Buddy: %d - %06p", xor(partition->position, partition->size), xor(partition->start, partition->size));
 	log_info(LOGGER, "Last access: %d", partition->access_time);
 	show_message(partition->message);
 	log_info(LOGGER, "--------------------------------");
