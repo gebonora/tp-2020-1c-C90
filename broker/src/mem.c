@@ -141,11 +141,44 @@ Partition* find_partition_buddys(potenciaDe2ABuscar) {
 void fifo(){
 
 }
-
-void lru() {
-
-}
 */
+
+Partition* lru(t_list* partitions) {
+	t_list* occupied_partitions = list_filter(partitions, &is_occupied);
+
+	if(occupied_partitions->elements_count > 0) {
+		list_sort(occupied_partitions, &less_access_time);
+		return list_get(occupied_partitions, 0);
+	}
+	return NULL;
+}
+
+Partition* memory_lru() {
+	t_list* occupied_partitions = list_sorted(list_filter(memory->partitions, &is_occupied), &less_access_time);
+
+	if(occupied_partitions->elements_count > 0) {
+		return list_get(occupied_partitions, 0);
+	}
+	return NULL;
+}
+
+t_list* get_occupied_partitions() {
+	return list_filter(memory->partitions, &is_occupied);
+}
+
+t_list* get_sorted_partitions() {
+	t_list* partitions = list_filter(memory->partitions, &is_occupied);
+	list_sort(partitions, &less_access_time);
+	return partitions;
+}
+
+bool less_access_time(Partition* partition_a, Partition* partition_b) {
+	return partition_a->access_time < partition_b->access_time;
+}
+
+bool is_occupied(Partition* partition) {
+	return !partition->free;
+}
 
 Message* create_message(Operation operation, uint32_t message_id, uint32_t correlational_id, uint32_t data_size) {
 	Message* message = malloc(sizeof(Message));
@@ -156,18 +189,25 @@ Message* create_message(Operation operation, uint32_t message_id, uint32_t corre
 	return message;
 }
 
-Partition* create_partition(uint32_t partition_number, uint32_t partition_size, uint32_t* partition_start, Message* message) {
+Partition* create_partition(uint32_t partition_number, uint32_t partition_size, uint32_t* partition_start, uint32_t position, Message* message) {
 	Partition* partition = malloc(sizeof(Partition));
-	partition->access_time = (int) ahoraEnTimeT();
-	partition->free = true;
+	partition->access_time = (int) ahoraEnTimeT() - partition_number; // borrar la resta
+	partition->free = partition_number % 2 == 0 ? true : false;
 	partition->number = partition_number;
 	partition->size = partition_size;
 	partition->start = partition_start;
+	partition->position = position;
 	partition->message = message;
 	return partition;
 }
 
-void show_partitions() {
+void show_partitions(t_list* partitions) {
+	log_info(LOGGER, "--------------------------------");
+	log_info(LOGGER, "Partitions size: %d", memory->partitions->elements_count);
+	list_iterate(partitions, &show_partition);
+}
+
+void show_memory_partitions() {
 	log_info(LOGGER, "--------------------------------");
 	log_info(LOGGER, "Partitions size: %d", memory->partitions->elements_count);
 	list_iterate(memory->partitions, &show_partition);
@@ -178,6 +218,7 @@ void show_partition(Partition* partition) {
 	log_info(LOGGER, "Free: %s", partition->free ? "true" : "false");
 	log_info(LOGGER, "Start: %d - %06p", partition->position, partition->start);
 	log_info(LOGGER, "Size: %d", partition->size);
+	log_info(LOGGER, "Buddy: %d - %06p", xor(partition->position, partition->size), xor(partition->start, partition->size));
 	log_info(LOGGER, "Last access: %d", partition->access_time);
 	show_message(partition->message);
 	log_info(LOGGER, "--------------------------------");

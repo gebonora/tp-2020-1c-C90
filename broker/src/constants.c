@@ -88,12 +88,24 @@ void init_memory() {
 	memory->cache = malloc(TAMANO_MEMORIA);
 	memory->partitions = list_create();
 	//create_partitions_test();
+	//show_memory_partitions();
+	///log_info(LOGGER, "==============OCUPPIED============");
+	//t_list* occupied_partitions = get_occupied_partitions();
+	//show_partitions(occupied_partitions);
+	//log_info(LOGGER, "==============LRU============");
+	//Partition* partition = memory_lru();
+	//show_partition(partition);
+
 }
 
 void create_partitions_test() {
-	list_add(memory->partitions, create_partition(0, 10, malloc(sizeof(uint32_t)), create_message(NEW, 19, 16, 14)));
-	sleep(2);
-	list_add(memory->partitions, create_partition(1, 5, malloc(sizeof(uint32_t)), create_message(CATCH, 20, -1, 8)));
-	sleep(2);
-	list_add(memory->partitions, create_partition(3, 19, malloc(sizeof(uint32_t)), create_message(LOCALIZED, 13, 7, 25)));
+	list_add(memory->partitions, create_partition(0, 8, malloc(sizeof(uint32_t)), 0, create_message(NEW, 19, 16, 14)));
+	sleep(1);
+	list_add(memory->partitions, create_partition(17, 8, malloc(sizeof(uint32_t)), 8, create_message(CATCH, 20, -1, 8)));
+	sleep(1);
+	list_add(memory->partitions, create_partition(13, 8, malloc(sizeof(uint32_t)), 16, create_message(LOCALIZED, 13, 7, 25)));
+	sleep(1);
+	list_add(memory->partitions, create_partition(4, 4, malloc(sizeof(uint32_t)), 24, create_message(APPEARED, 12, -1, 45)));
+	sleep(1);
+	list_add(memory->partitions, create_partition(25, 4, malloc(sizeof(uint32_t)), 28, create_message(APPEARED, 12, -1, 45)));
 }
