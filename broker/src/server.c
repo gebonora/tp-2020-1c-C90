@@ -60,107 +60,161 @@ void process_request(int cod_op, int socket) {
 	switch (cod_op) {
 	case NEW: ;
 		New* new_pokemon = recv_new(socket);
-		log_info(LOGGER, "Me llego un new");
-		log_info(LOGGER, "Nombre pokemon: %s", new_pokemon->pokemon->name->value);
-		log_info(LOGGER, "Cantidad: %d", new_pokemon->quantity);
+		if(new_pokemon != NULL) {
+			log_info(LOGGER, "Me llego un new");
+			log_info(LOGGER, "Nombre pokemon: %s", new_pokemon->pokemon->name->value);
+			log_info(LOGGER, "Cantidad: %d", new_pokemon->quantity);
 
-		pthread_mutex_lock(&MUTEX_NEW_QUEUE);
-		queue_push(NEW_QUEUE, new_pokemon);
-		pthread_mutex_unlock(&MUTEX_NEW_QUEUE);
-		sem_post(&NEW_MESSAGES);
+			pthread_mutex_lock(&MUTEX_NEW_QUEUE);
+			queue_push(NEW_QUEUE, new_pokemon);
+			pthread_mutex_unlock(&MUTEX_NEW_QUEUE);
+			sem_post(&NEW_MESSAGES);
 
-		send(socket, &generated_id, sizeof(uint32_t), 0);
-		free_new(new_pokemon);
+			send(socket, &generated_id, sizeof(uint32_t), 0);
+			free_new(new_pokemon);
+		} else {
+			log_info(LOGGER, "Se cayo el cliente: %d", socket);
+		}
+		close(socket);
 		break;
 	case CAUGHT: ;
 		Caught* caught_pokemon = recv_caught(socket);
-		//id_correlational = recv_uint32(socket);
-		recv(socket,&id_correlational,sizeof(uint32_t),0); //cambio por un recv solo.
-		log_info(LOGGER, "Me llego un caught");
-		log_info(LOGGER, "Resultado: %d", caught_pokemon->result);
-		log_info(LOGGER, "Id correlational: %d", id_correlational);
+		 //cambio por un recv solo.
 
-		pthread_mutex_lock(&MUTEX_CAUGHT_QUEUE);
-		queue_push(CAUGHT_QUEUE, caught_pokemon);
-		pthread_mutex_unlock(&MUTEX_CAUGHT_QUEUE);
-		sem_post(&CAUGHT_MESSAGES);
+		if(caught_pokemon != NULL){
+			int result = recv(socket,&id_correlational,sizeof(uint32_t),0);
+			if(result > 0){
+				log_info(LOGGER, "Me llego un caught");
+				log_info(LOGGER, "Resultado: %d", caught_pokemon->result);
+				log_info(LOGGER, "Id correlational: %d", id_correlational);
 
-		send(socket, &generated_id, sizeof(uint32_t), 0);
-		free(caught_pokemon);
+				pthread_mutex_lock(&MUTEX_CAUGHT_QUEUE);
+				queue_push(CAUGHT_QUEUE, caught_pokemon);
+				pthread_mutex_unlock(&MUTEX_CAUGHT_QUEUE);
+				sem_post(&CAUGHT_MESSAGES);
+
+				send(socket, &generated_id, sizeof(uint32_t), 0)
+				free(caught_pokemon);
+			}
+		} else {
+			log_info(LOGGER, "Se cayo el cliente: %d", socket);
+		}
+		close(socket);
 		break;
 	case GET: ;
 		Get* get_pokemon = recv_get(socket);
-		log_info(LOGGER, "Me llego un get");
-		log_info(LOGGER, "Nombre del pokemon: %s", get_pokemon->name->value);
+		if(get_pokemon != NULL){
+			log_info(LOGGER, "Me llego un get");
+			log_info(LOGGER, "Nombre del pokemon: %s", get_pokemon->name->value);
 
- 	 	pthread_mutex_lock(&MUTEX_GET_QUEUE);
-		queue_push(GET_QUEUE, get_pokemon);
-		pthread_mutex_unlock(&MUTEX_GET_QUEUE);
-		sem_post(&GET_MESSAGES);
+			pthread_mutex_lock(&MUTEX_GET_QUEUE);
+			queue_push(GET_QUEUE, get_pokemon);
+			pthread_mutex_unlock(&MUTEX_GET_QUEUE);
+			sem_post(&GET_MESSAGES);
 
-		send(socket, &generated_id, sizeof(uint32_t), 0);
-		free_get(get_pokemon);
+			send(socket, &generated_id, sizeof(uint32_t), 0);
+			free_get(get_pokemon);
+		} else {
+			log_info(LOGGER, "Se cayo el cliente: %d", socket);
+		}
+		close(socket);
 		break;
 	case LOCALIZED: ;
 		Localized* localized_pokemon = recv_localized(socket);
-		log_info(LOGGER, "Me llego un localized");
-		log_info(LOGGER, "Nombre del pokemon: %s", localized_pokemon->pokemon->name->value);
-		log_info(LOGGER, "Cantidad de coordenadas: %d", localized_pokemon->coordinates_quantity);
-		for(int i = 0; i < localized_pokemon->coordinates_quantity; i++) {
-			Coordinate* loc_coordinate = list_get(localized_pokemon->pokemon->coordinates, i);
-			log_info(LOGGER, "Coordenada: x=%d, y=%d", loc_coordinate->pos_x, loc_coordinate->pos_y);
+
+		if(localized_pokemon != NULL){
+			int result = recv(socket,&id_correlational,sizeof(uint32_t),0);
+			if (result > 0) {
+				log_info(LOGGER, "Me llego un localized");
+				log_info(LOGGER, "Nombre del pokemon: %s", localized_pokemon->pokemon->name->value);
+				log_info(LOGGER, "Cantidad de coordenadas: %d", localized_pokemon->coordinates_quantity);
+				for(int i = 0; i < localized_pokemon->coordinates_quantity; i++) {
+					Coordinate* loc_coordinate = list_get(localized_pokemon->pokemon->coordinates, i);
+					log_info(LOGGER, "Coordenada: x=%d, y=%d", loc_coordinate->pos_x, loc_coordinate->pos_y);
+				}
+
+				pthread_mutex_lock(&MUTEX_LOCALIZED_QUEUE);
+				queue_push(LOCALIZED_QUEUE, localized_pokemon);
+				pthread_mutex_unlock(&MUTEX_LOCALIZED_QUEUE);
+				sem_post(&LOCALIZED_MESSAGES);
+
+				send(socket, &generated_id, sizeof(uint32_t), 0);
+				free_localized(localized_pokemon);
+			}
+		} else {
+			log_info(LOGGER, "Se cayo el cliente: %d", socket);
 		}
-
-		pthread_mutex_lock(&MUTEX_LOCALIZED_QUEUE);
-		queue_push(LOCALIZED_QUEUE, localized_pokemon);
-		pthread_mutex_unlock(&MUTEX_LOCALIZED_QUEUE);
-		sem_post(&LOCALIZED_MESSAGES);
-
-		send(socket, &generated_id, sizeof(uint32_t), 0);
-		free_localized(localized_pokemon);
+		close(socket);
 		break;
 	case APPEARED: ;
 		Pokemon* appeared_pokemon = recv_pokemon(socket, false);
-		//id_correlational = recv_uint32(socket);
-		recv(socket,&id_correlational,sizeof(uint32_t),0); //cambio por un recv solo.
-		log_info(LOGGER, "Me llego un appeared");
-		log_info(LOGGER, "Nombre del pokemon: %s", appeared_pokemon->name->value);
-		log_info(LOGGER, "Id correlational: %d", id_correlational);
-		Coordinate* coordinate = list_get(appeared_pokemon->coordinates, 0);
-		log_info(LOGGER, "Coordenada: x=%d, y=%d", coordinate->pos_x, coordinate->pos_y);
 
-		pthread_mutex_lock(&MUTEX_APPEARED_QUEUE);
-		queue_push(APPEARED_QUEUE, appeared_pokemon);
-		pthread_mutex_unlock(&MUTEX_APPEARED_QUEUE);
-		sem_post(&APPEARED_MESSAGES);
+		if(appeared_pokemon != NULL){
+			int result = recv(socket,&id_correlational,sizeof(uint32_t),0);
+			if(result > 0){
+				log_info(LOGGER, "Me llego un appeared");
+				log_info(LOGGER, "Nombre del pokemon: %s", appeared_pokemon->name->value);
+				log_info(LOGGER, "Id correlational: %d", id_correlational);
+				Coordinate* coordinate = list_get(appeared_pokemon->coordinates, 0);
+				log_info(LOGGER, "Coordenada: x=%d, y=%d", coordinate->pos_x, coordinate->pos_y);
 
-		send(socket, &generated_id, sizeof(uint32_t), 0);
-		free_pokemon(appeared_pokemon);
+				pthread_mutex_lock(&MUTEX_APPEARED_QUEUE);
+				queue_push(APPEARED_QUEUE, appeared_pokemon);
+				pthread_mutex_unlock(&MUTEX_APPEARED_QUEUE);
+				sem_post(&APPEARED_MESSAGES);
+
+				send(socket, &generated_id, sizeof(uint32_t), 0);
+				free_pokemon(appeared_pokemon);
+			}
+		} else {
+			log_info(LOGGER, "Se cayo el cliente: %d", socket);
+		}
+		close(socket);
 		break;
 	case CATCH: ;
 		Pokemon* catch_pokemon = recv_pokemon(socket, false);
-		log_info(LOGGER, "Me llego un catch");
-		log_info(LOGGER, "Nombre del pokemon: %s", catch_pokemon->name->value);
-		Coordinate* catch_coordinate = list_get(catch_pokemon->coordinates, 0);
-		log_info(LOGGER, "Coordenada: x=%d, y=%d", catch_coordinate->pos_x, catch_coordinate->pos_y);
+		if(catch_pokemon != NULL) {
+			log_info(LOGGER, "Me llego un catch");
+			log_info(LOGGER, "Nombre del pokemon: %s", catch_pokemon->name->value);
+			Coordinate* catch_coordinate = list_get(catch_pokemon->coordinates, 0);
+			log_info(LOGGER, "Coordenada: x=%d, y=%d", catch_coordinate->pos_x, catch_coordinate->pos_y);
 
-		pthread_mutex_lock(&MUTEX_CATCH_QUEUE);
-		queue_push(CATCH_QUEUE, catch_pokemon);
-		pthread_mutex_unlock(&MUTEX_CATCH_QUEUE);
-		sem_post(&CATCH_MESSAGES);
+			pthread_mutex_lock(&MUTEX_CATCH_QUEUE);
+			queue_push(CATCH_QUEUE, catch_pokemon);
+			pthread_mutex_unlock(&MUTEX_CATCH_QUEUE);
+			sem_post(&CATCH_MESSAGES);
 
-		send(socket, &generated_id, sizeof(uint32_t), 0);
-		free_pokemon(catch_pokemon);
+			send(socket, &generated_id, sizeof(uint32_t), 0);
+			free_pokemon(catch_pokemon);
+		} else {
+			log_info(LOGGER, "Se cayo el cliente: %d", socket);
+		}
+		close(socket);
 		break;
 	case SUBSCRIBE: ;
 		log_info(LOGGER, "Me llego un suscribe");
-		int cod_process;
-		int process_id;
-		recv(socket, &cod_process, sizeof(int), MSG_WAITALL);
-		int cod_cola;
-		recv(socket, &cod_cola, sizeof(int), MSG_WAITALL);
+		int result;
 
-		recv(socket, &process_id, sizeof(int), MSG_WAITALL);
+		int cod_process;
+		result = recv(socket, &cod_process, sizeof(int), MSG_WAITALL);
+		if(result <= 0) {
+			close(socket);
+			break;
+		}
+
+		int cod_cola;
+		result = recv(socket, &cod_cola, sizeof(int), MSG_WAITALL);
+		if(result <= 0) {
+			close(socket);
+			break;
+		}
+
+		int id_process;
+		result = recv(socket, &id_process, sizeof(int), MSG_WAITALL);
+		if(result <= 0) {
+			close(socket);
+			break;
+    }
 
 		char* op = get_operation_by_value(cod_cola);
 		pthread_mutex_lock(&MUTEX_SUBSCRIBERS_BY_QUEUE);
@@ -168,6 +222,7 @@ void process_request(int cod_op, int socket) {
 		list_add(subscribers, socket);
 		pthread_mutex_unlock(&MUTEX_SUBSCRIBERS_BY_QUEUE);
 
+		log_info(LOGGER, "Suscripcion del proceso: %d", cod_process);
 		log_info(LOGGER, "Suscripcion del proceso: %d, con id: %d", cod_process, process_id);
 		log_info(LOGGER, "Suscripcion en cola: %d", cod_cola);
 
@@ -184,9 +239,9 @@ void process_request(int cod_op, int socket) {
 
 		break;
 	case 0:
-		pthread_exit(NULL); //revisar cuando matar al hilo y cerrar la conexion
 	case -1:
-		pthread_exit(NULL); //revisar cuando matar al hilo y cerrar la conexion
+		close(socket);
+		break;
 	}
 
 }
