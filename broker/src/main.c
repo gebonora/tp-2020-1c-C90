@@ -8,7 +8,7 @@ int main(){
 	init_context();
 	init_threads();
 	init_memory();
-	//init_dump();
-	//init_server();
+	init_dump();
+	init_server();
 	return 0;
 }
