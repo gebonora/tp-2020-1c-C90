@@ -1,23 +1,27 @@
 #include "buddy.h"
 
+static bool _partition_at_position(uintptr_t, Partition*);
+static uint32_t buddy_of(Partition*);
+
 void save_to_cache_buddy_system(void* data, Message* message) {
 
 }
 
 Partition* get_buddy(Partition* partition) {
-	return list_find(memory->partitions, starts_with(buddy_of(partition)));
+	bool _inline_partition_at_position(Partition* partition) {
+		return _partition_at_position(buddy_of(partition), partition);
+	}
+	return list_find(memory->partitions, &_inline_partition_at_position);
 }
 
-Partition* buddy_of(Partition* partition) {
-	return xor(partition->start, partition->size);
+static uintptr_t buddy_of(Partition* partition) {
+	return xor_pointer_and_int(partition->start, partition->size);
 }
 
-uint32_t xor(uint32_t position, uint32_t size) {
-	return (uint32_t) (unsigned) position ^ (unsigned) size;
-}
+/** PRIVATE FUNCTIONS **/
 
-uint32_t* starts_with(Partition* partition) {
-	return partition->start;
+static bool _partition_at_position(uintptr_t position, Partition* partition) {
+	return partition->start == position;
 }
 
 /*

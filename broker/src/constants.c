@@ -9,12 +9,18 @@ void init_config() {
 
 	IP = config_get_string_value(config, "IP_BROKER");
 	PUERTO = config_get_string_value(config, "PUERTO_BROKER");
-	TAMANO_MEMORIA = config_get_int_value(config, "TAMANO_MEMORIA");
-	TAMANO_MINIMO_PARTICION = config_get_int_value(config, "TAMANO_MINIMO_PARTICION");
 	ALGORITMO_MEMORIA = config_get_string_value(config, "ALGORITMO_MEMORIA");
 	ALGORITMO_REEMPLAZO = config_get_string_value(config, "ALGORITMO_REEMPLAZO");
 	ALGORITMO_PARTICION_LIBRE = config_get_string_value(config, "ALGORITMO_PARTICION_LIBRE");
 	FRECUENCIA_COMPACTACION = config_get_int_value(config, "FRECUENCIA_COMPACTACION");
+
+	if(string_equals_ignore_case(ALGORITMO_MEMORIA, BUDDY_SYSTEM)) {
+		TAMANO_MINIMO_PARTICION = next_power_of_2(config_get_int_value(config, "TAMANO_MINIMO_PARTICION"));
+		TAMANO_MEMORIA = next_power_of_2(config_get_int_value(config, "TAMANO_MEMORIA"));
+	} else {
+		TAMANO_MINIMO_PARTICION = config_get_int_value(config, "TAMANO_MINIMO_PARTICION");
+		TAMANO_MEMORIA = config_get_int_value(config, "TAMANO_MEMORIA");
+	}
 }
 
 void init_queues() {
@@ -99,25 +105,30 @@ void init_memory() {
 	*/
 
 	// PRUEBA SEBA LRU
-	/*
+	create_partitions_test();
 	show_memory_partitions();
-	log_info(LOGGER, "==============OCUPPIED============");
-	t_list* occupied_partitions = get_occupied_partitions();
-	show_partitions(occupied_partitions);
-	log_info(LOGGER, "==============LRU============");
-	Partition* partition = memory_lru();
-	show_partition(partition);
-	 */
+	//log_info(LOGGER, "==============OCUPPIED============");
+	//t_list* occupied_partitions = get_occupied_partitions();
+	//show_partitions(occupied_partitions);
+	//log_info(LOGGER, "==============LRU============");
+	//Partition* partition = choose_victim();
+	//show_partition(partition);
 }
 
 void create_partitions_test() {
-	list_add(memory->partitions, create_partition(0, 8, malloc(sizeof(uint32_t)), 0, create_message(NEW, 19, 16, 14)));
+	uintptr_t start = malloc(sizeof(uintptr_t));
+
+	list_add(memory->partitions, create_partition(0, 8, start, 0, create_message(NEW, 19, 16, 14)));
 	sleep(1);
-	list_add(memory->partitions, create_partition(17, 8, malloc(sizeof(uint32_t)), 8, create_message(CATCH, 20, -1, 8)));
+	start += 8;
+	list_add(memory->partitions, create_partition(17, 8, start, 8, create_message(CATCH, 20, -1, 8)));
 	sleep(1);
-	list_add(memory->partitions, create_partition(13, 8, malloc(sizeof(uint32_t)), 16, create_message(LOCALIZED, 13, 7, 25)));
+	start += 8;
+	list_add(memory->partitions, create_partition(13, 8, start, 16, create_message(LOCALIZED, 13, 7, 25)));
 	sleep(1);
-	list_add(memory->partitions, create_partition(4, 4, malloc(sizeof(uint32_t)), 24, create_message(APPEARED, 12, -1, 45)));
+	start += 8;
+	list_add(memory->partitions, create_partition(4, 4, start, 24, create_message(APPEARED, 12, -1, 45)));
 	sleep(1);
-	list_add(memory->partitions, create_partition(25, 4, malloc(sizeof(uint32_t)), 28, create_message(APPEARED, 12, -1, 45)));
+	start += 4;
+	list_add(memory->partitions, create_partition(25, 4, start, 28, create_message(APPEARED, 12, -1, 45)));
 }
