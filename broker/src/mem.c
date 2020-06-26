@@ -113,4 +113,3 @@ static bool _is_occupied(Partition* partition) {
 static bool _less_access_time(Partition* partition_a, Partition* partition_b) {
 	return partition_a->access_time < partition_b->access_time;
 }
-
