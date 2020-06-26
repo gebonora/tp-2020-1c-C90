@@ -11,13 +11,14 @@ Message* create_message(Operation operation, uint32_t message_id, uint32_t corre
 
 Partition* create_partition(uint32_t partition_number, uint32_t partition_size, uint32_t* partition_start, uint32_t position, Message* message) {
 	Partition* partition = malloc(sizeof(Partition));
-	partition->access_time = (int) ahoraEnTimeT() - partition_number; // borrar la resta
+	partition->access_time = (int) ahoraEnTimeT();
 	partition->free = partition_number % 2 == 0 ? true : false;
 	partition->number = partition_number;
 	partition->size = partition_size;
 	partition->start = partition_start;
 	partition->position = position;
 	partition->message = message;
+	partition->creation_time = (int) ahoraEnTimeT();
 	return partition;
 }
 
