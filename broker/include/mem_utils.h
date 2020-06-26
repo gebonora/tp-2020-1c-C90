@@ -2,6 +2,7 @@
 #define BROKER_INCLUDE_MEM_UTILS_H_
 
 #include <stdbool.h>
+#include <math.h>
 #include "constants.h"
 
 Partition* create_partition(uint32_t, uint32_t, uint32_t*, uint32_t, Message*);

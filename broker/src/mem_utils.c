@@ -36,9 +36,9 @@ void show_memory_partitions() {
 void show_partition(Partition* partition) {
 	log_info(LOGGER, "Partition #%d", partition->number);
 	log_info(LOGGER, "Free: %s", partition->free ? "true" : "false");
-	log_info(LOGGER, "Start: %d - %06p", partition->position, partition->start);
+	log_info(LOGGER, "Start: %d - %x", partition->position, partition->start);
 	log_info(LOGGER, "Size: %d", partition->size);
-	log_info(LOGGER, "Buddy: %d - %06p", xor(partition->position, partition->size), xor(partition->start, partition->size));
+	log_info(LOGGER, "Buddy: %d - %x", xor_int_and_int(partition->position, partition->size), xor_pointer_and_int(partition->start, partition->size));
 	log_info(LOGGER, "Last access: %d", partition->access_time);
 	show_message(partition->message);
 	log_info(LOGGER, "--------------------------------");
