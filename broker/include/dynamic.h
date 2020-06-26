@@ -1,4 +1,6 @@
 #ifndef BROKER_INCLUDE_DYNAMIC_H_
 #define BROKER_INCLUDE_DYNAMIC_H_
 
+void compact();
+
 #endif /* BROKER_INCLUDE_DYNAMIC_H_ */
