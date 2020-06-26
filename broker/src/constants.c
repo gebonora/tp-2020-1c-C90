@@ -1,5 +1,9 @@
 #include "constants.h"
 
+void init_logger() {
+    LOGGER = log_create(LOGGER_PATH, "Broker Server", 1, LOG_LEVEL_INFO);
+}
+
 void init_config() {
 	t_config* config = config_create("/home/utnso/tp-2020-1c-C90/broker/config/broker.config");
 
@@ -80,6 +84,7 @@ void init_threads() {
 }
 
 void init_memory() {
+	memory = malloc(sizeof(Memory));
 	memory->cache = malloc(TAMANO_MEMORIA);
 	memory->partitions = list_create();
 
@@ -115,5 +120,4 @@ void create_partitions_test() {
 	list_add(memory->partitions, create_partition(4, 4, malloc(sizeof(uint32_t)), 24, create_message(APPEARED, 12, -1, 45)));
 	sleep(1);
 	list_add(memory->partitions, create_partition(25, 4, malloc(sizeof(uint32_t)), 28, create_message(APPEARED, 12, -1, 45)));
-
 }
