@@ -93,7 +93,7 @@ void process_request(int cod_op, int socket) {
 				pthread_mutex_unlock(&MUTEX_CAUGHT_QUEUE);
 				sem_post(&CAUGHT_MESSAGES);
 
-				send(socket, &generated_id, sizeof(uint32_t), 0)
+				send(socket, &generated_id, sizeof(uint32_t), 0);
 				free(caught_pokemon);
 			}
 		} else {
@@ -209,8 +209,8 @@ void process_request(int cod_op, int socket) {
 			break;
 		}
 
-		int id_process;
-		result = recv(socket, &id_process, sizeof(int), MSG_WAITALL);
+		int process_id;
+		result = recv(socket, &process_id, sizeof(int), MSG_WAITALL);
 		if(result <= 0) {
 			close(socket);
 			break;
