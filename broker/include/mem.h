@@ -19,7 +19,6 @@
 #define LRU "LRU"
 
 void save_message(void*, Operation, uint32_t, uint32_t);
-t_list* get_filtered_partitions(uint32_t);
 Partition* test_lru(t_list*);
 t_list* get_occupied_partitions();
 t_list* get_sorted_partitions();

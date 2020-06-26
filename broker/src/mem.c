@@ -1,14 +1,24 @@
 #include "mem.h"
 
+static int _calculate_data_size(void*, Operation);
+static void _save_to_cache(void*, Message*);
+static Partition* _choose_by_fifo();
+static Partition* _choose_by_lru();
+static bool _is_occupied(Partition*);
+static bool _less_access_time(Partition*, Partition*);
+
+/** PUBLIC FUNCTIONS **/
+
 void save_message(void* data, Operation operation, uint32_t message_id, uint32_t correlational_id) {
 	Message* message = create_message(operation, message_id, correlational_id, _calculate_data_size(data, operation));
 	_save_to_cache(data, message);
 }
 
-// TODO: ver si siguen vigentes
+// TODO: ver si sigue vigente
 void delete_data() {
 
 }
+// TODO: ver si sigue vigente
 void delete_partition()  {
 
 }
@@ -20,13 +30,6 @@ Partition* choose_victim() {
 	} else {
 		return _choose_by_lru();
 	}
-}
-
-t_list* get_filtered_partitions(uint32_t size_to_compare) {
-	bool _greater_equals_and_free(Partition* partition) {
-		return greater_equals_and_free(size_to_compare, partition);
-	}
-	return list_filter(memory->partitions, &_greater_equals_and_free);
 }
 
 // Test: si no lo terminamos usando borrar
@@ -84,13 +87,8 @@ static void _save_to_cache(void* data, Message* message) {
 	if(string_equals_ignore_case(ALGORITMO_MEMORIA, BUDDY_SYSTEM)) {
 		save_to_cache_buddy_system(data, message);
 	} else {
-		save_to_cache_dynamic(data, message);
+		save_to_cache_dynamic_partitions(data, message);
 	}
-}
-
-
-static bool greater_equals_and_free(uint32_t to_compare, Partition* partition) {
-	return partition->free && partition->size >= to_compare;
 }
 
 // TODO: cambiar por la posta
@@ -108,10 +106,10 @@ static Partition* _choose_by_lru() {
 	return NULL;
 }
 
-static bool _less_access_time(Partition* partition_a, Partition* partition_b) {
-	return partition_a->access_time < partition_b->access_time;
-}
-
 static bool _is_occupied(Partition* partition) {
 	return !partition->free;
+}
+
+static bool _less_access_time(Partition* partition_a, Partition* partition_b) {
+	return partition_a->access_time < partition_b->access_time;
 }

@@ -1,5 +1,9 @@
 #include "buddy.h"
 
+void save_to_cache_buddy_system(void* data, Message* message) {
+
+}
+
 Partition* get_buddy(Partition* partition) {
 	return list_find(memory->partitions, starts_with(buddy_of(partition)));
 }

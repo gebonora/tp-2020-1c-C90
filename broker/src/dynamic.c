@@ -1,5 +1,6 @@
 #include "dynamic.h"
 
+static bool _greater_equals_and_free(uint32_t, Partition*);
 
 /*
 void add_dynamic_partitions() {
@@ -73,3 +74,21 @@ bool menorTamanio(Partition* partition_1, Partition* partition_2) {
 	return partition_1->partition_size < partition_2->partition_size;
 }
 */
+
+
+void save_to_cache_dynamic_partitions(void* datta, Message* message) {
+
+}
+
+t_list* get_filtered_partitions(uint32_t size_to_compare) {
+	bool _inline_greater_equals_and_free(Partition* partition) {
+		return _greater_equals_and_free(size_to_compare, partition);
+	}
+	return list_filter(memory->partitions, &_inline_greater_equals_and_free);
+}
+
+/** PRIVATE FUNCTIONS **/
+
+static bool _greater_equals_and_free(uint32_t to_compare, Partition* partition) {
+	return partition->free && partition->size >= to_compare;
+}
