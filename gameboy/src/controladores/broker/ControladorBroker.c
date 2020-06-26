@@ -5,19 +5,9 @@
 #include "controladores/broker/ControladorBroker.h"
 #include <readline/readline.h>
 #include <stdio.h>
-#include "support/servicios/servicioDeConfiguracion/ServicioDeConfiguracion.h"
+#include "delibird/servicios/servicioDeConfiguracion/ServicioDeConfiguracion.h"
 #include <stdlib.h>
 #include <netdb.h>
-
-/*
-#define NEW_POKEMON 1
-#define LOCALIZED_POKEMON 2
-#define GET_POKEMON 3
-#define APPEARED_POKEMON 4
-#define CATCH_POKEMON 5
-#define CAUGHT_POKEMON 6
-#define SUBSCRIBE_POKEMON 7
-*/
 
 bool is_alive = true;
 
@@ -98,13 +88,15 @@ void atenderPedidoBroker(PedidoGameBoy pedidoGameBoy, t_log * logger) {
     case SUBSCRIBE_POKEMON: ;
     	log_info(logger, "ENTRE A SUBSCRIBE");
     	Operation destination_queue = get_operation(list_get(pedidoGameBoy.argumentos, 0));
-    	//Operation destination_queue = list_get(pedidoGameBoy.argumentos, 0);
     	uint32_t operation = SUBSCRIBE;
     	uint32_t process_gameboy = GAMEBOY;
     	int suscription_time = atoi(list_get(pedidoGameBoy.argumentos, 1));
+    	uint32_t id_gameboy = servicioDeConfiguracion.obtenerEntero(&servicioDeConfiguracion, ID_GAMEBOY);
+
     	send(socket_broker, &operation, sizeof(uint32_t), 0);
     	send(socket_broker, &process_gameboy, sizeof(uint32_t), 0);
     	send(socket_broker, &destination_queue, sizeof(uint32_t), 0);
+    	send(socket_broker, &id_gameboy, sizeof(uint32_t), 0);
 
     	socket_with_logger* swl = malloc(sizeof(socket_with_logger));
     	swl->logger = logger;
@@ -112,7 +104,8 @@ void atenderPedidoBroker(PedidoGameBoy pedidoGameBoy, t_log * logger) {
     	swl->operation = destination_queue;
 
     	pthread_t listener_thread;
-    	pthread_create(&listener_thread,NULL,(void*)listen_messages, swl);
+    	//pthread_create(&listener_thread,NULL,(void*)listen_messages, swl);
+    	pthread_create(&listener_thread,NULL,(void*)listen_messages_test, swl);
     	pthread_detach(listener_thread);
 
     	log_info(logger, "Starting timer of: %d", suscription_time);
@@ -122,6 +115,16 @@ void atenderPedidoBroker(PedidoGameBoy pedidoGameBoy, t_log * logger) {
     	break;
     }
     close(socket_broker);
+}
+
+void listen_messages_test(socket_with_logger* swl) {
+	while(is_alive) {
+		Result result;
+		if(recv(swl->socket, &result, sizeof(Result), MSG_WAITALL) < 0) {
+			break;
+		}
+		log_info(swl->logger, "Message received: %d", result);
+	}
 }
 
 void listen_messages(socket_with_logger* swl) {
@@ -189,39 +192,6 @@ void listen_messages(socket_with_logger* swl) {
 
 
 Operation get_operation(char* operation_name) {
-	/*
-	Operation operation;
-
-	switch(operation_name) {
-	case NEW_POKEMON: ;
-		operation = NEW;
-		break;
-	case APPEARED_POKEMON: ;
-		operation = APPEARED;
-		break;
-	case GET_POKEMON: ;
-		operation = GET;
-		break;
-	case LOCALIZED_POKEMON: ;
-		operation = LOCALIZED;
-		break;
-	case CATCH_POKEMON: ;
-		operation = CATCH;
-		break;
-	case CAUGHT_POKEMON: ;
-		operation = CAUGHT;
-		break;
-	case SUBSCRIBE_POKEMON: ;
-		operation = SUBSCRIBE;
-		break;
-	default : ;
-		log_error(INTERNAL_LOGGER, "Tipo de operacion no soportada: %s", operation_name);
-		exit(EXIT_FAILURE);
-	}
-
-	return operation;
-*/
-
 	if (string_equals_ignore_case("NEW_POKEMON", operation_name)) {
 		return NEW;
 	} else if (string_equals_ignore_case("APPEARED_POKEMON", operation_name)) {
@@ -232,6 +202,8 @@ Operation get_operation(char* operation_name) {
 		return CAUGHT;
 	} else if (string_equals_ignore_case("GET_POKEMON", operation_name)) {
 		return GET;
+	} else if (string_equals_ignore_case("SUBSCRIBE_POKEMON", operation_name)) {
+		return SUBSCRIBE;
 	} else {
 		log_error(INTERNAL_LOGGER, "Tipo de operacion no soportada: %s", operation_name);
 		exit(EXIT_FAILURE);
