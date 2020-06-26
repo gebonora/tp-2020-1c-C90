@@ -13,8 +13,12 @@ void* serialize_caught(Caught* caught_pokemon, int bytes) {
 	return serialized;
 }
 
+int calculate_caught_bytes() {
+	return sizeof(uint32_t) * 2;
+}
+
 int send_caught(Caught* caught_pokemon, int socket) { //changed int y nosignal.
-	int bytes = sizeof(uint32_t) * 2;
+	int bytes = calculate_caught_bytes();
 	int resultado = 0;
 	void* serialized = serialize_caught(caught_pokemon, bytes);
 

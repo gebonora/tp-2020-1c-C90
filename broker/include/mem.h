@@ -4,37 +4,22 @@
 #include "constants.h"
 #include "dynamic.h"
 #include "buddy.h"
+#include "mem_utils.h"
 #include <string.h>
 #include <stdbool.h>
 #include <commons/collections/list.h>
 #include <delibird/utils/tiempo/Tiempo.h>
-/*
-void add();
-void choose_victim();
-void delete_data();
-void compact();
-void delete_partition();
-void dump();
+#include <delibird/interface.h>
 
-int find_free_partition();
-void save_data();
+#define BUDDY_SYSTEM "BS"
+#define DYNAMIC_PARTITIONS "PARTICIONES"
+#define FIRST_FIT "FF"
+#define BEST_FIT "BF"
+#define FIFO "FIFO"
+#define LRU "LRU"
 
-//func priv
-void save_buddy_system();
-void save_dynamic_partitions();
-void fifo();
-void best_fit();
-void first_fit();
-*/
-Partition* create_partition(uint32_t partition_number, uint32_t partition_size, uint32_t* partition_start, uint32_t position, Message* message);
-Message* create_message(Operation operation, uint32_t message_id, uint32_t correlational_id, uint32_t data_size);
-void show_partitions();
-void show_partition(Partition* partition);
-void show_message(Message* message);
-Partition* lru(t_list* partitions);
-Partition* memory_lru();
-bool less_access_time(Partition* partition_a, Partition* partition_b);
-bool is_occupied(Partition* partition);
+void save_message(void*, Operation, uint32_t, uint32_t);
+Partition* test_lru(t_list*);
 t_list* get_occupied_partitions();
 t_list* get_sorted_partitions();
 
