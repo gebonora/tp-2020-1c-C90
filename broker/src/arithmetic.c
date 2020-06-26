@@ -1,6 +1,6 @@
 #include "arithmetic.h"
 
-unsigned int next_power_of_2(unsigned int n)
+uint32_t next_power_of_2(uint32_t n)
 {
     n--;
     n |= n >> 1;
