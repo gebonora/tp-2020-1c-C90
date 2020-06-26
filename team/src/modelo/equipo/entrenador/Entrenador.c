@@ -4,44 +4,13 @@
 
 #include "modelo/equipo/entrenador/Entrenador.h"
 
-bool objetivoCompletado(Entrenador * this) {
-    t_list * pokemones = (t_list *) keys(this->pokemonesObjetivo);
-
-    int i = 0;
-    bool fueCompletado = true;
-
-    while (fueCompletado && i < list_size(pokemones)) {
-        char * pokemon = list_get(pokemones, i);
-        int cantidadRequerida = (int) dictionary_get(this->pokemonesObjetivo, pokemon);
-        int cantidadCapturada = 0;
-        if (dictionary_has_key(this->pokemonesCapturados, pokemon)) {
-            cantidadCapturada = (int) dictionary_get(this->pokemonesCapturados, pokemon);
-        }
-
-        if (cantidadCapturada != cantidadRequerida) {
-            fueCompletado = false;
-        }
-        i++;
-    }
-
-    list_destroy(pokemones);
-
-    return fueCompletado;
-}
-
-bool puedeAtraparPokemones(Entrenador * this) {
-    return totalDePokemones(this->pokemonesCapturados) < this->limiteDeCaptura;
-}
-
 static void destruir(Entrenador * this) {
     log_destroy(this->logger);
-    dictionary_destroy(this->pokemonesCapturados);
+    dictionary_destroy(this->pokemonesIniciales);
     dictionary_destroy(this->pokemonesObjetivo);
-    free(this->uuid);
     free(this);
 }
 
-// Funciones estaticas
 Coordinate parsearPosicion(char * posicion) {
     char ** punto = string_n_split(posicion, 2, "|");
     Coordinate coordenada = {.pos_x=atoi(punto[0]), .pos_y=atoi(punto[1])};
@@ -84,17 +53,16 @@ int totalDePokemones(ContadorPokemones contadorPokemones) {
     return total;
 }
 
-static Entrenador *new(char * posicionInicial, char * pokemonesIniciales, char * pokemonesObjetivos) {
+static Entrenador *new(char * posicionInicial, char * pokemones_iniciales, char * pokemones_objetivos) {
     Entrenador * entrenador = malloc(sizeof(Entrenador));
+
+    ContadorPokemones pokemonesObjetivo = agruparPokemonesPorNombre(pokemones_objetivos);
 
     entrenador->logger = log_create(TEAM_INTERNAL_LOG_FILE, "Entrenador", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_INFO);
     entrenador->posicionInicial = parsearPosicion(posicionInicial);
-    entrenador->uuid = mapa.registrarPosicion(entrenador->posicionInicial, ENTRENADOR);
-    entrenador->pokemonesCapturados = agruparPokemonesPorNombre(pokemonesIniciales);
-    entrenador->pokemonesObjetivo = agruparPokemonesPorNombre(pokemonesObjetivos);
+    entrenador->pokemonesIniciales = agruparPokemonesPorNombre(pokemones_iniciales);
+    entrenador->pokemonesObjetivo = pokemonesObjetivo;
     entrenador->limiteDeCaptura = totalDePokemones(entrenador->pokemonesObjetivo);
-    entrenador->objetivoCompletado = &objetivoCompletado;
-    entrenador->puedeAtraparPokemones = &puedeAtraparPokemones;
     entrenador->destruir = &destruir;
 
     return entrenador;

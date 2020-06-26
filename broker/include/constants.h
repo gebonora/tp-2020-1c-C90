@@ -16,8 +16,6 @@
 #include <delibird/protocol.h>
 #include "broker.h"
 
-#define LOGGER_PATH "/home/utnso/tp-2020-1c-C90/broker/logs/server.log"
-
 char* IP;
 char* PUERTO;
 int TAMANO_MEMORIA;
@@ -74,26 +72,23 @@ typedef struct {
 } Suscriber;
 
 typedef struct {
-	uint32_t position; // posicion relativa dentro de la cache
 	uint32_t* start; // puntero de la memoria cache
 	uint32_t number; // numero de particion
-	uint32_t size; // tamanio de particion
+	uint32_t partition_size; // tamanio de particion
 	bool free; // si esta libre o no
 	uint32_t buddy; // numero de particion de su buddy
-	uint32_t access_time; // timestamp del ultimo acceso a esta particion
+	double access_time; // timestamp del ultimo acceso a esta particion
 	Message* message; // datos administrativos del mensaje (id, id correlacional, cod op)
 	t_list* notified_suscribers; // suscriptores que ya devolvieron ACK para este mensaje
 } Partition;
 
 Memory* memory;
 
-void init_logger();
+void init_memory();
 void init_config();
 void init_queues();
 void init_semaphores();
 void init_context();
 void init_threads();
-void init_memory();
-void create_partitions_test();
 
 #endif

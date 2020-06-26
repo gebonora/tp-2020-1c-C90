@@ -5,8 +5,7 @@ set(CMAKE_C_STANDARD 11)
 
 # .h files
 include_directories(include)
-include_directories(/usr/include/delibird)
-
+include_directories(/usr/include/support)
 if(DEFINED CMAKE_LIBRARY_PATH)
     include_directories(${CMAKE_LIBRARY_PATH}/include)
     link_directories(${CMAKE_LIBRARY_PATH}/lib)

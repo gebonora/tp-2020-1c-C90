@@ -1,3 +1,4 @@
+/*
 #ifndef BROKER_INCLUDE_MEM_H_
 #define BROKER_INCLUDE_MEM_H_
 
@@ -7,10 +8,10 @@
 #include "mem_utils.h"
 #include <string.h>
 #include <stdbool.h>
+
 #include <commons/collections/list.h>
 #include <delibird/utils/tiempo/Tiempo.h>
 #include <delibird/interface.h>
-
 #define BUDDY_SYSTEM "BS"
 #define DYNAMIC_PARTITIONS "PARTICIONES"
 #define FIRST_FIT "FF"

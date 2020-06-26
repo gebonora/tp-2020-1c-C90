@@ -14,6 +14,7 @@
 #include "logger.h"
 #include "config.h"
 #include "server.h"
+#include "tests.h"
 
 
 #endif /* GAMECARD_INCLUDE_MAIN_H_ */

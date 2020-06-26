@@ -23,7 +23,7 @@ extern const struct EjemploPiolaClass {
     EjemploPiola (*new)(char * argConstruccion); // Si queremos un puntero agregar el * - EjemploPiola *(*new)(...);
 } EjemploPiolaConstructor;
 
-EjemploPiola ejemploPiola; // Agregar Si es que quiero hacerlo global (ej. servicios)s
+ManejadorDeEventos manejadorDeEventos;
 
 ```
 

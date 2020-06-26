@@ -17,6 +17,5 @@ typedef struct {
 void atenderPedidoBroker(PedidoGameBoy pedidoGameBoy, t_log * logger);
 Operation get_operation(char*);
 void listen_messages(socket_with_logger* swl);
-void listen_messages_test(socket_with_logger* swl);
 
 #endif //GAMEBOY_CONTROLADORBROKER_H

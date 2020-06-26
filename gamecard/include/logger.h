@@ -10,11 +10,15 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <pthread.h>
+
 #include <commons/string.h>
 #include <commons/log.h>
 #include <commons/config.h>
+
 #include <delibird/interface.h>
-#include <pthread.h>
+
+#include "server.h"
 
 t_log* loggerMain;
 t_log* loggerNew;
@@ -27,10 +31,17 @@ pthread_mutex_t m_loggerCatch;
 pthread_mutex_t m_loggerGet;
 
 void iniciarLoggers();
+void cerrarLoggers();
 
 void logearNewRecibido(New* unNew, uint32_t idMensaje);
 void logearCatchRecibido(Pokemon* unPokemon, uint32_t idMensaje);
 void logearGetRecibido(Get* unGet, uint32_t idMensaje);
+
+void logearAppearedProcesado(Pokemon* unAppeared, uint32_t idMensaje);
+void logearCaughtProcesado(Caught* unCaught, uint32_t idMensaje);
+void logearLocalizedProcesado(Localized* unLocalized, uint32_t idMensaje);
+
+char* logCoordenadas(t_list* listaCoor);
 
 #define PATH_LOGGER_MAIN "logs/loggerMain.log"
 #define PATH_LOGGER_NEW "logs/loggerNew.log"
