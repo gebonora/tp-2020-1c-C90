@@ -29,7 +29,7 @@ typedef struct Entrenador {
     // Interfaz publica
     bool (*objetivoCompletado)(struct Entrenador * this); // Es true si pokemones_objetivo es igual a pokemones_capturados.
     bool (*puedeAtraparPokemones)(struct Entrenador * this); // Es true si es < a limiteDeCaptura.
-    Coordinate (*posicion)(struct Entrenador * this); // Le pregunta al mapa donde esta, pasandole su uuid.
+    Posicion (*posicion)(struct Entrenador * this); // Le pregunta al mapa donde esta, pasandole su uuid.
     void (*destruir)(struct Entrenador * this);
 } Entrenador;
 
@@ -38,7 +38,6 @@ extern const struct EntrenadorClass {
 } EntrenadorConstructor;
 
 // Funciones estaticas
-Coordinate parsearPosicion(char * posicion); // Toma '1|2' y devuelve las coordenadas (1,2)
 ContadorPokemones agruparPokemonesPorNombre(char * nombreDeLosPokemones);
 int totalDePokemones(ContadorPokemones contadorPokemones); // Nos dice cuantos hay en el contador
 

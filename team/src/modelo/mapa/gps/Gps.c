@@ -4,7 +4,7 @@
 
 #include "modelo/mapa/gps/Gps.h"
 
-Coordinate posicionActual(Gps * this) {
+Posicion posicionActual(Gps * this) {
     Mapa * mapa = this->mapa;
     return mapa->obtenerPosicion(mapa, this->uuid);
 }

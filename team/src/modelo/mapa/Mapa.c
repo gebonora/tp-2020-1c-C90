@@ -5,7 +5,7 @@
 #include "modelo/mapa/Mapa.h"
 
 char * registrarPosicion(Mapa * this, Coordinate posicion, TipoPosicionable tipoPosicionable) {
-    char * posicionComoClave = coordenadaImprimible(posicion);
+    char * posicionComoClave = coordenadaClave(posicion);
     Presencia * presencia = crearPresencia(tipoPosicionable);
     if (dictionary_has_key(this->plano, posicionComoClave)) {
         Casilla casilla = dictionary_get(this->plano, posicionComoClave);
@@ -20,9 +20,25 @@ char * registrarPosicion(Mapa * this, Coordinate posicion, TipoPosicionable tipo
     return presencia->uuid;
 }
 
-Coordinate obtenerPosicion(Mapa * this, char * uuid) {
-    Coordinate coordinate = {.pos_x = 0, .pos_y = 0};
-    return coordinate;
+Posicion obtenerPosicion(Mapa * this, char * uuid) {
+    Posicion posicion = {.valida=false};
+
+    bool mismoUUID(void * _posiblePresencia) {
+        Presencia * posiblePresencia = _posiblePresencia;
+        return string_equals(posiblePresencia->uuid, uuid);
+    }
+
+    void posicionTienePresenciaConMismoUUID(char * coordenadaClave, void * casilla) {
+        Presencia * posiblePresencia = list_find(casilla, mismoUUID);
+        if (posiblePresencia != NULL) {
+            posicion.valida=true;
+            posicion.coordenada = convertirClaveACoordenada(coordenadaClave);
+        }
+    }
+
+    dictionary_iterator(this->plano, posicionTienePresenciaConMismoUUID);
+
+    return posicion;
 }
 
 static void destruir(Mapa *this) {
@@ -81,6 +97,24 @@ char * nombreTipoPosicionable(TipoPosicionable posicionable) {
     }
 }
 
-char * coordenadaImprimible(Coordinate posicion) {
+char * coordenadaClave(Coordinate posicion) {
     return string_from_format("(%u,%u)", posicion.pos_x, posicion.pos_y);
+}
+
+Coordinate parsearPosicion(char * posicion, char * separador) {
+    char ** punto = string_n_split(posicion, 2, separador);
+    Coordinate coordenada = {.pos_x=atoi(punto[0]), .pos_y=atoi(punto[1])};
+
+    free(punto[0]);
+    free(punto[1]);
+    free(punto);
+
+    return coordenada;
+}
+
+Coordinate convertirClaveACoordenada(char * coordenadaImprimible) {
+    char * posicion = string_substring(coordenadaImprimible, 1, string_length(coordenadaImprimible) - 2);
+    Coordinate coordenada = parsearPosicion(posicion, ",");
+    free(posicion);
+    return coordenada;
 }

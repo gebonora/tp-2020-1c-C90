@@ -22,17 +22,13 @@ void testDeIntegracion() {
     Mapa mapita = MapaConstructor.new();
     Entrenador * entrenadorARegistrar = EntrenadorConstructor.new("3|3", "A", "B");
 
-    registrarEnMapaPosicionEntrenador(&mapita, entrenadorARegistrar);
+    char * uuidRegistro = registrarEnMapaPosicionEntrenador(&mapita, entrenadorARegistrar);
+    Posicion posicionDelEntrenadorRegistrado = entrenadorARegistrar->posicion(entrenadorARegistrar);
 
-    Coordinate posicionDelEntrenadorRegistrado = entrenadorARegistrar->posicion(entrenadorARegistrar);
-
-    //TODO: Esta logica va a desaparecer cuando mapa.obtenerPosicion(uuid) se concrete. Por dentro va a hacer esto.
-    Casilla casilla = dictionary_get(mapita.plano, "(3,3)");
-    Presencia * presencia = list_get(casilla, 0);
-    assert(string_equals(presencia->uuid, entrenadorARegistrar->gps->uuid));
-    //TODO: Hacer que sean coordenadas posta (3,3)
-    assert(posicionDelEntrenadorRegistrado.pos_x == 0);
-    assert(posicionDelEntrenadorRegistrado.pos_y == 0);
+    assert(string_equals(uuidRegistro, entrenadorARegistrar->gps->uuid));
+    assert(posicionDelEntrenadorRegistrado.valida == true);
+    assert(posicionDelEntrenadorRegistrado.coordenada.pos_x == 3);
+    assert(posicionDelEntrenadorRegistrado.coordenada.pos_y == 3);
 
     entrenadorARegistrar->destruir(entrenadorARegistrar);
     mapita.destruir(&mapita);

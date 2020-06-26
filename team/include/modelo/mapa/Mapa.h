@@ -7,6 +7,7 @@
 
 #include "app/Global.h"
 #include "delibird/utils/random/Random.h"
+#include "delibird/utils/strings/ExtensionStrings.h"
 
 /**
  * Aca llevamos cuenta de la posicion de los entes del tp que utilicen coordenadas.
@@ -32,13 +33,18 @@ typedef struct Presencia {
     TipoPosicionable tipoPosicionable;
 } Presencia;
 
+typedef struct Posicion {
+    bool valida;
+    Coordinate coordenada;
+} Posicion;
+
 typedef struct Mapa {
     t_log * logger;
     Plano plano;
     // Interfaz publica
     // hayPokemonesAtrapables() : bool - Es true si hay pokemones para atrapar.
     char * (*registrarPosicion)(struct Mapa * this, Coordinate posicion, TipoPosicionable tipoPosicionable);
-    Coordinate (*obtenerPosicion)(struct Mapa * this, char * uuid); // Si le paso un uuid me dice en que (x,y) se encuentra.
+    Posicion (*obtenerPosicion)(struct Mapa * this, char * uuid); // Si le paso un uuid me dice en que (x,y) se encuentra.
     void (*destruir)(struct Mapa * this);
 } Mapa;
 
@@ -52,8 +58,10 @@ Plano crearPlano();
 Casilla crearCasilla();
 void destruirCasilla(Casilla casilla);
 void destruirPresencia(Presencia * presencia);
-char * coordenadaImprimible(Coordinate posicion);
 char * nombreTipoPosicionable(TipoPosicionable posicionable);
+char * coordenadaClave(Coordinate posicion); // Toma Coordinate => '(1,2)' que funciona como clave del mapa/plano.
+Coordinate convertirClaveACoordenada(char * coordenadaImprimible); // Toma '(1,2)' y devuelve Coordinate
+Coordinate parsearPosicion(char * coordenadaImprimible, char * separador);  // Toma '1|2' y separador => Coordinate
 
 Mapa mapaProcesoTeam;
 

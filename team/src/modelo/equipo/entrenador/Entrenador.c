@@ -32,7 +32,7 @@ bool puedeAtraparPokemones(Entrenador * this) {
     return totalDePokemones(this->pokemonesCapturados) < this->limiteDeCaptura;
 }
 
-Coordinate posicion(Entrenador * this) {
+Posicion posicion(Entrenador * this) {
     Gps * gps = this->gps;
     return gps->posicionActual(gps);
 }
@@ -53,7 +53,7 @@ static Entrenador *new(char * posicionInicial, char * pokemonesIniciales, char *
 
     entrenador->logger = log_create(TEAM_INTERNAL_LOG_FILE, "Entrenador", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_INFO);
     entrenador->gps = NULL;
-    entrenador->posicionInicial = parsearPosicion(posicionInicial);
+    entrenador->posicionInicial = parsearPosicion(posicionInicial, "|");
     entrenador->tipoPosicionable = ENTRENADOR;
     entrenador->pokemonesCapturados = agruparPokemonesPorNombre(pokemonesIniciales);
     entrenador->pokemonesObjetivo = agruparPokemonesPorNombre(pokemonesObjetivos);
@@ -69,17 +69,6 @@ static Entrenador *new(char * posicionInicial, char * pokemonesIniciales, char *
 const struct EntrenadorClass EntrenadorConstructor = {.new=&new};
 
 // Funciones estaticas
-Coordinate parsearPosicion(char * posicion) {
-    char ** punto = string_n_split(posicion, 2, "|");
-    Coordinate coordenada = {.pos_x=atoi(punto[0]), .pos_y=atoi(punto[1])};
-
-    free(punto[0]);
-    free(punto[1]);
-    free(punto);
-
-    return coordenada;
-}
-
 ContadorPokemones agruparPokemonesPorNombre(char * nombresDeLosPokemones) {
     ContadorPokemones contador = dictionary_create();
 
