@@ -5,6 +5,8 @@ static uint32_t buddy_of(Partition*);
 
 void save_to_cache_buddy_system(void* data, Message* message) {
 
+	//MAX(next_power_of_2(message->data_size));
+
 }
 
 Partition* get_buddy(Partition* partition) {

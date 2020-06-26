@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 #define MAX(x, y) ((x) >= (y)) ? (x) : (y)
+#define MAX_PARTITION_SIZE(x) MAX(x, TAMANO_MINIMO_PARTICION)
 
 unsigned int next_power_of_2(unsigned int);
 uint32_t xor_int_and_int(uint32_t, uint32_t);
