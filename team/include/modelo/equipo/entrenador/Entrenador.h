@@ -11,6 +11,7 @@
 #include "delibird/utils/memoria/Memoria.h"
 #include "delibird/utils/colecciones/ExtensionColecciones.h"
 #include "modelo/mapa/gps/Gps.h"
+#include "modelo/mapa/coordenadas/UtilidadesCoordenadas.h"
 
 /**
  * El entrenador se mueve y caza pokemones. La idea es llevar ese registro acá.

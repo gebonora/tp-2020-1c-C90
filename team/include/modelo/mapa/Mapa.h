@@ -8,6 +8,7 @@
 #include "app/Global.h"
 #include "delibird/utils/random/Random.h"
 #include "delibird/utils/strings/ExtensionStrings.h"
+#include "modelo/mapa/coordenadas/UtilidadesCoordenadas.h"
 
 /**
  * Aca llevamos cuenta de la posicion de los entes del tp que utilicen coordenadas.
@@ -59,10 +60,6 @@ Casilla crearCasilla();
 void destruirCasilla(Casilla casilla);
 void destruirPresencia(Presencia * presencia);
 char * nombreTipoPosicionable(TipoPosicionable posicionable);
-char * coordenadaClave(Coordinate posicion); // Toma Coordinate => '(1,2)' que funciona como clave del mapa/plano.
-Coordinate convertirClaveACoordenada(char * coordenadaImprimible); // Toma '(1,2)' y devuelve Coordinate
-Coordinate parsearPosicion(char * coordenadaImprimible, char * separador);  // Toma '1|2' y separador => Coordinate
-
 Mapa mapaProcesoTeam;
 
 #endif //TEAM_MAPA_H
