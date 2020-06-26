@@ -105,8 +105,8 @@ void init_memory() {
 	*/
 
 	// PRUEBA SEBA LRU
-	create_partitions_test();
-	show_memory_partitions();
+	//create_partitions_test();
+	//show_memory_partitions();
 	//log_info(LOGGER, "==============OCUPPIED============");
 	//t_list* occupied_partitions = get_occupied_partitions();
 	//show_partitions(occupied_partitions);
