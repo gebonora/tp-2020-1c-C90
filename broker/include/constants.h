@@ -87,6 +87,7 @@ typedef struct {
 	uint32_t size; // tamanio de particion
 	bool free; // si esta libre o no
 	uint32_t buddy; // numero de particion de su buddy
+	uint32_t creation_time;
 	uint32_t access_time; // timestamp del ultimo acceso a esta particion
 	Message* message; // datos administrativos del mensaje (id, id correlacional, cod op)
 	t_list* notified_suscribers; // suscriptores que ya devolvieron ACK para este mensaje
