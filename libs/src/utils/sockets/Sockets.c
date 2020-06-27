@@ -19,8 +19,8 @@ int crearSocketCliente(char* ip, char* puerto) {
 
 	int socketCliente = socket(server_info->ai_family, server_info->ai_socktype, server_info->ai_protocol);
 	if (connect(socketCliente, server_info->ai_addr, server_info->ai_addrlen) == -1) {
-		perror("Error al crear Socket Cliente");
 		socketCliente = -1;
+		perror("Error al crear Socket Cliente");
 	}
 
 	freeaddrinfo(server_info);

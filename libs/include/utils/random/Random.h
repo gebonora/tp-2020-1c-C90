@@ -8,6 +8,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <commons/string.h>
+#include <time.h>
+#include <linux/random.h>
 
 char * generateUUID();
 

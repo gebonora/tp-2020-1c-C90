@@ -4,18 +4,18 @@
 
 #include "utils/random/Random.h"
 
-/*
- * La precondicion es que el cliente haya inicializado una semilla con srandom(seed), sino no funca.
- */
-char * generateUUID(int length) {
-    length = abs(length);
+char * generateUUID() {
     char * uuid = string_new();
+    int length = 30;
+    srand(time(0));
+
     char charset[] = "0123456789"
                      "abcdefghijklmnopqrstuvwxyz"
                      "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                     "!$%&/()=-_.,^[]*?";
+                     "!$%&/()=";
+
     while (length-- > 0) {
-        size_t index = (double) random() / RAND_MAX * (sizeof charset - 1);
+        size_t index = (double) rand() / RAND_MAX * (sizeof charset - 1);
         char * caracter = string_from_format("%c", charset[index]);
         string_append(&uuid, caracter);
         free(caracter);

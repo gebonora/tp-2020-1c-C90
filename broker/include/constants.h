@@ -14,7 +14,16 @@
 #include <semaphore.h>
 #include <stdbool.h>
 #include <delibird/protocol.h>
+#include "arithmetic.h"
 #include "broker.h"
+
+#define LOGGER_PATH "/home/utnso/tp-2020-1c-C90/broker/logs/server.log"
+#define BUDDY_SYSTEM "BS"
+#define DYNAMIC_PARTITIONS "PARTICIONES"
+#define FIRST_FIT "FF"
+#define BEST_FIT "BF"
+#define FIFO "FIFO"
+#define LRU "LRU"
 
 char* IP;
 char* PUERTO;
@@ -72,23 +81,27 @@ typedef struct {
 } Suscriber;
 
 typedef struct {
-	uint32_t* start; // puntero de la memoria cache
+	uint32_t position; // posicion relativa dentro de la cache
+	uintptr_t start; // puntero de la memoria cache
 	uint32_t number; // numero de particion
-	uint32_t partition_size; // tamanio de particion
+	uint32_t size; // tamanio de particion
 	bool free; // si esta libre o no
 	uint32_t buddy; // numero de particion de su buddy
-	double access_time; // timestamp del ultimo acceso a esta particion
+	uint32_t creation_time;
+	uint32_t access_time; // timestamp del ultimo acceso a esta particion
 	Message* message; // datos administrativos del mensaje (id, id correlacional, cod op)
 	t_list* notified_suscribers; // suscriptores que ya devolvieron ACK para este mensaje
 } Partition;
 
 Memory* memory;
 
-void init_memory();
+void init_logger();
 void init_config();
 void init_queues();
 void init_semaphores();
 void init_context();
 void init_threads();
+void init_memory();
+void create_partitions_test();
 
 #endif

@@ -56,6 +56,7 @@ void free_localized(Localized*);
 
 // CAUGHT
 void* serialize_caught(Caught*, int);
+int calculate_caught_bytes();
 int send_caught(Caught*, int);
 Caught* recv_caught(int);
 Caught* create_caught_pokemon(uint32_t);

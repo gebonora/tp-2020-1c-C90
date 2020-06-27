@@ -4,7 +4,6 @@
  *  Created on: 20 abr. 2020
  *      Author: GONZALO BONORA
  */
-
 #include "logger.h"
 
 void iniciarLoggers() {
