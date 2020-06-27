@@ -1,12 +1,48 @@
 #include "mem_utils.h"
 
-Message* create_message(Operation operation, uint32_t message_id, uint32_t correlational_id, uint32_t data_size) {
-	Message* message = malloc(sizeof(Message));
-	message->operation_code = operation;
-	message->message_id = message_id;
-	message->correlational_id = correlational_id;
-	message->data_size = data_size;
-	return message;
+static Partition* _choose_victim(bool(*condition)(void*));
+static bool _is_occupied(Partition*);
+static bool _less_access_time(Partition*, Partition*);
+static bool _less_creation_time(Partition*, Partition*);
+static t_list* _get_occupied_partitions();
+
+
+// TODO: ver si lo movemos
+t_list* get_occupied_partitions();
+t_list* get_sorted_partitions();
+
+// TODO: tiene que exponerse, chau static
+
+
+// siempre que mato una particion, tengo que consolidar, siempre
+Partition* choose_victim() {
+	if(string_equals_ignore_case(ALGORITMO_REEMPLAZO, FIFO)) {
+		return _choose_victim(&_less_creation_time);
+	} else {
+		return _choose_victim(&_less_access_time);
+	}
+}
+
+static Partition* _choose_victim(bool(*condition)(void*)) {
+	t_list* occupied_partitions = list_sorted(_get_occupied_partitions(memory->partitions), &condition);
+	return list_get(occupied_partitions, 0);
+}
+
+
+static bool _is_occupied(Partition* partition) {
+	return !partition->free;
+}
+
+static bool _less_access_time(Partition* partition_a, Partition* partition_b) {
+	return partition_a->access_time < partition_b->access_time;
+}
+
+static bool _less_creation_time(Partition* partition_a, Partition* partition_b) {
+	return partition_a->creation_time < partition_b->creation_time;
+}
+
+static t_list* _get_occupied_partitions() {
+	return list_filter(memory->partitions, &_is_occupied);
 }
 
 Partition* create_partition(uint32_t partition_number, uint32_t partition_size, uint32_t* partition_start, uint32_t position, Message* message) {
