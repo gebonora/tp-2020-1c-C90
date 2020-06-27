@@ -14,6 +14,14 @@ void testDeIntegracion() {
     assert(entrenador->puedeAtraparPokemones(entrenador) == true);
     assert(entrenador2->objetivoCompletado(entrenador2) == true);
     assert(entrenador2->puedeAtraparPokemones(entrenador2) == false);
+    assert((int) dictionary_get(entrenador->pokemonesCapturados, "A") == 1);
+    assert((int) dictionary_get(entrenador->pokemonesCapturados, "B") == 1);
+    assert((int) dictionary_get(entrenador->pokemonesObjetivo, "A") == 1);
+    assert((int) dictionary_get(entrenador->pokemonesObjetivo, "D") == 2);
+    assert((int) dictionary_get(entrenador2->pokemonesCapturados, "A") == 1);
+    assert((int) dictionary_get(entrenador2->pokemonesCapturados, "B") == 1);
+    assert((int) dictionary_get(entrenador2->pokemonesObjetivo, "A") == 1);
+    assert((int) dictionary_get(entrenador2->pokemonesObjetivo, "B") == 1);
 
     entrenador->destruir(entrenador);
     entrenador2->destruir(entrenador2);
