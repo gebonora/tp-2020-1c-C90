@@ -19,6 +19,8 @@ static void _save_to_cache(void* data, Message* message) {
 	} else {
 		save_to_cache_dynamic_partitions(data, message);
 	}
+
+	// TODO: luego de esto deberia avisarle al sem de la operacion que hay un data nuevo para consumir
 }
 
 static Message* _create_message(Operation operation, uint32_t message_id, uint32_t correlational_id, uint32_t data_size) {
