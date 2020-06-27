@@ -16,5 +16,9 @@
 #include "modelo/objetivo/ObjetivoGlobal.h"
 
 void testDeIntegracion();
+void testDeEntrenadores();
+void testDeMapa();
+void testDePlanificacion();
+void testDeEventos();
 
 #endif //TEAM_TESTDEINTEGRACION_H

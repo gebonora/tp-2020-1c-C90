@@ -5,9 +5,20 @@
 #include "test/TestDeIntegracion.h"
 
 void testDeIntegracion() {
-    //TODO: Separar en llamadas a varios tests
-
     // Entrenadores
+    testDeEntrenadores();
+
+    // Mapa
+    testDeMapa();
+
+    // Planificacion
+    testDePlanificacion();
+
+    // Eventos
+    testDeEventos();
+}
+
+void testDeEntrenadores() {
     Entrenador * entrenador = EntrenadorConstructor.new("1|2", "A|B", "A|C|C");
     Entrenador * entrenador2 = EntrenadorConstructor.new("2|4", "A|B", "A|B");
 
@@ -43,8 +54,9 @@ void testDeIntegracion() {
 
     destruirEquipo(equipito);
     objetivo.destruirObjetivoGlobal(&objetivo);
+}
 
-    // Mapa
+void testDeMapa() {
     Mapa mapita = MapaConstructor.new();
     Entrenador * entrenadorARegistrar = EntrenadorConstructor.new("3|3", "A", "B");
 
@@ -58,8 +70,9 @@ void testDeIntegracion() {
 
     entrenadorARegistrar->destruir(entrenadorARegistrar);
     mapita.destruir(&mapita);
+}
 
-    // Planificacion
+void testDePlanificacion() {
     AlgoritmoPlanificador miAlgoritmo = obtenerAlgoritmo("FIFO");
     t_list * listaReady = list_create();
     Entrenador * entrenadorPiola = EntrenadorConstructor.new("1|2", "A|B", "A|D|D");
@@ -69,9 +82,10 @@ void testDeIntegracion() {
     miAlgoritmo.destruir(&miAlgoritmo);
     entrenadorPiola->destruir(entrenadorPiola);
     list_destroy_and_destroy_elements(listaReady, (void (*)(void *)) hiloEntrenadorPlanificable->destruir);
+}
 
-    // Eventos
-    manejadorDeEventos = ManejadorDeEventosConstructor.new();
-    manejadorDeEventos.notificarEventoLocalized(&manejadorDeEventos);
-    manejadorDeEventos.destruir(&manejadorDeEventos);
+void testDeEventos() {
+    ManejadorDeEventos manejadorDeEventosTest = ManejadorDeEventosConstructor.new();
+    manejadorDeEventosTest.notificarEventoLocalized(&manejadorDeEventos);
+    manejadorDeEventosTest.destruir(&manejadorDeEventos);
 }
