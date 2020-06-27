@@ -132,7 +132,8 @@ bool menorTamanio(Partition* partition_1, Partition* partition_2) {
 // 4) devolvemos la particion encontrada o un NULL si no encontre ninguna
 
 // first . filter(free && tamanio>=tamanioABuscar)
-Partition* find_partition(uint32_t tamanioABuscar) {
+
+Partition* find_partition_dynamic(uint32_t tamanioABuscar) {
 
 	t_list* partitions = _get_filtered_partitions(tamanioABuscar);
 

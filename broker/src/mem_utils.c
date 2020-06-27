@@ -8,6 +8,19 @@ static t_list* _get_occupied_partitions();
 static void _show_partition(Partition*);
 static void _show_message(Message*);
 static bool _greater_equals_and_free(uint32_t, Partition*);
+static Partition* _find_partition(int, bool);
+static t_list* greater_equals_and_free(uint32_t);
+static bool _smaller_size(Partition*, Partition*);
+
+/** PUBLIC FUNCTIONS **/
+
+Partition* find_partition(int size_to_fit) {
+	if(string_equals_ignore_case(ALGORITMO_PARTICION_LIBRE, FIRST_FIT)) {
+		return _find_partition(size_to_fit, false);
+	} else {
+		return _find_partition(size_to_fit, true);
+	}
+}
 
 Partition* choose_victim() {
 	if(string_equals_ignore_case(ALGORITMO_REEMPLAZO, FIFO)) {
@@ -15,13 +28,6 @@ Partition* choose_victim() {
 	} else {
 		return _choose_victim(&_less_access_time);
 	}
-}
-
-t_list* greater_equals_and_free(uint32_t size_to_compare) {
-	bool _inline_greater_equals_and_free(Partition* partition) {
-		return _greater_equals_and_free(size_to_compare, partition);
-	}
-	return list_filter(memory->partitions, &_inline_greater_equals_and_free);
 }
 
 Partition* create_partition(uint32_t partition_number, uint32_t partition_size, uint32_t* partition_start, uint32_t position, Message* message) {
@@ -50,6 +56,23 @@ void show_memory_partitions() {
 }
 
 /** PRIVATE FUNCTIONS **/
+
+static Partition* _find_partition(int desired_size, bool best) {
+	t_list* potential_partitions = greater_equals_and_free(desired_size);
+	if(best) list_sort(potential_partitions, &_smaller_size);
+	return list_get(potential_partitions, 0);
+}
+
+static t_list* greater_equals_and_free(uint32_t size_to_compare) {
+	bool _inline_greater_equals_and_free(Partition* partition) {
+		return _greater_equals_and_free(size_to_compare, partition);
+	}
+	return list_filter(memory->partitions, &_inline_greater_equals_and_free);
+}
+
+static bool _smaller_size(Partition* partition_1, Partition* partition_2) {
+	return partition_1->size < partition_2->size;
+}
 
 static void _show_partition(Partition* partition) {
 	log_info(LOGGER, "Partition #%d", partition->number);

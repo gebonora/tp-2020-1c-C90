@@ -16,32 +16,10 @@ static Partition* _break_buddys(Partition*, uint32_t);
 void save_to_cache_buddy_system(void* data, Message* message) {
 	int desired_size = MAX_PARTITION_SIZE(next_power_of_2(message->data_size));
 
-	Partition* partition = _find_partition_buddy(desired_size);
+	Partition* partition = find_partition(desired_size);
 
-	while(partition == NULL) {
-		Partition* victim = choose_victim();
-		_consolidate_buddy(victim);
-		partition = _find_partition_buddy(desired_size);
-	}
-
-	Partition* where_to_save_data = _break_buddys(partition, message->data_size);
-
-	// guardo el data con el memcpy
-	// guardo el message
-	partition->message = message;
-}
-
-/** PRIVATE FUNCTIONS **/
-
-// si nos confirman en el foro que siempre es "BF", podemos reutilizar el find para dinamicas y buddy
-// por configuracion de archivo siempre vamos a tener "BF"
-static Partition* _find_partition_buddy(int desired_size) {
-	t_list* potential_partitions = greater_equals_and_free(desired_size);
-
-	/*
-
+/*
 	if(partitionss->elements_count > 0) {
-		list_sort(partitionss, menorTamanio);
 		// ROMPER LA PARTICION en Buddys
 		// tamanio particion encontrada == tamanioAGuardar -> devuelvo asi
 		// tamanio particion encontrada >  tamanioAGuardar -> divido_en_2 hasta que tengo el buddy de la pot2 buscada
@@ -56,7 +34,21 @@ static Partition* _find_partition_buddy(int desired_size) {
 		return NULL;
 	}
 	*/
+
+	while(partition == NULL) {
+		Partition* victim = choose_victim();
+		_consolidate_buddy(victim);
+		partition = find_partition(desired_size);
+	}
+
+	Partition* where_to_save_data = _break_buddys(partition, message->data_size);
+
+	// guardo el data con el memcpy
+	// guardo el message
+	partition->message = message;
 }
+
+/** PRIVATE FUNCTIONS **/
 
 // para compactar tiene que cumplir: el tipo esta libre + su buddy esta libre + su buddy es del mismo tamanio
 // y hacer recursivo hasta que no puedo compactar ma
