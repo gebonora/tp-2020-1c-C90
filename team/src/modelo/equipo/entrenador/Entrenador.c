@@ -5,7 +5,7 @@
 #include "modelo/equipo/entrenador/Entrenador.h"
 
 bool objetivoCompletado(Entrenador * this) {
-    t_list * pokemones = (t_list *) keys(this->pokemonesObjetivo);
+    t_list * pokemones = (t_list *) dictionary_keys(this->pokemonesObjetivo);
 
     int i = 0;
     bool fueCompletado = true;

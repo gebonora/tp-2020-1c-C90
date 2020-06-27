@@ -5,7 +5,7 @@
 #include "modelo/objetivo/ObjetivoGlobal.h"
 
 t_list * especiesNecesarias(ObjetivoGlobal * this) {
-    return (t_list *) keys(this->contabilidadEspecies);
+    return (t_list *) dictionary_keys(this->contabilidadEspecies);
 }
 
 bool puedeCapturarse(ObjetivoGlobal * this, char * especiePokemon) {
