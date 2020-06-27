@@ -3,8 +3,8 @@
 
 #include <stdint.h>
 
-#define MAX(x, y) ((x) >= (y)) ? (x) : (y)
-#define MAX_PARTITION_SIZE(x) MAX(x, TAMANO_MINIMO_PARTICION)
+#define MIN(x, y) ((x) < (y)) ? (x) : (y)
+#define MAX(x, y) ((x) > (y)) ? (x) : (y)
 
 uint32_t next_power_of_2(uint32_t);
 uint32_t xor_int_and_int(uint32_t, uint32_t);
