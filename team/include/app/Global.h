@@ -14,6 +14,12 @@
 #include "delibird/protocol.h"
 #include "delibird/interface.h"
 
+// Configuración de ambiente -> Acá definimos las de la entrega -> En el CMake se sobreescriben para desarrollo.
+#ifndef TEAM_DEVELOPMENT_MODE
+#define INTERNAL_LOG_LEVEL LOG_LEVEL_INFO
+#define SHOW_INTERNAL_CONSOLE 0 // 1 para mostrar la consola de uso interno, 0 para el caso contrario.
+#define CORRER_TESTS 0
+#endif //TEAM_DEVELOPMENT_MODE
 
 // Paths a archivos
 #define TEAM_CONFIG_FILE "config/team.config"
@@ -35,11 +41,7 @@
 #define IP_TEAM_GAMEBOY "IP_TEAM_GAMEBOY"
 #define PUERTO_TEAM_GAMEBOY "PUERTO_TEAM_GAMEBOY"
 
-// Constantes
-#define SHOW_INTERNAL_CONSOLE 1 // Setear en 1 para mostrar la consola de uso interno. Dejar en 0 para la entrega.
-
-//mutex de los recursos compartidos
-
+// Mutex de los recursos compartidos
 pthread_mutex_t MTX_INTERNAL_LOG;
 
 // Variables globales

@@ -16,7 +16,7 @@ t_list * list_from(void ** array) {
     return lista;
 }
 
-t_list * keys(t_dictionary * dict) {
+t_list * dictionary_keys(t_dictionary * dict) {
     t_list * claves = list_create();
 
     void obtenerClaves(char * clave, void * valor) {
