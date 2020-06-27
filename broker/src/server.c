@@ -1,5 +1,10 @@
 #include "server.h"
 
+// TODO: ver si las podemos pasar a static privaditas
+void esperar_cliente(int);
+void process_request(int, int);
+void serve_client(int);
+
 void init_server() {
 	int socket_servidor;
 
