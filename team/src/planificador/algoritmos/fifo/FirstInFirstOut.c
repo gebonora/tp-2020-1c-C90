@@ -10,7 +10,7 @@ static UnidadPlanificable * proximoAEjecutar(AlgoritmoPlanificador * this, t_lis
         return NULL;
     } else {
         UnidadPlanificable * unindadProximaAEjecutar = list_get(listaReady, 0);
-        log_info(this->logger, "Proxima unidad planificable a ejecutar seleccionada con éxito");
+        log_debug(this->logger, "Proxima unidad planificable a ejecutar seleccionada con éxito");
         return unindadProximaAEjecutar;
     }
 }
@@ -21,7 +21,7 @@ static void destruir(AlgoritmoPlanificador * this) {
 
 static AlgoritmoPlanificador new() {
     return (AlgoritmoPlanificador) {
-            .logger = log_create(TEAM_INTERNAL_LOG_FILE, "AlgoritmoFifo", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_INFO),
+            .logger = log_create(TEAM_INTERNAL_LOG_FILE, "AlgoritmoFifo", SHOW_INTERNAL_CONSOLE, INTERNAL_LOG_LEVEL),
             .tipo = FIFO,
             &proximoAEjecutar,
             &destruir

@@ -18,7 +18,7 @@ void destruirGps(Gps * this) {
 static Gps * new(Mapa * mapaDeRegistro, char * uuid) {
     Gps * gps = malloc(sizeof(Gps));
 
-    gps->logger = log_create(TEAM_INTERNAL_LOG_FILE, "Gps", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_INFO);
+    gps->logger = log_create(TEAM_INTERNAL_LOG_FILE, "Gps", SHOW_INTERNAL_CONSOLE, INTERNAL_LOG_LEVEL);
     gps->uuid = uuid;
     gps->mapa = mapaDeRegistro;
     gps->posicionActual = &posicionActual;

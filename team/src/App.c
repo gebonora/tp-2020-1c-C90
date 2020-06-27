@@ -1,11 +1,8 @@
 #include "app/App.h"
 
 int main() {
-    INTERNAL_LOGGER = log_create(TEAM_INTERNAL_LOG_FILE, "Team.app", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_INFO);
-    mostrarTitulo(INTERNAL_LOGGER);
-    if (SHOW_INTERNAL_CONSOLE) {
-        log_warning(INTERNAL_LOGGER, "Logs de uso interno por consola activado. Recordar desactivarlo para la entrega.");
-    }
+    // Precalentamiento
+    warmUp();
     log_info(INTERNAL_LOGGER, "========================= Inicio de ejecución ============================");
 
     // Config
@@ -22,8 +19,10 @@ int main() {
     inicializarComponentesDelSistema();
 
     // Reservado a pruebas de integracion. Si logica de negocio rompe, explota el programa aca.
-    log_info(INTERNAL_LOGGER, "Realizando pruebas de integracion antes de comenzar...");
-    testDeIntegracion();
+    if (CORRER_TESTS) {
+        log_info(INTERNAL_LOGGER, "Realizando pruebas de integracion...");
+        testDeIntegracion();
+    }
 
     // Estado inicial del proceso Team
     log_info(INTERNAL_LOGGER, "Configurando el estado inicial del proceso Team...");
@@ -48,6 +47,18 @@ int main() {
     return 0;
 }
 
+void warmUp() {
+    INTERNAL_LOGGER = log_create(TEAM_INTERNAL_LOG_FILE, "Team.app", SHOW_INTERNAL_CONSOLE, INTERNAL_LOG_LEVEL);
+    mostrarTitulo(INTERNAL_LOGGER);
+    if (SHOW_INTERNAL_CONSOLE) {
+        log_warning(INTERNAL_LOGGER, "Logs de uso interno por consola activado. Recordar desactivarlo para la entrega.");
+    }
+    log_warning(INTERNAL_LOGGER, "Nivel de log interno configurado: %s", log_level_as_string(INTERNAL_LOG_LEVEL));
+    if (CORRER_TESTS) {
+        log_warning(INTERNAL_LOGGER, "Pruebas de integracion: ACTIVADAS");
+    }
+}
+
 void mostrarTitulo(t_log * logger) {
     char *title = "\n"
                   "====================================\n"
@@ -65,7 +76,7 @@ void mostrarTitulo(t_log * logger) {
 void inicializarComponentesDelSistema() {
     srandom(time(NULL));
     inicializarAlgoritmosDePlanificacion();
-    log_debug(INTERNAL_LOGGER, "Creando el terreno de captura");
+    log_debug(INTERNAL_LOGGER, "Creando el mapa de coordenadas...");
     mapaProcesoTeam = MapaConstructor.new();
     pthread_mutex_init(&MTX_INTERNAL_LOG, NULL); //TODO: por ahi conviene moverlo a configurarServer()
 }

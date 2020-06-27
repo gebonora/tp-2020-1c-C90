@@ -19,7 +19,7 @@ void destruirObjetivoGlobal(ObjetivoGlobal * this) {
 
 static ObjetivoGlobal new(Equipo equipo) {
     return (ObjetivoGlobal) {
-            .logger = log_create(TEAM_INTERNAL_LOG_FILE, "ObjetivoGlobal", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_INFO),
+            .logger = log_create(TEAM_INTERNAL_LOG_FILE, "ObjetivoGlobal", SHOW_INTERNAL_CONSOLE, INTERNAL_LOG_LEVEL),
             .contabilidadEspecies = calcularObjetivoEspecies(equipo),
             &especiesNecesarias,
             &puedeCapturarse,

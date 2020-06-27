@@ -12,6 +12,7 @@
 #include "modelo/objetivo/ObjetivoGlobal.h"
 #include "test/TestDeIntegracion.h"
 
+void warmUp();
 void mostrarTitulo(t_log * logger);
 void inicializarComponentesDelSistema();
 void configurarEstadoInicialProcesoTeam();

@@ -15,7 +15,7 @@ char * registrarPosicion(Mapa * this, Coordinate posicion, TipoPosicionable tipo
         list_add(casilla, presencia);
         dictionary_put(this->plano, posicionComoClave, casilla);
     }
-    log_info(this->logger, "Se registró un %s en la posición %s", nombreTipoPosicionable(tipoPosicionable), posicionComoClave);
+    log_debug(this->logger, "Se registró un %s en la posición %s", nombreTipoPosicionable(tipoPosicionable), posicionComoClave);
     free(posicionComoClave);
     return presencia->uuid;
 }
@@ -49,7 +49,7 @@ static void destruir(Mapa *this) {
 
 static Mapa new() {
     return (Mapa) {
-            .logger = log_create(TEAM_INTERNAL_LOG_FILE, "Mapa", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_INFO),
+            .logger = log_create(TEAM_INTERNAL_LOG_FILE, "Mapa", SHOW_INTERNAL_CONSOLE, INTERNAL_LOG_LEVEL),
             .plano = crearPlano(),
             &registrarPosicion,
             &obtenerPosicion,

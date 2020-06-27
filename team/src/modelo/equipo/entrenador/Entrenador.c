@@ -51,7 +51,7 @@ static void destruir(Entrenador * this) {
 static Entrenador *new(char * posicionInicial, char * pokemonesIniciales, char * pokemonesObjetivos) {
     Entrenador * entrenador = malloc(sizeof(Entrenador));
 
-    entrenador->logger = log_create(TEAM_INTERNAL_LOG_FILE, "Entrenador", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_INFO);
+    entrenador->logger = log_create(TEAM_INTERNAL_LOG_FILE, "Entrenador", SHOW_INTERNAL_CONSOLE, INTERNAL_LOG_LEVEL);
     entrenador->gps = NULL;
     entrenador->posicionInicial = parsearPosicion(posicionInicial, "|");
     entrenador->tipoPosicionable = ENTRENADOR;
@@ -62,6 +62,8 @@ static Entrenador *new(char * posicionInicial, char * pokemonesIniciales, char *
     entrenador->puedeAtraparPokemones = &puedeAtraparPokemones;
     entrenador->posicion = &posicion;
     entrenador->destruir = &destruir;
+
+    log_debug(entrenador->logger, "Se instanció un entrenador con pokemones iniciales: %s, y objetivos: %s", pokemonesIniciales, pokemonesObjetivos);
 
     return entrenador;
 }
