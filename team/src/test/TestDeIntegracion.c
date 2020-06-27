@@ -41,10 +41,17 @@ void testDeEntrenadores() {
 
     ObjetivoGlobal objetivo = ObjetivoGlobalConstructor.new(equipito);
 
+    t_list * especiesNecesarias = objetivo.especiesNecesarias(&objetivo);
+
     ContabilidadEspecie * contabilidadEspecieA = dictionary_get(objetivo.contabilidadEspecies, "A");
     ContabilidadEspecie * contabilidadEspecieB = dictionary_get(objetivo.contabilidadEspecies, "B");
     ContabilidadEspecie * contabilidadEspecieC = dictionary_get(objetivo.contabilidadEspecies, "C");
 
+    assert(list_size(objetivo.especiesNecesarias(&objetivo)) == 3);
+    assert(objetivo.puedeCapturarse(&objetivo, "A") == false);
+    assert(objetivo.puedeCapturarse(&objetivo, "B") == false);
+    assert(objetivo.puedeCapturarse(&objetivo, "C") == true);
+    assert(objetivo.puedeCapturarse(&objetivo, "X") == false);
     assert(contabilidadEspecieA->necesarios == 2);
     assert(contabilidadEspecieA->capturados == 2);
     assert(contabilidadEspecieB->necesarios == 1);

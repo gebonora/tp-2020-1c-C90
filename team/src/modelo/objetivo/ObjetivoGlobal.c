@@ -5,14 +5,19 @@
 #include "modelo/objetivo/ObjetivoGlobal.h"
 
 t_list * especiesNecesarias(ObjetivoGlobal * this) {
-    return list_create();
+    return (t_list *) keys(this->contabilidadEspecies);
 }
 
 bool puedeCapturarse(ObjetivoGlobal * this, char * especiePokemon) {
-    return true;
+    if (dictionary_has_key(this->contabilidadEspecies, especiePokemon)) {
+        ContabilidadEspecie * contabilidadEspecie = dictionary_get(this->contabilidadEspecies, especiePokemon);
+        return contabilidadEspecie->necesarios > contabilidadEspecie->capturados;
+    }
+    return false;
 }
 
 void destruirObjetivoGlobal(ObjetivoGlobal * this) {
+    log_debug(this->logger, "Se procede a destruir el objetivo global");
     log_destroy(this->logger);
     dictionary_destroy_and_destroy_elements(this->contabilidadEspecies, free);
 }

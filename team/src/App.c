@@ -83,7 +83,7 @@ void inicializarComponentesDelSistema() {
 
 /**
     * Instanciar a los entrenadores a partir de la config - OK
-    * Armar el objetivo global - TODO
+    * Armar el objetivo global - OK
     * Armar los hilos de entrenador planificables - TODO
     * Enviar a los entrenadores a new - TODO
     * Finalmente, con el cliente broker a mano: Por cada pokemon del objetivo global, enviar un GET \[POKEMON\] - TODO
