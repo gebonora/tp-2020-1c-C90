@@ -13,6 +13,6 @@
 t_list * list_from(void ** array);
 
 // Diccionarios
-t_list * keys(t_dictionary * dict);
+t_list * dictionary_keys(t_dictionary * dict);
 
 #endif //DELIBIRD_EXTENSIONCOLECCIONES_H
