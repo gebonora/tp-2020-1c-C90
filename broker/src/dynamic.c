@@ -1,123 +1,13 @@
 #include "dynamic.h"
 
-/*
-void add_dynamic_partitions() {
-	Partition* particion = find_partition(tamanioQueQuieroGuardar);
-
-	if(partition != NULL) {
-		guardar_dato(dato);
-	} else {
-		if(FRECUENCIA_COMPACTACION != -1) {
-			incrementar_busquedas_fallidas();
-			if(cantidad_de_fallidas == FRECUENCIA_COMPACTACION) {
-				compactar();
-				 particion = find_partition(tamanioQueQuieroGuardar);
-				 if(partition != NULL) {
-					 guardar_dato(dato);
-				 } else {
-					 incrementar_busquedas_fallidas();
-					 choose_victim();
-				 }
-			} else {
-				incrementar_busquedas_fallidas();
-				 choose_victim();
-			}
-
-		} else {
-			choose_victim();
-			add_dynamic_partitions();
-		}
-	}
-}
-
+static bool _is_free(Partition*);
+static t_link_element* _list_find_element(t_list *self, bool(*condition)(void*), int* index);
 
 // cuando guardamos el dato, hay que setearle el access_time a la particion
 // devolver puntero a la particion
-guardar_dato(dato, particion) {
+void guardar_dato(dato, particion) {
 
 }
-
-// 1) filtramos las particiones libres que satisfacen el tamañoAGuardar
-// 2) buscamos la particion en base al algoritmo FF / BF
-// 3) si encontre una, la rompo si hace falta en 2 particiones (1 del tamanioQueVoyAGuardar)
-//  y la otra de lo que le quedo libre
-//  Ej: guardo 30, tengo libre una de 80 (nro 7)
-//  me queda -> particion a usar (nro 7) tamanio 30 + particion (nro8) tamanio 50
-//  // TODO: ver lo del tamanioMinioDeParticion
-// 4) devolvemos la particion encontrada o un NULL si no encontre ninguna
-
-// first . filter(free && tamanio>=tamanioABuscar)
-Partition* find_partition(tamanioABuscar) {
-
-	t_list* partitionss = list_filter(partitions, estaLireYTamanioMayorIgualQue(tamanioABuscar));
-
-	if(partitionss->elements_count > 0) {
-		if(strcmp(ALGORITMO_PARTICION_LIBRE, "BF")) {
-			list_sort(partitionss, menorTamanio);
-		}
-		// ROMPER LA PARTICION
-		// tamanio particion encontrada == tamanioAGuardar -> devuelvo asi
-		// tamanio particion encontrada >  tamanioAGuardar -> trunco particion encontrada y genero una nueva con el excedente
-		return list_get(partitionss, 0);
-	} else {
-		return NULL;
-	}
-}
-
-bool estaLibreYTamanioMayorIgualQue( , tamanioABuscar) {
-
-}
-
-bool menorTamanio(Partition* partition_1, Partition* partition_2) {
-	return partition_1->partition_size < partition_2->partition_size;
-}
-*/
-
-/*cantidad_de_fallidas es la cantidad de particiones libres que tengo en ese momento. Se reduce cuando consolido y guardo.
- *
- *
- */
-/*void add_dynamic_partitions(void* data, Message* message) {
-	uint32_t size_of_data = message->data_size;
-	Partition* partition = find_partition(size_of_data);
-
-	if(partition != NULL) {
-		partition->message = message;
-		guardar_dato(data);
-	} else {
-		if(FRECUENCIA_COMPACTACION != -1) {
-			if(FAILED_SEARCHES == FRECUENCIA_COMPACTACION) {
-				compactar();
-				partition = find_partition(size_of_data);
-				 if(partition != NULL) {
-					 guardar_dato(data);
-				 } else {
-					 incrementar_busquedas_fallidas();
-					 choose_victim();
-				 }
-			} else {
-				incrementar_busquedas_fallidas();
-				 choose_victim();
-			}
-
-		} else {
-			choose_victim();
-			add_dynamic_partitions(data, message);
-		}
-	}
-}*/
-
-// cuando guardamos el dato, hay que setearle el access_time a la particion
-// devolver puntero a la particion
-guardar_dato(dato, particion) {
-
-}
-
-
-bool menorTamanio(Partition* partition_1, Partition* partition_2) {
-	return partition_1->size < partition_2->size;
-}
-
 // 1) filtramos las particiones libres que satisfacen el tamañoAGuardar
 // 2) buscamos la particion en base al algoritmo FF / BF
 // 3) si encontre una, la rompo si hace falta en 2 particiones (1 del tamanioQueVoyAGuardar)
@@ -176,36 +66,63 @@ Partition* find_partition_dynamic(uint32_t tamanioABuscar) {
 
 
 void save_to_cache_dynamic_partitions(void* data, Message* message) {
-/*	Partition* particion = find_partition(tamanioQueQuieroGuardar);
+	int partitions_killed = 0;
+	Partition* partition = NULL;
 
-		if(partition != NULL) {
-			guardar_dato(dato);
+	while(partition == NULL){
+		partition = find_partition(message->data_size);
+		if (partition != NULL) {
+			guardar_dato(data);
 		} else {
-			if(FRECUENCIA_COMPACTACION != -1) {
-				incrementar_busquedas_fallidas();
-				if(cantidad_de_fallidas == FRECUENCIA_COMPACTACION) {
-					compactar();
-					 particion = find_partition(tamanioQueQuieroGuardar);
-					 if(partition != NULL) {
-						 guardar_dato(dato);
-					 } else {
-						 incrementar_busquedas_fallidas();
-						 choose_victim();
-					 }
-				} else {
-					incrementar_busquedas_fallidas();
-					 choose_victim();
-				}
-
+			if(FRECUENCIA_COMPACTACION == partitions_killed) {//casos igual o 0
+				compactar();
 			} else {
-				choose_victim();
-				add_dynamic_partitions();
+				choose_victim();//que tambien la mata
+				consolidate();
 			}
+			partitions_killed++;
 		}
-		*/
+	}
+}
+
+/*Busco la primera libre.
+ * Me fijo si la siguiente esta libre. Si es asi, la absorbo.
+ * Por las dudas tengo que fijarme si la siguiente tambien esta libre (caso en el que borro una particion que esta rodeada de dos libres).
+ * Si es asi, la absorbo.
+ */
+void consolidate(){
+
+	t_link_element* first_free = _list_find_element(memory->partitions, &_is_free, NULL);
+
+	while(first_free->next != NULL){
+
+	}
 
 }
 
+void compactar() {
+
+}
 
 /** PRIVATE FUNCTIONS **/
+
+static bool _is_free(Partition* partition) {
+	return !partition->free;
+}
+
+static t_link_element* _list_find_element(t_list *self, bool(*condition)(void*), int* index) {
+	t_link_element *element = self->head;
+	int position = 0;
+
+	while (element != NULL && !condition(element->data)) {
+		element = element->next;
+		position++;
+	}
+
+	if (index != NULL) {
+		*index = position;
+	}
+
+	return element;
+}
 
