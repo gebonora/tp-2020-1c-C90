@@ -5,7 +5,7 @@
 #include "manejadorDeEventos/ManejadorDeEventos.h"
 
 static void notificarEventoLocalized(ManejadorDeEventos * this) {
-    log_info(this->logger, "Llego un LOCALIZED");
+    log_debug(this->logger, "Llego un LOCALIZED");
 }
 
 static void destruir(ManejadorDeEventos * this) {
@@ -14,7 +14,7 @@ static void destruir(ManejadorDeEventos * this) {
 
 static ManejadorDeEventos new() {
     return (ManejadorDeEventos) {
-            .logger = log_create(TEAM_INTERNAL_LOG_FILE, "ManejadorDeEventos", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_INFO),
+            .logger = log_create(TEAM_INTERNAL_LOG_FILE, "ManejadorDeEventos", SHOW_INTERNAL_CONSOLE, INTERNAL_LOG_LEVEL),
             &notificarEventoLocalized,
             &destruir
     };

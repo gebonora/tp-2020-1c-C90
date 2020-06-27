@@ -5,7 +5,7 @@
 #include "modelo/mapa/Mapa.h"
 
 char * registrarPosicion(Mapa * this, Coordinate posicion, TipoPosicionable tipoPosicionable) {
-    char * posicionComoClave = coordenadaImprimible(posicion);
+    char * posicionComoClave = coordenadaClave(posicion);
     Presencia * presencia = crearPresencia(tipoPosicionable);
     if (dictionary_has_key(this->plano, posicionComoClave)) {
         Casilla casilla = dictionary_get(this->plano, posicionComoClave);
@@ -15,9 +15,30 @@ char * registrarPosicion(Mapa * this, Coordinate posicion, TipoPosicionable tipo
         list_add(casilla, presencia);
         dictionary_put(this->plano, posicionComoClave, casilla);
     }
-    log_info(this->logger, "Se registró un %s en la posición %s", nombreTipoPosicionable(tipoPosicionable), posicionComoClave);
+    log_debug(this->logger, "Se registró un %s en la posición %s", nombreTipoPosicionable(tipoPosicionable), posicionComoClave);
     free(posicionComoClave);
     return presencia->uuid;
+}
+
+Posicion obtenerPosicion(Mapa * this, char * uuid) {
+    Posicion posicion = {.valida=false};
+
+    bool mismoUUID(void * _posiblePresencia) {
+        Presencia * posiblePresencia = _posiblePresencia;
+        return string_equals(posiblePresencia->uuid, uuid);
+    }
+
+    void posicionTienePresenciaConMismoUUID(char * coordenadaClave, void * casilla) {
+        Presencia * posiblePresencia = list_find(casilla, mismoUUID);
+        if (posiblePresencia != NULL) {
+            posicion.valida=true;
+            posicion.coordenada = convertirClaveACoordenada(coordenadaClave);
+        }
+    }
+
+    dictionary_iterator(this->plano, posicionTienePresenciaConMismoUUID);
+
+    return posicion;
 }
 
 static void destruir(Mapa *this) {
@@ -28,9 +49,10 @@ static void destruir(Mapa *this) {
 
 static Mapa new() {
     return (Mapa) {
-            .logger = log_create(TEAM_INTERNAL_LOG_FILE, "Mapa", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_INFO),
+            .logger = log_create(TEAM_INTERNAL_LOG_FILE, "Mapa", SHOW_INTERNAL_CONSOLE, INTERNAL_LOG_LEVEL),
             .plano = crearPlano(),
             &registrarPosicion,
+            &obtenerPosicion,
             &destruir
     };
 }
@@ -73,8 +95,4 @@ char * nombreTipoPosicionable(TipoPosicionable posicionable) {
         default:
             return "POSICIONABLE DESCONOCIDO";
     }
-}
-
-char * coordenadaImprimible(Coordinate posicion) {
-    return string_from_format("(%u,%u)", posicion.pos_x, posicion.pos_y);
 }

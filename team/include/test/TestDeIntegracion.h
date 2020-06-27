@@ -12,7 +12,13 @@
 #include "modelo/mapa/Mapa.h"
 #include "modelo/mapa/registro/RegistradorDePosiciones.h"
 #include "delibird/utils/strings/ExtensionStrings.h"
+#include "modelo/equipo/Equipo.h"
+#include "modelo/objetivo/ObjetivoGlobal.h"
 
 void testDeIntegracion();
+void testDeEntrenadores();
+void testDeMapa();
+void testDePlanificacion();
+void testDeEventos();
 
 #endif //TEAM_TESTDEINTEGRACION_H

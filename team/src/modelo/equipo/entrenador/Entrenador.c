@@ -17,7 +17,6 @@ bool objetivoCompletado(Entrenador * this) {
         if (dictionary_has_key(this->pokemonesCapturados, pokemon)) {
             cantidadCapturada = (int) dictionary_get(this->pokemonesCapturados, pokemon);
         }
-
         if (cantidadCapturada != cantidadRequerida) {
             fueCompletado = false;
         }
@@ -33,13 +32,18 @@ bool puedeAtraparPokemones(Entrenador * this) {
     return totalDePokemones(this->pokemonesCapturados) < this->limiteDeCaptura;
 }
 
+Posicion posicion(Entrenador * this) {
+    Gps * gps = this->gps;
+    return gps->posicionActual(gps);
+}
+
 static void destruir(Entrenador * this) {
     log_debug(this->logger, "Se procede a destruir un entrenador");
     log_destroy(this->logger);
     dictionary_destroy(this->pokemonesCapturados);
     dictionary_destroy(this->pokemonesObjetivo);
-    if (this->uuid != NULL) {
-        free(this->uuid);
+    if (this->gps) {
+        this->gps->destruirGps(this->gps);
     }
     free(this);
 }
@@ -47,16 +51,19 @@ static void destruir(Entrenador * this) {
 static Entrenador *new(char * posicionInicial, char * pokemonesIniciales, char * pokemonesObjetivos) {
     Entrenador * entrenador = malloc(sizeof(Entrenador));
 
-    entrenador->logger = log_create(TEAM_INTERNAL_LOG_FILE, "Entrenador", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_INFO);
-    entrenador->posicionInicial = parsearPosicion(posicionInicial);
-    entrenador->uuid = NULL;
+    entrenador->logger = log_create(TEAM_INTERNAL_LOG_FILE, "Entrenador", SHOW_INTERNAL_CONSOLE, INTERNAL_LOG_LEVEL);
+    entrenador->gps = NULL;
+    entrenador->posicionInicial = parsearPosicion(posicionInicial, "|");
     entrenador->tipoPosicionable = ENTRENADOR;
     entrenador->pokemonesCapturados = agruparPokemonesPorNombre(pokemonesIniciales);
     entrenador->pokemonesObjetivo = agruparPokemonesPorNombre(pokemonesObjetivos);
     entrenador->limiteDeCaptura = totalDePokemones(entrenador->pokemonesObjetivo);
     entrenador->objetivoCompletado = &objetivoCompletado;
     entrenador->puedeAtraparPokemones = &puedeAtraparPokemones;
+    entrenador->posicion = &posicion;
     entrenador->destruir = &destruir;
+
+    log_debug(entrenador->logger, "Se instanció un entrenador con pokemones iniciales: %s, y objetivos: %s", pokemonesIniciales, pokemonesObjetivos);
 
     return entrenador;
 }
@@ -64,17 +71,6 @@ static Entrenador *new(char * posicionInicial, char * pokemonesIniciales, char *
 const struct EntrenadorClass EntrenadorConstructor = {.new=&new};
 
 // Funciones estaticas
-Coordinate parsearPosicion(char * posicion) {
-    char ** punto = string_n_split(posicion, 2, "|");
-    Coordinate coordenada = {.pos_x=atoi(punto[0]), .pos_y=atoi(punto[1])};
-
-    free(punto[0]);
-    free(punto[1]);
-    free(punto);
-
-    return coordenada;
-}
-
 ContadorPokemones agruparPokemonesPorNombre(char * nombresDeLosPokemones) {
     ContadorPokemones contador = dictionary_create();
 
