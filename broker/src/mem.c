@@ -71,7 +71,9 @@ static void _save_to_cache(void* data, Message* message) {
 
 static Partition* _choose_victim(bool(*condition)(void*)) {
 	t_list* occupied_partitions = list_sorted(_get_occupied_partitions(memory->partitions), &condition);
-	return list_get(occupied_partitions, 0);
+	Partition* partition_victim = list_get(occupied_partitions, 0);
+	partition_victim->free = true;
+	return partition_victim;
 }
 
 
