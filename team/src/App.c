@@ -3,6 +3,9 @@
 int main() {
     INTERNAL_LOGGER = log_create(TEAM_INTERNAL_LOG_FILE, "Team.app", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_INFO);
     mostrarTitulo(INTERNAL_LOGGER);
+    if (SHOW_INTERNAL_CONSOLE) {
+        log_warning(INTERNAL_LOGGER, "Logs de uso interno por consola activado. Recordar desactivarlo para la entrega.");
+    }
     log_info(INTERNAL_LOGGER, "========================= Inicio de ejecución ============================");
 
     // Config
@@ -77,6 +80,8 @@ void inicializarComponentesDelSistema() {
 void configurarEstadoInicialProcesoTeam() {
     log_debug(INTERNAL_LOGGER, "Instanciando entrenadores y armando el equipo...");
     equipo = crearEquipoPorConfiguracion();
+    log_debug(INTERNAL_LOGGER, "Calculando el objetivo global...");
+    objetivoGlobal = ObjetivoGlobalConstructor.new(equipo);
 }
 
 void liberarRecursos() {
@@ -99,5 +104,6 @@ void liberarRecursos() {
     // Proceso Team
     log_debug(INTERNAL_LOGGER, "Liberando participantes del proceso Team...");
     destruirEquipo(equipo);
+    objetivoGlobal.destruirObjetivoGlobal(&objetivoGlobal);
     mapaProcesoTeam.destruir(&mapaProcesoTeam);
 }
