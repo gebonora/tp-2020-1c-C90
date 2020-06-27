@@ -16,7 +16,9 @@ static Partition* _break_buddys(Partition*, uint32_t);
 void save_to_cache_buddy_system(void* data, Message* message) {
 	int desired_size = MAX_PARTITION_SIZE(next_power_of_2(message->data_size));
 
-	Partition* partition = find_partition(desired_size);
+	t_link_element* element = find_partition(desired_size);
+
+	//element != NULL ? element->data;
 
 /*
 	if(partitionss->elements_count > 0) {
@@ -33,9 +35,9 @@ void save_to_cache_buddy_system(void* data, Message* message) {
 	} else {
 		return NULL;
 	}
-	*/
+	/
 
-	while(partition == NULL) {
+	while(t_ == NULL) {
 		Partition* victim = choose_victim();
 		_consolidate_buddy(victim);
 		partition = find_partition(desired_size);
@@ -46,6 +48,8 @@ void save_to_cache_buddy_system(void* data, Message* message) {
 	// guardo el data con el memcpy
 	// guardo el message
 	partition->message = message;
+
+	*/
 }
 
 /** PRIVATE FUNCTIONS **/

@@ -8,13 +8,14 @@ static t_list* _get_occupied_partitions();
 static void _show_partition(Partition*);
 static void _show_message(Message*);
 static bool _greater_equals_and_free(uint32_t, Partition*);
-static Partition* _find_partition(int, bool);
+static t_link_element* _find_partition(int, bool);
 static t_list* greater_equals_and_free(uint32_t);
 static bool _smaller_size(Partition*, Partition*);
+static t_link_element* _list_get_element(t_list*, int);
 
 /** PUBLIC FUNCTIONS **/
 
-Partition* find_partition(int size_to_fit) {
+t_link_element* find_partition(int size_to_fit) {
 	if(string_equals_ignore_case(ALGORITMO_PARTICION_LIBRE, FIRST_FIT)) {
 		return _find_partition(size_to_fit, false);
 	} else {
@@ -57,10 +58,24 @@ void show_memory_partitions() {
 
 /** PRIVATE FUNCTIONS **/
 
-static Partition* _find_partition(int desired_size, bool best) {
+static t_link_element* _find_partition(int desired_size, bool best) {
 	t_list* potential_partitions = greater_equals_and_free(desired_size);
 	if(best) list_sort(potential_partitions, &_smaller_size);
-	return list_get(potential_partitions, 0);
+	return _list_get_element(potential_partitions, 0);
+}
+
+static t_link_element* _list_get_element(t_list* self, int index) {
+	int cont = 0;
+
+	if ((self->elements_count > index) && (index >= 0)) {
+		t_link_element *element = self->head;
+		while (cont < index) {
+			element = element->next;
+			cont++;
+		}
+		return element;
+	}
+	return NULL;
 }
 
 static t_list* greater_equals_and_free(uint32_t size_to_compare) {

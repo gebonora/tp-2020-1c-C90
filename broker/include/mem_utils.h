@@ -7,7 +7,7 @@
 
 #define MAX_PARTITION_SIZE(x) MAX(x, TAMANO_MINIMO_PARTICION)
 
-Partition* find_partition(int);
+t_link_element* find_partition(int);
 Partition* choose_victim();
 Partition* create_partition(uint32_t, uint32_t, uint32_t*, uint32_t, Message*);
 void show_partitions(t_list*);

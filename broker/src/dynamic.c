@@ -1,9 +1,5 @@
 #include "dynamic.h"
 
-static bool _greater_equals_and_free(uint32_t, Partition*);
-static t_list* _get_filtered_partitions(uint32_t);
-static t_link_element* _list_get_element(t_list*, int);
-
 /*
 void add_dynamic_partitions() {
 	Partition* particion = find_partition(tamanioQueQuieroGuardar);
@@ -134,8 +130,8 @@ bool menorTamanio(Partition* partition_1, Partition* partition_2) {
 // first . filter(free && tamanio>=tamanioABuscar)
 
 Partition* find_partition_dynamic(uint32_t tamanioABuscar) {
-
-	t_list* partitions = _get_filtered_partitions(tamanioABuscar);
+/*
+	t_list* partitions = find_partition(tamanioABuscar);
 
 	if(partitions->elements_count > 0) {
 		if(strcmp(ALGORITMO_PARTICION_LIBRE, "BF")) {
@@ -152,9 +148,9 @@ Partition* find_partition_dynamic(uint32_t tamanioABuscar) {
 		elegidaPartition->size = nuevo_tamanio_particion;
 		elegidaPartition->free = false;
 		elegidaPartition->access_time = (int)ahoraEnTimeT();
-		/* TODO: ver access time,
-		 * ver metodo de seba nueva particion
-		 * */
+		// TODO: ver access time,
+		 // ver metodo de seba nueva particion
+
 
 		Partition* new_partition = malloc(sizeof(Partition));
 		new_partition->free = true;
@@ -175,6 +171,7 @@ Partition* find_partition_dynamic(uint32_t tamanioABuscar) {
 	} else {
 		return NULL;
 	}
+	*/
 }
 
 
@@ -212,27 +209,3 @@ void save_to_cache_dynamic_partitions(void* data, Message* message) {
 
 /** PRIVATE FUNCTIONS **/
 
-static bool _greater_equals_and_free(uint32_t to_compare, Partition* partition) {
-	return partition->free && partition->size >= to_compare;
-}
-
-static t_list* _get_filtered_partitions(uint32_t size_to_compare) {
-	bool _inline_greater_equals_and_free(Partition* partition) {
-		return _greater_equals_and_free(size_to_compare, partition);
-	}
-	return list_filter(memory->partitions, &_inline_greater_equals_and_free);
-}
-
-static t_link_element* _list_get_element(t_list* self, int index) {
-	int cont = 0;
-
-	if ((self->elements_count > index) && (index >= 0)) {
-		t_link_element *element = self->head;
-		while (cont < index) {
-			element = element->next;
-			cont++;
-		}
-		return element;
-	}
-	return NULL;
-}
