@@ -86,6 +86,6 @@ void testDePlanificacion() {
 
 void testDeEventos() {
     ManejadorDeEventos manejadorDeEventosTest = ManejadorDeEventosConstructor.new();
-    manejadorDeEventosTest.notificarEventoLocalized(&manejadorDeEventos);
-    manejadorDeEventosTest.destruir(&manejadorDeEventos);
+    manejadorDeEventosTest.notificarEventoLocalized(&manejadorDeEventosTest);
+    manejadorDeEventosTest.destruir(&manejadorDeEventosTest);
 }
