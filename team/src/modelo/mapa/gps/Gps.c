@@ -6,7 +6,11 @@
 
 Posicion posicionActual(Gps * this) {
     Mapa * mapa = this->mapa;
-    return mapa->obtenerPosicion(mapa, this->uuid);
+    Posicion posicion = mapa->obtenerPosicion(mapa, this->uuid);
+    if (posicion.valida == false) {
+        log_error(this->logger, "No se pudo encontrar la posicion asociada al uuid %s", this->uuid);
+    }
+    return posicion;
 }
 
 void destruirGps(Gps * this) {
