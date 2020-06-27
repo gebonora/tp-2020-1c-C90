@@ -3,16 +3,11 @@
 static bool _is_free(Partition*);
 static t_link_element* _list_find_element(t_list *self, bool(*condition)(void*), int* index);
 
-/*
-
 // cuando guardamos el dato, hay que setearle el access_time a la particion
 // devolver puntero a la particion
-guardar_dato(dato, particion) {
+void guardar_dato(dato, particion) {
 
 }
-
-*/
-
 // 1) filtramos las particiones libres que satisfacen el tamañoAGuardar
 // 2) buscamos la particion en base al algoritmo FF / BF
 // 3) si encontre una, la rompo si hace falta en 2 particiones (1 del tamanioQueVoyAGuardar)
@@ -105,6 +100,9 @@ void consolidate(){
 
 }
 
+void compactar() {
+
+}
 
 /** PRIVATE FUNCTIONS **/
 
