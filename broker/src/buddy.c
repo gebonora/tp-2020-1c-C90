@@ -1,11 +1,11 @@
 #include "buddy.h"
-/*
+
+static void _consolidate_buddy(Partition*);
 static bool _partition_at_position(uintptr_t, uintptr_t);
 static uint32_t _buddy_address(Partition*);
 static Partition* _buddy_of(Partition*);
-static Partition* _get_buddy(Partition* partition);
-static Partition* _break_buddys(Partition* partition_to_break, uint32_t data_size )
-*/
+static Partition* _find_partition_buddys();
+static Partition* _break_buddys(Partition*, uint32_t);
 
 // 1) calculo la potencia de 2 mas cercana (hacia arriba) al valor de tamanioDeMiDato
 //  2) busco una particion libre de tamanio = pot2
@@ -35,12 +35,13 @@ void save_to_cache_buddy_system(void* data, Message* message) {
 }
 
 /** PRIVATE FUNCTIONS **/
-/*
+
 // para compactar tiene que cumplir: el tipo esta libre + su buddy esta libre + su buddy es del mismo tamanio
 // y hacer recursivo hasta que no puedo compactar ma
 // para calcular la direccion del buddy uso el XOR con la direccion del tipo que estoy analizando
 // XOR -> (miDireccionDeMemoria ^ miTamanioDeMemoria)
-static void _consolidate_buddy(Partition* partition){
+static void _consolidate_buddy(Partition* partition) {
+	/*
 	Partition* buddy = _buddy_of(partition);
 	Partition* survivor;
 
@@ -69,10 +70,11 @@ static void _consolidate_buddy(Partition* partition){
 		buddy = _buddy_of(survivor);
 		partition = survivor;
 	}
+	*/
 }
 
 static Partition* _break_buddys(Partition* partition_to_break, uint32_t data_size) {
-
+/*
 	// mientras la particion actual sea mayor a mi data_size (que ya es pot2), entonces sigo rompiendo
 	while(partition_to_break->size != data_size){
 		//divido partition en 2 mitades iguales y me quedo con la de la izquierd?, es lo mismo
@@ -105,12 +107,14 @@ static Partition* _break_buddys(Partition* partition_to_break, uint32_t data_siz
 
 	// cuando ya no tengo que romper mas, devuelvo la uqe me quedo
 	return partition_to_break;
+	*/
 }
 
 // si nos confirman en el foro que siempre es "BF", podemos reutilizar el find para dinamicas y buddy
 // por configuracion de archivo siempre vamos a tener "BF"
-Partition* find_partition_buddys(potenciaDe2ABuscar) {
+static Partition* _find_partition_buddys(potenciaDe2ABuscar) {
 
+	/*
 	t_list* partitionss = list_filter(partitions, estaLireYTamanioMayorIgualQue(tamanioABuscar));
 
 	if(partitionss->elements_count > 0) {
@@ -128,12 +132,12 @@ Partition* find_partition_buddys(potenciaDe2ABuscar) {
 	} else {
 		return NULL;
 	}
+	*/
 }
-
 
 static Partition* _buddy_of(Partition* partition) {
 	bool _inline_partition_at_position(Partition* partition) {
-		return _partition_at_position(buddy_address(partition), partition->start);
+		return _partition_at_position(_buddy_address(partition), partition->start);
 	}
 	return list_find(memory->partitions, &_inline_partition_at_position);
 }
@@ -145,4 +149,3 @@ static uintptr_t _buddy_address(Partition* partition) {
 static bool _partition_at_position(uintptr_t position_to_compare, uintptr_t actual_position) {
 	return position_to_compare == actual_position;
 }
-*/

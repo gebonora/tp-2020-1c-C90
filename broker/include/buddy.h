@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <commons/collections/list.h>
+#include "arithmetic.h"
 #include "constants.h"
 #include "mem_utils.h"
 
