@@ -59,6 +59,7 @@ void testDeEntrenadores() {
     assert(contabilidadEspecieC->necesarios == 2);
     assert(contabilidadEspecieC->capturados == 0);
 
+    list_destroy(especiesNecesarias);
     destruirEquipo(equipito);
     objetivo.destruirObjetivoGlobal(&objetivo);
 }
