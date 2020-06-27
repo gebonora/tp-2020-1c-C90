@@ -43,7 +43,7 @@ static void destruir(Entrenador * this) {
     dictionary_destroy(this->pokemonesCapturados);
     dictionary_destroy(this->pokemonesObjetivo);
     if (this->gps) {
-        this->gps->destruir(this->gps);
+        this->gps->destruirGps(this->gps);
     }
     free(this);
 }

@@ -9,7 +9,7 @@ Posicion posicionActual(Gps * this) {
     return mapa->obtenerPosicion(mapa, this->uuid);
 }
 
-void destruir(Gps * this) {
+void destruirGps(Gps * this) {
     log_destroy(this->logger);
     free(this->uuid);
     free(this);
@@ -22,7 +22,7 @@ static Gps * new(Mapa * mapaDeRegistro, char * uuid) {
     gps->uuid = uuid;
     gps->mapa = mapaDeRegistro;
     gps->posicionActual = &posicionActual;
-    gps->destruir = &destruir;
+    gps->destruirGps = &destruirGps;
 
     return gps;
 }

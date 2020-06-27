@@ -12,8 +12,9 @@ typedef struct Gps {
     t_log * logger;
     char * uuid;
     Mapa * mapa;
+    //Interfaz publica
     Posicion (*posicionActual)(struct Gps * this);
-    void (*destruir)(struct Gps * this);
+    void (*destruirGps)(struct Gps * this);
 } Gps;
 
 extern const struct GpsClass {

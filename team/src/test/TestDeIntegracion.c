@@ -5,9 +5,10 @@
 #include "test/TestDeIntegracion.h"
 
 void testDeIntegracion() {
+    //TODO: Separar en llamadas a varios tests
 
     // Entrenadores
-    Entrenador * entrenador = EntrenadorConstructor.new("1|2", "A|B", "A|D|D");
+    Entrenador * entrenador = EntrenadorConstructor.new("1|2", "A|B", "A|C|C");
     Entrenador * entrenador2 = EntrenadorConstructor.new("2|4", "A|B", "A|B");
 
     assert(entrenador->objetivoCompletado(entrenador) == false);
@@ -17,14 +18,31 @@ void testDeIntegracion() {
     assert((int) dictionary_get(entrenador->pokemonesCapturados, "A") == 1);
     assert((int) dictionary_get(entrenador->pokemonesCapturados, "B") == 1);
     assert((int) dictionary_get(entrenador->pokemonesObjetivo, "A") == 1);
-    assert((int) dictionary_get(entrenador->pokemonesObjetivo, "D") == 2);
+    assert((int) dictionary_get(entrenador->pokemonesObjetivo, "C") == 2);
     assert((int) dictionary_get(entrenador2->pokemonesCapturados, "A") == 1);
     assert((int) dictionary_get(entrenador2->pokemonesCapturados, "B") == 1);
     assert((int) dictionary_get(entrenador2->pokemonesObjetivo, "A") == 1);
     assert((int) dictionary_get(entrenador2->pokemonesObjetivo, "B") == 1);
 
-    entrenador->destruir(entrenador);
-    entrenador2->destruir(entrenador2);
+    Equipo equipito = list_create();
+    list_add(equipito, entrenador);
+    list_add(equipito, entrenador2);
+
+    ObjetivoGlobal objetivo = ObjetivoGlobalConstructor.new(equipito);
+
+    ContabilidadEspecie * contabilidadEspecieA = dictionary_get(objetivo.contabilidadEspecies, "A");
+    ContabilidadEspecie * contabilidadEspecieB = dictionary_get(objetivo.contabilidadEspecies, "B");
+    ContabilidadEspecie * contabilidadEspecieC = dictionary_get(objetivo.contabilidadEspecies, "C");
+
+    assert(contabilidadEspecieA->necesarios == 2);
+    assert(contabilidadEspecieA->capturados == 2);
+    assert(contabilidadEspecieB->necesarios == 1);
+    assert(contabilidadEspecieB->capturados == 2);
+    assert(contabilidadEspecieC->necesarios == 2);
+    assert(contabilidadEspecieC->capturados == 0);
+
+    destruirEquipo(equipito);
+    objetivo.destruirObjetivoGlobal(&objetivo);
 
     // Mapa
     Mapa mapita = MapaConstructor.new();
