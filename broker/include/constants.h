@@ -74,7 +74,7 @@ typedef struct {
 } Message;
 
 typedef struct {
-	Process* process;
+	Process process;
 	uint32_t id;
 	int socket;
 } Suscriber;

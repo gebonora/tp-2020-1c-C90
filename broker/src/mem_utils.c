@@ -11,7 +11,6 @@ static bool _greater_equals_and_free(uint32_t, Partition*);
 static t_link_element* _find_partition(int, bool);
 static t_list* greater_equals_and_free(uint32_t);
 static bool _smaller_size(Partition*, Partition*);
-static t_link_element* _list_get_element(t_list*, int);
 
 /** PUBLIC FUNCTIONS **/
 
@@ -56,15 +55,7 @@ void show_memory_partitions() {
 	list_iterate(memory->partitions, &_show_partition);
 }
 
-/** PRIVATE FUNCTIONS **/
-
-static t_link_element* _find_partition(int desired_size, bool best) {
-	t_list* potential_partitions = greater_equals_and_free(desired_size);
-	if(best) list_sort(potential_partitions, &_smaller_size);
-	return _list_get_element(potential_partitions, 0);
-}
-
-static t_link_element* _list_get_element(t_list* self, int index) {
+t_link_element* list_get_element(t_list* self, int index) {
 	int cont = 0;
 
 	if ((self->elements_count > index) && (index >= 0)) {
@@ -76,6 +67,14 @@ static t_link_element* _list_get_element(t_list* self, int index) {
 		return element;
 	}
 	return NULL;
+}
+
+/** PRIVATE FUNCTIONS **/
+
+static t_link_element* _find_partition(int desired_size, bool best) {
+	t_list* potential_partitions = greater_equals_and_free(desired_size);
+	if(best) list_sort(potential_partitions, &_smaller_size);
+	return list_get_element(potential_partitions, 0);
 }
 
 static t_list* greater_equals_and_free(uint32_t size_to_compare) {
@@ -113,7 +112,9 @@ static bool _greater_equals_and_free(uint32_t to_compare, Partition* partition) 
 
 static Partition* _choose_victim(bool(*condition)(void*)) {
 	t_list* occupied_partitions = list_sorted(_get_occupied_partitions(memory->partitions), &condition);
-	return list_get(occupied_partitions, 0);
+	Partition* victim = list_get(occupied_partitions, 0);
+	victim->free = true;
+	return victim;
 }
 
 static bool _is_occupied(Partition* partition) {
