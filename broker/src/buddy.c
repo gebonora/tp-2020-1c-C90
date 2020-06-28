@@ -1,10 +1,8 @@
 #include "buddy.h"
 
 static void _consolidate_buddy(Partition*);
-static bool _partition_at_position(uintptr_t, uintptr_t);
 static uint32_t _buddy_address(Partition*);
 static Partition* _buddy_of(Partition*);
-static Partition* _find_partition_buddy(int size);
 static Partition* _break_buddys(Partition*, uint32_t);
 
 // 1) calculo la potencia de 2 mas cercana (hacia arriba) al valor de tamanioDeMiDato
@@ -16,129 +14,86 @@ static Partition* _break_buddys(Partition*, uint32_t);
 void save_to_cache_buddy_system(void* data, Message* message) {
 	int desired_size = MAX_PARTITION_SIZE(next_power_of_2(message->data_size));
 
-	t_link_element* element = find_partition(desired_size);
+	t_link_element* target_element = find_partition(desired_size);
 
-	//element != NULL ? element->data;
-
-/*
-	if(partitionss->elements_count > 0) {
-		// ROMPER LA PARTICION en Buddys
-		// tamanio particion encontrada == tamanioAGuardar -> devuelvo asi
-		// tamanio particion encontrada >  tamanioAGuardar -> divido_en_2 hasta que tengo el buddy de la pot2 buscada
-		Partition* elegida = list_get(partitionss, 0);
-
-		// mientras no tenga el buddy de tamanio = miPotenciade2 sigo rompiendo 1 de las mitades
-		while(elegida->partition_size != potenciaDe2ABuscar) {
-			elegida = divido_en_2(elegida); // divido_en_2 me tiene que dar uno de los 2 buddys generados
-		}
-		return elegida;
-	} else {
-		return NULL;
-	}
-	/
-
-	while(t_ == NULL) {
+	while(target_element == NULL) {
 		Partition* victim = choose_victim();
 		_consolidate_buddy(victim);
-		partition = find_partition(desired_size);
+		target_element = find_partition(desired_size);
 	}
 
-	Partition* where_to_save_data = _break_buddys(partition, message->data_size);
+	Partition* target_partition = _break_buddys(target_element->data, message->data_size);
 
 	// guardo el data con el memcpy
+	//memcpy();
 	// guardo el message
-	partition->message = message;
-
-	*/
+	target_partition->message = message;
 }
 
 /** PRIVATE FUNCTIONS **/
 
-// para compactar tiene que cumplir: el tipo esta libre + su buddy esta libre + su buddy es del mismo tamanio
-// y hacer recursivo hasta que no puedo compactar ma
-// para calcular la direccion del buddy uso el XOR con la direccion del tipo que estoy analizando
-// XOR -> (miDireccionDeMemoria ^ miTamanioDeMemoria)
 static void _consolidate_buddy(Partition* partition) {
-	/*
+	Partition* left_partition;
+	Partition* right_partition;
 	Partition* buddy = _buddy_of(partition);
-	Partition* survivor;
 
 	// si puedo consolidar, arranco, sino no hago nada
 	while(buddy->free && buddy->size == partition->size) {
-		// consolido
-		// obtengo la particion mas al izquierda, seria la ede menor posicion de memoria
+
+		// obtengo la particion mas al izquierda, seria la de menor posicion de memoria
 		if(partition->start < buddy->start) {
-			survivor = partition;
+			left_partition = partition;
+			right_partition = buddy;
 		} else {
-			survivor = buddy;
+			left_partition = buddy;
+			right_partition = partition;
 		}
 
-		// creo la nueva particion
-		// TODO: crear una funcion para esto
-		uint32_t now = (int) ahoraEnTimeT();
-		survivor->size = partition->size + buddy->size;
-		survivor->creation_time = now;
-		survivor->access_time = now;
+		// creo una nueva particion sumando los tamanios y manteniendo el start
+		Partition* replacement = create_partition(left_partition->start, left_partition->size + right_partition->size);
 
-		// reemplazo la particion por esta nueva y elimino la data vieja
-		//list_replace_and_destroy_element();
-		// elimino el buddy que sobro, ya que fue absorbido
-		//list_remove_and_destroy_by_condition(memory_partitions, &_funcion_para_obtener el buddy);
+		// reemplazo la left partition por esta nueva que ya esta consolidada
+		replace_partition_at(left_partition->start, replacement);
 
-		buddy = _buddy_of(survivor);
-		partition = survivor;
+		// elimino el buddy/right_partition que sobro, ya que fue absorbido
+		remove_partition_at(right_partition->start);
+
+		// obtengo el buddy de la nueva particion consolidada
+		buddy = _buddy_of(replacement);
+
+		// reasigno para volver a chequear si puedo consolidar esta nueva particion mas grande
+		partition = replacement;
 	}
-	*/
 }
 
 static Partition* _break_buddys(Partition* partition_to_break, uint32_t data_size) {
-/*
 	// mientras la particion actual sea mayor a mi data_size (que ya es pot2), entonces sigo rompiendo
 	while(partition_to_break->size != data_size){
-		//divido partition en 2 mitades iguales y me quedo con la de la izquierd?, es lo mismo
-		make_to_buddys(partition_to_break);
 
-		Partition* left = malloc(sizeof(Partition));
-		Partition* right = malloc(sizeof(Partition));
+		// izq -> size = a la que rompo dividido 2, start = start de la que rompo
+		Partition* left_partition = create_partition(partition_to_break->start, HALF(partition_to_break->size));
 
-		// la de la izquierda arranca donde arrancaba la que rompi
-		left->start = partition_to_break->start;
-		// y tiene un size igual a la mitad de la que rompi
-		left->size = partition_to_break->size/2;
+		// der -> size = al de la iz, start = start izq + size
+		Partition* right_partition = create_partition(left_partition->start, left_partition->size);
 
-		// la de la derecha arrnaca done empieza la izq + el size de la izq
-		right->start = left->start + left->size;
-		// y tiene un size igual al de la izquierda
-		right->size = left->size;
-
-		//reemplazo partition_to_break con left
-		//list_replace(memory->partitions, indice_de_partition_to_break, left);
+		// reemplazo partition_to_break con la nueva left_partition
+		replace_partition_at(partition_to_break->start, left_partition);
 
 		// agrego la de la derecha al lado de la de la izq
-		//list_add_in_index(memory->partitions, indice_de_partition_to_break, right);
+		add_partition_next_to(left_partition->start, right_partition);
 
-		// libero partition_to_break??
-
-		//ahora continuo viendo si tengo que romper con la de la izq
-		partition_to_break = left;
+		// ahora veo si tengo que seguir rompiendo la de la izq
+		partition_to_break = left_partition;
 	}
 
-	// cuando ya no tengo que romper mas, devuelvo la uqe me quedo
+	// cuando ya no tengo que romper mas, devuelvo la que me quedo, que es del tamanio deseado
 	return partition_to_break;
-	*/
 }
 
 static Partition* _buddy_of(Partition* partition) {
-	bool _inline_partition_at_position(Partition* partition) {
-		return _partition_at_position(_buddy_address(partition), partition->start);
-	}
-	return list_find(memory->partitions, &_inline_partition_at_position);
+	return find_partition_at(_buddy_address(partition));
 }
 
 static uintptr_t _buddy_address(Partition* partition) {
 	return xor_pointer_and_int(partition->start, partition->size);
-}
-
-static bool _partition_at_position(uintptr_t position_to_compare, uintptr_t actual_position) {
-	return position_to_compare == actual_position;
 }
