@@ -3,12 +3,10 @@
 //
 
 #include "modelo/planificable/HiloEntrenadorPlanificable.h"
-#include <unistd.h>
 
 static void trabajar(HiloEntrenadorPlanificable * this) {
     while (true) {
         log_debug(this->logger, "Trabajo muy duro");
-        sleep(3);
     }
 }
 

@@ -102,19 +102,25 @@ void testDeAlgoritmos() {
     assert(string_equals(idEntrenadorQueDeberiaSerSeleccionado, planificableSeleccioado->entrenador->id));
     miAlgoritmo.destruir(&miAlgoritmo);
 
+    list_destroy_and_destroy_elements(listaReady, (void (*)(void *)) hiloEntrenadorPlanificable->destruir);
     entrenador->destruir(entrenador);
     entrenador2->destruir(entrenador2);
-    list_destroy_and_destroy_elements(listaReady, (void (*)(void *)) hiloEntrenadorPlanificable->destruir);
 }
 
 void testDePlanificacion() {
     Entrenador * entrenador = EntrenadorConstructor.new("7|3", "A", "B");
     HiloEntrenadorPlanificable * hiloEntrenadorPlanificable = HiloEntrenadorPlanificableConstructor.new(entrenador);
 
-    //TODO: Test del hilo entrenador planificable
+    TareaEnSegundoPlano * hacerLaburarAlEntrenador = crearTareaPermanenteEnSegundoPlano(
+            "Hilo del entrenador para que labure",
+            hiloEntrenadorPlanificable->trabajar,
+            hiloEntrenadorPlanificable);
+    //ejecutarTareaEnSegundoPlano(hacerLaburarAlEntrenador);
+    //sleep(1);
+    destruirTareaEnSegundoPlano(hacerLaburarAlEntrenador);
 
-    entrenador->destruir(entrenador);
     hiloEntrenadorPlanificable->destruir(hiloEntrenadorPlanificable);
+    entrenador->destruir(entrenador);
 }
 
 void testDeEventos() {
