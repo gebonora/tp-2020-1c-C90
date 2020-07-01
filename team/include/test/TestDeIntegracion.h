@@ -15,7 +15,7 @@
 #include "modelo/objetivo/ObjetivoGlobal.h"
 #include "delibird/utils/strings/ExtensionStrings.h"
 #include "delibird/utils/programadorDeTareas/ProgramadorDeTareas.h"
-#include <unistd.h>"
+#include <unistd.h>
 
 void testDeIntegracion();
 void testDeEntrenadores();
