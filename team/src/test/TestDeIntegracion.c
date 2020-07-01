@@ -11,6 +11,9 @@ void testDeIntegracion() {
     // Mapa
     testDeMapa();
 
+    // Algoritmos
+    testDeAlgoritmos();
+
     // Planificacion
     testDePlanificacion();
 
@@ -83,16 +86,35 @@ void testDeMapa() {
     mapita.destruir(&mapita);
 }
 
-void testDePlanificacion() {
-    AlgoritmoPlanificador miAlgoritmo = obtenerAlgoritmo("FIFO");
+void testDeAlgoritmos() {
     t_list * listaReady = list_create();
-    Entrenador * entrenadorPiola = EntrenadorConstructor.new("1|2", "A|B", "A|D|D");
-    HiloEntrenadorPlanificable * hiloEntrenadorPlanificable = HiloEntrenadorPlanificableConstructor.new(entrenadorPiola);
+    Entrenador * entrenador = EntrenadorConstructor.new("1|2", "A|B", "A|C");
+    Entrenador * entrenador2 = EntrenadorConstructor.new("3|4", "C", "D");
+    char * idEntrenadorQueDeberiaSerSeleccionado = entrenador->id;
+    HiloEntrenadorPlanificable * hiloEntrenadorPlanificable = HiloEntrenadorPlanificableConstructor.new(entrenador);
+    HiloEntrenadorPlanificable * hiloEntrenadorPlanificable2 = HiloEntrenadorPlanificableConstructor.new(entrenador2);
     list_add(listaReady, hiloEntrenadorPlanificable);
-    miAlgoritmo.proximoAEjecutar(&miAlgoritmo, listaReady);
+    list_add(listaReady, hiloEntrenadorPlanificable2);
+
+    //FIFO
+    AlgoritmoPlanificador miAlgoritmo = obtenerAlgoritmo("FIFO");
+    HiloEntrenadorPlanificable * planificableSeleccioado = miAlgoritmo.proximoAEjecutar(&miAlgoritmo, listaReady);
+    assert(string_equals(idEntrenadorQueDeberiaSerSeleccionado, planificableSeleccioado->entrenador->id));
     miAlgoritmo.destruir(&miAlgoritmo);
-    entrenadorPiola->destruir(entrenadorPiola);
+
+    entrenador->destruir(entrenador);
+    entrenador2->destruir(entrenador2);
     list_destroy_and_destroy_elements(listaReady, (void (*)(void *)) hiloEntrenadorPlanificable->destruir);
+}
+
+void testDePlanificacion() {
+    Entrenador * entrenador = EntrenadorConstructor.new("7|3", "A", "B");
+    HiloEntrenadorPlanificable * hiloEntrenadorPlanificable = HiloEntrenadorPlanificableConstructor.new(entrenador);
+
+    //TODO: Test del hilo entrenador planificable
+
+    entrenador->destruir(entrenador);
+    hiloEntrenadorPlanificable->destruir(hiloEntrenadorPlanificable);
 }
 
 void testDeEventos() {
