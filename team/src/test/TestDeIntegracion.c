@@ -15,7 +15,7 @@ void testDeIntegracion() {
     testDeAlgoritmos();
 
     // Planificacion
-    testDePlanificacion();
+    testDePlanificable();
 
     // Eventos
     testDeEventos();
@@ -107,17 +107,11 @@ void testDeAlgoritmos() {
     entrenador2->destruir(entrenador2);
 }
 
-void testDePlanificacion() {
+void testDePlanificable() {
     Entrenador * entrenador = EntrenadorConstructor.new("7|3", "A", "B");
     HiloEntrenadorPlanificable * hiloEntrenadorPlanificable = HiloEntrenadorPlanificableConstructor.new(entrenador);
 
-    TareaEnSegundoPlano * hacerLaburarAlEntrenador = crearTareaPermanenteEnSegundoPlano(
-            "Hilo del entrenador para que labure",
-            hiloEntrenadorPlanificable->trabajar,
-            hiloEntrenadorPlanificable);
-    //ejecutarTareaEnSegundoPlano(hacerLaburarAlEntrenador);
-    //sleep(1);
-    destruirTareaEnSegundoPlano(hacerLaburarAlEntrenador);
+    //TODO: Meterle una tarea y que la haga de a poco.
 
     hiloEntrenadorPlanificable->destruir(hiloEntrenadorPlanificable);
     entrenador->destruir(entrenador);

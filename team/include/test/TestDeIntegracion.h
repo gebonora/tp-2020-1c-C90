@@ -21,7 +21,7 @@ void testDeIntegracion();
 void testDeEntrenadores();
 void testDeMapa();
 void testDeAlgoritmos();
-void testDePlanificacion();
+void testDePlanificable();
 void testDeEventos();
 
 #endif //TEAM_TESTDEINTEGRACION_H
