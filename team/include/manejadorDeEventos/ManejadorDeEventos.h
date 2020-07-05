@@ -16,6 +16,7 @@
  * Problema:
  *  - Debe faciltar una manera de que los entrenadores informen que esperan cierto evento para continuar su life cycle.
  *      Tal vez con un this.registrarEventoEsperado()
+ * TODO: la notificacion del evento localized y appeared se puede generalizar en uno o mas "aparecioPokemon".
  */
 
 typedef struct ManejadorDeEventos {

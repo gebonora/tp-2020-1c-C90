@@ -27,7 +27,7 @@
  * // El signal sobre ese semaforo me da pie a procesar de a poco la tarea.
  * // La cantidad de pasos a ejecutar de la tarea nos lo pasan como .....TODO
  * Modelo loop:
- *      While(finDeTrabajo) { // Cuando se liberen los recursos, esto se pone true y se sale.
+ *      While(not finDeTrabajo) { // Cuando se liberen los recursos, esto se pone true y se sale.
  *          wait(semaforoEjecucionHabilitada); // El servicio de planificacion le da el ok para que el bucle gire.
  *
  *          TODO

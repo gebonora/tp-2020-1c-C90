@@ -5,6 +5,8 @@
 #include "test/TestDeIntegracion.h"
 
 void testDeIntegracion() {
+    testLogger = log_create(TEAM_INTERNAL_LOG_FILE, "TestsDeIntegracion", 1, LOG_LEVEL_INFO);
+
     // Entrenadores
     testDeEntrenadores();
 
@@ -19,9 +21,13 @@ void testDeIntegracion() {
 
     // Eventos
     testDeEventos();
+
+    log_info(testLogger, "Pruebas de integracion finalizadas con exito");
+    log_destroy(testLogger);
 }
 
 void testDeEntrenadores() {
+    log_info(testLogger, "Testeando los metodos de los entrenadores");
     Entrenador * entrenador = EntrenadorConstructor.new("1|2", "A|B", "A|C|C");
     Entrenador * entrenador2 = EntrenadorConstructor.new("2|4", "A|B", "A|B");
 
@@ -42,6 +48,7 @@ void testDeEntrenadores() {
     list_add(equipito, entrenador);
     list_add(equipito, entrenador2);
 
+    log_info(testLogger, "Testeando los metodos del objetivo global");
     ObjetivoGlobal objetivo = ObjetivoGlobalConstructor.new(equipito);
 
     t_list * especiesNecesarias = objetivo.especiesNecesarias(&objetivo);
@@ -71,7 +78,9 @@ void testDeEntrenadores() {
 }
 
 void testDeMapa() {
+    log_info(testLogger, "Testeando la creacion del mapa");
     Mapa mapita = MapaConstructor.new();
+    log_info(testLogger, "Testeando el registro de posicionables en el mapa");
     Entrenador * entrenadorARegistrar = EntrenadorConstructor.new("3|3", "A", "B");
 
     char * uuidRegistro = registrarEnMapaPosicionEntrenador(&mapita, entrenadorARegistrar);
@@ -87,6 +96,7 @@ void testDeMapa() {
 }
 
 void testDeAlgoritmos() {
+    log_info(testLogger, "Testeando los algoritmos de planificacion");
     t_list * listaReady = list_create();
     Entrenador * entrenador = EntrenadorConstructor.new("1|2", "A|B", "A|C");
     Entrenador * entrenador2 = EntrenadorConstructor.new("3|4", "C", "D");
@@ -97,6 +107,7 @@ void testDeAlgoritmos() {
     list_add(listaReady, hiloEntrenadorPlanificable2);
 
     //FIFO
+    log_info(testLogger, "Testeando FIFO");
     AlgoritmoPlanificador miAlgoritmo = obtenerAlgoritmo("FIFO");
     HiloEntrenadorPlanificable * planificableSeleccioado = miAlgoritmo.proximoAEjecutar(&miAlgoritmo, listaReady);
     assert(string_equals(idEntrenadorQueDeberiaSerSeleccionado, planificableSeleccioado->entrenador->id));
@@ -108,6 +119,7 @@ void testDeAlgoritmos() {
 }
 
 void testDePlanificable() {
+    log_info(testLogger, "Testeando la unidad planificable de los entrenadores");
     Entrenador * entrenador = EntrenadorConstructor.new("7|3", "A", "B");
     HiloEntrenadorPlanificable * hiloEntrenadorPlanificable = HiloEntrenadorPlanificableConstructor.new(entrenador);
 
@@ -118,6 +130,7 @@ void testDePlanificable() {
 }
 
 void testDeEventos() {
+    log_info(testLogger, "Testeando los eventos del sistema");
     ManejadorDeEventos manejadorDeEventosTest = ManejadorDeEventosConstructor.new();
     manejadorDeEventosTest.notificarEventoLocalized(&manejadorDeEventosTest);
     manejadorDeEventosTest.destruir(&manejadorDeEventosTest);
