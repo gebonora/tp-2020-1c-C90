@@ -42,20 +42,22 @@ Posicion posicion(Entrenador * this) {
 }
 
 static void destruir(Entrenador * this) {
-    log_debug(this->logger, "Se procede a destruir un entrenador");
+    log_debug(this->logger, "Se procede a destruir al entrenador");
     log_destroy(this->logger);
     dictionary_destroy(this->pokemonesCapturados);
     dictionary_destroy(this->pokemonesObjetivo);
     if (this->gps) {
         this->gps->destruirGps(this->gps);
     }
+    free(this->id);
     free(this);
 }
 
 static Entrenador *new(char * posicionInicial, char * pokemonesIniciales, char * pokemonesObjetivos) {
     Entrenador * entrenador = malloc(sizeof(Entrenador));
 
-    entrenador->logger = log_create(TEAM_INTERNAL_LOG_FILE, "Entrenador", SHOW_INTERNAL_CONSOLE, INTERNAL_LOG_LEVEL);
+    entrenador->id = string_from_format("Entrenador_%d", ++contadorEntrenadores);
+    entrenador->logger = log_create(TEAM_INTERNAL_LOG_FILE, entrenador->id, SHOW_INTERNAL_CONSOLE, INTERNAL_LOG_LEVEL);
     entrenador->gps = NULL;
     entrenador->posicionInicial = parsearPosicion(posicionInicial, "|");
     entrenador->tipoPosicionable = ENTRENADOR;
@@ -67,7 +69,7 @@ static Entrenador *new(char * posicionInicial, char * pokemonesIniciales, char *
     entrenador->posicion = &posicion;
     entrenador->destruir = &destruir;
 
-    log_debug(entrenador->logger, "Se instanció un entrenador con pokemones iniciales: %s, y objetivos: %s", pokemonesIniciales, pokemonesObjetivos);
+    log_debug(entrenador->logger, "Se instanció al entrenador con pokemones iniciales: %s, y objetivos: %s", pokemonesIniciales, pokemonesObjetivos);
 
     return entrenador;
 }

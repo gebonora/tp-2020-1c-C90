@@ -21,6 +21,7 @@ typedef t_dictionary * ContadorPokemones; // La key es el nombre del pokemon, el
 
 typedef struct Entrenador {
     t_log * logger;
+    char * id;
     Gps * gps;
     TipoPosicionable tipoPosicionable;
     Coordinate posicionInicial;
@@ -41,5 +42,6 @@ extern const struct EntrenadorClass {
 // Funciones estaticas
 ContadorPokemones agruparPokemonesPorNombre(char * nombreDeLosPokemones);
 int totalDePokemones(ContadorPokemones contadorPokemones); // Nos dice cuantos hay en el contador
+int contadorEntrenadores;
 
 #endif //TEAM_ENTRENADOR_H

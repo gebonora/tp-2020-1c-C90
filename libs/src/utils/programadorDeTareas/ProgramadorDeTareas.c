@@ -4,7 +4,7 @@
 
 #include "utils/programadorDeTareas/ProgramadorDeTareas.h"
 
-void programarFuncion(Tarea *tarea) {
+void programarFuncion(TareaEnSegundoPlano *tarea) {
     int milisegundosTranscurridos = 0;
     while (tarea->activo) {
         while (milisegundosTranscurridos < tarea->intervaloEnMilisegundos && tarea->activo) {
@@ -20,33 +20,36 @@ void programarFuncion(Tarea *tarea) {
     }
 }
 
-void programarFuncionInfinita(Tarea *tarea) {
+void programarFuncionSinIntervalo(TareaEnSegundoPlano *tarea) {
     while (tarea->activo) {
         tarea->funcion(tarea->args);
     }
 }
 
-void ejecutarTarea(Tarea *tarea) {
-    if (tarea->esInfinita) {
-        crearHilo(programarFuncionInfinita, tarea);
+void ejecutarTareaEnSegundoPlano(TareaEnSegundoPlano *tarea) {
+    if (tarea->intervaloEnMilisegundos == INTERVALO_NO_DEFINIDO) {
+        crearHilo((void *(*)(void *)) programarFuncionSinIntervalo, tarea);
     } else {
-        crearHilo(programarFuncion, tarea);
+        crearHilo((void *(*)(void *)) programarFuncion, tarea);
     }
 }
 
-void destruirTarea(Tarea *tarea) {
+void destruirTareaEnSegundoPlano(TareaEnSegundoPlano *tarea) {
     tarea->activo = false;
     sleep(1);
     free(tarea);
 }
 
-Tarea *crearTarea(char *descripcion, void (*funcion)(void *), void *args, int intervaloEnMilisegundos) {
-    Tarea *tarea = malloc(sizeof(Tarea));
+TareaEnSegundoPlano *crearTareaProgramableEnSegundoPlano(char *descripcion, void (*funcion)(void *), void *args, int intervaloEnMilisegundos) {
+    TareaEnSegundoPlano *tarea = malloc(sizeof(TareaEnSegundoPlano));
     tarea->descripcion = descripcion;
     tarea->funcion = funcion;
     tarea->args = args;
     tarea->intervaloEnMilisegundos = intervaloEnMilisegundos;
     tarea->activo = true;
-    tarea->esInfinita = intervaloEnMilisegundos == 0 ? true : false;
     return tarea;
+}
+
+TareaEnSegundoPlano *crearTareaPermanenteEnSegundoPlano(char *descripcion, void (*funcion)(void *), void *args) {
+    return crearTareaProgramableEnSegundoPlano(descripcion, funcion, args, INTERVALO_NO_DEFINIDO);
 }
