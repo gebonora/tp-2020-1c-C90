@@ -15,6 +15,7 @@
 #include "modelo/mapa/registro/RegistradorDePosiciones.h"
 #include "modelo/equipo/Equipo.h"
 #include "modelo/objetivo/ObjetivoGlobal.h"
+#include "modelo/planificable/tarea/TareaPlanificable.h"
 #include "delibird/utils/strings/ExtensionStrings.h"
 #include "delibird/utils/programadorDeTareas/ProgramadorDeTareas.h"
 

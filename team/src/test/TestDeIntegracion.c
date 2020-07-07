@@ -124,6 +124,7 @@ void testDePlanificable() {
     HiloEntrenadorPlanificable * hiloEntrenadorPlanificable = HiloEntrenadorPlanificableConstructor.new(entrenador);
 
     //TODO: Meterle una tarea y que la haga de a poco.
+    TareaPlanificable * tarea = TareaPlanificableConstructor.new();
 
     hiloEntrenadorPlanificable->destruir(hiloEntrenadorPlanificable);
     entrenador->destruir(entrenador);

@@ -12,6 +12,7 @@ static void trabajar(HiloEntrenadorPlanificable * this) {
             log_debug(this->logger, "Se interrumpió el ciclo de trabajo fin de trabajo");
             break;
         }
+        //TODO: La tareaaaa
         log_debug(this->logger, "Finaliza un ciclo de trabajo muy duro");
     }
     sem_post(&this->semaforoFinDeTrabajo);
