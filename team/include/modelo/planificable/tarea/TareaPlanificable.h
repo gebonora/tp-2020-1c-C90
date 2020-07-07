@@ -9,6 +9,8 @@
 
 typedef struct TareaPlanificable {
     t_log * logger;
+    int contadorDeInstrucciones;
+    void (*destruir)(struct TareaPlanificable * this);
 } TareaPlanificable;
 
 extern const struct TareaPlanificableClass {

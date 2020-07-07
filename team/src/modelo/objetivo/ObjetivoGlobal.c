@@ -36,10 +36,10 @@ void destruirObjetivoGlobal(ObjetivoGlobal * this) {
     dictionary_destroy_and_destroy_elements(this->contabilidadEspecies, free);
 }
 
-static ObjetivoGlobal new(Equipo equipo) {
+static ObjetivoGlobal new(Equipo unEquipo) {
     ObjetivoGlobal objetivo = {
             .logger = log_create(TEAM_INTERNAL_LOG_FILE, "ObjetivoGlobal", SHOW_INTERNAL_CONSOLE, INTERNAL_LOG_LEVEL),
-            .contabilidadEspecies = calcularObjetivoEspecies(equipo),
+            .contabilidadEspecies = calcularObjetivoEspecies(unEquipo),
             &especiesNecesarias,
             &puedeCapturarse,
             &imprimirObjetivoGlobal,
@@ -57,9 +57,9 @@ t_dictionary * calcularObjetivoEspecies(Equipo entrenadores) {
     void agregarPokemonesNecesarios(char * nombreEspecie, void * cantidad) {
         if (dictionary_has_key(contabilidadEspecies, nombreEspecie)) {
             ContabilidadEspecie * contabilidadEspecie = dictionary_get(contabilidadEspecies, nombreEspecie);
-            contabilidadEspecie->necesarios += cantidad;
+            contabilidadEspecie->necesarios += (int) cantidad;
         } else {
-            ContabilidadEspecie * contabilidadEspecie = crearContabilidadEspecie(cantidad, 0);
+            ContabilidadEspecie * contabilidadEspecie = crearContabilidadEspecie((int) cantidad, 0);
             dictionary_put(contabilidadEspecies, nombreEspecie, contabilidadEspecie);
         }
     }
@@ -67,9 +67,9 @@ t_dictionary * calcularObjetivoEspecies(Equipo entrenadores) {
     void agregarPokemonesCapturados(char * nombreEspecie, void * cantidad) {
         if (dictionary_has_key(contabilidadEspecies, nombreEspecie)) {
             ContabilidadEspecie * contabilidadEspecie = dictionary_get(contabilidadEspecies, nombreEspecie);
-            contabilidadEspecie->capturados += cantidad;
+            contabilidadEspecie->capturados += (int) cantidad;
         } else {
-            ContabilidadEspecie * contabilidadEspecie = crearContabilidadEspecie(0, cantidad);
+            ContabilidadEspecie * contabilidadEspecie = crearContabilidadEspecie(0, (int) cantidad);
             dictionary_put(contabilidadEspecies, nombreEspecie, (void *) contabilidadEspecie);
         }
     }
