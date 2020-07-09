@@ -44,6 +44,8 @@ typedef struct Mapa {
     Plano plano;
     // Interfaz publica
     // hayPokemonesAtrapables() : bool - Es true si hay pokemones para atrapar.
+    void * (*moverPosicionable)(struct Mapa * this, char * uuid, Coordinate destino);
+    void (* agregarPresenciaACasillaExistenteOCrearUna)(struct Mapa * this, char * posicion, Presencia * presencia);
     char * (*registrarPosicion)(struct Mapa * this, Coordinate posicion, TipoPosicionable tipoPosicionable);
     Posicion (*obtenerPosicion)(struct Mapa * this, char * uuid); // Si le paso un uuid me dice en que (x,y) se encuentra.
     void (*destruir)(struct Mapa * this);

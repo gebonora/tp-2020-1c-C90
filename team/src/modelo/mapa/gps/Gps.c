@@ -13,6 +13,14 @@ Posicion posicionActual(Gps * this) {
     return posicion;
 }
 
+void irA(Gps * this, Coordinate destino) {
+    char * coordenada = coordenadaClave(destino);
+    log_debug(this->logger, "Guiando posicionable %s hacia %s", this->uuid, coordenada);
+    free(coordenada);
+    Mapa * mapa = this->mapa;
+    mapa->moverPosicionable(mapa, this->uuid, destino);
+}
+
 void destruirGps(Gps * this) {
     log_destroy(this->logger);
     free(this->uuid);
@@ -26,6 +34,7 @@ static Gps * new(Mapa * mapaDeRegistro, char * uuid) {
     gps->uuid = uuid;
     gps->mapa = mapaDeRegistro;
     gps->posicionActual = &posicionActual;
+    gps->irA = &irA;
     gps->destruirGps = &destruirGps;
 
     return gps;

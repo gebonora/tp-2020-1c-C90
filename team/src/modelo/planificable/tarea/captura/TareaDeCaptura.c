@@ -14,8 +14,10 @@ TareaPlanificable * generarTareaDeCaptura(Entrenador * entrenador, char * pokemo
             Coordinate coordenada = {.pos_x=0, .pos_y=0};
             Instruccion * instruccion = malloc(sizeof(Instruccion));
             instruccion->posicion = i;
-            //instruccion->funcion=
-            instruccion->descripcion = string_from_format("Moviendo entrenador a %s", coordenadaClave(coordenada));
+            instruccion->funcion = entrenador->mover;
+            char * coordenadaImprimible = coordenadaClave(coordenada);
+            instruccion->descripcion = string_from_format("Moviendo entrenador a %s", coordenadaImprimible);
+            free(coordenadaImprimible);
         }
         TareaPlanificable * tareaDeCaptura = TareaPlanificableConstructor.new(instrucciones);
         list_destroy(camino);

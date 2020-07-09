@@ -94,6 +94,15 @@ void testDeMapa() {
     assert(posicionDelEntrenadorRegistrado.coordenada.pos_x == 3);
     assert(posicionDelEntrenadorRegistrado.coordenada.pos_y == 3);
 
+    log_info(testLogger, "Testando el movimiento de un entrenador");
+    Coordinate destino = (Coordinate){.pos_x=4, .pos_y=20};
+    entrenadorARegistrar->mover(entrenadorARegistrar, destino);
+    posicionDelEntrenadorRegistrado = entrenadorARegistrar->posicion(entrenadorARegistrar);
+
+    assert(posicionDelEntrenadorRegistrado.valida == true);
+    //assert(posicionDelEntrenadorRegistrado.coordenada.pos_x == 4);
+    //assert(posicionDelEntrenadorRegistrado.coordenada.pos_y == 20);
+
     entrenadorARegistrar->destruir(entrenadorARegistrar);
     mapita.destruir(&mapita);
 }

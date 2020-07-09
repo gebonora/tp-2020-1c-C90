@@ -5,7 +5,8 @@
 #include "modelo/mapa/movimiento/Movimiento.h"
 
 Camino generarCamino(Coordinate origen, Coordinate destino) {
-    return list_create(); //TODO
+    Camino camino =  list_create();
+    return camino;
 }
 
 int distanciaEntre(Coordinate origen, Coordinate destino) {

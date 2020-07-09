@@ -7,7 +7,13 @@
 void mover(Entrenador * this, Coordinate posicionObjetivo) {
     Posicion posicionActual = this->posicion(this);
     if (posicionActual.valida) {
-        log_debug("El entrenador se movió de %s a %s", coordenadaClave(posicionActual.coordenada), coordenadaClave(posicionObjetivo));
+        Gps * gps = this->gps;
+        gps->irA(gps, posicionObjetivo);
+        char * coordActualImprimible = coordenadaClave(posicionActual.coordenada);
+        char * coordObjetivoImprimible = coordenadaClave(posicionObjetivo);
+        log_debug(this->logger,"El entrenador se movió de %s a %s", coordActualImprimible, coordObjetivoImprimible);
+        free(coordActualImprimible);
+        free(coordObjetivoImprimible);
     } else {
         log_error(this->logger, "No se puede mover a un entrenador sin posicion actual");
     }
