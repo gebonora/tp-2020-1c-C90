@@ -22,7 +22,7 @@ void imprimirObjetivoGlobal(ObjetivoGlobal * this) {
         log_debug(this->logger, "%-15s %-15d %-15d", pokemon, contabilidadEspecie->necesarios, contabilidadEspecie->capturados);
     }
     log_debug(this->logger, "------------------------------------------");
-    log_debug(this->logger, "              Objetivo Global");
+    log_debug(this->logger, "              Objetivo Global             ");
     log_debug(this->logger, "------------------------------------------");
     log_debug(this->logger, "%-16s%-16s%-16s", "Especie", "Necesarios", "Capturados");
     log_debug(this->logger, "------------------------------------------");
