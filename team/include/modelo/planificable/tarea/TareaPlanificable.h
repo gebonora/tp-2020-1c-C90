@@ -15,6 +15,7 @@ typedef enum EstadoTareaPlanificable {
 } EstadoTareaPlanificable;
 
 typedef struct Instruccion {
+    int posicion;
     void (*funcion)(void * sujetoDeAplicacion, void * argumentos, ...);
     char * descripcion;
 } Instruccion;
@@ -27,12 +28,18 @@ typedef struct TareaPlanificable {
     int totalInstrucciones;
     Instrucciones instrucciones;
     EstadoTareaPlanificable estado;
+    //Interfaz publica
     Instruccion * (*proximaInstruccion)(struct TareaPlanificable * this);
+    void (*notificarEjecucion)(struct TareaPlanificable * this, int numeroInstruccion);
     void (*destruir)(struct TareaPlanificable * this);
+    //Metodos privados
+    void (*actualizarEstado)(struct TareaPlanificable * this, int ultimaInstruccionEjecutada);
 } TareaPlanificable;
 
 extern const struct TareaPlanificableClass {
     TareaPlanificable *(*new)(Instrucciones instrucciones);
 } TareaPlanificableConstructor;
+
+char * nombreEstadoTareaPlanificable(EstadoTareaPlanificable estado);
 
 #endif //TEAM_TAREAPLANIFICABLE_H

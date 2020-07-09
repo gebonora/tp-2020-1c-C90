@@ -4,6 +4,15 @@
 
 #include "modelo/equipo/entrenador/Entrenador.h"
 
+void mover(Entrenador * this, Coordinate posicionObjetivo) {
+    Posicion posicionActual = this->posicion(this);
+    if (posicionActual.valida) {
+        log_debug("El entrenador se movió de %s a %s", coordenadaClave(posicionActual.coordenada), coordenadaClave(posicionObjetivo));
+    } else {
+        log_error(this->logger, "No se puede mover a un entrenador sin posicion actual");
+    }
+}
+
 bool objetivoCompletado(Entrenador * this) {
     t_list * pokemones = (t_list *) dictionary_keys(this->pokemonesObjetivo);
 
@@ -64,6 +73,7 @@ static Entrenador *new(char * posicionInicial, char * pokemonesIniciales, char *
     entrenador->pokemonesCapturados = agruparPokemonesPorNombre(pokemonesIniciales);
     entrenador->pokemonesObjetivo = agruparPokemonesPorNombre(pokemonesObjetivos);
     entrenador->limiteDeCaptura = totalDePokemones(entrenador->pokemonesObjetivo);
+    entrenador->mover = &mover;
     entrenador->objetivoCompletado = &objetivoCompletado;
     entrenador->puedeAtraparPokemones = &puedeAtraparPokemones;
     entrenador->posicion = &posicion;

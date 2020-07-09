@@ -7,12 +7,23 @@
 static void trabajar(HiloEntrenadorPlanificable * this) {
     while (!this->finDeTrabajo) {
         log_debug(this->logger, "Comienza un ciclo de trabajo muy duro");
+
         sem_wait(&this->semaforoEjecucionHabilitada);
+
         if (this->finDeTrabajo) {
             log_debug(this->logger, "Se interrumpió el ciclo de trabajo fin de trabajo");
             break;
         }
-        //TODO: La tareaaaa
+
+        TareaPlanificable * tareaEnEjecucion = this->tareaEnEjecucion;
+        Instruccion * instruccion = tareaEnEjecucion->proximaInstruccion(tareaEnEjecucion);
+        log_info(this->logger, "Se procede a ejecutar la instruccion %d: %s.",
+                instruccion->posicion, instruccion->descripcion);
+
+        instruccion->funcion(this->entrenador, NULL);
+
+        tareaEnEjecucion->notificarEjecucion(tareaEnEjecucion, instruccion->posicion);
+
         log_debug(this->logger, "Finaliza un ciclo de trabajo muy duro");
     }
     sem_post(&this->semaforoFinDeTrabajo);
@@ -20,6 +31,16 @@ static void trabajar(HiloEntrenadorPlanificable * this) {
 
 static void ejecutarParcialmente(HiloEntrenadorPlanificable * this, TareaPlanificable * tarea, int cantInstrucciones) {
     log_debug(this->logger, "Ejecutando tarea. Instrucciones a correr: %d/%d.", cantInstrucciones, tarea->totalInstrucciones);
+    if (tarea->estado != PENDIENTE_DE_EJECUCION) {
+        log_error(this->logger, "Se esta intentando ejecutar una tarea con estado %s",
+                nombreEstadoTareaPlanificable(tarea->estado));
+        return;
+    }
+    this->tareaEnEjecucion = tarea;
+    for (int i=0; i < cantInstrucciones; i++) {
+        sem_post(&this->semaforoEjecucionHabilitada);
+    }
+    this->tareaEnEjecucion = NULL;
 }
 
 static void ejecutar(HiloEntrenadorPlanificable * this, TareaPlanificable * tarea) {
