@@ -12,18 +12,16 @@ TareaPlanificable * generarTareaDeCaptura(Entrenador * entrenador, char * pokemo
         Instrucciones instrucciones = list_create();
 
         for (int i = 0; i < list_size(camino); i++) {
+            Coordinate * punteroCoordenada = list_get(camino, i);
+            t_list * args = list_create();
+            list_add(args, create_coordinate(punteroCoordenada->pos_x, punteroCoordenada->pos_y));
+
             Instruccion * instruccion = malloc(sizeof(Instruccion));
 
             instruccion->posicion = i;
-
-            instruccion->funcion = entrenador->mover;
-
-            Coordinate * punteroCoordenada = list_get(camino, i);
-            Coordinate coordenada = {.pos_x=punteroCoordenada->pos_x, .pos_y=punteroCoordenada->pos_y};
-            char * coordenadaImprimible = coordenadaClave(coordenada);
-            instruccion->descripcion = string_from_format("Mover entrenador a %s", coordenadaImprimible);
-
-            free(coordenadaImprimible);
+            instruccion->funcion = (void (*)(void *, ...)) entrenador->mover;
+            instruccion->descripcion = string_from_format("Mover entrenador a (%d,%d)", punteroCoordenada->pos_x, punteroCoordenada->pos_y);
+            instruccion->argumentos = args;
 
             list_add(instrucciones, instruccion);
         }

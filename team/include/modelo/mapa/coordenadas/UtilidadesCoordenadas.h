@@ -8,6 +8,8 @@
 #include "app/Global.h"
 
 char * coordenadaClave(Coordinate posicion); // Toma Coordinate => '(1,2)' que funciona como clave del mapa/plano.
+char * coordenadaPuntero(Coordinate * posicion);
+Coordinate convertirACoordenada(Coordinate * coordenadaPuntero);
 Coordinate convertirClaveACoordenada(char * coordenadaImprimible); // Toma '(1,2)' y devuelve Coordinate
 Coordinate parsearPosicion(char * coordenadaImprimible, char * separador);  // Toma '1|2' y separador => Coordinate
 

@@ -4,21 +4,21 @@
 
 #include "modelo/equipo/entrenador/Entrenador.h"
 
-void mover(Entrenador * this, Coordinate posicionObjetivo) {
+void mover(Entrenador * this, Coordinate * posicionObjetivo) {
     Posicion posicionActual = this->posicion(this);
     if (posicionActual.valida) {
 
         char * coordActualImprimible = coordenadaClave(posicionActual.coordenada);
-        char * coordObjetivoImprimible = coordenadaClave(posicionObjetivo);
+        char * coordObjetivoImprimible = coordenadaPuntero(posicionObjetivo);
 
-        int distanciaARecorrer = distanciaEntre(posicionActual.coordenada, posicionObjetivo);
+        int distanciaARecorrer = distanciaEntre(posicionActual.coordenada, convertirACoordenada(posicionObjetivo));
         if (distanciaARecorrer != 1) {
             log_warning(this->logger, "Se esta intentando mover a un entrenador de forma no adyacente [%s -> %s]. Distancia: %d.",
                     coordActualImprimible, coordObjetivoImprimible, distanciaARecorrer);
         }
 
         Gps * gps = this->gps;
-        gps->irA(gps, posicionObjetivo);
+        gps->irA(gps, convertirACoordenada(posicionObjetivo));
         log_debug(this->logger,"El entrenador se movió de %s a %s", coordActualImprimible, coordObjetivoImprimible);
         free(coordActualImprimible);
         free(coordObjetivoImprimible);

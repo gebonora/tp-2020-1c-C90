@@ -17,31 +17,14 @@
  * Aca se va a determinar COMO y CUANDO llamar a los metodos que exponga el entrenador.
  *
  * ¿Que cosas pueden mandarse a ejecutar?
- *      - Movimiento
- *      - Intercambio
- *      - Captura
+ *      - Movimiento(entrenador, coordenada)
+ *      - Intercambio(entrenador, coordenada, idEntrenador)
+ *      - Captura(entrenador, coordenada, especiePokemon)
  *
  * IDEA: armar un metodo que permita el ingreso de trabajo/tarea. Por dentro vamos a asignarsela al planificable, yq que
  *  de esta forma compartimos memoria entre hilos. Luego vamos a ir haciendo signals de acuerdo a la cantidad
  *  de ciclos que nos pasen. Cada ciclo ejecutara un pasito de la tarea.
  *  Dejamos registro de la ultima ejecucion en un struct InfoUltimaEjecucion del planificable.
- *
- *
- * Tengo que introducir el concepto de TAREA. TODO: ¿Quien la genera?
- *      - El planificable va a tener un atributo TAREA. El servicioDePlanificacion le asignara una.
- *          Cuando termine, el planificable se encargara de destruirla para que puedan asignarle otra.
- * // Necesito que el hilo este pausado por un semaforo.
- * // El signal sobre ese semaforo me da pie a procesar de a poco la tarea.
- * // La cantidad de pasos a ejecutar de la tarea nos lo pasan como .....TODO
- * Modelo loop:
- *      While(not finDeTrabajo) { // Cuando se liberen los recursos, esto se pone true y se sale.
- *          wait(semaforoEjecucionHabilitada); // El servicio de planificacion le da el ok para que el bucle gire.
- *
- *          TODO
- *          proximoPaso = tarea.proximoPaso() // Internamente hay un IP que se actualiza cuando le piden el paso.
- *
- *
- *      }
  */
 
 typedef struct InfoUltimaEjecucion {

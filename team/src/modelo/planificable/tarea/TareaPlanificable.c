@@ -76,7 +76,28 @@ char * nombreEstadoTareaPlanificable(EstadoTareaPlanificable estado) {
     }
 }
 
+void ejecutarInstruccion(Instruccion * instruccion, void * sujetoDeAplicacion) {
+    t_list * args = instruccion->argumentos;
+    int cantidadArgumentos = list_size(args);
+    switch (cantidadArgumentos) {
+        case 0:
+            instruccion->funcion(NULL);
+        case 1:
+            instruccion->funcion(sujetoDeAplicacion, list_get(args, 0));
+            break;
+        case 2:
+            instruccion->funcion(sujetoDeAplicacion, list_get(args, 0), list_get(args, 1));
+            break;
+        case 3:
+            instruccion->funcion(sujetoDeAplicacion, list_get(args, 0), list_get(args, 1), list_get(args, 2));
+            break;
+        default:
+            break;
+    }
+}
+
 void destruirInstruccion(Instruccion * instruccion) {
     free(instruccion->descripcion);
+    list_destroy_and_destroy_elements(instruccion->argumentos, free);
     free(instruccion);
 }

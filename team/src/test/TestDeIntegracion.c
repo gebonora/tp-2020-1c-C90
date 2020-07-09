@@ -121,15 +121,16 @@ void testDeMapa() {
     assert(posicionDelEntrenadorRegistrado.coordenada.pos_x == 3);
     assert(posicionDelEntrenadorRegistrado.coordenada.pos_y == 3);
 
-    log_info(testLogger, "Testando el movimiento de un entrenador");
-    Coordinate destino = (Coordinate){.pos_x=4, .pos_y=20};
+    log_info(testLogger, "Testeando el movimiento de un entrenador");
+    Coordinate * destino = create_coordinate(3,4);
     entrenadorARegistrar->mover(entrenadorARegistrar, destino);
     posicionDelEntrenadorRegistrado = entrenadorARegistrar->posicion(entrenadorARegistrar);
 
     assert(posicionDelEntrenadorRegistrado.valida == true);
-    assert(posicionDelEntrenadorRegistrado.coordenada.pos_x == 4);
-    assert(posicionDelEntrenadorRegistrado.coordenada.pos_y == 20);
+    assert(posicionDelEntrenadorRegistrado.coordenada.pos_x == 3);
+    assert(posicionDelEntrenadorRegistrado.coordenada.pos_y == 4);
 
+    free(destino);
     entrenadorARegistrar->destruir(entrenadorARegistrar);
     mapita.destruir(&mapita);
 }
@@ -209,9 +210,14 @@ void testDePlanificable() {
 
     hiloEntrenadorPlanificable->ejecutar(hiloEntrenadorPlanificable, tareaCaptura);
 
-    //TODO asertear consumo de la tarea y su efecto de lado.
+
     assert(tareaCaptura->estado == FINALIZADA);
-    assert(tareaCaptura->contadorDeInstrucciones == tareaCaptura->totalInstrucciones);
+
+    log_info(testLogger, "Testeando el efecto de lado de la tarea de captura");
+    Posicion posicionDeCaptura = entrenador->posicion(entrenador);
+    assert(posicionDeCaptura.valida == true);
+    assert(posicionDeCaptura.coordenada.pos_x == 3);
+    assert(posicionDeCaptura.coordenada.pos_y == 5);
 
     tareaCaptura->destruir(tareaCaptura);
     hiloEntrenadorPlanificable->destruir(hiloEntrenadorPlanificable);

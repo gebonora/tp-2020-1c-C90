@@ -20,7 +20,7 @@ static void trabajar(HiloEntrenadorPlanificable * this) {
         log_info(this->logger, "Se procede a ejecutar la instruccion %d: %s.",
                 instruccion->posicion, instruccion->descripcion);
 
-        instruccion->funcion(this->entrenador, NULL);
+        ejecutarInstruccion(instruccion, this->entrenador);
 
         tareaEnEjecucion->notificarEjecucion(tareaEnEjecucion, instruccion->posicion);
 
