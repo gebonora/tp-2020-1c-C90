@@ -5,6 +5,9 @@
 #include "modelo/planificable/tarea/TareaPlanificable.h"
 
 static Instruccion * proximaInstruccion(TareaPlanificable * this) {
+    if (this->estado == FINALIZADA || this->estado == ABORTADA){
+        return NULL;
+    }
     this->estado = EJECUTANDO;
     return (Instruccion *) list_get(this->instrucciones, this->contadorDeInstrucciones);
 }
@@ -13,18 +16,22 @@ static void actualizarEstado(TareaPlanificable * this, int ultimaInstruccionEjec
     if (this->estado == ABORTADA) {
         return;
     }
-    if (this->contadorDeInstrucciones != ultimaInstruccionEjecutada) {
+    if (this->totalInstrucciones == this->contadorDeInstrucciones + 1 && this->totalInstrucciones == ultimaInstruccionEjecutada + 1) {
+        this->estado = FINALIZADA;
+    } else if (ultimaInstruccionEjecutada < this->totalInstrucciones - 1) {
+        this->estado = PENDIENTE_DE_EJECUCION;
+    } else {
         // Orden de ejecución corrompido. Me notificaron que se ejecuto una instruccion que no me fue solicitada.
         this->estado = ABORTADA;
-    } else if (this->totalInstrucciones == this->contadorDeInstrucciones + 1) {
-        this->estado = FINALIZADA;
-    } else {
-        this->estado = PENDIENTE_DE_EJECUCION;
     }
 }
 
 static void notificarEjecucion(TareaPlanificable *this, int numeroInstruccion) {
-    if (this->contadorDeInstrucciones == numeroInstruccion) {
+    if (
+            this->estado == EJECUTANDO &&
+            this->contadorDeInstrucciones == numeroInstruccion &&
+            numeroInstruccion < this->totalInstrucciones - 1
+    ) {
         this->contadorDeInstrucciones+=1; //Avanzo solo si me notifican que la ultima que pidieron fue ejecutada.
     }
     actualizarEstado(this, numeroInstruccion);
