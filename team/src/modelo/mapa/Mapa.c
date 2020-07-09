@@ -43,15 +43,7 @@ void agregarPresenciaACasillaExistenteOCrearUna(Mapa * this, char * posicion, Pr
 char * registrarPosicion(Mapa * this, Coordinate posicion, TipoPosicionable tipoPosicionable) {
     char * posicionComoClave = coordenadaClave(posicion);
     Presencia * presencia = crearPresencia(tipoPosicionable);
-    //TODO volar
-    if (dictionary_has_key(this->plano, posicionComoClave)) {
-        Casilla casilla = dictionary_get(this->plano, posicionComoClave);
-        list_add(casilla, presencia);
-    } else {
-        Casilla casilla = crearCasilla();
-        list_add(casilla, presencia);
-        dictionary_put(this->plano, posicionComoClave, casilla);
-    }
+    this->agregarPresenciaACasillaExistenteOCrearUna(this, posicionComoClave, presencia);
     log_debug(this->logger, "Se registró un %s en la posición %s", nombreTipoPosicionable(tipoPosicionable), posicionComoClave);
     free(posicionComoClave);
     return presencia->uuid;
