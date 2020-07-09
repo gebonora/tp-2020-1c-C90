@@ -100,8 +100,8 @@ void testDeMapa() {
     posicionDelEntrenadorRegistrado = entrenadorARegistrar->posicion(entrenadorARegistrar);
 
     assert(posicionDelEntrenadorRegistrado.valida == true);
-    //assert(posicionDelEntrenadorRegistrado.coordenada.pos_x == 4);
-    //assert(posicionDelEntrenadorRegistrado.coordenada.pos_y == 20);
+    assert(posicionDelEntrenadorRegistrado.coordenada.pos_x == 4);
+    assert(posicionDelEntrenadorRegistrado.coordenada.pos_y == 20);
 
     entrenadorARegistrar->destruir(entrenadorARegistrar);
     mapita.destruir(&mapita);
