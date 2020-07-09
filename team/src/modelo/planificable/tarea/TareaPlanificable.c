@@ -19,6 +19,7 @@ static TareaPlanificable *new(Instrucciones instrucciones) {
 
     tarea->logger = log_create(TEAM_INTERNAL_LOG_FILE, "TareaPlanificable", SHOW_INTERNAL_CONSOLE, INTERNAL_LOG_LEVEL);
     tarea->contadorDeInstrucciones = 0;
+    tarea->totalInstrucciones = list_size(instrucciones);
     tarea->instrucciones = instrucciones;
     tarea->estado = PENDIENTE_DE_EJECUCION;
     tarea->proximaInstruccion = &proximaInstruccion;

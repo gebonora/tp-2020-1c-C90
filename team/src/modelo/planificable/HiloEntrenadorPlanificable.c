@@ -18,6 +18,14 @@ static void trabajar(HiloEntrenadorPlanificable * this) {
     sem_post(&this->semaforoFinDeTrabajo);
 }
 
+static void ejecutarParcialmente(HiloEntrenadorPlanificable * this, TareaPlanificable * tarea, int cantInstrucciones) {
+    log_debug(this->logger, "Ejecutando tarea. Instrucciones a correr: %d/%d.", cantInstrucciones, tarea->totalInstrucciones);
+}
+
+static void ejecutar(HiloEntrenadorPlanificable * this, TareaPlanificable * tarea) {
+    this->ejecutarParcialmente(this, tarea, tarea->totalInstrucciones);
+}
+
 static void destruir(HiloEntrenadorPlanificable * this) {
     this->finDeTrabajo = true;
     sem_post(&this->semaforoEjecucionHabilitada);
@@ -38,7 +46,11 @@ static HiloEntrenadorPlanificable *new(Entrenador * entrenador) {
     hiloEntrenadorPlanificable->finDeTrabajo = false;
     sem_init(&hiloEntrenadorPlanificable->semaforoEjecucionHabilitada,1 ,0);
     sem_init(&hiloEntrenadorPlanificable->semaforoFinDeTrabajo,0 ,0);
+    hiloEntrenadorPlanificable->tareaEnEjecucion = NULL;
+    hiloEntrenadorPlanificable->infoUltimaEjecucion = (InfoUltimaEjecucion) {.rafagaAnterior=0, .estimadoAnterior=0};
     hiloEntrenadorPlanificable->trabajar = &trabajar;
+    hiloEntrenadorPlanificable->ejecutarParcialmente = &ejecutarParcialmente;
+    hiloEntrenadorPlanificable->ejecutar = &ejecutar;
     hiloEntrenadorPlanificable->destruir = &destruir;
     free(nombreLog);
 

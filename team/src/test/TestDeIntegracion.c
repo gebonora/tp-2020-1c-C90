@@ -143,10 +143,13 @@ void testDePlanificable() {
     registrarEnMapaPosicionEntrenador(&mapita, entrenador);
     HiloEntrenadorPlanificable * hiloEntrenadorPlanificable = HiloEntrenadorPlanificableConstructor.new(entrenador);
 
-    //TODO: Meterle una tarea y que la haga de a poco.
-    log_info(testLogger, "Testeando la ejecucion de una tarea de captura");
+    log_info(testLogger, "Testeando la ejecucion total de una tarea de captura");
     Coordinate posicionPokemon = (Coordinate){.pos_x=3, .pos_y=5};
     TareaPlanificable * tareaCaptura = generarTareaDeCaptura(hiloEntrenadorPlanificable->entrenador, "A", posicionPokemon);
+
+    hiloEntrenadorPlanificable->ejecutar(hiloEntrenadorPlanificable, tareaCaptura);
+
+    //assert(tareaCaptura->contadorDeInstrucciones == tareaCaptura->totalInstrucciones);
 
     tareaCaptura->destruir(tareaCaptura);
     hiloEntrenadorPlanificable->destruir(hiloEntrenadorPlanificable);

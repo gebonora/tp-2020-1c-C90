@@ -24,6 +24,7 @@ typedef t_list * Instrucciones;
 typedef struct TareaPlanificable {
     t_log * logger;
     int contadorDeInstrucciones;
+    int totalInstrucciones;
     Instrucciones instrucciones;
     EstadoTareaPlanificable estado;
     Instruccion * (*proximaInstruccion)(struct TareaPlanificable * this);
