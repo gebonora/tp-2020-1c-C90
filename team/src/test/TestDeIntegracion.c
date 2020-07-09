@@ -16,6 +16,9 @@ void testDeIntegracion() {
     // Algoritmos
     testDeAlgoritmos();
 
+    // Tareas
+    testDeTareas();
+
     // Planificacion
     testDePlanificable();
 
@@ -118,17 +121,37 @@ void testDeAlgoritmos() {
     entrenador2->destruir(entrenador2);
 }
 
+void testDeTareas() {
+    log_info(testLogger, "Testeando la generacion de una tarea de captura");
+    Entrenador * entrenador = EntrenadorConstructor.new("4|20", "A", "B");
+    Mapa mapita = MapaConstructor.new();
+    registrarEnMapaPosicionEntrenador(&mapita, entrenador);
+    Coordinate posicionPokemon = (Coordinate){.pos_x=34, .pos_y=23};
+    TareaPlanificable * tareaCaptura = generarTareaDeCaptura(entrenador, "A", posicionPokemon);
+
+    //TODO: Assertear metodos de la tarea.
+
+    tareaCaptura->destruir(tareaCaptura);
+    entrenador->destruir(entrenador);
+    mapita.destruir(&mapita);
+}
+
 void testDePlanificable() {
     log_info(testLogger, "Testeando la unidad planificable de los entrenadores");
     Entrenador * entrenador = EntrenadorConstructor.new("7|3", "A", "B");
+    Mapa mapita = MapaConstructor.new();
+    registrarEnMapaPosicionEntrenador(&mapita, entrenador);
     HiloEntrenadorPlanificable * hiloEntrenadorPlanificable = HiloEntrenadorPlanificableConstructor.new(entrenador);
 
     //TODO: Meterle una tarea y que la haga de a poco.
-    TareaPlanificable * tarea = TareaPlanificableConstructor.new();
+    log_info(testLogger, "Testeando la ejecucion de una tarea de captura");
+    Coordinate posicionPokemon = (Coordinate){.pos_x=3, .pos_y=5};
+    TareaPlanificable * tareaCaptura = generarTareaDeCaptura(hiloEntrenadorPlanificable->entrenador, "A", posicionPokemon);
 
-    tarea->destruir(tarea);
+    tareaCaptura->destruir(tareaCaptura);
     hiloEntrenadorPlanificable->destruir(hiloEntrenadorPlanificable);
     entrenador->destruir(entrenador);
+    mapita.destruir(&mapita);
 }
 
 void testDeEventos() {

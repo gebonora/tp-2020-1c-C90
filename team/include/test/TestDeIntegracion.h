@@ -15,7 +15,7 @@
 #include "modelo/mapa/registro/RegistradorDePosiciones.h"
 #include "modelo/equipo/Equipo.h"
 #include "modelo/objetivo/ObjetivoGlobal.h"
-#include "modelo/planificable/tarea/TareaPlanificable.h"
+#include "modelo/planificable/tarea/captura/TareaDeCaptura.h"
 #include "delibird/utils/strings/ExtensionStrings.h"
 #include "delibird/utils/programadorDeTareas/ProgramadorDeTareas.h"
 
@@ -23,6 +23,7 @@ void testDeIntegracion();
 void testDeEntrenadores();
 void testDeMapa();
 void testDeAlgoritmos();
+void testDeTareas();
 void testDePlanificable();
 void testDeEventos();
 

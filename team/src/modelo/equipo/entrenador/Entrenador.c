@@ -35,7 +35,7 @@ bool puedeAtraparPokemones(Entrenador * this) {
 Posicion posicion(Entrenador * this) {
     Gps * gps = this->gps;
     if (gps == NULL) {
-        log_error(this->logger, "El entrenador no tiene un GPS asignado. No puede responder su ubicación");
+        log_error(this->logger, "El entrenador no tiene un GPS asignado. No puede responder su ubicación.");
         return (Posicion) {.valida = false};
     }
     return gps->posicionActual(gps);
