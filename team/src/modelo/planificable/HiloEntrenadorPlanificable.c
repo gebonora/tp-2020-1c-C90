@@ -25,11 +25,13 @@ static void trabajar(HiloEntrenadorPlanificable * this) {
         tareaEnEjecucion->notificarEjecucion(tareaEnEjecucion, instruccion->posicion);
 
         log_debug(this->logger, "Finaliza un ciclo de trabajo muy duro");
+
+        sem_post(&this->semaforoCicloCompletado);
     }
     sem_post(&this->semaforoFinDeTrabajo);
 }
 
-static void ejecutarParcialmente(HiloEntrenadorPlanificable * this, TareaPlanificable * tarea, int cantInstrucciones) {
+static void ejecutarLimitado(HiloEntrenadorPlanificable * this, TareaPlanificable * tarea, int cantInstrucciones) {
     log_debug(this->logger, "Ejecutando tarea. Instrucciones a correr: %d/%d.", cantInstrucciones, tarea->totalInstrucciones);
     if (tarea->estado != PENDIENTE_DE_EJECUCION) {
         log_error(this->logger, "Se esta intentando ejecutar una tarea con estado %s",
@@ -39,6 +41,7 @@ static void ejecutarParcialmente(HiloEntrenadorPlanificable * this, TareaPlanifi
     this->tareaEnEjecucion = tarea;
     for (int i=0; i < cantInstrucciones; i++) {
         sem_post(&this->semaforoEjecucionHabilitada);
+        sem_wait(&this->semaforoCicloCompletado);
     }
     this->tareaEnEjecucion = NULL;
 }
@@ -66,11 +69,12 @@ static HiloEntrenadorPlanificable *new(Entrenador * entrenador) {
     hiloEntrenadorPlanificable->entrenador = entrenador;
     hiloEntrenadorPlanificable->finDeTrabajo = false;
     sem_init(&hiloEntrenadorPlanificable->semaforoEjecucionHabilitada,1 ,0);
+    sem_init(&hiloEntrenadorPlanificable->semaforoCicloCompletado,1 ,0);
     sem_init(&hiloEntrenadorPlanificable->semaforoFinDeTrabajo,0 ,0);
     hiloEntrenadorPlanificable->tareaEnEjecucion = NULL;
     hiloEntrenadorPlanificable->infoUltimaEjecucion = (InfoUltimaEjecucion) {.rafagaAnterior=0, .estimadoAnterior=0};
     hiloEntrenadorPlanificable->trabajar = &trabajar;
-    hiloEntrenadorPlanificable->ejecutarParcialmente = &ejecutarParcialmente;
+    hiloEntrenadorPlanificable->ejecutarParcialmente = &ejecutarLimitado;
     hiloEntrenadorPlanificable->ejecutar = &ejecutar;
     hiloEntrenadorPlanificable->destruir = &destruir;
     free(nombreLog);

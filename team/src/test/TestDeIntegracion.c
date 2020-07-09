@@ -180,6 +180,7 @@ void testDeTareas() {
 
     tareaCaptura->notificarEjecucion(tareaCaptura, 1);
     assert(tareaCaptura->estado == FINALIZADA);
+    assert(tareaCaptura->contadorDeInstrucciones + 1 == tareaCaptura->totalInstrucciones);
 
     assert(tareaCaptura->proximaInstruccion(tareaCaptura) == NULL);
     assert(tareaCaptura->estado == FINALIZADA);
@@ -209,8 +210,8 @@ void testDePlanificable() {
     hiloEntrenadorPlanificable->ejecutar(hiloEntrenadorPlanificable, tareaCaptura);
 
     //TODO asertear consumo de la tarea y su efecto de lado.
-    //assert(tareaCaptura->estado == FINALIZADA);
-    //assert(tareaCaptura->contadorDeInstrucciones == tareaCaptura->totalInstrucciones);
+    assert(tareaCaptura->estado == FINALIZADA);
+    assert(tareaCaptura->contadorDeInstrucciones == tareaCaptura->totalInstrucciones);
 
     tareaCaptura->destruir(tareaCaptura);
     hiloEntrenadorPlanificable->destruir(hiloEntrenadorPlanificable);

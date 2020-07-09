@@ -54,6 +54,7 @@ typedef struct HiloEntrenadorPlanificable {
     Entrenador *entrenador;
     bool finDeTrabajo;
     sem_t semaforoEjecucionHabilitada;
+    sem_t semaforoCicloCompletado;
     sem_t semaforoFinDeTrabajo;
     TareaPlanificable * tareaEnEjecucion; //Nos sirve para que el hilo pueda levantar de aca la tarea que le dejen.
     InfoUltimaEjecucion infoUltimaEjecucion; //Necesario en SJF.
