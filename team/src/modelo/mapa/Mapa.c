@@ -71,9 +71,7 @@ Posicion obtenerPosicion(Mapa * this, char * uuid) {
 
 static void dibujarMapa(Mapa * this) {
     t_list * coordenadasClave = (t_list *) dictionary_keys(this->plano);
-
     uint32_t max = 0;
-
     for (int i = 0; i < list_size(coordenadasClave); i++) {
         char * coordenadaClave = (char *) list_get(coordenadasClave, i);
         Coordinate coordenada = convertirClaveACoordenada(coordenadaClave);
@@ -84,15 +82,13 @@ static void dibujarMapa(Mapa * this) {
             max = coordenada.pos_y;
         }
     }
+    list_destroy(coordenadasClave);
 
     char * separadorDibujo = string_new();
-
     for (int s = 0; s < ((max * 3) + 1) / 2; s++) {
         string_append(&separadorDibujo, "#");
     }
-
     log_debug(this->logger, "%s Mapa %s", separadorDibujo, separadorDibujo);
-
 
     char * enumeracionColumnas = string_from_format("   ");
     for (int e = 1; e <= max; e++) {
@@ -108,7 +104,24 @@ static void dibujarMapa(Mapa * this) {
         string_append_with_format(&medio, "%-3d", x);
         for (int y = 1; y <= max; y++) {
             string_append(&arriba, "+--");
-            string_append_with_format(&medio, "|%-2s","");
+
+            char * representacionPresencia = string_new();
+            char * coordenadaClave = armarCoordenadaClave(x,y);
+
+            if (dictionary_has_key(this->plano, coordenadaClave)) {
+                Casilla casilla = dictionary_get(this->plano, coordenadaClave);
+                for (int p = 0; p < list_size(casilla); p++) {
+                    Presencia * presencia = list_get(casilla, p);
+                    char * inicialPresencia = string_substring(nombreTipoPosicionable(presencia->tipoPosicionable), 0, 1);
+                    if (!string_contains(representacionPresencia, inicialPresencia)) {
+                        string_append(&representacionPresencia, inicialPresencia);
+                    }
+                    free(inicialPresencia);
+                }
+            }
+            string_append_with_format(&medio, "|%-2s", representacionPresencia);
+            free(coordenadaClave);
+            free(representacionPresencia);
         }
         string_append(&arriba, "+");
         string_append(&medio, "|");
@@ -129,7 +142,6 @@ static void dibujarMapa(Mapa * this) {
 
     log_debug(this->logger, "%s Mapa %s", separadorDibujo, separadorDibujo);
     free(separadorDibujo);
-    list_destroy(coordenadasClave);
 }
 
 static void destruir(Mapa *this) {

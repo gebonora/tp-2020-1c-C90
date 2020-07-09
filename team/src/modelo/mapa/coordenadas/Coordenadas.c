@@ -4,6 +4,11 @@
 
 #include "modelo/mapa/coordenadas/UtilidadesCoordenadas.h"
 
+char * armarCoordenadaClave(int x, int y) {
+    Coordinate posicion = {.pos_x = x, .pos_y = y};
+    return coordenadaClave(posicion);
+}
+
 char * coordenadaClave(Coordinate posicion) {
     return string_from_format("(%u,%u)", posicion.pos_x, posicion.pos_y);
 }
