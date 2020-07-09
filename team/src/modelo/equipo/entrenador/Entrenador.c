@@ -7,10 +7,18 @@
 void mover(Entrenador * this, Coordinate posicionObjetivo) {
     Posicion posicionActual = this->posicion(this);
     if (posicionActual.valida) {
-        Gps * gps = this->gps;
-        gps->irA(gps, posicionObjetivo);
+
         char * coordActualImprimible = coordenadaClave(posicionActual.coordenada);
         char * coordObjetivoImprimible = coordenadaClave(posicionObjetivo);
+
+        int distanciaARecorrer = distanciaEntre(posicionActual.coordenada, posicionObjetivo);
+        if (distanciaARecorrer != 1) {
+            log_warning(this->logger, "Se esta intentando mover a un entrenador de forma no adyacente [%s -> %s]. Distancia: %d.",
+                    coordActualImprimible, coordObjetivoImprimible, distanciaARecorrer);
+        }
+
+        Gps * gps = this->gps;
+        gps->irA(gps, posicionObjetivo);
         log_debug(this->logger,"El entrenador se movió de %s a %s", coordActualImprimible, coordObjetivoImprimible);
         free(coordActualImprimible);
         free(coordObjetivoImprimible);

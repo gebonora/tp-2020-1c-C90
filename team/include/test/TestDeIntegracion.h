@@ -18,9 +18,11 @@
 #include "modelo/planificable/tarea/captura/TareaDeCaptura.h"
 #include "delibird/utils/strings/ExtensionStrings.h"
 #include "delibird/utils/programadorDeTareas/ProgramadorDeTareas.h"
+#include "modelo/mapa/movimiento/Movimiento.h"
 
 void testDeIntegracion();
 void testDeEntrenadores();
+void testDeMovimiento();
 void testDeMapa();
 void testDeAlgoritmos();
 void testDeTareas();

@@ -41,5 +41,6 @@ extern const struct TareaPlanificableClass {
 } TareaPlanificableConstructor;
 
 char * nombreEstadoTareaPlanificable(EstadoTareaPlanificable estado);
+void destruirInstruccion(Instruccion * instruccion);
 
 #endif //TEAM_TAREAPLANIFICABLE_H

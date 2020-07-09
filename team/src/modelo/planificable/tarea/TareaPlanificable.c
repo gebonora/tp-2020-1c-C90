@@ -32,7 +32,7 @@ static void notificarEjecucion(TareaPlanificable *this, int numeroInstruccion) {
 
 static void destruir(TareaPlanificable * this) {
     log_destroy(this->logger);
-    list_destroy(this->instrucciones);
+    list_destroy_and_destroy_elements(this->instrucciones, (void (*)(void *)) destruirInstruccion);
     free(this);
 }
 
@@ -67,4 +67,9 @@ char * nombreEstadoTareaPlanificable(EstadoTareaPlanificable estado) {
         default:
             return "DESCONOCIDO";
     }
+}
+
+void destruirInstruccion(Instruccion * instruccion) {
+    free(instruccion->descripcion);
+    free(instruccion);
 }
