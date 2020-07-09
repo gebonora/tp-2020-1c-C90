@@ -25,6 +25,7 @@ void moverPosicionable(Mapa * this, char * uuid, Coordinate destino) {
         log_error(this->logger, "Movimiento cancelado. No se pudo encontrar en el mapa a %s", uuid);
     }
     free(posicionDestino);
+    this->dibujarMapa(this);
 }
 
 void agregarPresenciaACasillaExistenteOCrearUna(Mapa * this, char * posicion, Presencia * presencia) {
@@ -46,6 +47,7 @@ char * registrarPosicion(Mapa * this, Coordinate posicion, TipoPosicionable tipo
     this->agregarPresenciaACasillaExistenteOCrearUna(this, posicionComoClave, presencia);
     log_debug(this->logger, "Se registró un %s en la posición %s", nombreTipoPosicionable(tipoPosicionable), posicionComoClave);
     free(posicionComoClave);
+    this->dibujarMapa(this);
     return presencia->uuid;
 }
 
@@ -67,6 +69,81 @@ Posicion obtenerPosicion(Mapa * this, char * uuid) {
     return posicion;
 }
 
+static void dibujarMapa(Mapa * this) {
+    t_list * coordenadasClave = (t_list *) dictionary_keys(this->plano);
+    uint32_t max = 0;
+    for (int i = 0; i < list_size(coordenadasClave); i++) {
+        char * coordenadaClave = (char *) list_get(coordenadasClave, i);
+        Coordinate coordenada = convertirClaveACoordenada(coordenadaClave);
+        if (coordenada.pos_x > max) {
+            max = coordenada.pos_x;
+        }
+        if (coordenada.pos_y > max) {
+            max = coordenada.pos_y;
+        }
+    }
+    list_destroy(coordenadasClave);
+
+    char * separadorDibujo = string_new();
+    for (int s = 0; s < ((max * 3) + 1) / 2; s++) {
+        string_append(&separadorDibujo, "#");
+    }
+    log_debug(this->logger, "%s Mapa %s", separadorDibujo, separadorDibujo);
+
+    char * enumeracionColumnas = string_from_format("   ");
+    for (int e = 1; e <= max; e++) {
+        string_append_with_format(&enumeracionColumnas, " %-2d", e);
+    }
+    log_debug(this->logger, enumeracionColumnas);
+    free(enumeracionColumnas);
+
+    for (int x = 1; x <= max; x++) {
+        char * arriba = string_new();
+        char * medio = string_new();
+        string_append(&arriba, "   ");
+        string_append_with_format(&medio, "%-3d", x);
+        for (int y = 1; y <= max; y++) {
+            string_append(&arriba, "+--");
+
+            char * representacionPresencia = string_new();
+            char * coordenadaClave = armarCoordenadaClave(x,y);
+
+            if (dictionary_has_key(this->plano, coordenadaClave)) {
+                Casilla casilla = dictionary_get(this->plano, coordenadaClave);
+                for (int p = 0; p < list_size(casilla); p++) {
+                    Presencia * presencia = list_get(casilla, p);
+                    char * inicialPresencia = string_substring(nombreTipoPosicionable(presencia->tipoPosicionable), 0, 1);
+                    if (!string_contains(representacionPresencia, inicialPresencia)) {
+                        string_append(&representacionPresencia, inicialPresencia);
+                    }
+                    free(inicialPresencia);
+                }
+            }
+            string_append_with_format(&medio, "|%-2s", representacionPresencia);
+            free(coordenadaClave);
+            free(representacionPresencia);
+        }
+        string_append(&arriba, "+");
+        string_append(&medio, "|");
+        log_debug(this->logger, arriba);
+        log_debug(this->logger, medio);
+        free(arriba);
+        free(medio);
+    }
+
+    char * final = string_new();
+    string_append(&final, "   ");
+    for (int b = 0; b < max; b ++) {
+        string_append(&final, "+--");
+    }
+    string_append(&final, "+");
+    log_debug(this->logger, final);
+    free(final);
+
+    log_debug(this->logger, "%s Mapa %s", separadorDibujo, separadorDibujo);
+    free(separadorDibujo);
+}
+
 static void destruir(Mapa *this) {
     log_debug(this->logger, "Se procede a destruir el mapa");
     log_destroy(this->logger);
@@ -81,6 +158,7 @@ static Mapa new() {
             &agregarPresenciaACasillaExistenteOCrearUna,
             &registrarPosicion,
             &obtenerPosicion,
+            &dibujarMapa,
             &destruir
     };
 }
