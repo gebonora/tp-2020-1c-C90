@@ -34,7 +34,9 @@ Partition* find_partition_dynamic(uint32_t sizeOfData) {
 
 		partition->size = new_size;
 		partition->free = false;
-		partition->access_time = (int)ahoraEnTimeT();
+		int now = (int) ahoraEnTimeT();
+		partition->access_time = now;
+		partition->creation_time = now;
 		// TODO: ver access time,
 		 // ver metodo de seba nueva particion
 
