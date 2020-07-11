@@ -29,6 +29,4 @@ void testDeTareas();
 void testDePlanificable();
 void testDeEventos();
 
-t_log * testLogger;
-
 #endif //TEAM_TESTDEINTEGRACION_H

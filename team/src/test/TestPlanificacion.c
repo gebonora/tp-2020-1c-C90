@@ -5,6 +5,8 @@
 #include "test/TestDeIntegracion.h"
 
 void testDePlanificable() {
+    t_log * testLogger = log_create(TEAM_INTERNAL_LOG_FILE, "TestPlanificable", 1, LOG_LEVEL_INFO);
+
     log_info(testLogger, "Testeando la unidad planificable de los entrenadores");
     Entrenador * entrenador = EntrenadorConstructor.new("7|3", "A", "B");
     Mapa mapita = MapaConstructor.new();
@@ -45,4 +47,5 @@ void testDePlanificable() {
     hiloEntrenadorPlanificable->destruir(hiloEntrenadorPlanificable);
     entrenador->destruir(entrenador);
     mapita.destruir(&mapita);
+    log_destroy(testLogger);
 }

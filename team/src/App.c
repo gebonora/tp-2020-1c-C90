@@ -22,6 +22,7 @@ int main() {
     if (CORRER_TESTS) {
         log_info(INTERNAL_LOGGER, "Realizando pruebas de integracion...");
         testDeIntegracion();
+        log_info(INTERNAL_LOGGER, "Pruebas de integracion finalizadas con exito");
     }
 
     // Estado inicial del proceso Team
@@ -84,7 +85,7 @@ void inicializarComponentesDelSistema() {
 /**
     * Instanciar a los entrenadores a partir de la config - OK
     * Armar el objetivo global - OK
-    * Armar los hilos de entrenador planificables - TODO
+    * Armar los hilos de entrenador planificables - OK
     * Enviar a los entrenadores a new - TODO
     * Finalmente, con el cliente broker a mano: Por cada pokemon del objetivo global, enviar un GET \[POKEMON\] - TODO
  */

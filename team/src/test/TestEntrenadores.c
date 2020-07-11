@@ -5,6 +5,8 @@
 #include "test/TestDeIntegracion.h"
 
 void testDeEntrenadores() {
+    t_log * testLogger = log_create(TEAM_INTERNAL_LOG_FILE, "TestEntrenadores", 1, LOG_LEVEL_INFO);
+
     log_info(testLogger, "Testeando los metodos de los entrenadores");
     Entrenador * entrenador = EntrenadorConstructor.new("1|2", "A|B", "A|C|C");
     Entrenador * entrenador2 = EntrenadorConstructor.new("2|4", "A|B", "A|B");
@@ -53,4 +55,6 @@ void testDeEntrenadores() {
     list_destroy(especiesNecesarias);
     destruirEquipo(equipito);
     objetivo.destruirObjetivoGlobal(&objetivo);
+
+    log_destroy(testLogger);
 }

@@ -5,6 +5,8 @@
 #include "test/TestDeIntegracion.h"
 
 void testDeMapa() {
+    t_log * testLogger = log_create(TEAM_INTERNAL_LOG_FILE, "TestMapa", 1, LOG_LEVEL_INFO);
+
     log_info(testLogger, "Testeando la creacion del mapa");
     Mapa mapita = MapaConstructor.new();
     log_info(testLogger, "Testeando el registro de posicionables en el mapa");
@@ -30,4 +32,5 @@ void testDeMapa() {
     free(destino);
     entrenadorARegistrar->destruir(entrenadorARegistrar);
     mapita.destruir(&mapita);
+    log_destroy(testLogger);
 }
