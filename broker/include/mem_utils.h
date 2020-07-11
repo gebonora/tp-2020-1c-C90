@@ -9,7 +9,12 @@
 
 t_link_element* find_partition(int);
 Partition* choose_victim();
-Partition* create_partition(uint32_t, uint32_t, uint32_t*, uint32_t, Message*);
+Partition* create_partition(uintptr_t, uint32_t);
+Partition* create_partition_with_message(uintptr_t, uint32_t, Message*);
+void replace_partition_at(uintptr_t, Partition*);
+void remove_partition_at(uintptr_t);
+void add_partition_next_to(uintptr_t, Partition*);
+Partition* find_partition_at(uintptr_t);
 void show_partitions(t_list*);
 void show_memory_partitions();
 
