@@ -33,6 +33,8 @@ t_list* messages_from_operation(Operation operation){
 	t_list* messages = list_create();
 
 	void _transform_messages(Partition* partition){
+		int now = (int) ahoraEnTimeT();
+		partition->access_time = now;
 		void* message;
 
 		switch(operation){

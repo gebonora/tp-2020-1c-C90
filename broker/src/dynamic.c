@@ -59,7 +59,7 @@ void save_to_cache_dynamic_partitions(void* data, Message* message) {
 			memcpy(partition->start, data, message->data_size);
 		} else {
 			if(FRECUENCIA_COMPACTACION == partitions_killed) {//casos igual o 0
-				compactar();
+				_compact();
 			} else {
 				choose_victim();//que tambien la mata
 				_consolidate();
@@ -75,7 +75,44 @@ void save_to_cache_dynamic_partitions(void* data, Message* message) {
  *
  * */
 static void _compact() {
+	bool  _menor_start(Partition* p1, Partition* p2){
+		return p1->start < p2->start;
+	}
+	t_list* ocupied = list_sort(_get_occupied_partitions(), &_menor_start);
 
+	for(int i = 0; i< ocupied->elements_count; i+2){
+
+		Partition* first_partition = list_get(ocupied, i);
+		Partition* second_partition = list_get(ocupied, i+1);
+
+		if(i == 0){
+			first_partition->start = memory->cache;
+		} else {
+			Partition* third_partition = list_get(ocupied, i-1);
+			first_partition->start = third_partition->start + third_partition->size;
+		}
+
+		second_partition = first_partition->start + first_partition->size;
+	}
+
+	t_list* not_ocupied = list_sort(_get_not_ocupied_partition(), &_menor_start);
+
+	int free_size = 0;
+	Partition* free_big_partition;
+	for(int a = 0; a < not_ocupied->elements_count; a++){
+
+		Partition* partition = list_get(not_ocupied, a);
+
+		if(a == 0) free_big_partition = partition;
+
+		free_size += partition->size;
+	}
+
+	free_big_partition->size = free_size;
+	Partition* last_ocupied = list_get(ocupied, ocupied->elements_count -1);
+	free_big_partition->start = last_ocupied->start + last_ocupied->size;
+
+	//checks for nulls
 }
 
 
