@@ -91,9 +91,9 @@ void inicializarComponentesDelSistema() {
  */
 void configurarEstadoInicialProcesoTeam() {
     log_debug(INTERNAL_LOGGER, "Instanciando entrenadores y armando el equipo...");
-    equipo = crearEquipoPorConfiguracion();
+    equipoProcesoTeam = crearEquipoPorConfiguracion();
     log_debug(INTERNAL_LOGGER, "Calculando el objetivo global...");
-    objetivoGlobal = ObjetivoGlobalConstructor.new(equipo);
+    objetivoGlobal = ObjetivoGlobalConstructor.new(equipoProcesoTeam);
 }
 
 void liberarRecursos() {
@@ -115,7 +115,7 @@ void liberarRecursos() {
 
     // Proceso Team
     log_debug(INTERNAL_LOGGER, "Liberando participantes del proceso Team...");
-    destruirEquipo(equipo);
+    destruirEquipo(equipoProcesoTeam);
     objetivoGlobal.destruirObjetivoGlobal(&objetivoGlobal);
     mapaProcesoTeam.destruir(&mapaProcesoTeam);
 }

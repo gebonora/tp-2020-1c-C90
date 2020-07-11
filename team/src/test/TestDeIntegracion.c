@@ -20,10 +20,13 @@ void testDeIntegracion() {
     // Tareas
     testDeTareas();
 
+    // Planificador
+    testDePlanificador();
+
     // ServicioDePlanificacion
     testServicioDePlanificacion();
 
-    // Planificacion
+    // Unidad planificable
     testDePlanificable();
 
     // Eventos

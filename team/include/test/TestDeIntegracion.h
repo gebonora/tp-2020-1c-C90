@@ -30,5 +30,6 @@ void testDeTareas();
 void testDePlanificable();
 void testDeEventos();
 void testServicioDePlanificacion();
+void testDePlanificador();
 
 #endif //TEAM_TESTDEINTEGRACION_H

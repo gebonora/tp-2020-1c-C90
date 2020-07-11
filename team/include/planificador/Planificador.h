@@ -5,14 +5,17 @@
 #ifndef TEAM_PLANIFICADOR_H
 #define TEAM_PLANIFICADOR_H
 
+#include "app/Global.h"
+#include "planificador/transicionador/TransicionadorDeEstados.h"
+#include "planificador/algoritmos/AlgoritmoPlanificador.h"
+#include "delibird/servicios/servicioDeConfiguracion/ServicioDeConfiguracion.h"
+
 /**
  * Encargado de darle lugar a los entrenadores para que ejecuten sus acciones 1 a la vez.
  * Los hilos de los entrenadores van a estar bloqueados por un semaforo, y el planificador les va a dar signal.
  * Grado de multiprogramacion 1.
  *
  * Problemas:
- *  - ¿Como hago para que esto siga mandando a los amigos a EXEC independientemente del servicio de planificacion?
- *      ¿Correr en un hilo aparte con un terrible while this.hayAlgoParaHacer()?
  *  - ¿Puedo no conocer las reglas del servicio de planificación para seguir trabajando con un estado avanzado?
  *      Por ejemplo, si 3 entrenadores necesitan ejecutar, voy mandando de a uno a exec y replanifico.
  *  - ¿Que es replanificar? ¿Cuando replanifico? Ver teoria.
@@ -28,15 +31,18 @@ typedef struct Planificador {
     t_log *logger;
     AlgoritmoPlanificador algoritmoPlanificador;
     TransicionadorDeEstados transicionadorDeEstados;
+    ColasDePlanificacion * colas;
     // Interfaz publica
-    // agregar(UP) - Agrega una UP a la lista y le asigna el estado NEW
+    void (*agregarUnidadesPlanificables)(struct Planificador * planificador, t_list * unidadesPlanificables);
+    void (*agregarUnidadPlanificable)(struct Planificador * planificador, UnidadPlanificable * unidadPlanificable); // Agrega una UP a la lista y le asigna el estado NEW
     // planificar(UP) - Manda una UP a EXEC.
     // finalizar(UP) - Manda la UP a EXIT, si no hay mas UP activas, logre el objetivo global.
     void (*destruir)(struct Planificador *this);
+    void (*destructorUnidadPlanificable)(UnidadPlanificable * unidadPlanificable);
 } Planificador;
 
 extern const struct PlanificadorClass {
-    Planificador (*new)();
+    Planificador (*new)(t_list * unidadesPlanificablesIniciales, void (*destructorUnidadPlanificable)(UnidadPlanificable *));
 } PlanificadorConstructor;
 
 #endif //TEAM_PLANIFICADOR_H
