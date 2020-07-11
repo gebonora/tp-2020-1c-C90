@@ -22,6 +22,14 @@ void trabajar(ServicioDePlanificacion * this) {
     sem_post(&this->semaforoFinDeTrabajo);
 }
 
+void asignarEquipoAPlanificar(ServicioDePlanificacion * this, Equipo equipo) {
+    log_debug(this->logger, "Convirtiendo a los entrenadores en unidades planificables...");
+    t_list * unidadesPlanificables = convertirAUnidadesPlanificables(equipo);
+    this->planificador.agregarUnidadesPlanificables(&this->planificador, unidadesPlanificables);
+    log_info(this->logger, "Los entrenadores fueron enviados a la cola de NEW");
+    list_destroy(unidadesPlanificables);
+}
+
 void destruir(ServicioDePlanificacion * this) {
     this->finDeTrabajo = true;
     sem_post(&this->semaforoEjecucionHabilitada);
@@ -29,11 +37,11 @@ void destruir(ServicioDePlanificacion * this) {
     log_debug(this->logger, "Se procede a destruir al servicio de planificacion");
     queue_destroy(this->colaDeTrabajo);
     log_destroy(this->logger);
-    this->planificador.destruir(&this->planificador);
+    this->planificador.destruir(&this->planificador, destruirUnidadPlanificable);
     free(this);
 }
 
-static ServicioDePlanificacion * new(Equipo equipo) {
+static ServicioDePlanificacion * new() {
     ServicioDePlanificacion * servicio = malloc(sizeof(ServicioDePlanificacion));
 
     servicio->logger = log_create(TEAM_INTERNAL_LOG_FILE, "ServicioDePlanificacion", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_INFO);
@@ -41,14 +49,12 @@ static ServicioDePlanificacion * new(Equipo equipo) {
     servicio->finDeTrabajo = false;
     sem_init(&servicio->semaforoFinDeTrabajo,1 ,0);
     sem_init(&servicio->semaforoEjecucionHabilitada,1 ,0);
-    t_list * unidadesPlanificables = convertirAUnidadesPlanificables(equipo);
-    servicio->planificador = PlanificadorConstructor.new(unidadesPlanificables, destruirUnidadPlanificable);
+    servicio->planificador = PlanificadorConstructor.new();
+    servicio->asignarEquipoAPlanificar = &asignarEquipoAPlanificar;
     servicio->trabajar = &trabajar;
     servicio->destruir = &destruir;
 
     crearHilo((void *(*)(void *)) servicio->trabajar, servicio);
-
-    list_destroy(unidadesPlanificables);
 
     return servicio;
 }

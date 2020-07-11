@@ -12,13 +12,13 @@ void agregarUnidadPlanificable(Planificador * this, UnidadPlanificable * unidadP
     list_add(this->colas->colaNew, unidadPlanificable);
 }
 
-void destruirPlanificador(Planificador * this) {
+void destruirPlanificador(Planificador * this, void (*destructorUnidadPlanificable)(UnidadPlanificable *)) {
     log_destroy(this->logger);
     this->transicionadorDeEstados.destruir(&this->transicionadorDeEstados);
-    destruirColasDePlanificacion(this->colas, this->destructorUnidadPlanificable);
+    destruirColasDePlanificacion(this->colas, destructorUnidadPlanificable);
 }
 
-static Planificador new(t_list * unidadesPlanificablesIniciales, void (*destructorUnidadPlanificable)(UnidadPlanificable *)) {
+static Planificador new() {
     t_log * logger = log_create(TEAM_INTERNAL_LOG_FILE, "Planificador", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_INFO);
 
     char * nombreAlgoritmo = servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, ALGORITMO_PLANIFICACION);
@@ -32,12 +32,7 @@ static Planificador new(t_list * unidadesPlanificablesIniciales, void (*destruct
             &agregarUnidadesPlanificables,
             &agregarUnidadPlanificable,
             &destruirPlanificador,
-            destructorUnidadPlanificable,
     };
-
-    if (unidadesPlanificablesIniciales != NULL) {
-        planificador.agregarUnidadesPlanificables(&planificador, unidadesPlanificablesIniciales);
-    }
 
     return planificador;
 }

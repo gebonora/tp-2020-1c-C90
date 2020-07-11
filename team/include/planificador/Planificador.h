@@ -37,12 +37,11 @@ typedef struct Planificador {
     void (*agregarUnidadPlanificable)(struct Planificador * planificador, UnidadPlanificable * unidadPlanificable); // Agrega una UP a la lista y le asigna el estado NEW
     // planificar(UP) - Manda una UP a EXEC.
     // finalizar(UP) - Manda la UP a EXIT, si no hay mas UP activas, logre el objetivo global.
-    void (*destruir)(struct Planificador *this);
-    void (*destructorUnidadPlanificable)(UnidadPlanificable * unidadPlanificable);
+    void (*destruir)(struct Planificador *this, void (*destructorUnidadPlanificable)(UnidadPlanificable *));
 } Planificador;
 
 extern const struct PlanificadorClass {
-    Planificador (*new)(t_list * unidadesPlanificablesIniciales, void (*destructorUnidadPlanificable)(UnidadPlanificable *));
+    Planificador (*new)();
 } PlanificadorConstructor;
 
 #endif //TEAM_PLANIFICADOR_H

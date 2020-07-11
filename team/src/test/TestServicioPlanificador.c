@@ -11,7 +11,7 @@ void testServicioDePlanificacion() {
     Entrenador * entrenador1 = EntrenadorConstructor.new("0|0", "A", "B");
     list_add(miEquipo, entrenador1);
 
-    ServicioDePlanificacion * servicio = ServicioDePlanificacionConstructor.new(miEquipo);
+    ServicioDePlanificacion * servicio = ServicioDePlanificacionConstructor.new();
 
     //TODO: Tests del servicio de planificacion
 

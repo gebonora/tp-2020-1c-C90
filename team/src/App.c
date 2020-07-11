@@ -80,6 +80,7 @@ void inicializarComponentesDelSistema() {
     log_debug(INTERNAL_LOGGER, "Creando el mapa de coordenadas...");
     mapaProcesoTeam = MapaConstructor.new();
     pthread_mutex_init(&MTX_INTERNAL_LOG, NULL); //TODO: por ahi conviene moverlo a configurarServer()
+    servicioDePlanificacion = ServicioDePlanificacionConstructor.new();
 }
 
 /**
@@ -99,6 +100,8 @@ void configurarEstadoInicialProcesoTeam() {
         registrarEnMapaPosicionEntrenador(&mapaProcesoTeam, entrenador);
     }
     list_iterate(equipoProcesoTeam, registrarEquipo);
+    log_debug(INTERNAL_LOGGER, "Agregando equipo a la planificacion...");
+    servicioDePlanificacion->asignarEquipoAPlanificar(servicioDePlanificacion, equipoProcesoTeam);
 }
 
 void liberarRecursos() {
@@ -113,6 +116,7 @@ void liberarRecursos() {
 
     // Servicios
     servicioDeConfiguracion.destruir(&servicioDeConfiguracion);
+    servicioDePlanificacion->destruir(servicioDePlanificacion);
 
     // Componentes
     log_debug(INTERNAL_LOGGER, "Liberando componentes del sistema...");

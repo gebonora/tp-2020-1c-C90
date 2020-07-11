@@ -62,11 +62,12 @@ typedef struct ServicioDePlanificacion {
     Planificador planificador;
     // Interfaz publica
     void (*trabajar)(struct ServicioDePlanificacion * this);
+    void (*asignarEquipoAPlanificar)(struct ServicioDePlanificacion * this, Equipo equipo);
     void (*destruir)(struct ServicioDePlanificacion * this);
 } ServicioDePlanificacion;
 
 extern const struct ServicioDePlanificacionClass {
-    ServicioDePlanificacion * (*new)(Equipo equipo);
+    ServicioDePlanificacion * (*new)();
 } ServicioDePlanificacionConstructor;
 
 ServicioDePlanificacion * servicioDePlanificacion;
