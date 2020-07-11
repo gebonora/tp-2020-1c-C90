@@ -14,20 +14,22 @@ static Partition* _break_buddys(Partition*, uint32_t);
 void save_to_cache_buddy_system(void* data, Message* message) {
 	int desired_size = MAX_PARTITION_SIZE(next_power_of_2(message->data_size));
 
+	// busco una particion libre
 	t_link_element* target_element = find_partition(desired_size);
 
+	// busco una particion libre y sino elimino alguna ocupada y consolido
 	while(target_element == NULL) {
 		Partition* victim = choose_victim();
 		_consolidate_buddy(victim);
 		target_element = find_partition(desired_size);
 	}
 
+	// rompo la particion libre elegida, hasta la minima pot2 posible
 	Partition* target_partition = _break_buddys(target_element->data, message->data_size);
+	target_partition->message = message;
 
 	// guardo el data con el memcpy
-	//memcpy();
-	// guardo el message
-	target_partition->message = message;
+	memcpy(target_partition->start, data, message->data_size);
 }
 
 /** PRIVATE FUNCTIONS **/
