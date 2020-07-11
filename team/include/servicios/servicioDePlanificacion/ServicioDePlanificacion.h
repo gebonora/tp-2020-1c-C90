@@ -5,7 +5,9 @@
 #ifndef TEAM_SERVICIODEPLANIFICACION_H
 #define TEAM_SERVICIODEPLANIFICACION_H
 
+#include "semaphore.h"
 #include "app/Global.h"
+#include "delibird/utils/hilos/HiloFacil.h"
 
 /**
  * Esta clase es conocedora de que implicancias a nivel planificacion tienen los eventos del sistema.
@@ -26,15 +28,17 @@
 typedef struct ServicioDePlanificacion {
     t_log * logger;
     t_queue * colaDeTrabajo;
+    bool finDeTrabajo;
+    sem_t semaforoFinDeTrabajo;
     // Interfaz publica
     void (*trabajar)(struct ServicioDePlanificacion * this);
     void (*destruir)(struct ServicioDePlanificacion * this);
 } ServicioDePlanificacion;
 
 extern const struct ServicioDePlanificacionClass {
-    ServicioDePlanificacion (*new)();
+    ServicioDePlanificacion * (*new)();
 } ServicioDePlanificacionConstructor;
 
-ServicioDePlanificacion servicioDePlanificacion;
+ServicioDePlanificacion * servicioDePlanificacion;
 
 #endif //TEAM_SERVICIODEPLANIFICACION_H
