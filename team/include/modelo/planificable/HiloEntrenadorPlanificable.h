@@ -28,8 +28,9 @@
  */
 
 typedef struct InfoUltimaEjecucion {
-    int rafagaAnterior;
-    int estimadoAnterior;
+    double est_raf_ant;
+    double real_raf_ant;
+    double est_raf_actual;
 } InfoUltimaEjecucion;
 
 typedef struct HiloEntrenadorPlanificable {
