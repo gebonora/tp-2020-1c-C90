@@ -99,7 +99,7 @@ void configurarEstadoInicialProcesoTeam() {
     void registrarEquipo(Entrenador * entrenador) {
         registrarEnMapaPosicionEntrenador(&mapaProcesoTeam, entrenador);
     }
-    list_iterate(equipoProcesoTeam, registrarEquipo);
+    list_iterate(equipoProcesoTeam, (void (*)(void *)) registrarEquipo);
     log_debug(INTERNAL_LOGGER, "Agregando equipo a la planificacion...");
     servicioDePlanificacion->asignarEquipoAPlanificar(servicioDePlanificacion, equipoProcesoTeam);
 }

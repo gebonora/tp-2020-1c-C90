@@ -31,5 +31,6 @@ void testDePlanificable();
 void testDeEventos();
 void testServicioDePlanificacion();
 void testDePlanificador();
+void testDeTransicionadorDeEstados();
 
 #endif //TEAM_TESTDEINTEGRACION_H
