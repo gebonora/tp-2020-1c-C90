@@ -1,22 +1,21 @@
 #ifndef BROKER_INCLUDE_CONSTANTS_H_
 #define BROKER_INCLUDE_CONSTANTS_H_
 
+#include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <pthread.h>
+#include <readline/readline.h>
+#include <semaphore.h>
 #include <commons/collections/queue.h>
 #include <commons/log.h>
 #include <commons/config.h>
 #include <commons/string.h>
 #include <commons/collections/dictionary.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <readline/readline.h>
-#include <pthread.h>
-#include <semaphore.h>
-#include <stdbool.h>
 #include <delibird/protocol.h>
-#include "arithmetic.h"
-#include "broker.h"
 
+#define DUMP_PATH "dump.log"
 #define LOGGER_PATH "/home/utnso/tp-2020-1c-C90/broker/logs/server.log"
 #define BUDDY_SYSTEM "BS"
 #define DYNAMIC_PARTITIONS "PARTICIONES"
@@ -87,21 +86,12 @@ typedef struct {
 	uint32_t size; // tamanio de particion
 	bool free; // si esta libre o no
 	uint32_t buddy; // numero de particion de su buddy
-	uint32_t creation_time;
+	uint32_t creation_time; // timestamp del momento en que se creo
 	uint32_t access_time; // timestamp del ultimo acceso a esta particion
 	Message* message; // datos administrativos del mensaje (id, id correlacional, cod op)
 	t_list* notified_suscribers; // suscriptores que ya devolvieron ACK para este mensaje
 } Partition;
 
 Memory* memory;
-
-void init_logger();
-void init_config();
-void init_queues();
-void init_semaphores();
-void init_context();
-void init_threads();
-void init_memory();
-void create_partitions_test();
 
 #endif
