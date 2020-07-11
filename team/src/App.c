@@ -38,7 +38,7 @@ int main() {
     log_info(INTERNAL_LOGGER, "Solicitando la ubicacion de los pokemones objetivo para comenzar...");
     //TODO: for loop -> cliente broker -> mover logica a objetivo global
 
-    // Main loop. Traba el hilo main asi no se corta el programa. Se libera si se cumple el objetivo global.
+    // TODO: Semaforo?. Trabar el hilo main asi no se corta el programa. Se libera si se cumple el objetivo global.
 
     // Liberacion
     log_info(INTERNAL_LOGGER, "Finalizando proceso Team...");
@@ -87,7 +87,7 @@ void inicializarComponentesDelSistema() {
     * Instanciar a los entrenadores a partir de la config - OK
     * Armar el objetivo global - OK
     * Armar los hilos de entrenador planificables - OK
-    * Enviar a los entrenadores a new - TODO
+    * Enviar a los entrenadores a new - OK
     * Finalmente, con el cliente broker a mano: Por cada pokemon del objetivo global, enviar un GET \[POKEMON\] - TODO
  */
 void configurarEstadoInicialProcesoTeam() {
