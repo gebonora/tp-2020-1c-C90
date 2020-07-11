@@ -79,7 +79,7 @@ static HiloEntrenadorPlanificable *new(Entrenador * entrenador) {
     hiloEntrenadorPlanificable->destruir = &destruir;
     free(nombreLog);
 
-    crearHilo(hiloEntrenadorPlanificable->trabajar, hiloEntrenadorPlanificable);
+    crearHilo((void *(*)(void *)) hiloEntrenadorPlanificable->trabajar, hiloEntrenadorPlanificable);
 
     return hiloEntrenadorPlanificable;
 }
