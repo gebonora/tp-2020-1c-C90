@@ -91,18 +91,18 @@ static void dibujarMapa(Mapa * this) {
     log_debug(this->logger, "%s Mapa %s", separadorDibujo, separadorDibujo);
 
     char * enumeracionColumnas = string_from_format("   ");
-    for (int e = 1; e <= max; e++) {
+    for (int e = 0; e <= max; e++) {
         string_append_with_format(&enumeracionColumnas, " %-2d", e);
     }
     log_debug(this->logger, enumeracionColumnas);
     free(enumeracionColumnas);
 
-    for (int x = 1; x <= max; x++) {
+    for (int x = 0; x <= max; x++) {
         char * arriba = string_new();
         char * medio = string_new();
         string_append(&arriba, "   ");
         string_append_with_format(&medio, "%-3d", x);
-        for (int y = 1; y <= max; y++) {
+        for (int y = 0; y <= max; y++) {
             string_append(&arriba, "+--");
 
             char * representacionPresencia = string_new();
@@ -133,7 +133,7 @@ static void dibujarMapa(Mapa * this) {
 
     char * final = string_new();
     string_append(&final, "   ");
-    for (int b = 0; b < max; b ++) {
+    for (int b = 0; b <= max; b ++) {
         string_append(&final, "+--");
     }
     string_append(&final, "+");
