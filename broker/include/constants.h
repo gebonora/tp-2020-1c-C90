@@ -80,9 +80,7 @@ typedef struct {
 } Suscriber;
 
 typedef struct {
-	uint32_t position; // posicion relativa dentro de la cache
 	uintptr_t start; // puntero de la memoria cache
-	uint32_t number; // numero de particion
 	uint32_t size; // tamanio de particion
 	bool free; // si esta libre o no
 	uint32_t buddy; // numero de particion de su buddy
