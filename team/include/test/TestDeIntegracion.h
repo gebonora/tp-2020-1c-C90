@@ -19,6 +19,7 @@
 #include "delibird/utils/strings/ExtensionStrings.h"
 #include "delibird/utils/programadorDeTareas/ProgramadorDeTareas.h"
 #include "modelo/mapa/movimiento/Movimiento.h"
+#include "servicios/servicioDePlanificacion/ServicioDePlanificacion.h"
 
 void testDeIntegracion();
 void testDeEntrenadores();
@@ -28,5 +29,6 @@ void testDeAlgoritmos();
 void testDeTareas();
 void testDePlanificable();
 void testDeEventos();
+void testServicioDePlanificacion();
 
 #endif //TEAM_TESTDEINTEGRACION_H

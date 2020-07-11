@@ -20,6 +20,9 @@ void testDeIntegracion() {
     // Tareas
     testDeTareas();
 
+    // ServicioDePlanificacion
+    testServicioDePlanificacion();
+
     // Planificacion
     testDePlanificable();
 

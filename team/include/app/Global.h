@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <commons/collections/list.h>
 #include <commons/collections/dictionary.h>
+#include <commons/collections/queue.h>
 #include "delibird/protocol.h"
 #include "delibird/interface.h"
 
