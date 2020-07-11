@@ -1,13 +1,8 @@
 #include "dynamic.h"
 
-static void _free_suscriber(Suscriber*);
 static void _consolidate();
+static void _compact();
 
-// cuando guardamos el dato, hay que setearle el access_time a la particion
-// devolver puntero a la particion
-void guardar_dato(dato, particion) {
-
-}
 // 1) filtramos las particiones libres que satisfacen el tamañoAGuardar
 // 2) buscamos la particion en base al algoritmo FF / BF
 // 3) si encontre una, la rompo si hace falta en 2 particiones (1 del tamanioQueVoyAGuardar)
@@ -21,15 +16,12 @@ void guardar_dato(dato, particion) {
 
 Partition* find_partition_dynamic(uint32_t sizeOfData) {
 
-	t_link_element* partition_element = find_partition(sizeOfData);
+	Partition* partition = find_partition(sizeOfData);
 
-	if(partition_element != NULL) {
-
-		t_link_element* next_partition = partition_element->next;
+	if(partition != NULL) {
 
 		int new_size = MAX_PARTITION_SIZE(sizeOfData);
 
-		Partition* partition = partition_element->data;
 		int old_size = partition->size;
 
 		partition->size = new_size;
@@ -40,18 +32,11 @@ Partition* find_partition_dynamic(uint32_t sizeOfData) {
 		// TODO: ver access time,
 		 // ver metodo de seba nueva particion
 
+		replace_partition_at(partition->start, partition);
 
-		Partition* new_partition = malloc(sizeof(Partition));
-		new_partition->free = true;
-		new_partition->size = old_size - new_size;
-		new_partition->start = partition->start + new_size;
-		new_partition->position = partition->position + new_size;
+		Partition* new_partition = create_partition(partition->start + new_size, old_size - new_size);
 
-		t_link_element* new_element = malloc(sizeof(t_link_element));
-		new_element->data = new_partition;
-		new_element->next = next_partition;
-		partition_element->next = new_element;
-
+		add_partition_next_to(partition->start, new_partition);
 
 		// ROMPER LA PARTICION
 		// tamanio particion encontrada == tamanioAGuardar -> devuelvo asi
@@ -70,7 +55,8 @@ void save_to_cache_dynamic_partitions(void* data, Message* message) {
 	while(partition == NULL){
 		partition = find_partition_dynamic(message->data_size);
 		if (partition != NULL) {
-			guardar_dato(data);
+			partition->message = message;
+			memcpy(partition->start, data, message->data_size);
 		} else {
 			if(FRECUENCIA_COMPACTACION == partitions_killed) {//casos igual o 0
 				compactar();
@@ -88,15 +74,12 @@ void save_to_cache_dynamic_partitions(void* data, Message* message) {
  * Esa la tengo que agregar al final de la lista.
  *
  * */
-void compactar() {
+static void _compact() {
 
 }
+
 
 /** PRIVATE FUNCTIONS **/
-
-static void _free_suscriber(Suscriber* suscriber) {
-	free(suscriber);
-}
 
 /*Busco la primera libre.
  * Me fijo si la siguiente esta libre. Si es asi, la absorbo.
@@ -105,43 +88,36 @@ static void _free_suscriber(Suscriber* suscriber) {
  */
 static void _consolidate(){
 
-	t_link_element* left_element;
+	Partition* left_partition;
+	Partition* middle_partition;
+	Partition* right_partition;
 
 	for(int i = 0; i < memory->partitions->elements_count; i++){
-		t_link_element* element = list_get_element(memory->partitions, i);
-		if(((Partition*)(element->data))->free && ((Partition*)(element->next->data))->free && element->next->data != NULL){
-			left_element = element;
+		Partition* element = list_get(memory->partitions, i);
+		Partition* element_next = list_get(memory->partitions, i+1);
+		Partition* element_next2 = list_get(memory->partitions, i+2);
+		if(element->free && element_next->free && element_next != NULL){
+			left_partition = element;
+			middle_partition = element_next;
+
+			if(element_next2->free && element_next2 != NULL){
+				right_partition = element_next2;
+			}
 			break;
 		}
 	}
-	//ver de liberar los mensajes, listas etc para que quede limpita
 
-
-	if(left_element != NULL){
-		Partition* left_partition = left_element->data;
-		t_link_element* middle_element = left_element->next;
-		Partition* middle_partition = middle_element->data;
-		t_link_element* left_partition_next;
+	if(left_partition != NULL){
 
 		left_partition->size = left_partition->size + middle_partition->size;
-		left_partition_next = middle_element->next;
 
-		t_link_element* right_element;
-		if(middle_element->next !=NULL && ((Partition*)(middle_element->next->data))->free){
-			right_element = middle_element->next;
-			Partition* right_partition = right_element->data;
+		if(right_partition != NULL){
+
 			left_partition->size = left_partition->size + right_partition->size;
-			left_partition_next = right_element->next;
 
-			free(right_partition->message);
-			list_destroy_and_destroy_elements(right_partition->notified_suscribers, &_free_suscriber);
-			free(right_element);
+			remove_partition_at(right_partition->start);
 		}
 
-		left_element->next = left_partition_next;
-		free(middle_partition->message);
-		list_destroy_and_destroy_elements(middle_partition->notified_suscribers, &_free_suscriber);
-		free(middle_partition);
-		free(middle_element);
+		remove_partition_at(middle_partition->start);
 	}
 }
