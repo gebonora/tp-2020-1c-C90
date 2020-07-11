@@ -94,6 +94,11 @@ void configurarEstadoInicialProcesoTeam() {
     equipoProcesoTeam = crearEquipoPorConfiguracion();
     log_debug(INTERNAL_LOGGER, "Calculando el objetivo global...");
     objetivoGlobal = ObjetivoGlobalConstructor.new(equipoProcesoTeam);
+    log_debug(INTERNAL_LOGGER, "Registrando al equipo en el mapa...");
+    void registrarEquipo(Entrenador * entrenador) {
+        registrarEnMapaPosicionEntrenador(&mapaProcesoTeam, entrenador);
+    }
+    list_iterate(equipoProcesoTeam, registrarEquipo);
 }
 
 void liberarRecursos() {
