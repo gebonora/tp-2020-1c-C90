@@ -83,7 +83,11 @@ void save_to_cache_dynamic_partitions(void* data, Message* message) {
 	}
 }
 
-
+/*
+ * Tengo toda las particiones, debo agarrar las libres y hacer una sola con todos los tamaños.
+ * Esa la tengo que agregar al final de la lista.
+ *
+ * */
 void compactar() {
 
 }
