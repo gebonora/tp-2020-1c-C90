@@ -30,6 +30,7 @@ typedef struct ServicioDePlanificacion {
     t_queue * colaDeTrabajo;
     bool finDeTrabajo;
     sem_t semaforoFinDeTrabajo;
+    sem_t semaforoEjecucionHabilitada;
     // Interfaz publica
     void (*trabajar)(struct ServicioDePlanificacion * this);
     void (*destruir)(struct ServicioDePlanificacion * this);

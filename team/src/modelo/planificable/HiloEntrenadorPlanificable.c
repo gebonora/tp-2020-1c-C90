@@ -11,7 +11,7 @@ static void trabajar(HiloEntrenadorPlanificable * this) {
         sem_wait(&this->semaforoEjecucionHabilitada);
 
         if (this->finDeTrabajo) {
-            log_debug(this->logger, "Se interrumpió el ciclo de trabajo fin de trabajo");
+            log_debug(this->logger, "Se interrumpió el ciclo de trabajo por fin de trabajo");
             break;
         }
 
@@ -70,7 +70,7 @@ static HiloEntrenadorPlanificable *new(Entrenador * entrenador) {
     hiloEntrenadorPlanificable->finDeTrabajo = false;
     sem_init(&hiloEntrenadorPlanificable->semaforoEjecucionHabilitada,1 ,0);
     sem_init(&hiloEntrenadorPlanificable->semaforoCicloCompletado,1 ,0);
-    sem_init(&hiloEntrenadorPlanificable->semaforoFinDeTrabajo,0 ,0);
+    sem_init(&hiloEntrenadorPlanificable->semaforoFinDeTrabajo,1 ,0);
     hiloEntrenadorPlanificable->tareaEnEjecucion = NULL;
     hiloEntrenadorPlanificable->infoUltimaEjecucion = (InfoUltimaEjecucion) {.rafagaAnterior=0, .estimadoAnterior=0};
     hiloEntrenadorPlanificable->trabajar = &trabajar;
