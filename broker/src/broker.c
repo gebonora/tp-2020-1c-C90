@@ -3,6 +3,11 @@
 static int _get_suscriber_socket(Suscriber*);
 static t_list* _get_suscribers(char*);
 
+struct arg_struct{
+	Partition* partition;
+	int socket_suscriber;
+};
+
 uint32_t get_id() {
 	pthread_mutex_lock(&MUTEX_MESSAGE_ID);
 	uint32_t generated_id = ++MESSAGE_ID;
@@ -19,6 +24,7 @@ void consumer_new_queue() {
 
 	void* new;
 	void _send_new_to_suscribers(int socket_suscriber){
+
 		send(socket_suscriber, new, calculate_new_bytes(), MSG_NOSIGNAL);
 	}
 
@@ -56,12 +62,22 @@ void consumer_localized_queue() {
 	sem_wait(&LOCALIZED_MESSAGES);
 	t_list* suscribers = _get_suscribers("LOCALIZED");
 
-	t_list* localized_messages = messages_from_operation(LOCALIZED);
+	t_list* localized_partirions_messages = messages_from_operation(LOCALIZED);
 
 	void* localized;
 	void _send_localized_to_suscribers(int socket_suscriber){
 		send(socket_suscriber, localized, calculate_localized_bytes(), MSG_NOSIGNAL);
 	}
+
+	void hola(Partition* partition){
+		void* message = _transform_messages(partition, LOCALIZED);
+		pthread_t thread_localized;
+		pthread_create(&thread_localized, NULL,(void*)_send_localized_to_suscribers, NULL);
+		pthread_detach(thread_localized);
+	}
+
+	list_iterate(localized_partirions_messages, &hola);
+
 
 	for(int i = 0; i < localized_messages->elements_count; i++){
 		localized = list_get(localized_messages, i);
@@ -135,6 +151,13 @@ void consumer_caught_queue() {
 
 }
 
+void wait_for_ack(int socket_suscriber){
+	Result result;
+	if(recv(socket_suscriber, &result, sizeof(Result), MSG_WAITALL) != -1){
+
+	}
+}
+
 static int _get_suscriber_socket(Suscriber* suscriber){
 	return suscriber->socket;
 }
@@ -146,3 +169,47 @@ static t_list* _get_suscribers(char* queue_key){
 	return suscribers;
 }
 
+void* _transform_messages(Partition* partition, Operation, operation){
+	int now = (int) ahoraEnTimeT();
+	partition->access_time = now;
+	void* message;
+
+	switch(operation){
+	case NEW: ;
+		message = malloc(sizeof(Operation) + partition->message->data_size);
+		memcpy(message, &operation, sizeof(Operation));
+		memcpy(message + sizeof(Operation), partition->start, partition->message->data_size);
+		break;
+	case APPEARED: ;
+		message = malloc(sizeof(Operation) + partition->message->data_size);
+		memcpy(message, &operation, sizeof(Operation));
+		memcpy(message + sizeof(Operation), partition->start, partition->message->data_size);
+		break;
+	case CATCH: ;
+		message = malloc(sizeof(Operation) + partition->message->data_size + sizeof(uint32_t));
+		memcpy(message, &operation, sizeof(Operation));
+		memcpy(message + sizeof(Operation), partition->start, partition->message->data_size);
+		memcpy(message + sizeof(Operation) + sizeof(uint32_t), &(partition->message->message_id), sizeof(uint32_t));
+		break;
+	case CAUGHT: ;
+		message = malloc(sizeof(Operation) + partition->message->data_size + sizeof(uint32_t));
+		memcpy(message, &operation, sizeof(Operation));
+		memcpy(message + sizeof(Operation), partition->start, partition->message->data_size);
+		memcpy(message + sizeof(Operation) + sizeof(uint32_t), &(partition->message->correlational_id), sizeof(uint32_t));
+		break;
+	case LOCALIZED: ;
+		message = malloc(sizeof(Operation) + partition->message->data_size + sizeof(uint32_t));
+		memcpy(message, &operation, sizeof(Operation));
+		memcpy(message + sizeof(Operation), partition->start, partition->message->data_size);
+		memcpy(message + sizeof(Operation) + sizeof(uint32_t), &(partition->message->correlational_id), sizeof(uint32_t));
+		break;
+	case GET: ;
+		message = malloc(sizeof(Operation) + partition->message->data_size + sizeof(uint32_t));
+		memcpy(message, &operation, sizeof(Operation));
+		memcpy(message + sizeof(Operation), partition->start, partition->message->data_size);
+		memcpy(message + sizeof(Operation) + sizeof(uint32_t), &(partition->message->message_id), sizeof(uint32_t));
+		break;
+	}
+
+	return message;
+}

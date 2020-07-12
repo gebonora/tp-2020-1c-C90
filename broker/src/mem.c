@@ -29,8 +29,8 @@ t_list* messages_from_operation(Operation operation){
 		return partition->message->operation_code == operation;
 	}
 
-	t_list* partitions = list_filter(memory->partitions, &_find_for_operation);
-	t_list* messages = list_create();
+	return list_filter(memory->partitions, &_find_for_operation);
+	/*t_list* messages = list_create();
 
 	void _transform_messages(Partition* partition){
 		int now = (int) ahoraEnTimeT();
@@ -79,7 +79,7 @@ t_list* messages_from_operation(Operation operation){
 
 	list_iterate(partitions, &_transform_messages);
 
-	return messages;
+	return messages;*/
 
 }
 
