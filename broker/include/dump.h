@@ -2,6 +2,7 @@
 #define BROKER_INCLUDE_DUMP_H_
 
 #include <signal.h>
+#include "commons/memory.h"
 #include "delibird/utils/tiempo/Tiempo.h"
 #include "constants.h"
 

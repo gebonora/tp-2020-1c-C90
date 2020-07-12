@@ -20,4 +20,6 @@ double milisegundos(struct timeval tiempo);
 
 char* current_date_time_as_string();
 
+char* date_time_to_string(time_t);
+
 #endif //DELIBIRD_TIEMPO_H
