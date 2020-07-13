@@ -59,6 +59,7 @@ static void ejecutarLimitado(HiloEntrenadorPlanificable * this, int cantInstrucc
         sem_post(&this->semaforoEjecucionHabilitada);
         sem_wait(&this->semaforoCicloCompletado);
     }
+    //TODO: informar cuanto le queda por ejecutar
     if (tarea->estado == FINALIZADA) {
         log_info(this->logger, "La tarea asignada se completó con exito. Se procede a destruirla.");
         tarea->destruir(tarea);
