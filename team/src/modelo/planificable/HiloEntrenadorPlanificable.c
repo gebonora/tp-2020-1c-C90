@@ -22,6 +22,13 @@ static void trabajar(HiloEntrenadorPlanificable * this) {
 
         ejecutarInstruccion(instruccion, this->entrenador);
 
+        if (this->retardoInstruccion > 0) {
+            for (int r = this->retardoInstruccion; r > 0; r--){
+                log_debug(this->logger, "Fin de retardo en %d...", r);
+                sleep(1);
+            }
+        }
+
         tareaEnEjecucion->notificarEjecucion(tareaEnEjecucion, instruccion->posicion);
 
         log_debug(this->logger, "Finaliza un ciclo de trabajo muy duro");
@@ -67,6 +74,7 @@ static HiloEntrenadorPlanificable *new(Entrenador * entrenador) {
     char * nombreLog = string_from_format("HiloEntrenadorPlanificable-%s", entrenador->id);
     hiloEntrenadorPlanificable->logger = log_create(TEAM_INTERNAL_LOG_FILE, nombreLog, SHOW_INTERNAL_CONSOLE, INTERNAL_LOG_LEVEL);
     hiloEntrenadorPlanificable->entrenador = entrenador;
+    hiloEntrenadorPlanificable->retardoInstruccion = servicioDeConfiguracion.obtenerEntero(&servicioDeConfiguracion, RETARDO_CICLO_CPU);
     hiloEntrenadorPlanificable->finDeTrabajo = false;
     sem_init(&hiloEntrenadorPlanificable->semaforoEjecucionHabilitada,1 ,0);
     sem_init(&hiloEntrenadorPlanificable->semaforoCicloCompletado,1 ,0);
@@ -78,6 +86,10 @@ static HiloEntrenadorPlanificable *new(Entrenador * entrenador) {
     hiloEntrenadorPlanificable->ejecutar = &ejecutar;
     hiloEntrenadorPlanificable->destruir = &destruir;
     free(nombreLog);
+
+    if(hiloEntrenadorPlanificable->retardoInstruccion <= 0) {
+        log_warning(hiloEntrenadorPlanificable->logger, "No hay retardo artifical en los ciclos de CPU");
+    }
 
     crearHilo((void *(*)(void *)) hiloEntrenadorPlanificable->trabajar, hiloEntrenadorPlanificable);
 

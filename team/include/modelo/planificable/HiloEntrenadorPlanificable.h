@@ -10,6 +10,7 @@
 #include "modelo/equipo/entrenador/Entrenador.h"
 #include "delibird/utils/hilos/HiloFacil.h"
 #include "modelo/planificable/tarea/TareaPlanificable.h"
+#include "delibird/servicios/servicioDeConfiguracion/ServicioDeConfiguracion.h"
 
 /**
  * La idea es que esta clase sea planificable, dando lugar a la ejecucion de las acciones propias del entrenador
@@ -35,6 +36,7 @@ typedef struct InfoUltimaEjecucion {
 typedef struct HiloEntrenadorPlanificable {
     t_log * logger;
     Entrenador *entrenador;
+    int retardoInstruccion;
     bool finDeTrabajo;
     sem_t semaforoEjecucionHabilitada;
     sem_t semaforoCicloCompletado;

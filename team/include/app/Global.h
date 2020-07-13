@@ -9,6 +9,7 @@
 #include <commons/config.h>
 #include <commons/string.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <commons/collections/list.h>
 #include <commons/collections/dictionary.h>
 #include <commons/collections/queue.h>
