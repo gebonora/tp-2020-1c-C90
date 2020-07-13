@@ -141,9 +141,7 @@ static Partition* find_partition_dynamic(uint32_t size_of_data) {
 		partition->free = false;
 		int now = (int) ahoraEnTimeT();
 		partition->access_time = now;
-		partition->creation_time = now;
-		// TODO: ver access time,
-		 // ver metodo de seba nueva particion
+		if(size_of_data == old_size) partition->creation_time = now;
 
 		replace_partition_at(partition->start, partition);
 
