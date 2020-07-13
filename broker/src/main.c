@@ -129,6 +129,6 @@ static void _init_dump() {
 		log_info(LOGGER, "Error catching signal SIGUSR1");
 	}
 	if(signal(SIGUSR2, dump_handler) == SIG_ERR) {
-		log_info(LOGGER, "Error catching signal SIGUSR2ss");
+		log_info(LOGGER, "Error catching signal SIGUSR2");
 	}
 }
