@@ -38,6 +38,7 @@ int main() {
     log_info(INTERNAL_LOGGER, "Solicitando la ubicacion de los pokemones objetivo para comenzar...");
     objetivoGlobal.solicitarUbicacionPokemonesNecesitados(&objetivoGlobal);
 
+    // Cuando se complete el objetivo global, podremos finalizar el proceso y liberar los recursos.
     if (ESPERAR_OBJETIVO_GLOBAL) {
         log_info(INTERNAL_LOGGER, "Esperando a que se complete el objetivo global...");
         sem_wait(&semaforoObjetivoGlobalCompletado);
