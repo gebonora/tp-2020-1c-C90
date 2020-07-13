@@ -242,7 +242,6 @@ void process_request(int cod_op, int socket) {
 		}
 
 		break;
-	case 0:
 	case -1:
 		close(socket);
 		break;
