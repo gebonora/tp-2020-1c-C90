@@ -20,6 +20,7 @@
 #define INTERNAL_LOG_LEVEL LOG_LEVEL_INFO
 #define SHOW_INTERNAL_CONSOLE 0 // 1 para mostrar la consola de uso interno, 0 para el caso contrario.
 #define CORRER_TESTS 0
+#define ESPERAR_OBJETIVO_GLOBAL 1
 #endif //TEAM_DEVELOPMENT_MODE
 
 // Paths a archivos

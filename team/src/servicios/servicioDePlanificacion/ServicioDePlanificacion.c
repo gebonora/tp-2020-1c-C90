@@ -16,7 +16,21 @@ void trabajar(ServicioDePlanificacion * this) {
 
         if (!queue_is_empty(this->colaDeTrabajo)) {
             log_debug(this->logger, "Hay trabajo para hacer en la cola de trabajo");
-
+            TrabajoPlanificador * trabajo = queue_pop(this->colaDeTrabajo);
+            switch (trabajo->tipo) {
+                case CAPTURA_POKEMON:
+                    log_debug(this->logger, "Se procede a procesar un trabajo de captura pokemon");
+                    break;
+                case NOTIFY_CAUGHT_RESULT:
+                    log_debug(this->logger, "Se procede a dej");
+                    break;
+                case DEADLOCK_RESOLUTION:
+                    log_debug(this->logger, "Hay trabajo para hacer en la cola de trabajo");
+                    break;
+                default:
+                    log_warning(this->logger, "El trabajo asignado no puede resolverse");
+                    break;
+            }
         }
     }
     sem_post(&this->semaforoFinDeTrabajo);

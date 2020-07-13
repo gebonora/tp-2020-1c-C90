@@ -53,9 +53,21 @@
  *     El algoritmo de resolucion generará una o varias tareas de intercambio para solucionarlo.
  */
 
+typedef enum TipoTrabajoPlanificador {
+    CAPTURA_POKEMON,
+    NOTIFY_CAUGHT_RESULT,
+    DEADLOCK_RESOLUTION
+} TipoTrabajoPlanificador;
+
+typedef struct TrabajoPlanificador {
+    TipoTrabajoPlanificador tipo;
+    char * objetivo;
+    Coordinate coordenadaObjetivo;
+} TrabajoPlanificador;
+
 typedef struct ServicioDePlanificacion {
     t_log * logger;
-    t_queue * colaDeTrabajo;
+    t_queue * colaDeTrabajo; // Posee TrabajoPlanificador
     bool finDeTrabajo;
     sem_t semaforoFinDeTrabajo;
     sem_t semaforoEjecucionHabilitada;
