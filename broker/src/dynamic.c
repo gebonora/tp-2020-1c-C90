@@ -75,42 +75,43 @@ void save_to_cache_dynamic_partitions(void* data, Message* message) {
  *
  * */
 static void _compact() {
-	bool  _menor_start(Partition* p1, Partition* p2){
-		return p1->start < p2->start;
-	}
-	t_list* ocupied = list_sort(_get_occupied_partitions(), &_menor_start);
 
-	for(int i = 0; i< ocupied->elements_count; i+2){
+	t_list* occupied = _get_occupied_partitions();
 
-		Partition* first_partition = list_get(ocupied, i);
-		Partition* second_partition = list_get(ocupied, i+1);
+	for(int i = 0; i < occupied->elements_count; i+2){
+
+		Partition* first_partition = list_get(occupied, i);
+		Partition* second_partition = list_get(occupied, i+1);
 
 		if(i == 0){
 			first_partition->start = memory->cache;
 		} else {
-			Partition* third_partition = list_get(ocupied, i-1);
+			Partition* third_partition = list_get(occupied, i-1);
 			first_partition->start = third_partition->start + third_partition->size;
 		}
 
 		second_partition = first_partition->start + first_partition->size;
 	}
 
-	t_list* not_ocupied = list_sort(_get_not_ocupied_partition(), &_menor_start);
+	t_list* not_occupied = _get_not_ocupied_partition();
 
 	int free_size = 0;
-	Partition* free_big_partition;
-	for(int a = 0; a < not_ocupied->elements_count; a++){
 
-		Partition* partition = list_get(not_ocupied, a);
-
-		if(a == 0) free_big_partition = partition;
-
-		free_size += partition->size;
+	int _sum_all_sizes(int accum, Partition* partition){
+		return accum += partition->size;
 	}
 
-	free_big_partition->size = free_size;
-	Partition* last_ocupied = list_get(ocupied, ocupied->elements_count -1);
-	free_big_partition->start = last_ocupied->start + last_ocupied->size;
+	list_fold(not_occupied, free_size, &_sum_all_sizes);
+
+	Partition* last_ocupied = list_get(occupied, occupied->elements_count -1);
+
+	Partition* new_free_partition = create_partition(last_ocupied->start + last_ocupied->size, free_size);
+
+	void _remove(Partition* partition) {
+		remove_partition_at(partition->start);
+	}
+	list_iterate(not_occupied, &_remove);
+	add_partition_next_to(last_ocupied->start, new_free_partition);
 
 	//checks for nulls
 }
@@ -133,7 +134,7 @@ static void _consolidate(){
 		Partition* element = list_get(memory->partitions, i);
 		Partition* element_next = list_get(memory->partitions, i+1);
 		Partition* element_next2 = list_get(memory->partitions, i+2);
-		if(element->free && element_next->free && element_next != NULL){
+		if(element->free && element_next->free && element_next != NULL && element != NULL){
 			left_partition = element;
 			middle_partition = element_next;
 

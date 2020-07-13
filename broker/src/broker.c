@@ -3,10 +3,10 @@
 static int _get_suscriber_socket(Suscriber*);
 static t_list* _get_suscribers(char*);
 
-struct arg_struct{
+typedef struct arg_struct {
 	Partition* partition;
 	int socket_suscriber;
-};
+} arg_struct;
 
 uint32_t get_id() {
 	pthread_mutex_lock(&MUTEX_MESSAGE_ID);
@@ -60,34 +60,41 @@ void consumer_appeared_queue() {
 
 void consumer_localized_queue() {
 	sem_wait(&LOCALIZED_MESSAGES);
-	t_list* suscribers = _get_suscribers("LOCALIZED");
+	t_list* subscribers = _get_suscribers("LOCALIZED");
 
-	t_list* localized_partirions_messages = messages_from_operation(LOCALIZED);
+	t_list* localized_partitions = messages_from_operation(LOCALIZED);
 
-	void* localized;
-	void _send_localized_to_suscribers(int socket_suscriber){
-		send(socket_suscriber, localized, calculate_localized_bytes(), MSG_NOSIGNAL);
+	void send_message(Partition* partition){
+		hola(subscribers, partition);
 	}
 
-	void hola(Partition* partition){
-		void* message = _transform_messages(partition, LOCALIZED);
+	list_iterate(localized_partitions, &send_message);
+}
+
+void send_message_and_wait_for_ack(arg_struct* args) {
+	void* message = _transform_messages(args->partition, args->partition->message->operation_code);
+	send(args->socket_suscriber, message, sizeof(message), MSG_NOSIGNAL);
+	Result result;
+	if(recv(args->socket_suscriber, &result, sizeof(Result), MSG_WAITALL) > 0){
+		list_add(args->partition->notified_suscribers, args->socket_suscriber);
+	}
+}
+
+void hola(t_list* subscribers, Partition* partition){
+	for(int i = 0; i < subscribers->elements_count; i++){
+		int socket_subscriber = list_get(subscribers, i);
+
+		arg_struct* args = malloc(sizeof(arg_struct));
+		args->partition = partition;
+		args->socket_suscriber = socket_subscriber;
+
 		pthread_t thread_localized;
-		pthread_create(&thread_localized, NULL,(void*)_send_localized_to_suscribers, NULL);
+		pthread_create(&thread_localized, NULL, (void*)send_message_and_wait_for_ack, args);
 		pthread_detach(thread_localized);
 	}
-
-	list_iterate(localized_partirions_messages, &hola);
-
-
-	for(int i = 0; i < localized_messages->elements_count; i++){
-		localized = list_get(localized_messages, i);
-		list_iterate(suscribers, &_send_localized_to_suscribers);
-	}
-
-	free(localized);
-	list_destroy_and_destroy_elements(localized_messages);
-
 }
+
+
 
 void consumer_get_queue() {
 	sem_wait(&GET_MESSAGES);
@@ -149,13 +156,6 @@ void consumer_caught_queue() {
 	free(caught);
 	list_destroy_and_destroy_elements(caught_messages);
 
-}
-
-void wait_for_ack(int socket_suscriber){
-	Result result;
-	if(recv(socket_suscriber, &result, sizeof(Result), MSG_WAITALL) != -1){
-
-	}
 }
 
 static int _get_suscriber_socket(Suscriber* suscriber){
