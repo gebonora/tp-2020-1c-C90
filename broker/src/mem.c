@@ -9,9 +9,13 @@ static sem_t _semaphore_from_operation(Operation);
 
 void save_message(void* data, Operation operation, uint32_t message_id, uint32_t correlational_id) {
 	Message* message = _create_message(operation, message_id, correlational_id, _calculate_data_size(data, operation));
-	_save_to_cache(data, message);
-	sem_t semaphore = _semaphore_from_operation(operation);
-	sem_post(&semaphore);
+	if(sizeof(data) <= TAMANO_MEMORIA){
+		_save_to_cache(data, message);
+		sem_t semaphore = _semaphore_from_operation(operation);
+		sem_post(&semaphore);
+	} else {
+		log_error(LOGGER, "Message size is bigger than memory size. Message will be not saved. Memory size: %d , Message size: %d", TAMANO_MEMORIA, sizeof(data));
+	}
 }
 
 t_list* messages_from_operation(Operation operation){//todo sincronizar
