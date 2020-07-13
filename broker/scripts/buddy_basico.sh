@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-cd deploy
+cd ../../gameboy/deploy
 
 ./gameboy BROKER CAUGHT_POKEMON 1 OK
 
