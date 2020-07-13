@@ -41,12 +41,13 @@ typedef struct HiloEntrenadorPlanificable {
     sem_t semaforoEjecucionHabilitada;
     sem_t semaforoCicloCompletado;
     sem_t semaforoFinDeTrabajo;
-    TareaPlanificable * tareaEnEjecucion; //Nos sirve para que el hilo pueda levantar de aca la tarea que le dejen.
-    InfoUltimaEjecucion infoUltimaEjecucion; //Necesario en SJF.
+    TareaPlanificable * tareaAsignada; //Nos sirve para que el hilo pueda levantar de aca la tarea que le dejen.
+    InfoUltimaEjecucion infoUltimaEjecucion;
     // Interfaz publica
+    void (*asignarTarea)(struct HiloEntrenadorPlanificable * this, TareaPlanificable * tarea);
     void (*trabajar)(struct HiloEntrenadorPlanificable * this);
-    void (*ejecutarParcialmente)(struct HiloEntrenadorPlanificable * this, TareaPlanificable * tarea, int cantInstrucciones);
-    void (*ejecutar)(struct HiloEntrenadorPlanificable * this, TareaPlanificable * tarea);
+    void (*ejecutarParcialmente)(struct HiloEntrenadorPlanificable * this, int cantInstrucciones);
+    void (*ejecutar)(struct HiloEntrenadorPlanificable * this);
     // nuevoEstado(estado) - Asi nos enteramos si nos dan permiso para ejecutar o nos bloquearon TODO ¿Lo necesito?
     void (*destruir)(struct HiloEntrenadorPlanificable * this);
 } HiloEntrenadorPlanificable;

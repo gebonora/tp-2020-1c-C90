@@ -18,7 +18,6 @@ void testServicioDePlanificacion() {
 
     //TODO: Tests del servicio de planificacion
 
-
     servicio->destruir(servicio);
     destruirEquipo(miEquipo);
     log_destroy(testLogger);

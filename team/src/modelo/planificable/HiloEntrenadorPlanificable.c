@@ -15,7 +15,7 @@ static void trabajar(HiloEntrenadorPlanificable * this) {
             break;
         }
 
-        TareaPlanificable * tareaEnEjecucion = this->tareaEnEjecucion;
+        TareaPlanificable * tareaEnEjecucion = this->tareaAsignada;
         Instruccion * instruccion = tareaEnEjecucion->proximaInstruccion(tareaEnEjecucion);
         log_info(this->logger, "Se procede a ejecutar la instruccion %d: %s.",
                 instruccion->posicion, instruccion->descripcion);
@@ -38,26 +38,44 @@ static void trabajar(HiloEntrenadorPlanificable * this) {
     sem_post(&this->semaforoFinDeTrabajo);
 }
 
-static void ejecutarLimitado(HiloEntrenadorPlanificable * this, TareaPlanificable * tarea, int cantInstrucciones) {
-    log_debug(this->logger, "Ejecutando tarea. Instrucciones a correr: %d/%d.", cantInstrucciones, tarea->totalInstrucciones);
+static void asignarTarea(HiloEntrenadorPlanificable * this, TareaPlanificable * tarea) {
+    if (tarea->estado == PENDIENTE_DE_EJECUCION) {
+        this->tareaAsignada = tarea;
+    } else {
+        log_error(this->logger, "No se puede asignar una tarea con estado %s",
+                nombreEstadoTareaPlanificable(tarea->estado));
+    }
+}
+
+static void ejecutarLimitado(HiloEntrenadorPlanificable * this, int cantInstrucciones) {
+    TareaPlanificable * tarea = this->tareaAsignada;
     if (tarea->estado != PENDIENTE_DE_EJECUCION) {
         log_error(this->logger, "Se esta intentando ejecutar una tarea con estado %s",
                 nombreEstadoTareaPlanificable(tarea->estado));
         return;
     }
-    this->tareaEnEjecucion = tarea;
+    log_debug(this->logger, "Ejecutando tarea. Instrucciones a correr: %d/%d restantes.", cantInstrucciones, tarea->cantidadInstruccionesRestantes(tarea));
     for (int i=0; i < cantInstrucciones; i++) {
         sem_post(&this->semaforoEjecucionHabilitada);
         sem_wait(&this->semaforoCicloCompletado);
     }
-    this->tareaEnEjecucion = NULL;
+    if (tarea->estado == FINALIZADA) {
+        log_info(this->logger, "La tarea asignada se completó con exito. Se procede a destruirla.");
+        tarea->destruir(tarea);
+        this->tareaAsignada = NULL;
+    }
 }
 
-static void ejecutar(HiloEntrenadorPlanificable * this, TareaPlanificable * tarea) {
-    this->ejecutarParcialmente(this, tarea, tarea->totalInstrucciones);
+static void ejecutar(HiloEntrenadorPlanificable * this) {
+    this->ejecutarParcialmente(this, this->tareaAsignada->cantidadInstruccionesRestantes(this->tareaAsignada));
 }
 
 static void destruir(HiloEntrenadorPlanificable * this) {
+    if (this->tareaAsignada != NULL) {
+        log_warning(this->logger, "Todavia hay una tarea pendiente asignada. Se procede a abortarla y destruirla legalmente.");
+        this->tareaAsignada->abortar(this->tareaAsignada);
+        this->tareaAsignada->destruir(this->tareaAsignada);
+    }
     this->finDeTrabajo = true;
     sem_post(&this->semaforoEjecucionHabilitada);
     sem_wait(&this->semaforoFinDeTrabajo);
@@ -79,8 +97,9 @@ static HiloEntrenadorPlanificable *new(Entrenador * entrenador) {
     sem_init(&hiloEntrenadorPlanificable->semaforoEjecucionHabilitada,1 ,0);
     sem_init(&hiloEntrenadorPlanificable->semaforoCicloCompletado,1 ,0);
     sem_init(&hiloEntrenadorPlanificable->semaforoFinDeTrabajo,1 ,0);
-    hiloEntrenadorPlanificable->tareaEnEjecucion = NULL;
+    hiloEntrenadorPlanificable->tareaAsignada = NULL;
     hiloEntrenadorPlanificable->infoUltimaEjecucion = (InfoUltimaEjecucion) {.rafagaAnterior=0, .estimadoAnterior=0};
+    hiloEntrenadorPlanificable->asignarTarea = &asignarTarea;
     hiloEntrenadorPlanificable->trabajar = &trabajar;
     hiloEntrenadorPlanificable->ejecutarParcialmente = &ejecutarLimitado;
     hiloEntrenadorPlanificable->ejecutar = &ejecutar;
