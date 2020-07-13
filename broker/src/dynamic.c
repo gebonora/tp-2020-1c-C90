@@ -2,51 +2,7 @@
 
 static void _consolidate();
 static void _compact();
-
-// 1) filtramos las particiones libres que satisfacen el tamañoAGuardar
-// 2) buscamos la particion en base al algoritmo FF / BF
-// 3) si encontre una, la rompo si hace falta en 2 particiones (1 del tamanioQueVoyAGuardar)
-//  y la otra de lo que le quedo libre
-//  Ej: guardo 30, tengo libre una de 80 (nro 7)
-//  me queda -> particion a usar (nro 7) tamanio 30 + particion (nro8) tamanio 50
-//  // TODO: ver lo del tamanioMinioDeParticion
-// 4) devolvemos la particion encontrada o un NULL si no encontre ninguna
-
-// first . filter(free && tamanio>=tamanioABuscar)
-
-Partition* find_partition_dynamic(uint32_t sizeOfData) {
-
-	Partition* partition = find_partition(sizeOfData);
-
-	if(partition != NULL) {
-
-		int new_size = MAX_PARTITION_SIZE(sizeOfData);
-
-		int old_size = partition->size;
-
-		partition->size = new_size;
-		partition->free = false;
-		int now = (int) ahoraEnTimeT();
-		partition->access_time = now;
-		partition->creation_time = now;
-		// TODO: ver access time,
-		 // ver metodo de seba nueva particion
-
-		replace_partition_at(partition->start, partition);
-
-		Partition* new_partition = create_partition(partition->start + new_size, old_size - new_size);
-
-		add_partition_next_to(partition->start, new_partition);
-
-		// ROMPER LA PARTICION
-		// tamanio particion encontrada == tamanioAGuardar -> devuelvo asi
-		// tamanio particion encontrada >  tamanioAGuardar -> trunco particion encontrada y genero una nueva con el excedente
-		return partition;
-	} else {
-		return NULL;
-	}
-}
-
+static Partition* find_partition_dynamic(uint32_t);
 
 void save_to_cache_dynamic_partitions(void* data, Message* message) {
 	int partitions_killed = 0;
@@ -76,7 +32,7 @@ void save_to_cache_dynamic_partitions(void* data, Message* message) {
  * */
 static void _compact() {
 
-	t_list* occupied = _get_occupied_partitions();
+	t_list* occupied = get_occupied_partitions();
 
 	for(int i = 0; i < occupied->elements_count; i+2){
 
@@ -93,7 +49,7 @@ static void _compact() {
 		second_partition = first_partition->start + first_partition->size;
 	}
 
-	t_list* not_occupied = _get_not_ocupied_partition();
+	t_list* not_occupied = get_free_partitions();
 
 	int free_size = 0;
 
@@ -159,3 +115,48 @@ static void _consolidate(){
 		remove_partition_at(middle_partition->start);
 	}
 }
+
+// 1) filtramos las particiones libres que satisfacen el tamañoAGuardar
+// 2) buscamos la particion en base al algoritmo FF / BF
+// 3) si encontre una, la rompo si hace falta en 2 particiones (1 del tamanioQueVoyAGuardar)
+//  y la otra de lo que le quedo libre
+//  Ej: guardo 30, tengo libre una de 80 (nro 7)
+//  me queda -> particion a usar (nro 7) tamanio 30 + particion (nro8) tamanio 50
+//  // TODO: ver lo del tamanioMinioDeParticion
+// 4) devolvemos la particion encontrada o un NULL si no encontre ninguna
+
+// first . filter(free && tamanio>=tamanioABuscar)
+
+static Partition* find_partition_dynamic(uint32_t size_of_data) {
+
+	Partition* partition = find_partition(size_of_data);
+
+	if(partition != NULL) {
+
+		int new_size = MAX_PARTITION_SIZE(size_of_data);
+
+		int old_size = partition->size;
+
+		partition->size = new_size;
+		partition->free = false;
+		int now = (int) ahoraEnTimeT();
+		partition->access_time = now;
+		partition->creation_time = now;
+		// TODO: ver access time,
+		 // ver metodo de seba nueva particion
+
+		replace_partition_at(partition->start, partition);
+
+		Partition* new_partition = create_partition(partition->start + new_size, old_size - new_size);
+
+		add_partition_next_to(partition->start, new_partition);
+
+		// ROMPER LA PARTICION
+		// tamanio particion encontrada == tamanioAGuardar -> devuelvo asi
+		// tamanio particion encontrada >  tamanioAGuardar -> trunco particion encontrada y genero una nueva con el excedente
+		return partition;
+	} else {
+		return NULL;
+	}
+}
+

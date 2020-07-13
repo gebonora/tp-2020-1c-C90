@@ -1,12 +1,15 @@
 #include "broker.h"
 
-static int _get_suscriber_socket(Suscriber*);
-static t_list* _get_suscribers(char*);
-
 typedef struct arg_struct {
 	Partition* partition;
 	int socket_suscriber;
 } arg_struct;
+
+static int _get_subscriber_socket(Suscriber* );
+static t_list* _get_subscribers(char*);
+static void* _transform_messages(Partition*, Operation);
+static void send_message_and_wait_for_ack(arg_struct*);
+static void send_messages_to_subscribers(t_list* subscribers, Partition* partition);
 
 uint32_t get_id() {
 	pthread_mutex_lock(&MUTEX_MESSAGE_ID);
@@ -18,158 +21,89 @@ uint32_t get_id() {
 void consumer_new_queue() {
 	sem_wait(&NEW_MESSAGES);
 
-	t_list* suscribers = _get_suscribers("NEW");
+	t_list* new_partitions = messages_from_operation(NEW);
 
-	t_list* new_messages = messages_from_operation(NEW);
-
-	void* new;
-	void _send_new_to_suscribers(int socket_suscriber){
-
-		send(socket_suscriber, new, calculate_new_bytes(), MSG_NOSIGNAL);
+	void _inline_send_message(Partition* partition){
+		send_messages_to_subscribers(_get_subscribers("NEW"), partition);
 	}
 
-	for(int i = 0; i < new_messages->elements_count; i++){
-		new = list_get(new_messages, i);
-		list_iterate(suscribers, &_send_new_to_suscribers);
-	}
-
-	free(new);
-	list_destroy_and_destroy_elements(new_messages);
+	list_iterate(new_partitions, &_inline_send_message);
 }
 
 void consumer_appeared_queue() {
 	sem_wait(&APPEARED_MESSAGES);
-	t_list* suscribers = _get_suscribers("APPEARED");
 
-	t_list* appeared_messages = messages_from_operation(APPEARED);
+	t_list* appeared_partitions = messages_from_operation(APPEARED);
 
-	void* appeared;
-	void _send_appeared_to_suscribers(int socket_suscriber){
-		send(socket_suscriber, appeared, calculate_pokemon_bytes(), MSG_NOSIGNAL);
+	void _inline_send_message(Partition* partition){
+		send_messages_to_subscribers(_get_subscribers("APPEARED"), partition);
 	}
 
-	for(int i = 0; i < appeared_messages->elements_count; i++){
-		appeared = list_get(appeared_messages, i);
-		list_iterate(suscribers, &_send_appeared_to_suscribers);
-	}
-
-	free(appeared);
-	list_destroy_and_destroy_elements(appeared_messages);
+	list_iterate(appeared_partitions, &_inline_send_message);
 
 }
 
 void consumer_localized_queue() {
 	sem_wait(&LOCALIZED_MESSAGES);
-	t_list* subscribers = _get_suscribers("LOCALIZED");
-
 	t_list* localized_partitions = messages_from_operation(LOCALIZED);
 
-	void send_message(Partition* partition){
-		hola(subscribers, partition);
+	void _inline_send_message(Partition* partition){
+		send_messages_to_subscribers(_get_subscribers("LOCALIZED"), partition);
 	}
 
-	list_iterate(localized_partitions, &send_message);
+	list_iterate(localized_partitions, &_inline_send_message);
 }
-
-void send_message_and_wait_for_ack(arg_struct* args) {
-	void* message = _transform_messages(args->partition, args->partition->message->operation_code);
-	send(args->socket_suscriber, message, sizeof(message), MSG_NOSIGNAL);
-	Result result;
-	if(recv(args->socket_suscriber, &result, sizeof(Result), MSG_WAITALL) > 0){
-		list_add(args->partition->notified_suscribers, args->socket_suscriber);
-	}
-}
-
-void hola(t_list* subscribers, Partition* partition){
-	for(int i = 0; i < subscribers->elements_count; i++){
-		int socket_subscriber = list_get(subscribers, i);
-
-		arg_struct* args = malloc(sizeof(arg_struct));
-		args->partition = partition;
-		args->socket_suscriber = socket_subscriber;
-
-		pthread_t thread_localized;
-		pthread_create(&thread_localized, NULL, (void*)send_message_and_wait_for_ack, args);
-		pthread_detach(thread_localized);
-	}
-}
-
-
 
 void consumer_get_queue() {
 	sem_wait(&GET_MESSAGES);
-	t_list* suscribers = _get_suscribers("GET");
 
-	t_list* get_messages = messages_from_operation(GET);
+	t_list* get_partitions = messages_from_operation(GET);
 
-	void* get;
-	void _send_get_to_suscribers(int socket_suscriber){
-		send(socket_suscriber, get, calculate_get_bytes(), MSG_NOSIGNAL);
+	void _inline_send_message(Partition* partition){
+		send_messages_to_subscribers(_get_subscribers("GET"), partition);
 	}
 
-	for(int i = 0; i < get_messages->elements_count; i++){
-		get = list_get(get_messages, i);
-		list_iterate(suscribers, &_send_localized_to_suscribers);
-	}
-
-	free(get);
-	list_destroy_and_destroy_elements(get_messages);
+	list_iterate(get_partitions, &_inline_send_message);
 
 }
 
 void consumer_catch_queue() {
 	sem_wait(&CATCH_MESSAGES);
-	t_list* suscribers = _get_suscribers("CATCH");
 
-	t_list* catch_messages = messages_from_operation(CATCH);
+	t_list* catch_partitions = messages_from_operation(CATCH);
 
-	void* catch;
-	void _send_catch_to_suscribers(int socket_suscriber){
-		send(socket_suscriber, catch, calculate_pokemon_bytes(), MSG_NOSIGNAL);
+	void _inline_send_message(Partition* partition){
+		send_messages_to_subscribers(_get_subscribers("CATCH"), partition);
 	}
 
-	for(int i = 0; i < catch_messages->elements_count; i++){
-		catch = list_get(catch_messages, i);
-		list_iterate(suscribers, &_send_catch_to_suscribers);
-	}
-
-	free(catch);
-	list_destroy_and_destroy_elements(catch_messages);
+	list_iterate(catch_partitions, &_inline_send_message);
 }
 
 void consumer_caught_queue() {
 	sem_wait(&CAUGHT_MESSAGES);
-	t_list* suscribers = _get_suscribers("CAUGHT");
 
-	t_list* caught_messages = messages_from_operation(CAUGHT);
+	t_list* caught_partitions = messages_from_operation(CAUGHT);
 
-	void* caught;
-	void _send_caught_to_suscribers(int socket_suscriber){
-		send(socket_suscriber, caught, calculate_caught_bytes(), MSG_NOSIGNAL);
+	void _inline_send_message(Partition* partition){
+		send_messages_to_subscribers(_get_subscribers("CAUGHT"), partition);
 	}
 
-	for(int i = 0; i < caught_messages->elements_count; i++){
-		caught = list_get(caught_messages, i);
-		list_iterate(suscribers, &_send_caught_to_suscribers);
-	}
-
-	free(caught);
-	list_destroy_and_destroy_elements(caught_messages);
+	list_iterate(caught_partitions, &_inline_send_message);
 
 }
 
-static int _get_suscriber_socket(Suscriber* suscriber){
+static int _get_subscriber_socket(Suscriber* suscriber) {
 	return suscriber->socket;
 }
 
-static t_list* _get_suscribers(char* queue_key){
+static t_list* _get_subscribers(char* queue_key) {
 	pthread_mutex_lock(&MUTEX_SUBSCRIBERS_BY_QUEUE);
-	t_list* suscribers = list_map(dictionary_get(SUBSCRIBERS_BY_QUEUE, queue_key), &_get_suscriber_socket);
+	t_list* subscribers = list_map(dictionary_get(SUBSCRIBERS_BY_QUEUE, queue_key), &_get_subscriber_socket);
 	pthread_mutex_unlock(&MUTEX_SUBSCRIBERS_BY_QUEUE);
-	return suscribers;
+	return subscribers;
 }
 
-void* _transform_messages(Partition* partition, Operation, operation){
+static void* _transform_messages(Partition* partition, Operation operation) {
 	int now = (int) ahoraEnTimeT();
 	partition->access_time = now;
 	void* message;
@@ -212,4 +146,27 @@ void* _transform_messages(Partition* partition, Operation, operation){
 	}
 
 	return message;
+}
+
+static void send_message_and_wait_for_ack(arg_struct* args) {
+	void* message = _transform_messages(args->partition, args->partition->message->operation_code);
+	send(args->socket_suscriber, message, sizeof(message), MSG_NOSIGNAL);
+	Result result;
+	if(recv(args->socket_suscriber, &result, sizeof(Result), MSG_WAITALL) > 0){
+		list_add(args->partition->notified_suscribers, args->socket_suscriber);
+	}
+}
+
+static void send_messages_to_subscribers(t_list* subscribers, Partition* partition) {
+	for(int i = 0; i < subscribers->elements_count; i++){
+		int socket_subscriber = list_get(subscribers, i);
+
+		arg_struct* args = malloc(sizeof(arg_struct));
+		args->partition = partition;
+		args->socket_suscriber = socket_subscriber;
+
+		pthread_t thread_localized;
+		pthread_create(&thread_localized, NULL, (void*)send_message_and_wait_for_ack, args);
+		pthread_detach(thread_localized);
+	}
 }

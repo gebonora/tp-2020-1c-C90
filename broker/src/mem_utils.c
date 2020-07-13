@@ -4,7 +4,7 @@ static Partition* _choose_victim(bool(*)(void*));
 static bool _is_occupied(Partition*);
 static bool _less_access_time(Partition*, Partition*);
 static bool _less_creation_time(Partition*, Partition*);
-static t_list* _get_occupied_partitions();
+static bool _is_free(Partition*);
 static void _show_partitions_with_index(t_list*);
 static void _show_partition(Partition*, int, int);
 static void _show_message(Message*);
@@ -78,6 +78,15 @@ void show_partitions(t_list* partitions) {
 void show_memory_partitions() {
 	_show_partitions_with_index(memory->partitions);
 }
+
+t_list* get_occupied_partitions() {
+	return list_filter(memory->partitions, &_is_occupied);
+}
+
+t_list* get_free_partitions() {
+	return list_filter(memory->partitions, &_is_free);
+}
+
 
 /** PRIVATE FUNCTIONS **/
 
@@ -158,7 +167,7 @@ static bool _greater_equals_and_free(uint32_t to_compare, Partition* partition) 
 }
 
 static Partition* _choose_victim(bool(*condition)(void*)) {
-	t_list* occupied_partitions = list_sorted(_get_occupied_partitions(memory->partitions), &condition);
+	t_list* occupied_partitions = list_sorted(get_occupied_partitions(memory->partitions), &condition);
 	Partition* victim = list_get(occupied_partitions, 0);
 	victim->free = true;
 	return victim;
@@ -168,16 +177,16 @@ static bool _is_occupied(Partition* partition) {
 	return !partition->free;
 }
 
+static bool _is_free(Partition* partition) {
+	return partition->free;
+}
+
 static bool _less_access_time(Partition* partition_a, Partition* partition_b) {
 	return partition_a->access_time < partition_b->access_time;
 }
 
 static bool _less_creation_time(Partition* partition_a, Partition* partition_b) {
 	return partition_a->creation_time < partition_b->creation_time;
-}
-
-static t_list* _get_occupied_partitions() {
-	return list_filter(memory->partitions, &_is_occupied);
 }
 
 static bool _partition_at_position(uintptr_t position_to_compare, uintptr_t actual_position) {

@@ -10,7 +10,17 @@ static sem_t _semaphore_from_operation(Operation);
 void save_message(void* data, Operation operation, uint32_t message_id, uint32_t correlational_id) {
 	Message* message = _create_message(operation, message_id, correlational_id, _calculate_data_size(data, operation));
 	_save_to_cache(data, message);
-	sem_post(&(_semaphore_from_operation(operation)));
+	sem_t semaphore = _semaphore_from_operation(operation);
+	sem_post(&semaphore);
+}
+
+t_list* messages_from_operation(Operation operation){//todo sincronizar
+
+	bool _find_for_operation(Partition* partition){
+		return partition->message->operation_code == operation;
+	}
+
+	return list_filter(memory->partitions, &_find_for_operation);
 }
 
 /** PRIVATE FUNCTIONS **/
@@ -21,66 +31,6 @@ static void _save_to_cache(void* data, Message* message) {
 	} else {
 		save_to_cache_dynamic_partitions(data, message);
 	}
-}
-
-t_list* messages_from_operation(Operation operation){
-
-	bool _find_for_operation(Partition* partition){
-		return partition->message->operation_code == operation;
-	}
-
-	return list_filter(memory->partitions, &_find_for_operation);
-	/*t_list* messages = list_create();
-
-	void _transform_messages(Partition* partition){
-		int now = (int) ahoraEnTimeT();
-		partition->access_time = now;
-		void* message;
-
-		switch(operation){
-		case NEW: ;
-			message = malloc(sizeof(Operation) + partition->message->data_size);
-			memcpy(message, &operation, sizeof(Operation));
-			memcpy(message + sizeof(Operation), partition->start, partition->message->data_size);
-			break;
-		case APPEARED: ;
-			message = malloc(sizeof(Operation) + partition->message->data_size);
-			memcpy(message, &operation, sizeof(Operation));
-			memcpy(message + sizeof(Operation), partition->start, partition->message->data_size);
-			break;
-		case CATCH: ;
-			message = malloc(sizeof(Operation) + partition->message->data_size + sizeof(uint32_t));
-			memcpy(message, &operation, sizeof(Operation));
-			memcpy(message + sizeof(Operation), partition->start, partition->message->data_size);
-			memcpy(message + sizeof(Operation) + sizeof(uint32_t), &(partition->message->message_id), sizeof(uint32_t));
-			break;
-		case CAUGHT: ;
-			message = malloc(sizeof(Operation) + partition->message->data_size + sizeof(uint32_t));
-			memcpy(message, &operation, sizeof(Operation));
-			memcpy(message + sizeof(Operation), partition->start, partition->message->data_size);
-			memcpy(message + sizeof(Operation) + sizeof(uint32_t), &(partition->message->correlational_id), sizeof(uint32_t));
-			break;
-		case LOCALIZED: ;
-			message = malloc(sizeof(Operation) + partition->message->data_size + sizeof(uint32_t));
-			memcpy(message, &operation, sizeof(Operation));
-			memcpy(message + sizeof(Operation), partition->start, partition->message->data_size);
-			memcpy(message + sizeof(Operation) + sizeof(uint32_t), &(partition->message->correlational_id), sizeof(uint32_t));
-			break;
-		case GET: ;
-			message = malloc(sizeof(Operation) + partition->message->data_size + sizeof(uint32_t));
-			memcpy(message, &operation, sizeof(Operation));
-			memcpy(message + sizeof(Operation), partition->start, partition->message->data_size);
-			memcpy(message + sizeof(Operation) + sizeof(uint32_t), &(partition->message->message_id), sizeof(uint32_t));
-			break;
-		}
-
-		list_add(messages, message);
-	}
-
-	list_iterate(partitions, &_transform_messages);
-
-	return messages;*/
-
 }
 
 static int _calculate_data_size(void* data, Operation operation) {
