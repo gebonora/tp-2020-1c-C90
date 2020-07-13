@@ -7,11 +7,11 @@
 #include <commons/collections/list.h>
 
 typedef enum {
-	GAMEBOY = 1, TEAM = 2, GAMECARD = 3, BROKER = 4, SUSCRIPTOR = 5
+	GAMEBOY, TEAM, GAMECARD, BROKER, SUSCRIPTOR
 } Process;
 
 typedef enum {
-	NEW = 1, LOCALIZED = 2, GET = 3, APPEARED = 4, CATCH = 5, CAUGHT = 6, SUBSCRIBE = 7
+	NEW, LOCALIZED, GET, APPEARED, CATCH, CAUGHT, SUBSCRIBE
 } Operation;
 
 typedef enum {
