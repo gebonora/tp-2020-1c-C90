@@ -36,8 +36,17 @@ static void procesarAppearedRecibido(ManejadorDeEventos* this, Pokemon* unPokemo
 	//pasamanos para llamar a notificarNuevoPokemon.
 }
 
-static void procesarCaughtRecibido(ManejadorDeEventos* this, Caught* unCaught) {
+static void procesarCaughtRecibido(ManejadorDeEventos* this, Caught* unCaught, uint32_t idMensaje) {
 	//nos fijamos que sea un caught que hayamos pedido y llamamos a notificarPokemonCapturado.
+
+	for(int a =0; a<list_size(this->listaCatchEnEspera->lista); a++){
+		MensajeEsperado* elem = (MensajeEsperado*) list_get((this->listaCatchEnEspera->lista),a);
+		if (elem->idMensaje == idMensaje){
+			//sacar del mapa y demas
+			//sacarlo de la lista y liberar memoria.
+			//TODO: tengo que tener al entrenador para avisarle que tuvo exito, desde el cliente tengo que guardar esto en MensajeEsperado???
+		}
+	}
 }
 
 static void destruir(ManejadorDeEventos * this) {

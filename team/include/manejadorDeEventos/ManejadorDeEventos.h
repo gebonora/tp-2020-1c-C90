@@ -43,7 +43,7 @@ typedef struct ManejadorDeEventos {
 
 	void (*procesarLocalizedRecibido)(struct ManejadorDeEventos* this, Localized* unLocalized);
 	void (*procesarAppearedRecibido)(struct ManejadorDeEventos* this, Pokemon* unPokemon);
-	void (*procesarCaughtRecibido)(struct ManejadorDeEventos* this, Caught* unCaught);
+	void (*procesarCaughtRecibido)(struct ManejadorDeEventos* this, Caught* unCaught, uint32_t idMensaje);
 
 	void (*destruir)(struct ManejadorDeEventos *this);
 } ManejadorDeEventos;

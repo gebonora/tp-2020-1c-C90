@@ -16,7 +16,7 @@
 #include <signal.h>
 #include "app/Global.h"
 #include "utils/sockets/Sockets.h"
-#include "cliente/ClienteBroker.h"
+#include "manejadorDeEventos/ManejadorDeEventos.h"
 
 typedef struct {
 	void* mensaje;
