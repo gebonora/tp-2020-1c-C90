@@ -45,6 +45,7 @@ static void procesarCaughtRecibido(ManejadorDeEventos* this, Caught* unCaught, u
 			//sacar del mapa y demas
 			//sacarlo de la lista y liberar memoria.
 			//TODO: tengo que tener al entrenador para avisarle que tuvo exito, desde el cliente tengo que guardar esto en MensajeEsperado???
+			//capaz conviene que el cliente cree el MensajeEsperado, sino va a quedar long parameter list
 		}
 	}
 }
