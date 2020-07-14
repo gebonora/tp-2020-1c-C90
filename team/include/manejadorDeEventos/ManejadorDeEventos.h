@@ -6,6 +6,7 @@
 #define TEAM_MANEJADORDEEVENTOS_H
 
 #include "app/Global.h"
+#include <pthread.h>
 
 /**
  * El server va a llamar al manejador de eventos cuando recibamos los mensajes.
@@ -19,16 +20,39 @@
  * TODO: la notificacion del evento localized y appeared se puede generalizar en uno o mas "aparecioPokemon".
  */
 
+typedef struct MensajeEsperado {
+	char* nombrePokemon;
+	uint32_t idMensaje;
+} MensajeEsperado;
+
+typedef struct ListaSincronizada{
+	t_list* lista;
+	pthread_mutex_t mtx;
+}ListaSincronizada;
+
 typedef struct ManejadorDeEventos {
-    t_log * logger;
-    // Interfaz publica
-    void (*notificarEventoLocalized)(struct ManejadorDeEventos *this);
-    void (*destruir)(struct ManejadorDeEventos *this);
+	t_log * logger;
+	ListaSincronizada* listaGetEnEspera;
+	ListaSincronizada* listaCatchEnEspera;
+
+	// Interfaz publica
+	void (*registrarMensajeEnEsperaEnLista)(struct ManejadorDeEventos* this, char* nombrePokemon, uint32_t idAsignado, ListaSincronizada* lista);
+
+	void (*notificarNuevoPokemon)(struct ManejadorDeEventos* this);
+	void (*notificarPokemonCapturado)(struct ManejadorDeEventos* this);
+
+	void (*procesarLocalizedRecibido)(struct ManejadorDeEventos* this, Localized* unLocalized);
+	void (*procesarAppearedRecibido)(struct ManejadorDeEventos* this, Pokemon* unPokemon);
+	void (*procesarCaughtRecibido)(struct ManejadorDeEventos* this, Caught* unCaught);
+
+	void (*destruir)(struct ManejadorDeEventos *this);
 } ManejadorDeEventos;
 
 extern const struct ManejadorDeEventosClass {
-    ManejadorDeEventos (*new)();
+	ManejadorDeEventos (*new)();
 } ManejadorDeEventosConstructor;
+
+ListaSincronizada* iniciarListaSincronizada();
 
 ManejadorDeEventos manejadorDeEventos;
 

@@ -21,6 +21,8 @@
 #include <pthread.h>
 #include "app/Global.h"
 #include "utils/sockets/Sockets.h"
+#include "servidor/ServidorTeam.h"
+#include "manejadorDeEventos/ManejadorDeEventos.h"
 
 void atenderCaughtRecibido(Caught* unCaught, uint32_t);
 

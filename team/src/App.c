@@ -88,6 +88,7 @@ void inicializarComponentesDelSistema() {
     mapaProcesoTeam = MapaConstructor.new();
     pthread_mutex_init(&MTX_INTERNAL_LOG, NULL); //TODO: por ahi conviene moverlo a configurarServer()
     servicioDePlanificacion = ServicioDePlanificacionConstructor.new();
+    manejadorDeEventos = ManejadorDeEventosConstructor.new();
     sem_init(&semaforoObjetivoGlobalCompletado, 0, 0);
 }
 
