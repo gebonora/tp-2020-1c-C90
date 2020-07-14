@@ -23,11 +23,6 @@ t_list* messages_from_operation(Operation operation){//todo sincronizar
 	bool _find_for_operation(Partition* partition){
 		return partition->message->operation_code == operation;
 	}
-	void _modify_access_time(Partition* partition) {
-		partition->access_time = (int) ahoraEnTimeT();
-	}
-
-	list_iterate(memory->partitions, &_modify_access_time);
 
 	return list_filter(memory->partitions, &_find_for_operation);
 }

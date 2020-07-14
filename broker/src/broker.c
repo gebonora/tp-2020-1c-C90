@@ -103,7 +103,7 @@ static t_list* _get_subscribers(char* queue_key) {
 	return subscribers;
 }
 
-static void* _transform_messages(Partition* partition, Operation operation) {
+static void* _transform_messages(Partition* partition, Operation operation) { //todo: esto vamos a tener que sincronizarlo porque se leen aca los datos de los start de las particiones.
 	int now = (int) ahoraEnTimeT();
 	partition->access_time = now;
 	void* message;
