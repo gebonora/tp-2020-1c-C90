@@ -26,7 +26,7 @@ static void actualizarEstado(TareaPlanificable * this, int ultimaInstruccionEjec
     }
 }
 
-static void notificarEjecucion(TareaPlanificable *this, int numeroInstruccion) {
+static void notificarEjecucion(TareaPlanificable * this, int numeroInstruccion) {
     if (
             this->estado == EJECUTANDO &&
             this->contadorDeInstrucciones == numeroInstruccion &&
@@ -35,6 +35,20 @@ static void notificarEjecucion(TareaPlanificable *this, int numeroInstruccion) {
         this->contadorDeInstrucciones+=1; //Avanzo solo si me notifican que la ultima que pidieron fue ejecutada.
     }
     actualizarEstado(this, numeroInstruccion);
+}
+
+static void abortar(TareaPlanificable * this) {
+    log_error(this->logger, "Se solicitó abortar la tarea.");
+    this->estado = ABORTADA;
+}
+
+static int cantidadInstruccionesRestantes(TareaPlanificable * this) {
+    if (this->contadorDeInstrucciones == 0) {
+        return this->totalInstrucciones;
+    } else if (this->estado == FINALIZADA) {
+        return 0;
+    }
+    return this->totalInstrucciones - this->contadorDeInstrucciones;
 }
 
 static void destruir(TareaPlanificable * this) {
@@ -53,6 +67,8 @@ static TareaPlanificable *new(Instrucciones instrucciones) {
     tarea->estado = PENDIENTE_DE_EJECUCION;
     tarea->proximaInstruccion = &proximaInstruccion;
     tarea->notificarEjecucion = &notificarEjecucion;
+    tarea->cantidadInstruccionesRestantes = &cantidadInstruccionesRestantes;
+    tarea->abortar = &abortar;
     tarea->destruir = &destruir;
     tarea->actualizarEstado = &actualizarEstado;
 

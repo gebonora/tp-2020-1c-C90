@@ -30,6 +30,21 @@ void imprimirObjetivoGlobal(ObjetivoGlobal * this) {
     log_debug(this->logger, "------------------------------------------");
 }
 
+void solicitarPokemones(ObjetivoGlobal * this) {
+    t_list * especiesNecesarias = this->especiesNecesarias(this);
+
+    for (int i = 0; i < list_size(especiesNecesarias); i++) {
+        char * pokemon = list_get(especiesNecesarias, i);
+        log_debug(this->logger, "Solicitando especie: %s", pokemon);
+        //RespuestaBroker rta = this->clienteBroker.get(pokemon);
+        //if(rta.valida) {
+        // manejadorDeEventos.registarEventoLocalizedEsperado(rta.idCorrelatividad);
+        // }
+    }
+
+    list_destroy(especiesNecesarias);
+}
+
 void destruirObjetivoGlobal(ObjetivoGlobal * this) {
     log_debug(this->logger, "Se procede a destruir el objetivo global");
     log_destroy(this->logger);
@@ -43,6 +58,7 @@ static ObjetivoGlobal new(Equipo unEquipo) {
             &especiesNecesarias,
             &puedeCapturarse,
             &imprimirObjetivoGlobal,
+            &solicitarPokemones,
             &destruirObjetivoGlobal
     };
     objetivo.imprimirObjetivoGlobal(&objetivo);

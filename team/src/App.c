@@ -36,9 +36,13 @@ int main() {
 
     // Por cada pokemon del objetivo global, enviar un GET [POKEMON].
     log_info(INTERNAL_LOGGER, "Solicitando la ubicacion de los pokemones objetivo para comenzar...");
-    //TODO: for loop -> cliente broker -> mover logica a objetivo global
+    objetivoGlobal.solicitarUbicacionPokemonesNecesitados(&objetivoGlobal);
 
-    // Main loop. Traba el hilo main asi no se corta el programa. Se libera si se cumple el objetivo global.
+    // Cuando se complete el objetivo global, podremos finalizar el proceso y liberar los recursos.
+    if (ESPERAR_OBJETIVO_GLOBAL) {
+        log_info(INTERNAL_LOGGER, "Esperando a que se complete el objetivo global...");
+        sem_wait(&semaforoObjetivoGlobalCompletado);
+    }
 
     // Liberacion
     log_info(INTERNAL_LOGGER, "Finalizando proceso Team...");
@@ -57,6 +61,9 @@ void warmUp() {
     log_warning(INTERNAL_LOGGER, "Nivel de log interno configurado: %s", log_level_as_string(INTERNAL_LOG_LEVEL));
     if (CORRER_TESTS) {
         log_warning(INTERNAL_LOGGER, "Pruebas de integracion: ACTIVADAS");
+    }
+    if (!ESPERAR_OBJETIVO_GLOBAL) {
+        log_warning(INTERNAL_LOGGER, "Objetivo global es necesario para finalizar el proceso: NO");
     }
 }
 
@@ -81,13 +88,14 @@ void inicializarComponentesDelSistema() {
     mapaProcesoTeam = MapaConstructor.new();
     pthread_mutex_init(&MTX_INTERNAL_LOG, NULL); //TODO: por ahi conviene moverlo a configurarServer()
     servicioDePlanificacion = ServicioDePlanificacionConstructor.new();
+    sem_init(&semaforoObjetivoGlobalCompletado, 0, 0);
 }
 
 /**
     * Instanciar a los entrenadores a partir de la config - OK
     * Armar el objetivo global - OK
     * Armar los hilos de entrenador planificables - OK
-    * Enviar a los entrenadores a new - TODO
+    * Enviar a los entrenadores a new - OK
     * Finalmente, con el cliente broker a mano: Por cada pokemon del objetivo global, enviar un GET \[POKEMON\] - TODO
  */
 void configurarEstadoInicialProcesoTeam() {
@@ -99,7 +107,7 @@ void configurarEstadoInicialProcesoTeam() {
     void registrarEquipo(Entrenador * entrenador) {
         registrarEnMapaPosicionEntrenador(&mapaProcesoTeam, entrenador);
     }
-    list_iterate(equipoProcesoTeam, registrarEquipo);
+    list_iterate(equipoProcesoTeam, (void (*)(void *)) registrarEquipo);
     log_debug(INTERNAL_LOGGER, "Agregando equipo a la planificacion...");
     servicioDePlanificacion->asignarEquipoAPlanificar(servicioDePlanificacion, equipoProcesoTeam);
 }
@@ -121,6 +129,7 @@ void liberarRecursos() {
     // Componentes
     log_debug(INTERNAL_LOGGER, "Liberando componentes del sistema...");
     pthread_mutex_destroy(&MTX_INTERNAL_LOG);
+    sem_destroy(&semaforoObjetivoGlobalCompletado);
 
     // Proceso Team
     log_debug(INTERNAL_LOGGER, "Liberando participantes del proceso Team...");

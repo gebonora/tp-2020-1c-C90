@@ -32,6 +32,8 @@ typedef struct TareaPlanificable {
     //Interfaz publica
     Instruccion * (*proximaInstruccion)(struct TareaPlanificable * this);
     void (*notificarEjecucion)(struct TareaPlanificable * this, int numeroInstruccion);
+    int (*cantidadInstruccionesRestantes)(struct TareaPlanificable * this);
+    void (*abortar)(struct TareaPlanificable * this);
     void (*destruir)(struct TareaPlanificable * this);
     //Metodos privados
     void (*actualizarEstado)(struct TareaPlanificable * this, int ultimaInstruccionEjecutada);

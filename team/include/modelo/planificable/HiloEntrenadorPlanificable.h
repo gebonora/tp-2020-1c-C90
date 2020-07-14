@@ -10,6 +10,7 @@
 #include "modelo/equipo/entrenador/Entrenador.h"
 #include "delibird/utils/hilos/HiloFacil.h"
 #include "modelo/planificable/tarea/TareaPlanificable.h"
+#include "delibird/servicios/servicioDeConfiguracion/ServicioDeConfiguracion.h"
 
 /**
  * La idea es que esta clase sea planificable, dando lugar a la ejecucion de las acciones propias del entrenador
@@ -35,16 +36,18 @@ typedef struct InfoUltimaEjecucion {
 typedef struct HiloEntrenadorPlanificable {
     t_log * logger;
     Entrenador *entrenador;
+    int retardoInstruccion;
     bool finDeTrabajo;
     sem_t semaforoEjecucionHabilitada;
     sem_t semaforoCicloCompletado;
     sem_t semaforoFinDeTrabajo;
-    TareaPlanificable * tareaEnEjecucion; //Nos sirve para que el hilo pueda levantar de aca la tarea que le dejen.
-    InfoUltimaEjecucion infoUltimaEjecucion; //Necesario en SJF.
+    TareaPlanificable * tareaAsignada; //Nos sirve para que el hilo pueda levantar de aca la tarea que le dejen.
+    InfoUltimaEjecucion infoUltimaEjecucion;
     // Interfaz publica
+    void (*asignarTarea)(struct HiloEntrenadorPlanificable * this, TareaPlanificable * tarea);
     void (*trabajar)(struct HiloEntrenadorPlanificable * this);
-    void (*ejecutarParcialmente)(struct HiloEntrenadorPlanificable * this, TareaPlanificable * tarea, int cantInstrucciones);
-    void (*ejecutar)(struct HiloEntrenadorPlanificable * this, TareaPlanificable * tarea);
+    void (*ejecutarParcialmente)(struct HiloEntrenadorPlanificable * this, int cantInstrucciones);
+    void (*ejecutar)(struct HiloEntrenadorPlanificable * this);
     // nuevoEstado(estado) - Asi nos enteramos si nos dan permiso para ejecutar o nos bloquearon TODO ¿Lo necesito?
     void (*destruir)(struct HiloEntrenadorPlanificable * this);
 } HiloEntrenadorPlanificable;

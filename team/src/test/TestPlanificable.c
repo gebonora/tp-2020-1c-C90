@@ -16,10 +16,10 @@ void testDePlanificable() {
     log_info(testLogger, "Testeando la ejecucion total de una tarea de captura");
     Coordinate posicionPokemon = (Coordinate){.pos_x=3, .pos_y=5};
     TareaPlanificable * tareaCaptura = generarTareaDeCaptura(hiloEntrenadorPlanificable->entrenador, "A", posicionPokemon);
+    hiloEntrenadorPlanificable->asignarTarea(hiloEntrenadorPlanificable, tareaCaptura);
+    hiloEntrenadorPlanificable->ejecutar(hiloEntrenadorPlanificable);
 
-    hiloEntrenadorPlanificable->ejecutar(hiloEntrenadorPlanificable, tareaCaptura);
-
-    assert(tareaCaptura->estado == FINALIZADA);
+    assert(hiloEntrenadorPlanificable->tareaAsignada == NULL);
 
     log_info(testLogger, "Testeando el efecto de lado de la tarea de captura");
     Posicion posicionDeCaptura = entrenador->posicion(entrenador);
@@ -30,8 +30,8 @@ void testDePlanificable() {
     log_info(testLogger, "Testeando la ejecucion parcial de una tarea de captura");
     Coordinate posicionPokemon2 = (Coordinate){.pos_x=7, .pos_y=3};
     TareaPlanificable * tareaCapturaParcial = generarTareaDeCaptura(hiloEntrenadorPlanificable->entrenador, "A", posicionPokemon2);
-
-    hiloEntrenadorPlanificable->ejecutarParcialmente(hiloEntrenadorPlanificable, tareaCapturaParcial, 1);
+    hiloEntrenadorPlanificable->asignarTarea(hiloEntrenadorPlanificable, tareaCapturaParcial);
+    hiloEntrenadorPlanificable->ejecutarParcialmente(hiloEntrenadorPlanificable, 1);
 
     assert(tareaCapturaParcial->estado == PENDIENTE_DE_EJECUCION);
 
@@ -42,8 +42,15 @@ void testDePlanificable() {
     assert(posicionEnCaminoACapturar.coordenada.pos_x == 4);
     assert(posicionEnCaminoACapturar.coordenada.pos_y == 5);
 
-    tareaCaptura->destruir(tareaCaptura);
-    tareaCapturaParcial->destruir(tareaCapturaParcial);
+    log_info(testLogger, "Si ejecutamos por el remanente, la tarea deberia finalizar y eliminarse");
+    hiloEntrenadorPlanificable->ejecutar(hiloEntrenadorPlanificable);
+
+    assert(hiloEntrenadorPlanificable->tareaAsignada == NULL);
+    posicionEnCaminoACapturar = entrenador->posicion(entrenador);
+    assert(posicionEnCaminoACapturar.valida == true);
+    assert(posicionEnCaminoACapturar.coordenada.pos_x == 7);
+    assert(posicionEnCaminoACapturar.coordenada.pos_y == 3);
+
     hiloEntrenadorPlanificable->destruir(hiloEntrenadorPlanificable);
     entrenador->destruir(entrenador);
     mapita.destruir(&mapita);
