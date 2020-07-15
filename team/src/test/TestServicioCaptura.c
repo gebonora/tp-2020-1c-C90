@@ -10,13 +10,27 @@ void testServicioDeCaptura() {
     log_info(testLogger, "Testeando el servicio de captura");
     Mapa mapa = MapaConstructor.new();
     Entrenador * entrenador = EntrenadorConstructor.new("1|2", "A|B", "A|C|C");
+    free(entrenador->id);
+    entrenador->id = string_from_format("EntrenadorPiola");
     Equipo equipo = list_create();
     list_add(equipo, entrenador);
+    PokemonAtrapable * pokemonAtrapable = PokemonAtrapableConstructor.new("Pikachu", "1|2");
+    char * uuidPokemon = registrarEnMapaPosicionPokemonAtrapable(&mapa, pokemonAtrapable);
     ServicioDePlanificacion * servicioPlanificacion = ServicioDePlanificacionConstructor.new();
     ServicioDeCaptura * servicioDeCaptura = ServicioDeCapturaConstructor.new(mapa, equipo, servicioPlanificacion);
 
-    //TODO Clavar algunos tests
+    log_info(testLogger, "Testeando el impacto de una captura exitosa");
+    CapturaPokemon * capturaPokemon = CapturaPokemonConstructor.new("EntrenadorPiola", "1", pokemonAtrapable);
 
+    bool resultadoCaptura = servicioDeCaptura->registrarCapturaExitosa(servicioDeCaptura, capturaPokemon);
+
+    assert(resultadoCaptura == true);
+
+    Posicion posicionPokemon = mapa.obtenerPosicion(&mapa, uuidPokemon);
+
+    assert(posicionPokemon.valida == false);
+
+    capturaPokemon->destruir(capturaPokemon);
     servicioDeCaptura->destruir(servicioDeCaptura);
     servicioPlanificacion->destruir(servicioPlanificacion);
     mapa.destruir(&mapa);

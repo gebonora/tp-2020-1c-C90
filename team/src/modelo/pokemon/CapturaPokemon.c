@@ -4,6 +4,10 @@
 
 #include "modelo/pokemon/CapturaPokemon.h"
 
+static char * posicion(CapturaPokemon * this) {
+    return coordenadaClave(this->pokemonAtrapable->posicionInicial);
+}
+
 static bool eliminarPokemonCapturadoDelMapa(CapturaPokemon * this, Mapa mapa) {
     return this->pokemonAtrapable->borrarPosicion(this->pokemonAtrapable);
 }
@@ -20,7 +24,9 @@ static CapturaPokemon * new(char * idEntrenador, char * idCorrelatividad, Pokemo
     capturaPokemon->logger = log_create(TEAM_INTERNAL_LOG_FILE, "CapturaPokemon", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_INFO);
     capturaPokemon->idEntrenador = idEntrenador;
     capturaPokemon->idCorrelatividad = idCorrelatividad;
+    capturaPokemon->pokemonAtrapable = pokemon;
     capturaPokemon->eliminarPokemonCapturadoDelMapa = &eliminarPokemonCapturadoDelMapa;
+    capturaPokemon->posicion = &posicion;
     capturaPokemon->destruir = &destruirCapturaPokemon;
 
     return capturaPokemon;

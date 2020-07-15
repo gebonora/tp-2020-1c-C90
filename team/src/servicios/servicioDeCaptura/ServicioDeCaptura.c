@@ -5,12 +5,12 @@
 #include "servicios/servicioDeCaptura/ServicioDeCaptura.h"
 
 #define mismoIdEntrenador(idEntrenador) \
-bool matcheaIdEntrenador(void * id) { \
-    return string_equals(id, idEntrenador); \
+bool matcheaIdEntrenador(void * entrenador) { \
+    return string_equals(((Entrenador *) entrenador)->id, idEntrenador); \
 }
 
 static bool registrarCapturaExitosa(ServicioDeCaptura * this, CapturaPokemon * capturaPokemon) {
-    char * posicion = coordenadaClave(capturaPokemon->pokemonAtrapable->posicionInicial);
+    char * posicion = capturaPokemon->posicion(capturaPokemon);
     bool sePudoRegistrar = false;
 
     mismoIdEntrenador(capturaPokemon->idEntrenador);
@@ -18,13 +18,15 @@ static bool registrarCapturaExitosa(ServicioDeCaptura * this, CapturaPokemon * c
     if (entrenador != NULL) {
         log_debug(this->logger, "Existe el entrenador que capturó al pokemon. Se procede con los efectos de lado.");
         log_debug(this->logger, "Eliminando al pokemon capturado del mapa...");
-        capturaPokemon->eliminarPokemonCapturadoDelMapa(capturaPokemon, this->mapa);
-        // TODO: Actualizar el estado del entrenador que lo capturó, sumandole 1 a su contabilidad.
-        // TODO: Avisarle al servicio de planificacion con NOTIFY_CAUGHT_RESULT que ya puede habilitar al entrenador bloqueado.
+        bool sePudoEliminarDelMapa = capturaPokemon->eliminarPokemonCapturadoDelMapa(capturaPokemon, this->mapa);
+        if (sePudoEliminarDelMapa) {
+            // TODO: Actualizar el estado del entrenador que lo capturó, sumandole 1 a su contabilidad.
+            // TODO: Avisarle al servicio de planificacion con NOTIFY_CAUGHT_RESULT que ya puede habilitar al entrenador bloqueado.
+        }
         sePudoRegistrar = true;
         log_info(this->logger, "%s capturó con exito un %s en %s", capturaPokemon->idEntrenador, capturaPokemon->pokemonAtrapable->especie, posicion);
     } else {
-        log_error(this->logger, "No existe un entrenador en el equipo que haya intentado capturar al pokemon");
+        log_error(this->logger, "No existe un entrenador %s en el equipo que haya intentado capturar al pokemon", capturaPokemon->idEntrenador);
     }
     free(posicion);
     return sePudoRegistrar;

@@ -14,6 +14,7 @@ typedef struct CapturaPokemon {
     char * idCorrelatividad;
     PokemonAtrapable * pokemonAtrapable;
     bool (*eliminarPokemonCapturadoDelMapa)(struct CapturaPokemon * this, Mapa mapa);
+    char * (*posicion)(struct CapturaPokemon * this);
     void (*destruir)(struct CapturaPokemon * this);
 } CapturaPokemon;
 
