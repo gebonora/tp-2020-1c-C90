@@ -18,14 +18,17 @@ int main(){
 	_init_threads();
 	_init_memory();
 	_init_dump();
+	// TODO: esto borrarlo luego de los tests
+	//init_test();
 	init_server();
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 /** PRIVATE FUNCTIONS **/
 
 static void _init_logger() {
-    LOGGER = log_create(LOGGER_PATH, "Broker Server", 1, LOG_LEVEL_INFO);
+	// TODO: volver a level info
+    LOGGER = log_create(LOGGER_PATH, "Broker Server", 1, LOG_LEVEL_DEBUG);
 }
 
 static void _init_config() {
@@ -117,10 +120,15 @@ static void _init_memory() {
 	memory = malloc(sizeof(Memory));
 	memory->cache = malloc(TAMANO_MEMORIA);
 	memory->partitions = list_create();
+	list_add(memory->partitions, create_partition(0, memory->cache, TAMANO_MEMORIA));
+	log_debug(LOGGER, "Memory Cache: %x (%d), Size: %d", memory->cache, memory->cache, TAMANO_MEMORIA);
 }
 
 static void _init_dump() {
 	if(signal(SIGUSR1, dump_handler) == SIG_ERR) {
 		log_info(LOGGER, "Error catching signal SIGUSR1");
+	}
+	if(signal(SIGUSR2, dump_handler) == SIG_ERR) {
+		log_info(LOGGER, "Error catching signal SIGUSR2");
 	}
 }
