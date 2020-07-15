@@ -25,15 +25,16 @@ void testDeEntrenadores() {
     assert((int) dictionary_get(entrenador2->pokemonesObjetivo, "B") == 1);
 
     log_info(testLogger, "Testeando entrenador sin pokemones capturados");
-
     Entrenador * entrenador3 = EntrenadorConstructor.new("2|4", "None", "A|B");
     assert(dictionary_size(entrenador3->pokemonesCapturados) == 0);
+    entrenador3->destruir(entrenador3);
+
+    log_info(testLogger, "Testeando los metodos del objetivo global");
 
     Equipo equipito = list_create();
     list_add(equipito, entrenador);
     list_add(equipito, entrenador2);
 
-    log_info(testLogger, "Testeando los metodos del objetivo global");
     ObjetivoGlobal objetivo = ObjetivoGlobalConstructor.new(equipito);
 
     t_list * especiesNecesarias = objetivo.especiesNecesarias(&objetivo);
