@@ -24,6 +24,11 @@ void testDeEntrenadores() {
     assert((int) dictionary_get(entrenador2->pokemonesObjetivo, "A") == 1);
     assert((int) dictionary_get(entrenador2->pokemonesObjetivo, "B") == 1);
 
+    log_info(testLogger, "Testeando entrenador sin pokemones capturados");
+
+    Entrenador * entrenador3 = EntrenadorConstructor.new("2|4", "None", "A|B");
+    assert(dictionary_size(entrenador3->pokemonesCapturados) == 0);
+
     Equipo equipito = list_create();
     list_add(equipito, entrenador);
     list_add(equipito, entrenador2);
