@@ -65,6 +65,9 @@ void warmUp() {
     if (!ESPERAR_OBJETIVO_GLOBAL) {
         log_warning(INTERNAL_LOGGER, "Objetivo global es necesario para finalizar el proceso: NO");
     }
+    if (!ACTIVAR_RETARDO_CPU) {
+        log_warning(INTERNAL_LOGGER, "Retardo de CPU: DESACTIVADO");
+    }
 }
 
 void mostrarTitulo(t_log * logger) {
