@@ -9,6 +9,7 @@
 #include "app/Global.h"
 #include "delibird/utils/random/Random.h"
 #include "delibird/utils/strings/ExtensionStrings.h"
+#include "delibird/utils/colecciones/ExtensionColecciones.h"
 #include "modelo/mapa/coordenadas/UtilidadesCoordenadas.h"
 
 /**
@@ -16,7 +17,6 @@
  * Hasta donde sabemos, tanto entrenadores como pokemones tienen una posicion (x,y) asignada.
  * Cumple la funcion de ser el lugar para depositar pokemones xd.
  * El mapa es responsable de setearle el (x,y) a las cosas despues de moverlas en su memoria.
- * TODO: Definir que estructura usar. Por ahi necesito 2 dicts ya que no tengo forma de decir que hay en una posicion
  * Entrenador -> Registra en mapa <- HASH
  * Cliente del mapa -> (x,y) -> Consulta dict <- Si no hay nada NULL, sino Presencia(hash_id, tipo)
  * Cliente del mapa -> HASH -> Iterar dict <- KeyValue[(x,y), Presencia], devolvemos la presencia.

@@ -21,9 +21,11 @@
 #include "modelo/mapa/movimiento/Movimiento.h"
 #include "servicios/servicioDePlanificacion/ServicioDePlanificacion.h"
 #include "servicios/servicioDeCaptura/ServicioDeCaptura.h"
+#include "modelo/pokemon/PokemonAtrapable.h"
 
 void testDeIntegracion();
 void testDeEntrenadores();
+void testDePokemones();
 void testDeMovimiento();
 void testDeMapa();
 void testDeAlgoritmos();
@@ -34,5 +36,6 @@ void testServicioDePlanificacion();
 void testDePlanificador();
 void testDeTransicionadorDeEstados();
 void testServicioDeCaptura();
+void testLibs();
 
 #endif //TEAM_TESTDEINTEGRACION_H
