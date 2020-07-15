@@ -9,8 +9,30 @@ bool matcheaIdEntrenador(void * entrenador) { \
     return string_equals(((Entrenador *) entrenador)->id, idEntrenador); \
 }
 
+static void procesarPokemonCapturable(ServicioDeCaptura * this, char * especie, Coordinate posicion) {
+    this->altaDePokemon(this, especie, posicion);
+    bool sePuedeCapturar = false;
+    if (sePuedeCapturar) {
+        log_debug(this->logger, "Se determinó que es posible la captura de %s", especie);
+        this->encargarTrabajoDeCaptura(this, especie, posicion);
+    } else {
+        log_warning(this->logger, "No hay nadie disponible que pueda capturar a %s", especie);
+    }
+}
+
+static void altaDePokemon(ServicioDeCaptura * this, char * especie, Coordinate posicion) {
+    char * ubicacionPokemonACapturar = coordenadaClave(posicion);
+    log_info(this->logger, "Agregamos un %s en la posición %s", especie, ubicacionPokemonACapturar);
+    free(ubicacionPokemonACapturar);
+}
+
+static void encargarTrabajoDeCaptura(ServicioDeCaptura * this, char * especie, Coordinate posicion) {
+    char * ubicacionPokemonACapturar = coordenadaClave(posicion);
+    log_info(this->logger, "Se le encarga al servicio de planificacion que mande a un entrenador a capturar a %s en %s", especie, ubicacionPokemonACapturar);
+    free(ubicacionPokemonACapturar);
+}
+
 static bool registrarCapturaExitosa(ServicioDeCaptura * this, CapturaPokemon * capturaPokemon) {
-    char * posicion = capturaPokemon->posicion(capturaPokemon);
     bool sePudoRegistrar = false;
 
     mismoIdEntrenador(capturaPokemon->idEntrenador);
@@ -24,11 +46,12 @@ static bool registrarCapturaExitosa(ServicioDeCaptura * this, CapturaPokemon * c
             // TODO: Avisarle al servicio de planificacion con NOTIFY_CAUGHT_RESULT que ya puede habilitar al entrenador bloqueado.
         }
         sePudoRegistrar = true;
+        char * posicion = capturaPokemon->posicion(capturaPokemon);
         log_info(this->logger, "%s capturó con exito un %s en %s", capturaPokemon->idEntrenador, capturaPokemon->pokemonAtrapable->especie, posicion);
+        free(posicion);
     } else {
         log_error(this->logger, "No existe un entrenador %s en el equipo que haya intentado capturar al pokemon", capturaPokemon->idEntrenador);
     }
-    free(posicion);
     return sePudoRegistrar;
 }
 
@@ -46,6 +69,9 @@ static ServicioDeCaptura * new(Mapa mapa, Equipo equipo, ServicioDePlanificacion
     servicio->equipo = equipo;
     servicio->servicioDePlanificacion = servicioDePlanificacion;
     servicio->registrarCapturaExitosa = &registrarCapturaExitosa;
+    servicio->procesarPokemonCapturable = &procesarPokemonCapturable;
+    servicio->encargarTrabajoDeCaptura = &encargarTrabajoDeCaptura;
+    servicio->altaDePokemon = &altaDePokemon;
     servicio->destruir = &destruirServicioDeCaptura;
 
     return servicio;
