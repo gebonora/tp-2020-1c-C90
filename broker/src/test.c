@@ -1,26 +1,27 @@
 #include "test.h"
 
-//Partition* test_lru(t_list*);
+static Message* _create_message(Operation, uint32_t, uint32_t, uint32_t);
 
-void create_partitions_test() {
-
+void init_test() {
 	/*
-	uintptr_t start = malloc(sizeof(uintptr_t));
+	Partition* first_one = list_get(memory->partitions, 0);
+	uintptr_t start = first_one->start;
 
-	list_add(memory->partitions, create_partition(0, 8, start, 0, create_message(NEW, 19, 16, 14)));
+	list_add(memory->partitions, create_partition_with_message(0, start, 8, _create_message(NEW, 19, 16, 14)));
 	sleep(1);
 	start += 8;
-	list_add(memory->partitions, create_partition(17, 8, start, 8, create_message(CATCH, 20, -1, 8)));
+	list_add(memory->partitions, create_partition_with_message(start, 8, _create_message(CATCH, 20, -1, 8)));
 	sleep(1);
 	start += 8;
-	list_add(memory->partitions, create_partition(13, 8, start, 16, create_message(LOCALIZED, 13, 7, 25)));
+	list_add(memory->partitions, create_partition_with_message(start, 8, _create_message(LOCALIZED, 13, 7, 25)));
 	sleep(1);
 	start += 8;
-	list_add(memory->partitions, create_partition(4, 4, start, 24, create_message(APPEARED, 12, -1, 45)));
+	list_add(memory->partitions, create_partition_with_message(start, 4, _create_message(APPEARED, 12, -1, 45)));
 	sleep(1);
 	start += 4;
-	list_add(memory->partitions, create_partition(25, 4, start, 28, create_message(APPEARED, 12, -1, 45)));
-	*/
+	list_add(memory->partitions, create_partition_with_message(start, 4, _create_message(APPEARED, 12, -1, 45)));
+
+	show_memory_partitions();
 
 	// PRUEBA BEL FILTER
 	/*
@@ -41,4 +42,15 @@ void create_partitions_test() {
 	//log_info(LOGGER, "==============LRU============");
 	//Partition* partition = choose_victim();
 	//show_partition(partition);
+}
+
+/** PRIVATE FUNCTIONS **/
+
+static Message* _create_message(Operation operation, uint32_t message_id, uint32_t correlational_id, uint32_t data_size) {
+	Message* message = malloc(sizeof(Message));
+	message->operation_code = operation;
+	message->message_id = message_id;
+	message->correlational_id = correlational_id;
+	message->data_size = data_size;
+	return message;
 }
