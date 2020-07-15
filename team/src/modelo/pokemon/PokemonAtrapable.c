@@ -66,6 +66,7 @@ static void destruirPokemonAtrapable(PokemonAtrapable * this) {
     if (this->gps) {
         this->gps->destruirGps(this->gps);
     }
+    pthread_mutex_destroy(&this->mutexAtrapable);
     free(this);
 }
 
