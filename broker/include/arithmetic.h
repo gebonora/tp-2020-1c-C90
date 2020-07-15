@@ -7,6 +7,7 @@
 
 #define MIN(x, y) ((x) < (y)) ? (x) : (y)
 #define MAX(x, y) ((x) > (y)) ? (x) : (y)
+#define SUM(x, y) (x + y)
 #define NEXT(n) (n + 1)
 #define HALF(n) (n / 2)
 

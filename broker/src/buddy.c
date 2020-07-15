@@ -17,38 +17,43 @@ void save_to_cache_buddy_system(void* data, Message* message) {
 	log_debug(LOGGER, "MAX between MIN_PARTITION_SIZE (%d) and next_power_of_2 of data_size (%d)", TAMANO_MINIMO_PARTICION, message->data_size);
 	int desired_size = MAX_PARTITION_SIZE(next_power_of_2(message->data_size));
 
-	log_debug(LOGGER, "Desired size: %d", desired_size);
+	if(desired_size > TAMANO_MEMORIA) {
+		log_error("Message's size (%d) is bigger than cache (%d)", desired_size, TAMANO_MEMORIA);
+	} else {
+		log_debug(LOGGER, "Desired size: %d", desired_size);
+		log_debug(LOGGER, "Finding free partition");
+		// busco una particion libre
+		Partition* partition = find_partition(desired_size);
 
-	log_debug(LOGGER, "Finding free partition");
-	// busco una particion libre
-	t_link_element* target_element = find_partition(desired_size);
+		// busco una particion libre y sino elimino alguna ocupada y consolido
+		while(partition == NULL) {
+			log_debug(LOGGER, "Free partition not found");
+			log_debug(LOGGER, "Choosing victim");
+			Partition* victim = choose_victim();
+			log_debug(LOGGER, "Consolidating buddy");
+			_consolidate_buddy(victim);
+			log_debug(LOGGER, "Trying to find free partition again");
+			partition = find_partition(desired_size);
+		}
 
-	// busco una particion libre y sino elimino alguna ocupada y consolido
-	while(target_element == NULL) {
-		log_debug(LOGGER, "Free partition not found");
-		log_debug(LOGGER, "Choosing victim");
-		Partition* victim = choose_victim();
-		log_debug(LOGGER, "Consolidating buddy");
-		_consolidate_buddy(victim);
-		log_debug(LOGGER, "Trying to find free partition again");
-		target_element = find_partition(desired_size);
+		log_debug(LOGGER, "Free partition found. Check if needs to be broken");
+		if(partition->size != desired_size) {
+			// rompo la particion libre elegida, hasta la minima pot2 posible
+			Partition* choosed_partition = _break_buddys(partition, desired_size);
+		}
+
+		// marco la particion como ocupada, y completo el resto de los atributos
+		partition->message = message;
+		partition->creation_time = (int) ahoraEnTimeT();
+		partition->access_time = (int) ahoraEnTimeT();
+		partition->free = false;
+
+		log_debug(LOGGER, "Partition broken, doing memcpy");
+		// guardo el data con el memcpy
+		memcpy(partition->start, data, message->data_size);
+
+		log_debug(LOGGER, "Done memcpy");
 	}
-
-	log_debug(LOGGER, "Free partition found. Check if needs to be broken");
-	// rompo la particion libre elegida, hasta la minima pot2 posible
-	Partition* target_partition = _break_buddys(target_element->data, desired_size);
-
-	// marco la particion como ocupada, y completo el resto de los atributos
-	target_partition->message = message;
-	target_partition->free = false;
-	target_partition->creation_time = (int) ahoraEnTimeT();
-	target_partition->access_time = (int) ahoraEnTimeT();
-
-	log_debug(LOGGER, "Partition broken, doing memcpy");
-	// guardo el data con el memcpy
-	memcpy(target_partition->start, data, message->data_size);
-
-	log_debug(LOGGER, "Done memcpy");
 }
 
 /** PRIVATE FUNCTIONS **/
@@ -64,25 +69,11 @@ static void _consolidate_buddy(Partition* partition) {
 
 		log_debug(LOGGER, "Buddy is free and same size...consolidating");
 
-		// obtengo el start y position mas a la izquierda, seria la de menor posicion de memoria
-		uint32_t replacement_position;
-		uintptr_t replacement_start;
-
-		if(partition->position < buddy->position) {
-			replacement_position = partition->position;
-			replacement_start = partition->start;
-		} else {
-			replacement_position = buddy->position;
-			replacement_start = buddy->start;
-		}
-
 		log_debug(LOGGER, "Merging partition with buddy in new partition");
-		// creo una nueva particion sumando los tamanios y manteniendo el start
-		Partition* replacement = create_partition(replacement_position, replacement_start, partition->size + buddy->size);
-
-		log_debug(LOGGER, "Replacing partition with new one");
-		// reemplazo la left partition por esta nueva que ya esta consolidada
-		replace_partition_at(partition->start, replacement);
+		// cambio la particion, sumando los tamanios y utilizando los minimos start y position
+		partition->position = MIN(partition->position, buddy->position);
+		partition->start = MIN(partition->start, buddy->start);
+		partition->size = SUM(partition->size, buddy->size);
 
 		log_debug(LOGGER, "Removing buddy because it was absorbed");
 		// elimino el buddy que sobro, ya que fue absorbido
@@ -90,15 +81,13 @@ static void _consolidate_buddy(Partition* partition) {
 
 		log_debug(LOGGER, "Calculating buddy of new partition (replacement)");
 		// obtengo el buddy de la nueva particion consolidada
-		buddy = _buddy_of(replacement);
-
-		log_debug(LOGGER, "Reasigning partition to replacement to check if another consolidating needs to be done");
-		// reasigno para volver a chequear si puedo consolidar esta nueva particion mas grande
-		partition = replacement;
+		buddy = _buddy_of(partition);
 
 		log_debug(LOGGER, "Partition Position: %d, Size: %d, Free: %s", partition->position, partition->size, partition->free ? "true" : "false");
 		log_debug(LOGGER, "Buddy Position: %d, Size: %d, Free: %s", buddy->position, buddy->size, buddy->free ? "true" : "false");
 	}
+
+	partition->creation_time = (int) ahoraEnTimeT();
 
 	log_debug(LOGGER, "Buddy is not free or same size...done consolidating");
 }
@@ -116,7 +105,7 @@ static Partition* _break_buddys(Partition* partition_to_break, uint32_t data_siz
 		log_debug(LOGGER, "Left partition - Position %d, Start: %x, Size: %d", partition_to_break->position, partition_to_break->start, partition_to_break->size);
 
 		// der -> size = al de la iz, start = start izq + size
-		Partition* right_partition = create_partition(partition_to_break->position + partition_to_break->size, partition_to_break->start + partition_to_break->size, partition_to_break->size);
+		Partition* right_partition = create_partition(SUM(partition_to_break->position, partition_to_break->size), SUM(partition_to_break->start, partition_to_break->size), partition_to_break->size);
 		log_debug(LOGGER, "Right partition - Position %d, Start: %x, Size: %d", right_partition->position, right_partition->start, right_partition->size);
 
 		log_debug(LOGGER, "Adding right partition next to left one");
@@ -127,7 +116,6 @@ static Partition* _break_buddys(Partition* partition_to_break, uint32_t data_siz
 	}
 
 	log_debug(LOGGER, "Partition's size is same as desired, no breaking needed");
-
 	// cuando ya no tengo que romper mas, devuelvo la que me quedo, que es del tamanio deseado
 	return partition_to_break;
 }

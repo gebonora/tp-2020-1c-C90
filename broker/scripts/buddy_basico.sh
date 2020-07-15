@@ -6,7 +6,7 @@ cd ../../gameboy/deploy
 
 sleep 1
 
-./gameboy BROKER CAUGHT_POKEMON 1 FAIL
+./gameboy BROKER CAUGHT_POKEMON 2 FAIL
 
 sleep 1
 
