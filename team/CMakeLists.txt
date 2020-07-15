@@ -10,6 +10,7 @@ if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug" OR "${CMAKE_BUILD_TYPE}" STREQUAL "DEB
             -DSHOW_INTERNAL_CONSOLE=1
             -DCORRER_TESTS=1
             -DESPERAR_OBJETIVO_GLOBAL=0
+            -DACTIVAR_RETARDO_CPU=0
     )
 endif()
 

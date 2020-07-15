@@ -7,7 +7,9 @@
 
 #include "modelo/mapa/gps/Gps.h"
 #include "modelo/equipo/entrenador/Entrenador.h"
+#include "modelo/pokemon/PokemonAtrapable.h"
 
 char * registrarEnMapaPosicionEntrenador(Mapa * mapa, Entrenador * posicionable);
+char * registrarEnMapaPosicionPokemonAtrapable(Mapa * mapa, PokemonAtrapable * posicionable);
 
 #endif //TEAM_REGISTRADORDEPOSICIONES_H

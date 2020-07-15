@@ -20,9 +20,9 @@ int main() {
 
     // Reservado a pruebas de integracion. Si logica de negocio rompe, explota el programa aca.
     if (CORRER_TESTS) {
-        log_info(INTERNAL_LOGGER, "Realizando pruebas de integracion...");
+        log_info(INTERNAL_LOGGER, "@@@@@@@@@@@@@@@@@@@@@ Realizando pruebas de integracion... @@@@@@@@@@@@@@@@@@@@@");
         testDeIntegracion();
-        log_info(INTERNAL_LOGGER, "Pruebas de integracion finalizadas con exito");
+        log_info(INTERNAL_LOGGER, "@@@@@@@@@@@@@@@@@@@@@ Pruebas de integracion finalizadas con exito @@@@@@@@@@@@@");
     }
 
     // Estado inicial del proceso Team
@@ -65,6 +65,9 @@ void warmUp() {
     if (!ESPERAR_OBJETIVO_GLOBAL) {
         log_warning(INTERNAL_LOGGER, "Objetivo global es necesario para finalizar el proceso: NO");
     }
+    if (!ACTIVAR_RETARDO_CPU) {
+        log_warning(INTERNAL_LOGGER, "Retardo de CPU: DESACTIVADO");
+    }
 }
 
 void mostrarTitulo(t_log * logger) {
@@ -87,7 +90,7 @@ void inicializarComponentesDelSistema() {
     log_debug(INTERNAL_LOGGER, "Creando el mapa de coordenadas...");
     mapaProcesoTeam = MapaConstructor.new();
     pthread_mutex_init(&MTX_INTERNAL_LOG, NULL); //TODO: por ahi conviene moverlo a configurarServer()
-    servicioDePlanificacion = ServicioDePlanificacionConstructor.new();
+    servicioDePlanificacionProcesoTeam = ServicioDePlanificacionConstructor.new();
     manejadorDeEventos = ManejadorDeEventosConstructor.new();
     sem_init(&semaforoObjetivoGlobalCompletado, 0, 0);
 }
@@ -110,7 +113,7 @@ void configurarEstadoInicialProcesoTeam() {
     }
     list_iterate(equipoProcesoTeam, (void (*)(void *)) registrarEquipo);
     log_debug(INTERNAL_LOGGER, "Agregando equipo a la planificacion...");
-    servicioDePlanificacion->asignarEquipoAPlanificar(servicioDePlanificacion, equipoProcesoTeam);
+    servicioDePlanificacionProcesoTeam->asignarEquipoAPlanificar(servicioDePlanificacionProcesoTeam, equipoProcesoTeam);
 }
 
 void liberarRecursos() {
@@ -125,7 +128,7 @@ void liberarRecursos() {
 
     // Servicios
     servicioDeConfiguracion.destruir(&servicioDeConfiguracion);
-    servicioDePlanificacion->destruir(servicioDePlanificacion);
+    servicioDePlanificacionProcesoTeam->destruir(servicioDePlanificacionProcesoTeam);
 
     // Componentes
     log_debug(INTERNAL_LOGGER, "Liberando componentes del sistema...");

@@ -82,7 +82,7 @@ extern const struct ServicioDePlanificacionClass {
     ServicioDePlanificacion * (*new)();
 } ServicioDePlanificacionConstructor;
 
-ServicioDePlanificacion * servicioDePlanificacion;
+ServicioDePlanificacion * servicioDePlanificacionProcesoTeam;
 
 t_list * convertirAUnidadesPlanificables(Equipo equipo);
 void destruirUnidadPlanificable(UnidadPlanificable * unidadPlanificable);

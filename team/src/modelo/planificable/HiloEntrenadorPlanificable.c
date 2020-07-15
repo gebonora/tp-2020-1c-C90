@@ -59,6 +59,7 @@ static void ejecutarLimitado(HiloEntrenadorPlanificable * this, int cantInstrucc
         sem_post(&this->semaforoEjecucionHabilitada);
         sem_wait(&this->semaforoCicloCompletado);
     }
+    //TODO: informar cuanto le queda por ejecutar
     if (tarea->estado == FINALIZADA) {
         log_info(this->logger, "La tarea asignada se completó con exito. Se procede a destruirla.");
         tarea->destruir(tarea);
@@ -92,7 +93,7 @@ static HiloEntrenadorPlanificable *new(Entrenador * entrenador) {
     char * nombreLog = string_from_format("HiloEntrenadorPlanificable-%s", entrenador->id);
     hiloEntrenadorPlanificable->logger = log_create(TEAM_INTERNAL_LOG_FILE, nombreLog, SHOW_INTERNAL_CONSOLE, INTERNAL_LOG_LEVEL);
     hiloEntrenadorPlanificable->entrenador = entrenador;
-    hiloEntrenadorPlanificable->retardoInstruccion = servicioDeConfiguracion.obtenerEntero(&servicioDeConfiguracion, RETARDO_CICLO_CPU);
+    hiloEntrenadorPlanificable->retardoInstruccion = ACTIVAR_RETARDO_CPU ? servicioDeConfiguracion.obtenerEntero(&servicioDeConfiguracion, RETARDO_CICLO_CPU) : 0;
     hiloEntrenadorPlanificable->finDeTrabajo = false;
     sem_init(&hiloEntrenadorPlanificable->semaforoEjecucionHabilitada,1 ,0);
     sem_init(&hiloEntrenadorPlanificable->semaforoCicloCompletado,1 ,0);
