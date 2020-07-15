@@ -17,7 +17,12 @@ typedef struct ServicioDeCaptura {
     Mapa mapa;
     Equipo equipo;
     ServicioDePlanificacion * servicioDePlanificacion;
+    //Interfaz publica
     bool (*registrarCapturaExitosa)(struct ServicioDeCaptura * this, CapturaPokemon * capturaPokemon);
+    void (*procesarPokemonCapturable)(struct ServicioDeCaptura * this);
+    //Metodos privados
+    void (*altaDePokemon)(struct ServicioDeCaptura * this);
+    void (*encargarTrabajoDeCaptura)(struct ServicioDeCaptura * this);
     void (*destruir)(struct ServicioDeCaptura * this);
 } ServicioDeCaptura;
 

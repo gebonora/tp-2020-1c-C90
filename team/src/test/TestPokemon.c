@@ -31,7 +31,7 @@ void testDePokemones() {
     assert(posicionLuegoDeBorrar.valida == false);
 
     Posicion posicionEnMapaLuegoDeBorrar = mapa.obtenerPosicion(&mapa, uuid);
-    //TODO: assert(posicionEnMapaLuegoDeBorrar.valida == false);
+    assert(posicionEnMapaLuegoDeBorrar.valida == false);
 
     pokemon->destruir(pokemon);
     mapa.destruir(&mapa);

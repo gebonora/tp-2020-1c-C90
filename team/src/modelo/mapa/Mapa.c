@@ -12,7 +12,7 @@ bool mismoUUID(void * _posiblePresencia) { \
 
 void moverPosicionable(Mapa * this, char * uuid, Coordinate destino) {
     char * posicionDestino = coordenadaClave(destino);
-    log_debug(this->logger, "Moviendo a posicion %s el posicionable %s", posicionDestino, uuid);
+    log_debug(this->logger, "Intentando mover a la posicion %s el posicionable %s", posicionDestino, uuid);
     Posicion posicionActual = this->obtenerPosicion(this, uuid);
     if (posicionActual.valida) {
         char * posicionComoClave = coordenadaClave(posicionActual.coordenada);
@@ -21,6 +21,7 @@ void moverPosicionable(Mapa * this, char * uuid, Coordinate destino) {
         filtrarPormismoUUID(uuid);
         Presencia * presencia = list_remove_by_condition(casillaActual, mismoUUID);
         this->agregarPresenciaACasillaExistenteOCrearUna(this, posicionDestino, presencia);
+        log_info(this->logger, "Se movio con exito el %s a %s", nombreTipoPosicionable(presencia->tipoPosicionable), posicionDestino);
     } else {
         log_error(this->logger, "Movimiento cancelado. No se pudo encontrar en el mapa a %s", uuid);
     }
@@ -52,7 +53,19 @@ char * registrarPosicion(Mapa * this, Coordinate posicion, TipoPosicionable tipo
 }
 
 bool borrarPosicion(Mapa * this, char * uuid) {
-    //TODO
+    Posicion posiblePosicion = this->obtenerPosicion(this, uuid);
+    if (posiblePosicion.valida) {
+        char * posicionComoClave = coordenadaClave(posiblePosicion.coordenada);
+        Casilla casillaActual = dictionary_get(this->plano, posicionComoClave);
+        filtrarPormismoUUID(uuid);
+        Presencia * presencia = list_remove_by_condition(casillaActual, mismoUUID);
+        log_info(this->logger, "Se borró del mapa un %s en %s", nombreTipoPosicionable(presencia->tipoPosicionable), posicionComoClave);
+        free(posicionComoClave);
+        destruirPresencia(presencia);
+        return true;
+    }
+    log_warning(this->logger, "Se intentó borrar un posicionable inexistente");
+    return false;
 }
 
 Posicion obtenerPosicion(Mapa * this, char * uuid) {

@@ -5,8 +5,7 @@
 #include "modelo/mapa/gps/Gps.h"
 
 bool borrarPosicionDelMapa(Gps * this) {
-    //TODO
-    return true;
+    return this->mapa->borrarPosicion(this->mapa, this->uuid);
 }
 
 Posicion posicionActual(Gps * this) {
