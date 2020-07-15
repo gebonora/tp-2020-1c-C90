@@ -10,7 +10,7 @@
  */
 
 typedef enum EstadoPlanificador {
-    NEW,
+    NEW_,
     READY,
     EXEC,
     BLOCK,

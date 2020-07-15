@@ -7,6 +7,7 @@
 
 #include <time.h>
 #include <sys/time.h>
+#include <commons/string.h>
 
 time_t ahoraEnTimeT();
 

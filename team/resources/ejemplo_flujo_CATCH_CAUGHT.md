@@ -11,13 +11,17 @@ para que envíe a un _Entrenador_ a capturarlo.
 
 ### Manejador de eventos
 Filtra los mensajes por id de correlatividad y por repetido
-en el caso de que me lleguen 2 localized de la misma especie pokemonon.
+en el caso de que me lleguen 2 localized de la misma especie pokemon.
 
-Si llega otro LOCALIZED SQUIRTLE, no le tengo que dar bola mientras resuelva
+Si llega otro LOCALIZED SQUIRTLE, no le tengo que dar bola. Solo uno por especie, y si llego un caught, el localized  
+de esa especie tambien debe ser descartado.  
 
 Si bien me pueden llegar mas ubicaciones en el localized, la planificación toma la primera.
 
 El resto de los pokemones se guardan en el mapa por si falla la captura.
+
+Para facilitar la tarea,  tanto appeared como localized seran tratados de de la misma manera por el sistema como un 
+evento "nuevoPokemon".
 
 #### Aclaracion:
 > - Si vienen N ejemplares pero necesito M < N, mando M entrenadores, ¡¡¡NO mas!!!  
@@ -96,6 +100,9 @@ A su vez un entrenador puede querer ir a intercambiar, ambos deben competir por 
 
 Con la ayuda del algoritmo de planificación configurado, vamos a seleccionar a uno de los entrenadores en **READY**
 y mandarlo a **EXEC**.
+
+> Parte de la responsabilidad del algoritmo es realizar las tareas posteriores a mandar a ejecutar. Por ejemplo 
+> el Round Robin si no terminaste, te manda a READY nuevamente. SJF con desalojo también lo hace. Ambos replanifican.
 
 Detallaremos lo que ocurre en el caso de que sea un entrenador que va a capturar a un pokemon.
 

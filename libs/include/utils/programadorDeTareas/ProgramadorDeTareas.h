@@ -10,23 +10,22 @@
 #include <stdlib.h>
 #include "utils/hilos/HiloFacil.h"
 
-typedef struct Tarea {
+#define INTERVALO_NO_DEFINIDO -777
+
+typedef struct TareaEnSegundoPlano {
     char *descripcion;
     void (*funcion)(void *);
     void *args;
     int intervaloEnMilisegundos;
     bool activo;
-    bool esInfinita;
-} Tarea;
+} TareaEnSegundoPlano;
 
-void ejecutarTarea(Tarea *tarea);
+void ejecutarTareaEnSegundoPlano(TareaEnSegundoPlano *tarea);
 
-void programarFuncion(Tarea *tarea);
+void destruirTareaEnSegundoPlano(TareaEnSegundoPlano *tarea);
 
-void programarFuncionInfinita(Tarea *tarea);
+TareaEnSegundoPlano *crearTareaProgramableEnSegundoPlano(char *descripcion, void (*funcion)(void *), void *args, int intervaloEnMilisegundos);
 
-void destruirTarea(Tarea *tarea);
-
-Tarea *crearTarea(char *descripcion, void (*funcion)(void *), void *args, int intervaloEnMilisegundos);
+TareaEnSegundoPlano *crearTareaPermanenteEnSegundoPlano(char *descripcion, void (*funcion)(void *), void *args);
 
 #endif //DELIBIRD_PROGRAMADORDETAREAS_H

@@ -5,98 +5,50 @@
 #include "test/TestDeIntegracion.h"
 
 void testDeIntegracion() {
+    t_log * testLogger = log_create(TEAM_INTERNAL_LOG_FILE, "TestDeIntegracion", 1, LOG_LEVEL_INFO);
+    t_list * tests = list_create();
+
+    // Libs
+    list_add(tests, testLibs);
+
     // Entrenadores
-    testDeEntrenadores();
+    list_add(tests, testDeEntrenadores);
+
+    // Pokemones
+    list_add(tests, testDePokemones);
+
+    // Movimiento
+    list_add(tests, testDeMovimiento);
 
     // Mapa
-    testDeMapa();
+    list_add(tests, testDeMapa);
 
-    // Planificacion
-    testDePlanificacion();
+    // Algoritmos
+    list_add(tests, testDeAlgoritmos);
+
+    // Tareas
+    list_add(tests, testDeTareas);
+
+    // Planificador
+    list_add(tests, testDePlanificador);
+
+    // ServicioDePlanificacion
+    list_add(tests, testServicioDePlanificacion);
+
+    // ServicioDeCaptura
+    list_add(tests, testServicioDeCaptura);
+
+    // Unidad planificable
+    list_add(tests, testDePlanificable);
 
     // Eventos
-    testDeEventos();
-}
+    list_add(tests, testDeEventos);
 
-void testDeEntrenadores() {
-    Entrenador * entrenador = EntrenadorConstructor.new("1|2", "A|B", "A|C|C");
-    Entrenador * entrenador2 = EntrenadorConstructor.new("2|4", "A|B", "A|B");
+    for (int i = 0; i < list_size(tests); i++){
+        log_info(testLogger, "-------- Ejecutando test %d/%d --------", i + 1, list_size(tests));
+        ((void (*)()) list_get(tests, i))();
+    }
 
-    assert(entrenador->objetivoCompletado(entrenador) == false);
-    assert(entrenador->puedeAtraparPokemones(entrenador) == true);
-    assert(entrenador2->objetivoCompletado(entrenador2) == true);
-    assert(entrenador2->puedeAtraparPokemones(entrenador2) == false);
-    assert((int) dictionary_get(entrenador->pokemonesCapturados, "A") == 1);
-    assert((int) dictionary_get(entrenador->pokemonesCapturados, "B") == 1);
-    assert((int) dictionary_get(entrenador->pokemonesObjetivo, "A") == 1);
-    assert((int) dictionary_get(entrenador->pokemonesObjetivo, "C") == 2);
-    assert((int) dictionary_get(entrenador2->pokemonesCapturados, "A") == 1);
-    assert((int) dictionary_get(entrenador2->pokemonesCapturados, "B") == 1);
-    assert((int) dictionary_get(entrenador2->pokemonesObjetivo, "A") == 1);
-    assert((int) dictionary_get(entrenador2->pokemonesObjetivo, "B") == 1);
-
-    Equipo equipito = list_create();
-    list_add(equipito, entrenador);
-    list_add(equipito, entrenador2);
-
-    ObjetivoGlobal objetivo = ObjetivoGlobalConstructor.new(equipito);
-
-    t_list * especiesNecesarias = objetivo.especiesNecesarias(&objetivo);
-
-    ContabilidadEspecie * contabilidadEspecieA = dictionary_get(objetivo.contabilidadEspecies, "A");
-    ContabilidadEspecie * contabilidadEspecieB = dictionary_get(objetivo.contabilidadEspecies, "B");
-    ContabilidadEspecie * contabilidadEspecieC = dictionary_get(objetivo.contabilidadEspecies, "C");
-
-    assert(list_size(especiesNecesarias) == 3);
-    assert(string_equals(list_get(especiesNecesarias, 0),"A"));
-    assert(string_equals(list_get(especiesNecesarias, 1),"B"));
-    assert(string_equals(list_get(especiesNecesarias, 2),"C"));
-    assert(objetivo.puedeCapturarse(&objetivo, "A") == false);
-    assert(objetivo.puedeCapturarse(&objetivo, "B") == false);
-    assert(objetivo.puedeCapturarse(&objetivo, "C") == true);
-    assert(objetivo.puedeCapturarse(&objetivo, "X") == false);
-    assert(contabilidadEspecieA->necesarios == 2);
-    assert(contabilidadEspecieA->capturados == 2);
-    assert(contabilidadEspecieB->necesarios == 1);
-    assert(contabilidadEspecieB->capturados == 2);
-    assert(contabilidadEspecieC->necesarios == 2);
-    assert(contabilidadEspecieC->capturados == 0);
-
-    list_destroy(especiesNecesarias);
-    destruirEquipo(equipito);
-    objetivo.destruirObjetivoGlobal(&objetivo);
-}
-
-void testDeMapa() {
-    Mapa mapita = MapaConstructor.new();
-    Entrenador * entrenadorARegistrar = EntrenadorConstructor.new("3|3", "A", "B");
-
-    char * uuidRegistro = registrarEnMapaPosicionEntrenador(&mapita, entrenadorARegistrar);
-    Posicion posicionDelEntrenadorRegistrado = entrenadorARegistrar->posicion(entrenadorARegistrar);
-
-    assert(string_equals(uuidRegistro, entrenadorARegistrar->gps->uuid));
-    assert(posicionDelEntrenadorRegistrado.valida == true);
-    assert(posicionDelEntrenadorRegistrado.coordenada.pos_x == 3);
-    assert(posicionDelEntrenadorRegistrado.coordenada.pos_y == 3);
-
-    entrenadorARegistrar->destruir(entrenadorARegistrar);
-    mapita.destruir(&mapita);
-}
-
-void testDePlanificacion() {
-    AlgoritmoPlanificador miAlgoritmo = obtenerAlgoritmo("FIFO");
-    t_list * listaReady = list_create();
-    Entrenador * entrenadorPiola = EntrenadorConstructor.new("1|2", "A|B", "A|D|D");
-    HiloEntrenadorPlanificable * hiloEntrenadorPlanificable = HiloEntrenadorPlanificableConstructor.new(entrenadorPiola);
-    list_add(listaReady, hiloEntrenadorPlanificable);
-    miAlgoritmo.proximoAEjecutar(&miAlgoritmo, listaReady);
-    miAlgoritmo.destruir(&miAlgoritmo);
-    entrenadorPiola->destruir(entrenadorPiola);
-    list_destroy_and_destroy_elements(listaReady, (void (*)(void *)) hiloEntrenadorPlanificable->destruir);
-}
-
-void testDeEventos() {
-    ManejadorDeEventos manejadorDeEventosTest = ManejadorDeEventosConstructor.new();
-    manejadorDeEventosTest.notificarEventoLocalized(&manejadorDeEventosTest);
-    manejadorDeEventosTest.destruir(&manejadorDeEventosTest);
+    list_destroy(tests);
+    log_destroy(testLogger);
 }
