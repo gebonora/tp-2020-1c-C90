@@ -46,6 +46,8 @@ static void procesarCaughtRecibido(ManejadorDeEventos* this, Caught* unCaught, u
 			//sacarlo de la lista y liberar memoria.
 			//TODO: tengo que tener al entrenador para avisarle que tuvo exito, desde el cliente tengo que guardar esto en MensajeEsperado???
 			//capaz conviene que el cliente cree el MensajeEsperado, sino va a quedar long parameter list
+			//  agregarPresenciaACasillaExistenteOCrearUna
+			// el entrenador como lo obtengo? por un id entrenador?
 		}
 	}
 }
@@ -57,7 +59,7 @@ static void destruir(ManejadorDeEventos * this) {
 static ManejadorDeEventos new() {
 	return (ManejadorDeEventos ) {
 		.logger = log_create(TEAM_INTERNAL_LOG_FILE, "ManejadorDeEventos", SHOW_INTERNAL_CONSOLE, INTERNAL_LOG_LEVEL),
-		.listaGetEnEspera = iniciarListaSincronizada(), //como hago el init de esta struct??
+		.listaGetEnEspera = iniciarListaSincronizada(),
 		.listaCatchEnEspera = iniciarListaSincronizada(),
 		&notificarNuevoPokemon,
 		&notificarPokemonCapturado,
