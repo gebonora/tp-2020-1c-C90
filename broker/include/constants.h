@@ -77,7 +77,7 @@ typedef struct {
 	Process process;
 	uint32_t id;
 	int socket;
-} Suscriber;
+} Subscriber;
 
 typedef struct {
 	uintptr_t start; // puntero de la memoria cache

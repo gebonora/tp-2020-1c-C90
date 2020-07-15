@@ -5,11 +5,11 @@ typedef struct arg_struct {
 	int socket_suscriber;
 } arg_struct;
 
-static int _get_subscriber_socket(Suscriber* );
+static int _get_subscriber_socket(Subscriber* );
 static t_list* _get_subscribers(char*);
 static void* _transform_messages(Partition*, Operation);
 static void send_message_and_wait_for_ack(arg_struct*);
-static void send_messages_to_subscribers(t_list* subscribers, Partition* partition);
+static void send_messages_to_subscribers(Partition* partition);
 
 uint32_t get_id() {
 	pthread_mutex_lock(&MUTEX_MESSAGE_ID);
@@ -24,7 +24,7 @@ void consumer_new_queue() {
 	t_list* new_partitions = messages_from_operation(NEW);
 
 	void _inline_send_message(Partition* partition){
-		send_messages_to_subscribers(_get_subscribers("NEW"), partition);
+		send_messages_to_subscribers(partition);
 	}
 
 	list_iterate(new_partitions, &_inline_send_message);
@@ -36,7 +36,7 @@ void consumer_appeared_queue() {
 	t_list* appeared_partitions = messages_from_operation(APPEARED);
 
 	void _inline_send_message(Partition* partition){
-		send_messages_to_subscribers(_get_subscribers("APPEARED"), partition);
+		send_messages_to_subscribers(partition);
 	}
 
 	list_iterate(appeared_partitions, &_inline_send_message);
@@ -48,7 +48,7 @@ void consumer_localized_queue() {
 	t_list* localized_partitions = messages_from_operation(LOCALIZED);
 
 	void _inline_send_message(Partition* partition){
-		send_messages_to_subscribers(_get_subscribers("LOCALIZED"), partition);
+		send_messages_to_subscribers(partition);
 	}
 
 	list_iterate(localized_partitions, &_inline_send_message);
@@ -60,7 +60,7 @@ void consumer_get_queue() {
 	t_list* get_partitions = messages_from_operation(GET);
 
 	void _inline_send_message(Partition* partition){
-		send_messages_to_subscribers(_get_subscribers("GET"), partition);
+		send_messages_to_subscribers(partition);
 	}
 
 	list_iterate(get_partitions, &_inline_send_message);
@@ -73,7 +73,7 @@ void consumer_catch_queue() {
 	t_list* catch_partitions = messages_from_operation(CATCH);
 
 	void _inline_send_message(Partition* partition){
-		send_messages_to_subscribers(_get_subscribers("CATCH"), partition);
+		send_messages_to_subscribers(partition);
 	}
 
 	list_iterate(catch_partitions, &_inline_send_message);
@@ -85,14 +85,14 @@ void consumer_caught_queue() {
 	t_list* caught_partitions = messages_from_operation(CAUGHT);
 
 	void _inline_send_message(Partition* partition){
-		send_messages_to_subscribers(_get_subscribers("CAUGHT"), partition);
+		send_messages_to_subscribers(partition);
 	}
 
 	list_iterate(caught_partitions, &_inline_send_message);
 
 }
 
-static int _get_subscriber_socket(Suscriber* suscriber) {
+static int _get_subscriber_socket(Subscriber* suscriber) {
 	return suscriber->socket;
 }
 
@@ -157,16 +157,27 @@ static void send_message_and_wait_for_ack(arg_struct* args) {
 	}
 }
 
-static void send_messages_to_subscribers(t_list* subscribers, Partition* partition) {
-	for(int i = 0; i < subscribers->elements_count; i++){
-		int socket_subscriber = list_get(subscribers, i);
+static void send_messages_to_subscribers(Partition* partition) {
 
+	bool _equals(Subscriber* s1, Subscriber* s2) {
+		return s1->process == s2->process && s1->id == s2->id;
+	}
+
+	bool _not_notified(Subscriber* subscriber){
+		return !list_any_satisfy(partition->notified_suscribers, &_equals);
+	}
+
+	t_list* filtered_subscribers = list_filter(_get_subscribers(get_operation_by_value(partition->message->operation_code)), &_not_notified);
+
+	void _inline_send_messages(Subscriber* subscriber){
 		arg_struct* args = malloc(sizeof(arg_struct));
 		args->partition = partition;
-		args->socket_suscriber = socket_subscriber;
+		args->socket_suscriber = subscriber->socket;
 
 		pthread_t thread_localized;
 		pthread_create(&thread_localized, NULL, (void*)send_message_and_wait_for_ack, args);
 		pthread_detach(thread_localized);
 	}
+
+	list_iterate(filtered_subscribers, &_inline_send_messages);
 }
