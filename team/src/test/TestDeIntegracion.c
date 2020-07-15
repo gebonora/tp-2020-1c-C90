@@ -26,6 +26,9 @@ void testDeIntegracion() {
     // ServicioDePlanificacion
     testServicioDePlanificacion();
 
+    // ServicioDeCaptura
+    testServicioDeCaptura();
+
     // Unidad planificable
     testDePlanificable();
 

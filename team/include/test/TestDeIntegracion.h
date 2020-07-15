@@ -20,6 +20,7 @@
 #include "delibird/utils/programadorDeTareas/ProgramadorDeTareas.h"
 #include "modelo/mapa/movimiento/Movimiento.h"
 #include "servicios/servicioDePlanificacion/ServicioDePlanificacion.h"
+#include "servicios/servicioDeCaptura/ServicioDeCaptura.h"
 
 void testDeIntegracion();
 void testDeEntrenadores();
@@ -32,5 +33,6 @@ void testDeEventos();
 void testServicioDePlanificacion();
 void testDePlanificador();
 void testDeTransicionadorDeEstados();
+void testServicioDeCaptura();
 
 #endif //TEAM_TESTDEINTEGRACION_H
