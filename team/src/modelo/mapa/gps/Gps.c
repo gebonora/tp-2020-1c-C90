@@ -4,6 +4,10 @@
 
 #include "modelo/mapa/gps/Gps.h"
 
+bool borrarPosicionDelMapa(Gps * this) {
+    return this->mapa->borrarPosicion(this->mapa, this->uuid);
+}
+
 Posicion posicionActual(Gps * this) {
     Mapa * mapa = this->mapa;
     Posicion posicion = mapa->obtenerPosicion(mapa, this->uuid);
@@ -11,6 +15,14 @@ Posicion posicionActual(Gps * this) {
         log_error(this->logger, "No se pudo encontrar la posicion asociada al uuid %s", this->uuid);
     }
     return posicion;
+}
+
+void irA(Gps * this, Coordinate destino) {
+    char * coordenada = coordenadaClave(destino);
+    log_debug(this->logger, "Guiando posicionable %s hacia %s", this->uuid, coordenada);
+    free(coordenada);
+    Mapa * mapa = this->mapa;
+    mapa->moverPosicionable(mapa, this->uuid, destino);
 }
 
 void destruirGps(Gps * this) {
@@ -26,6 +38,8 @@ static Gps * new(Mapa * mapaDeRegistro, char * uuid) {
     gps->uuid = uuid;
     gps->mapa = mapaDeRegistro;
     gps->posicionActual = &posicionActual;
+    gps->irA = &irA;
+    gps->borrarPosicionDelMapa = &borrarPosicionDelMapa;
     gps->destruirGps = &destruirGps;
 
     return gps;

@@ -14,6 +14,8 @@ typedef struct Gps {
     Mapa * mapa;
     //Interfaz publica
     Posicion (*posicionActual)(struct Gps * this);
+    bool (*borrarPosicionDelMapa)(struct Gps * this);
+    void (*irA)(struct Gps * this, Coordinate destino);
     void (*destruirGps)(struct Gps * this);
 } Gps;
 

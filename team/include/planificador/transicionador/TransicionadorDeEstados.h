@@ -7,6 +7,8 @@
 
 #include "app/Global.h"
 #include "planificador/estados/EstadoPlanificador.h"
+#include "planificador/colas/ColasDePlanificacion.h"
+#include "planificador/algoritmos/AlgoritmoPlanificador.h"
 
 /**
  * Esta clase se va a encargar de transicionar el estado de la unidad planificable (UP).
@@ -24,7 +26,6 @@ typedef enum {
 
 typedef struct TransicionadorDeEstados {
     t_log *logger;
-    ColasDePlanificacion colas;
     ResultadoTransicion (*transicionarA)(struct TransicionadorDeEstados *this, UnidadPlanificable * unidadPlanificable, EstadoPlanificador estadoDeseado);
     void (*destruir)(struct TransicionadorDeEstados *this);
 } TransicionadorDeEstados;
@@ -34,7 +35,5 @@ extern const struct TransicionadorDeEstadosClass {
 } TransicionadorDeEstadosConstructor;
 
 bool estadoPrevioSatisfecho(EstadoPlanificador estadoPrevio, EstadoPlanificador estadoDeseado);
-
-TransicionadorDeEstados transicionadorDeEstados;
 
 #endif //TEAM_TRANSICIONADORDEESTADOS_H

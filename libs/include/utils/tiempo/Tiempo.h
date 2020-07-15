@@ -7,6 +7,7 @@
 
 #include <time.h>
 #include <sys/time.h>
+#include <commons/string.h>
 
 time_t ahoraEnTimeT();
 
@@ -19,5 +20,7 @@ double milisegundosHastaAhora(struct timeval tiempoInicio);
 double milisegundos(struct timeval tiempo);
 
 char* current_date_time_as_string();
+
+char* date_time_to_string(time_t);
 
 #endif //DELIBIRD_TIEMPO_H

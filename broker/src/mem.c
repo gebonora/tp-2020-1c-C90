@@ -8,6 +8,7 @@ static sem_t _semaphore_from_operation(Operation);
 /** PUBLIC FUNCTIONS **/
 
 void save_message(void* data, Operation operation, uint32_t message_id, uint32_t correlational_id) {
+	log_debug(LOGGER, "Creating message");
 	Message* message = _create_message(operation, message_id, correlational_id, _calculate_data_size(data, operation));
 	if(sizeof(data) <= TAMANO_MEMORIA){
 		_save_to_cache(data, message);
@@ -31,8 +32,10 @@ t_list* messages_from_operation(Operation operation){//todo sincronizar
 
 static void _save_to_cache(void* data, Message* message) {
 	if(string_equals_ignore_case(ALGORITMO_MEMORIA, BUDDY_SYSTEM)) {
+		log_debug(LOGGER, "Using buddy system");
 		save_to_cache_buddy_system(data, message);
 	} else {
+		log_debug(LOGGER, "Using dynamic partitions");
 		save_to_cache_dynamic_partitions(data, message);
 	}
 }

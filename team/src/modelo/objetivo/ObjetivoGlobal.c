@@ -16,20 +16,53 @@ bool puedeCapturarse(ObjetivoGlobal * this, char * especiePokemon) {
     return false;
 }
 
+void imprimirObjetivoGlobal(ObjetivoGlobal * this) {
+    void agregarEntradaAString(char * pokemon, void * _contabilidad) {
+        ContabilidadEspecie * contabilidadEspecie = _contabilidad;
+        log_debug(this->logger, "%-15s %-15d %-15d", pokemon, contabilidadEspecie->necesarios, contabilidadEspecie->capturados);
+    }
+    log_debug(this->logger, "------------------------------------------");
+    log_debug(this->logger, "              Objetivo Global             ");
+    log_debug(this->logger, "------------------------------------------");
+    log_debug(this->logger, "%-16s%-16s%-16s", "Especie", "Necesarios", "Capturados");
+    log_debug(this->logger, "------------------------------------------");
+    dictionary_iterator(this->contabilidadEspecies, agregarEntradaAString);
+    log_debug(this->logger, "------------------------------------------");
+}
+
+void solicitarPokemones(ObjetivoGlobal * this) {
+    t_list * especiesNecesarias = this->especiesNecesarias(this);
+
+    for (int i = 0; i < list_size(especiesNecesarias); i++) {
+        char * pokemon = list_get(especiesNecesarias, i);
+        log_debug(this->logger, "Solicitando especie: %s", pokemon);
+        //RespuestaBroker rta = this->clienteBroker.get(pokemon);
+        //if(rta.valida) {
+        // manejadorDeEventos.registarEventoLocalizedEsperado(rta.idCorrelatividad);
+        // }
+    }
+
+    list_destroy(especiesNecesarias);
+}
+
 void destruirObjetivoGlobal(ObjetivoGlobal * this) {
     log_debug(this->logger, "Se procede a destruir el objetivo global");
     log_destroy(this->logger);
     dictionary_destroy_and_destroy_elements(this->contabilidadEspecies, free);
 }
 
-static ObjetivoGlobal new(Equipo equipo) {
-    return (ObjetivoGlobal) {
+static ObjetivoGlobal new(Equipo unEquipo) {
+    ObjetivoGlobal objetivo = {
             .logger = log_create(TEAM_INTERNAL_LOG_FILE, "ObjetivoGlobal", SHOW_INTERNAL_CONSOLE, INTERNAL_LOG_LEVEL),
-            .contabilidadEspecies = calcularObjetivoEspecies(equipo),
+            .contabilidadEspecies = calcularObjetivoEspecies(unEquipo),
             &especiesNecesarias,
             &puedeCapturarse,
+            &imprimirObjetivoGlobal,
+            &solicitarPokemones,
             &destruirObjetivoGlobal
     };
+    objetivo.imprimirObjetivoGlobal(&objetivo);
+    return objetivo;
 }
 
 const struct ObjetivoGlobalClass ObjetivoGlobalConstructor = {.new=&new};
@@ -40,9 +73,9 @@ t_dictionary * calcularObjetivoEspecies(Equipo entrenadores) {
     void agregarPokemonesNecesarios(char * nombreEspecie, void * cantidad) {
         if (dictionary_has_key(contabilidadEspecies, nombreEspecie)) {
             ContabilidadEspecie * contabilidadEspecie = dictionary_get(contabilidadEspecies, nombreEspecie);
-            contabilidadEspecie->necesarios += cantidad;
+            contabilidadEspecie->necesarios += (int) cantidad;
         } else {
-            ContabilidadEspecie * contabilidadEspecie = crearContabilidadEspecie(cantidad, 0);
+            ContabilidadEspecie * contabilidadEspecie = crearContabilidadEspecie((int) cantidad, 0);
             dictionary_put(contabilidadEspecies, nombreEspecie, contabilidadEspecie);
         }
     }
@@ -50,9 +83,9 @@ t_dictionary * calcularObjetivoEspecies(Equipo entrenadores) {
     void agregarPokemonesCapturados(char * nombreEspecie, void * cantidad) {
         if (dictionary_has_key(contabilidadEspecies, nombreEspecie)) {
             ContabilidadEspecie * contabilidadEspecie = dictionary_get(contabilidadEspecies, nombreEspecie);
-            contabilidadEspecie->capturados += cantidad;
+            contabilidadEspecie->capturados += (int) cantidad;
         } else {
-            ContabilidadEspecie * contabilidadEspecie = crearContabilidadEspecie(0, cantidad);
+            ContabilidadEspecie * contabilidadEspecie = crearContabilidadEspecie(0, (int) cantidad);
             dictionary_put(contabilidadEspecies, nombreEspecie, (void *) contabilidadEspecie);
         }
     }

@@ -9,8 +9,10 @@
 #include <commons/config.h>
 #include <commons/string.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <commons/collections/list.h>
 #include <commons/collections/dictionary.h>
+#include <commons/collections/queue.h>
 #include "delibird/protocol.h"
 #include "delibird/interface.h"
 
@@ -19,6 +21,8 @@
 #define INTERNAL_LOG_LEVEL LOG_LEVEL_INFO
 #define SHOW_INTERNAL_CONSOLE 0 // 1 para mostrar la consola de uso interno, 0 para el caso contrario.
 #define CORRER_TESTS 0
+#define ESPERAR_OBJETIVO_GLOBAL 1
+#define ACTIVAR_RETARDO_CPU 1
 #endif //TEAM_DEVELOPMENT_MODE
 
 // Paths a archivos

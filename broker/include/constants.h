@@ -80,10 +80,10 @@ typedef struct {
 } Subscriber;
 
 typedef struct {
+	uint32_t position; // posicion relativa dentro de la cache
 	uintptr_t start; // puntero de la memoria cache
 	uint32_t size; // tamanio de particion
 	bool free; // si esta libre o no
-	uint32_t buddy; // numero de particion de su buddy
 	uint32_t creation_time; // timestamp del momento en que se creo
 	uint32_t access_time; // timestamp del ultimo acceso a esta particion
 	Message* message; // datos administrativos del mensaje (id, id correlacional, cod op)

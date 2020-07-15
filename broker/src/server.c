@@ -61,7 +61,7 @@ void serve_client(int socket_e) {
 void process_request(int cod_op, int socket) {
 	uint32_t generated_id = get_id();
 	log_info(LOGGER, "Message id generated: %d", generated_id);
-	uint32_t id_correlational;
+	uint32_t correlational_id = -1;
 	switch (cod_op) {
 	case NEW: ;
 		New* new_pokemon = recv_new(socket);
@@ -76,6 +76,9 @@ void process_request(int cod_op, int socket) {
 			sem_post(&NEW_MESSAGES);
 
 			send(socket, &generated_id, sizeof(uint32_t), 0);
+
+			save_message(new_pokemon, NEW, generated_id, correlational_id);
+
 			free_new(new_pokemon);
 		} else {
 			log_info(LOGGER, "Se cayo el cliente: %d", socket);
@@ -87,11 +90,11 @@ void process_request(int cod_op, int socket) {
 		 //cambio por un recv solo.
 
 		if(caught_pokemon != NULL){
-			int result = recv(socket,&id_correlational,sizeof(uint32_t),0);
+			int result = recv(socket,&correlational_id,sizeof(uint32_t),0);
 			if(result > 0){
 				log_info(LOGGER, "Me llego un caught");
 				log_info(LOGGER, "Resultado: %d", caught_pokemon->result);
-				log_info(LOGGER, "Id correlational: %d", id_correlational);
+				log_info(LOGGER, "Id correlational: %d", correlational_id);
 
 				pthread_mutex_lock(&MUTEX_CAUGHT_QUEUE);
 				queue_push(CAUGHT_QUEUE, caught_pokemon);
@@ -99,6 +102,9 @@ void process_request(int cod_op, int socket) {
 				sem_post(&CAUGHT_MESSAGES);
 
 				send(socket, &generated_id, sizeof(uint32_t), 0);
+
+				save_message(caught_pokemon, CAUGHT, generated_id, correlational_id);
+
 				free(caught_pokemon);
 			}
 		} else {
@@ -118,6 +124,9 @@ void process_request(int cod_op, int socket) {
 			sem_post(&GET_MESSAGES);
 
 			send(socket, &generated_id, sizeof(uint32_t), 0);
+
+			save_message(get_pokemon, GET, generated_id, correlational_id);
+
 			free_get(get_pokemon);
 		} else {
 			log_info(LOGGER, "Se cayo el cliente: %d", socket);
@@ -128,7 +137,7 @@ void process_request(int cod_op, int socket) {
 		Localized* localized_pokemon = recv_localized(socket);
 
 		if(localized_pokemon != NULL){
-			int result = recv(socket,&id_correlational,sizeof(uint32_t),0);
+			int result = recv(socket,&correlational_id,sizeof(uint32_t),0);
 			if (result > 0) {
 				log_info(LOGGER, "Me llego un localized");
 				log_info(LOGGER, "Nombre del pokemon: %s", localized_pokemon->pokemon->name->value);
@@ -144,6 +153,9 @@ void process_request(int cod_op, int socket) {
 				sem_post(&LOCALIZED_MESSAGES);
 
 				send(socket, &generated_id, sizeof(uint32_t), 0);
+
+				save_message(localized_pokemon, LOCALIZED, generated_id, correlational_id);
+
 				free_localized(localized_pokemon);
 			}
 		} else {
@@ -155,11 +167,11 @@ void process_request(int cod_op, int socket) {
 		Pokemon* appeared_pokemon = recv_pokemon(socket, false);
 
 		if(appeared_pokemon != NULL){
-			int result = recv(socket,&id_correlational,sizeof(uint32_t),0);
+			int result = recv(socket,&correlational_id,sizeof(uint32_t),0);
 			if(result > 0){
 				log_info(LOGGER, "Me llego un appeared");
 				log_info(LOGGER, "Nombre del pokemon: %s", appeared_pokemon->name->value);
-				log_info(LOGGER, "Id correlational: %d", id_correlational);
+				log_info(LOGGER, "Id correlational: %d", correlational_id);
 				Coordinate* coordinate = list_get(appeared_pokemon->coordinates, 0);
 				log_info(LOGGER, "Coordenada: x=%d, y=%d", coordinate->pos_x, coordinate->pos_y);
 
@@ -169,6 +181,9 @@ void process_request(int cod_op, int socket) {
 				sem_post(&APPEARED_MESSAGES);
 
 				send(socket, &generated_id, sizeof(uint32_t), 0);
+
+				save_message(appeared_pokemon, APPEARED, generated_id, correlational_id);
+
 				free_pokemon(appeared_pokemon);
 			}
 		} else {
@@ -190,6 +205,9 @@ void process_request(int cod_op, int socket) {
 			sem_post(&CATCH_MESSAGES);
 
 			send(socket, &generated_id, sizeof(uint32_t), 0);
+
+			save_message(catch_pokemon, CATCH, generated_id, correlational_id);
+
 			free_pokemon(catch_pokemon);
 		} else {
 			log_info(LOGGER, "Se cayo el cliente: %d", socket);
