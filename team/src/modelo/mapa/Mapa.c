@@ -10,6 +10,18 @@ bool mismoUUID(void * _posiblePresencia) { \
     return string_equals(posiblePresencia->uuid, uuid); \
 }
 
+int cantidadPosicionables(Mapa * this) {
+    int cantidad = 0;
+
+    void sumarPosicionables(char * coordenadaClave, void * casilla_) {
+        Casilla * casilla = (Casilla *) casilla_;
+        cantidad += list_size(casilla);
+    }
+
+    dictionary_iterator(this->plano, sumarPosicionables);
+    return cantidad;
+}
+
 void moverPosicionable(Mapa * this, char * uuid, Coordinate destino) {
     char * posicionDestino = coordenadaClave(destino);
     log_debug(this->logger, "Intentando mover a la posicion %s el posicionable %s", posicionDestino, uuid);
@@ -187,6 +199,7 @@ static Mapa new() {
     return (Mapa) {
             .logger = log_create(TEAM_INTERNAL_LOG_FILE, "Mapa", SHOW_INTERNAL_CONSOLE, INTERNAL_LOG_LEVEL),
             .plano = crearPlano(),
+            &cantidadPosicionables,
             &moverPosicionable,
             &agregarPresenciaACasillaExistenteOCrearUna,
             &registrarPosicion,

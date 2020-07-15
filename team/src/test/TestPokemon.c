@@ -18,6 +18,7 @@ void testDePokemones() {
     assert(pokemon->esAtrapable(pokemon) == true);
     assert(pokemon->marcarComoObjetivo(pokemon, "EntrenadorRapido") == true);
     assert(pokemon->esAtrapable(pokemon) == false);
+    log_info(testLogger, "Deberia aparecer un mensaje de error porque el pokemon ya fue marcado");
     assert(pokemon->marcarComoObjetivo(pokemon, "EntrenadorLento") == false);
 
     Posicion posicion = pokemon->posicion(pokemon);
@@ -27,6 +28,7 @@ void testDePokemones() {
 
     assert(pokemon->borrarPosicion(pokemon) == true);
 
+    log_info(testLogger, "Deberia aparecer un mensaje de error porque ya fue voleteado del mapa");
     Posicion posicionLuegoDeBorrar = pokemon->posicion(pokemon);
     assert(posicionLuegoDeBorrar.valida == false);
 

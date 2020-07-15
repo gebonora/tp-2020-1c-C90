@@ -42,6 +42,9 @@ void testDeMapa() {
     assert(posicionDelEntrenadorRegistrado.coordenada.pos_x == 3);
     assert(posicionDelEntrenadorRegistrado.coordenada.pos_y == 4);
 
+    log_info(testLogger, "Testeando el conteo de posicionables en el mapa");
+    assert(mapita.cantidadPosicionables(&mapita) == 2);
+
     free(destino);
     entrenadorARegistrar->destruir(entrenadorARegistrar);
     pokemonARegistrar->destruir(pokemonARegistrar);

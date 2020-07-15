@@ -20,6 +20,9 @@ void testServicioDeCaptura() {
     ServicioDeCaptura * servicioDeCaptura = ServicioDeCapturaConstructor.new(mapa, equipo, servicioPlanificacion);
 
     log_info(testLogger, "Testeando el impacto de una captura exitosa");
+
+    assert(mapa.cantidadPosicionables(&mapa) == 1);
+
     CapturaPokemon * capturaPokemon = CapturaPokemonConstructor.new("EntrenadorPiola", "1", pokemonAtrapable);
 
     bool resultadoCaptura = servicioDeCaptura->registrarCapturaExitosa(servicioDeCaptura, capturaPokemon);
@@ -29,6 +32,8 @@ void testServicioDeCaptura() {
     Posicion posicionPokemon = mapa.obtenerPosicion(&mapa, uuidPokemon);
 
     assert(posicionPokemon.valida == false);
+
+    assert(mapa.cantidadPosicionables(&mapa) == 0);
 
     capturaPokemon->destruir(capturaPokemon);
     servicioDeCaptura->destruir(servicioDeCaptura);

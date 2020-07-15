@@ -52,20 +52,18 @@ static bool marcarComoObjetivo(PokemonAtrapable * this, char * idMarcador) {
 }
 
 static void destruirPokemonAtrapable(PokemonAtrapable * this) {
-    Posicion posicion = this->posicion(this);
-    if (posicion.valida) {
+    if (this->gps != NULL) {
+        Posicion posicion = this->posicion(this);
         char * coordenada = coordenadaClave(posicion.coordenada);
         log_debug(this->logger, "Se procede a destruir un %s en %s", this->especie, coordenada);
         free(coordenada);
+        this->gps->destruirGps(this->gps);
     } else {
         char * posicionInicial = coordenadaClave(this->posicionInicial);
         log_debug(this->logger, "Se procede a destruir un %s que debería estar en %s, pero nunca se registró.", this->especie, posicionInicial);
         free(posicionInicial);
     }
     log_destroy(this->logger);
-    if (this->gps) {
-        this->gps->destruirGps(this->gps);
-    }
     pthread_mutex_destroy(&this->mutexAtrapable);
     free(this);
 }
