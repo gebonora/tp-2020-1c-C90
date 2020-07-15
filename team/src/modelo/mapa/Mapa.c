@@ -51,6 +51,10 @@ char * registrarPosicion(Mapa * this, Coordinate posicion, TipoPosicionable tipo
     return presencia->uuid;
 }
 
+bool borrarPosicion(Mapa * this, char * uuid) {
+    //TODO
+}
+
 Posicion obtenerPosicion(Mapa * this, char * uuid) {
     Posicion posicion = {.valida=false};
 
@@ -173,6 +177,7 @@ static Mapa new() {
             &moverPosicionable,
             &agregarPresenciaACasillaExistenteOCrearUna,
             &registrarPosicion,
+            &borrarPosicion,
             &obtenerPosicion,
             &dibujarMapa,
             &destruir

@@ -48,6 +48,7 @@ typedef struct Mapa {
     void (*moverPosicionable)(struct Mapa * this, char * uuid, Coordinate destino);
     void (* agregarPresenciaACasillaExistenteOCrearUna)(struct Mapa * this, char * posicion, Presencia * presencia);
     char * (*registrarPosicion)(struct Mapa * this, Coordinate posicion, TipoPosicionable tipoPosicionable);
+    bool (*borrarPosicion)(struct Mapa * this, char * uuid);
     Posicion (*obtenerPosicion)(struct Mapa * this, char * uuid); // Si le paso un uuid me dice en que (x,y) se encuentra.
     void (*dibujarMapa)(struct Mapa * this);
     void (*destruir)(struct Mapa * this);

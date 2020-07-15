@@ -21,7 +21,6 @@
 #include "modelo/mapa/movimiento/Movimiento.h"
 #include "servicios/servicioDePlanificacion/ServicioDePlanificacion.h"
 #include "servicios/servicioDeCaptura/ServicioDeCaptura.h"
-#include "modelo/pokemon/PokemonAtrapable.h"
 
 void testDeIntegracion();
 void testDeEntrenadores();

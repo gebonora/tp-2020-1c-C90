@@ -10,19 +10,14 @@
 #include "modelo/mapa/Mapa.h"
 #include "modelo/equipo/Equipo.h"
 #include "modelo/pokemon/PokemonAtrapable.h"
-
-typedef struct CapturaPokemon {
-    char * idEntrenador;
-    char * idCorrelatividad;
-    PokemonAtrapable * pokemonAtrapable;
-} CapturaPokemon;
+#include "modelo/pokemon/CapturaPokemon.h"
 
 typedef struct ServicioDeCaptura {
     t_log * logger;
     Mapa mapa;
     Equipo equipo;
     ServicioDePlanificacion * servicioDePlanificacion;
-    void (*registrarCapturaExitosa)(struct ServicioDeCaptura * this, CapturaPokemon * capturaPokemon);
+    bool (*registrarCapturaExitosa)(struct ServicioDeCaptura * this, CapturaPokemon * capturaPokemon);
     void (*destruir)(struct ServicioDeCaptura * this);
 } ServicioDeCaptura;
 

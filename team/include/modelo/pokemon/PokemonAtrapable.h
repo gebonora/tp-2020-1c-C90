@@ -5,6 +5,7 @@
 #ifndef TEAM_POKEMONATRAPABLE_H
 #define TEAM_POKEMONATRAPABLE_H
 
+#include <pthread.h>
 #include "app/Global.h"
 #include "modelo/mapa/gps/Gps.h"
 #include "modelo/mapa/coordenadas/UtilidadesCoordenadas.h"
@@ -18,12 +19,16 @@ typedef struct PokemonAtrapable {
     char * especie;
     Coordinate posicionInicial;
     Gps * gps;
+    pthread_mutex_t mutexAtrapable;
     TipoPosicionable tipoPosicionable;
+    bool disponible;
+    char * idMarcador;
     // Interfaz publica
     Posicion (*posicion)(struct PokemonAtrapable * this);
-    // marcarComoObjetivo() : void - La idea es evitar que 2 entrenadores vayan a la misma posicion.
-    // esAtrapable() : bool - Es true si ningun entrenador lo marcó como objetivo
-    // capturadoPor(Entrenador) : void - Se registra en el entrenador y muere.
+    bool (*marcarComoObjetivo)(struct PokemonAtrapable * this, char * idMarcador); //La idea es evitar que 2 entrenadores vayan a la misma posicion.
+    bool (*esAtrapable)(struct PokemonAtrapable * this); //Es true si ningun entrenador lo marcó como objetivo
+    // capturar(Entrenador) : void - Se registra en el entrenador y muere. ver como hacer la secuencia de llamadas con el entrenador.
+    bool (*borrarPosicion)(struct PokemonAtrapable * this);
     void (*destruir)(struct PokemonAtrapable * this);
 } PokemonAtrapable;
 
