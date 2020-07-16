@@ -78,6 +78,8 @@ static void _show_partition(Partition* partition, int number) {
 static void _show_message(Message* message) {
 	log_info(LOGGER, "Message Queue: %s", get_operation_by_value(message->operation_code));
 	log_info(LOGGER, "Message ID: %d", message->message_id);
-	log_info(LOGGER, "Correlative ID: %d", message->correlational_id);
+	if (message->correlational_id != -1) {
+		log_info(LOGGER, "Correlative ID: %d", message->correlational_id);
+	}
 	log_info(LOGGER, "Message Size: %d", message->data_size);
 }
