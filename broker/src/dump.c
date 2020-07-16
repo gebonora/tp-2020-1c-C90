@@ -64,7 +64,9 @@ static void _show_partition(Partition* partition, int number) {
 	log_info(LOGGER, "Size: %d", partition->size);
 	log_info(LOGGER, "Position: %d - %d", partition->position, partition->position + partition->size -1);
 	log_info(LOGGER, "Start: %x (%d) - %x (%d)", partition->start, partition->start, partition->start + partition->size - 1, partition->start + partition->size - 1);
-	log_info(LOGGER, "Buddy: %d", xor_int_and_int(partition->position, partition->size));
+	if (string_equals_ignore_case(ALGORITMO_MEMORIA, BUDDY_SYSTEM)) {
+		log_info(LOGGER, "Buddy: %d", xor_int_and_int(partition->position, partition->size));
+	}
 	log_info(LOGGER, "Creation time: %d - %s", partition->creation_time, date_time_to_string(partition->creation_time));
 	log_info(LOGGER, "Last access: %d - %s", partition->access_time, date_time_to_string(partition->access_time));
 	if(!partition->free) {

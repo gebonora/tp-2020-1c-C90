@@ -12,6 +12,6 @@ sleep 1
 sleep 1
 ./gameboy BROKER CATCH_POKEMON Onyx 4 5
 sleep 1
-./gameboy SUSCRIPTOR CAUGHT_POKEMON 10
+#./gameboy SUSCRIPTOR CAUGHT_POKEMON 10
 sleep 1
 ./gameboy BROKER CATCH_POKEMON Charmander 4 5

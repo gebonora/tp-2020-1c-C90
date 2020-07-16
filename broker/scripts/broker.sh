@@ -41,15 +41,15 @@ elif [ -z "${PID}" ]; then
     case $1 in
         -v)
             echo -e "${YELLOW}Starting broker in valgrind mode${NC}"
-            valgrind --show-leak-kinds=all --leak-check=full --log-file="broker.log" -v ./broker.app &
+            valgrind --show-leak-kinds=all --leak-check=full --log-file="broker.log" -v ./../broker.app
             ;;
         -h)
             echo -e "${YELLOW}Starting broker in helgrind mode${NC}"
-            valgrind --tool="helgrind" --log-file="broker.log" -v ./broker.app &
+            valgrind --tool="helgrind" --log-file="broker.log" -v ./../broker.app
             ;;
         *)
             echo -e "${YELLOW}Starting broker${NC}"
-            ./broker.app &
+            ./../broker.app
             ;;
     esac
 

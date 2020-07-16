@@ -46,6 +46,15 @@ static void _init_config() {
 		TAMANO_MINIMO_PARTICION = config_get_int_value(config, "TAMANO_MINIMO_PARTICION");
 		TAMANO_MEMORIA = config_get_int_value(config, "TAMANO_MEMORIA");
 	}
+
+	log_debug(LOGGER, "IP: %d", IP);
+	log_debug(LOGGER, "PUERTO: %d", PUERTO);
+	log_debug(LOGGER, "ALGORITMO_MEMORIA: %s", ALGORITMO_MEMORIA);
+	log_debug(LOGGER, "ALGORITMO_REEMPLAZO: %s", ALGORITMO_REEMPLAZO);
+	log_debug(LOGGER, "ALGORITMO_PARTICION_LIBRE: %s", ALGORITMO_PARTICION_LIBRE);
+	log_debug(LOGGER, "FRECUENCIA_COMPACTACION: %d", FRECUENCIA_COMPACTACION);
+	log_debug(LOGGER, "TAMANO_MEMORIA: %d", TAMANO_MEMORIA);
+	log_debug(LOGGER, "TAMANO_MINIMO_PARTICION: %d", TAMANO_MINIMO_PARTICION);
 }
 
 static void _init_semaphores() {

@@ -156,3 +156,14 @@ char* get_operation_by_value(int value) {
 		return "SUBSCRIBE";
 	}
 }
+
+char* get_result_by_value(uint32_t result) {
+	switch(result) {
+		case OK:
+			return "OK";
+		case FAIL:
+			return "FAIL";
+		default:
+			return "ACKNOWLEDGE";
+	}
+}
