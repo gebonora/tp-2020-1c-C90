@@ -64,7 +64,9 @@ static void _show_partition(Partition* partition, int number) {
 	log_info(LOGGER, "Size: %d", partition->size);
 	log_info(LOGGER, "Position: %d - %d", partition->position, partition->position + partition->size -1);
 	log_info(LOGGER, "Start: %x (%d) - %x (%d)", partition->start, partition->start, partition->start + partition->size - 1, partition->start + partition->size - 1);
-	log_info(LOGGER, "Buddy: %d", xor_int_and_int(partition->position, partition->size));
+	if (string_equals_ignore_case(ALGORITMO_MEMORIA, BUDDY_SYSTEM)) {
+		log_info(LOGGER, "Buddy: %d", xor_int_and_int(partition->position, partition->size));
+	}
 	log_info(LOGGER, "Creation time: %d - %s", partition->creation_time, date_time_to_string(partition->creation_time));
 	log_info(LOGGER, "Last access: %d - %s", partition->access_time, date_time_to_string(partition->access_time));
 	if(!partition->free) {
@@ -76,6 +78,8 @@ static void _show_partition(Partition* partition, int number) {
 static void _show_message(Message* message) {
 	log_info(LOGGER, "Message Queue: %s", get_operation_by_value(message->operation_code));
 	log_info(LOGGER, "Message ID: %d", message->message_id);
-	log_info(LOGGER, "Correlative ID: %d", message->correlational_id);
+	if (message->correlational_id != -1) {
+		log_info(LOGGER, "Correlative ID: %d", message->correlational_id);
+	}
 	log_info(LOGGER, "Message Size: %d", message->data_size);
 }

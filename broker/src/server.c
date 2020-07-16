@@ -1,9 +1,8 @@
 #include "server.h"
 
-// TODO: ver si las podemos pasar a static privaditas
-void esperar_cliente(int);
-void process_request(int, int);
-void serve_client(int);
+static void _esperar_cliente(int);
+static void _serve_client(int);
+static void _process_request(uint32_t, int);
 
 void init_server() {
 	int socket_servidor;
@@ -33,10 +32,12 @@ void init_server() {
 
     freeaddrinfo(servinfo);
 
-    while(1) esperar_cliente(socket_servidor);
+    while(1) _esperar_cliente(socket_servidor);
 }
 
-void esperar_cliente(int socket_servidor)
+/** PRIVATE FUNCTIONS **/
+
+static void _esperar_cliente(int socket_servidor)
 {
 	struct sockaddr_in dir_cliente;
 
@@ -48,17 +49,22 @@ void esperar_cliente(int socket_servidor)
 
 	pthread_t thread;
 
-	pthread_create(&thread,NULL,(void*)serve_client, socket_cliente);
+	pthread_create(&thread,NULL,(void*)_serve_client, socket_cliente);
 	pthread_detach(thread);
 }
 
-void serve_client(int socket_e) {
-	int cod_op;
-	recv(socket_e, &cod_op, sizeof(int), MSG_WAITALL);
-	process_request(cod_op, socket_e);
+static void _serve_client(int socket_client) {
+	uint32_t cod_op;
+
+	int result = recv(socket_client,&cod_op, sizeof(uint32_t),0);
+	if(result > 0){
+		_process_request(cod_op, socket_client);
+	} else {
+		log_info(LOGGER, "Se cayo el cliente: %d", socket);
+	}
 }
 
-void process_request(int cod_op, int socket) {
+static void _process_request(uint32_t cod_op, int socket) {
 	uint32_t generated_id = get_id();
 	log_info(LOGGER, "Message id generated: %d", generated_id);
 	uint32_t correlational_id = -1;
@@ -207,7 +213,7 @@ void process_request(int cod_op, int socket) {
 		if(result <= 0) {
 			close(socket);
 			break;
-    }
+		}
 
 		char* op = get_operation_by_value(cod_cola);
 		pthread_mutex_lock(&MUTEX_SUBSCRIBERS_BY_QUEUE);

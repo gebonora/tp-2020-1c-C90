@@ -16,7 +16,7 @@ void atenderPedidoBroker(PedidoGameBoy pedidoGameBoy, t_log * logger) {
     char* ip = servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, IP_BROKER);
     char* puerto = servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, PUERTO_BROKER);
     int socket_broker = create_connection(ip, puerto);
-    int id;
+    uint32_t id;
     uint32_t correlational_id;
 
     switch(pedidoGameBoy.tipoMensaje) {
@@ -38,13 +38,17 @@ void atenderPedidoBroker(PedidoGameBoy pedidoGameBoy, t_log * logger) {
 		correlational_id = atoi(list_get(pedidoGameBoy.argumentos, 3));
 		send_pokemon(appeared_pokemon, APPEARED, socket_broker);
 		send(socket_broker, &correlational_id, sizeof(uint32_t), 0);
+
+    	recv(socket_broker, &id, sizeof(uint32_t), MSG_WAITALL);
+    	log_info(logger, "Me asignaron el ID: %d", id);
     break;
     case GET_POKEMON: ;
     	Get* get_pokemon = create_get_pokemon(
     			list_get(pedidoGameBoy.argumentos, 0)
 				);
     	send_get(get_pokemon, socket_broker);
-    	recv(socket_broker, &id, sizeof(int), MSG_WAITALL);
+
+    	recv(socket_broker, &id, sizeof(uint32_t), MSG_WAITALL);
     	log_info(logger, "Me asignaron el ID: %d", id);
     break;
     case LOCALIZED_POKEMON: ;
@@ -65,6 +69,9 @@ void atenderPedidoBroker(PedidoGameBoy pedidoGameBoy, t_log * logger) {
     	pokemon->coordinates = coordinates;
     	localized_pokemon->pokemon = pokemon;
     	send_localized(localized_pokemon, socket_broker);
+
+    	recv(socket_broker, &id, sizeof(uint32_t), MSG_WAITALL);
+    	log_info(logger, "Me asignaron el ID: %d", id);
     break;
     case CATCH_POKEMON: ;
     	Pokemon* catch_pokemon = create_pokemon(
@@ -74,7 +81,7 @@ void atenderPedidoBroker(PedidoGameBoy pedidoGameBoy, t_log * logger) {
     				);
 		send_pokemon(catch_pokemon, CATCH, socket_broker);
 
-    	recv(socket_broker, &id, sizeof(int), MSG_WAITALL);
+		recv(socket_broker, &id, sizeof(uint32_t), MSG_WAITALL);
     	log_info(logger, "Me asignaron el ID: %d", id);
     break;
     case CAUGHT_POKEMON: ;
@@ -84,6 +91,9 @@ void atenderPedidoBroker(PedidoGameBoy pedidoGameBoy, t_log * logger) {
 				);
 		send_caught(caught_pokemon, socket_broker);
 		send(socket_broker, &correlational_id, sizeof(uint32_t), 0);
+
+		recv(socket_broker, &id, sizeof(uint32_t), MSG_WAITALL);
+    	log_info(logger, "Me asignaron el ID: %d", id);
     break;
     case SUBSCRIBE_POKEMON: ;
     	log_info(logger, "ENTRE A SUBSCRIBE");
@@ -136,60 +146,45 @@ void listen_messages(socket_with_logger* swl) {
 		switch(swl->operation) {
 		case NEW: ;
 			New* new_pokemon = recv_new(swl->socket);
-			recv(swl->socket,&message_id,sizeof(uint32_t),0);
-			log_info(swl->logger, "Operation: NEW");
-			log_info(swl->logger, "Message ID: %d", message_id);
-			log_info(swl->logger, "Nombre pokemon: %s", new_pokemon->pokemon->name->value);
-			log_info(swl->logger, "Cantidad: %d", new_pokemon->quantity);
+			log_info(swl->logger, "Message received (operation=NEW, pokemon=%s, quantity=%d)", new_pokemon->pokemon->name->value, new_pokemon->quantity);
 			break;
 		case APPEARED: ;
 			Pokemon* appeared_pokemon = recv_pokemon(swl->socket, false);
-			recv(swl->socket,&correlational_id,sizeof(uint32_t),0);
-			log_info(swl->logger, "Operation: APPEARED");
-			log_info(swl->logger, "Correlational ID: %d", correlational_id);
-			log_info(swl->logger, "Nombre del pokemon: %s", appeared_pokemon->name->value);
+			recv(swl->socket, &correlational_id, sizeof(uint32_t), 0);
 			Coordinate* coordinate = list_get(appeared_pokemon->coordinates, 0);
-			log_info(swl->logger, "Coordenada: x=%d, y=%d", coordinate->pos_x, coordinate->pos_y);
+			log_info(swl->logger, "Message received (operation=APPEARED, correlational_id=%d, pokemon=%s, x=%d, y=%d)", correlational_id, new_pokemon->pokemon->name->value, coordinate->pos_x, coordinate->pos_y);
+			free(coordinate);
 			break;
 		case GET: ;
 			Get* get_pokemon = recv_get(swl->socket);
-			recv(swl->socket,&message_id,sizeof(uint32_t),0);
-			log_info(swl->logger, "Operation: GET");
-			log_info(swl->logger, "Message ID: %d", message_id);;
-			log_info(swl->logger, "Nombre del pokemon: %s", get_pokemon->name->value);
+			recv(swl->socket, &message_id, sizeof(uint32_t), 0);
+			log_info(swl->logger, "Message received (operation=GET, message_id=%d, pokemon=%s)", message_id, get_pokemon->name);
 			break;
 		case LOCALIZED: ;
 			Localized* localized_pokemon = recv_localized(swl->socket);
-			recv(swl->socket,&correlational_id,sizeof(uint32_t),0);
-			log_info(swl->logger, "Operation: LOCALIZED");
-			log_info(swl->logger, "Correlational ID: %d", correlational_id);
-			log_info(swl->logger, "Nombre del pokemon: %s", localized_pokemon->pokemon->name->value);
-			log_info(swl->logger, "Cantidad de coordenadas: %d", localized_pokemon->coordinates_quantity);
+			recv(swl->socket, &correlational_id, sizeof(uint32_t), 0);
+			log_info(swl->logger, "Message received (operation=LOCALIZED, correlational_id=%d, pokemon=%s, coordinates_quantity=%d)", correlational_id, localized_pokemon->pokemon->name->value, localized_pokemon->coordinates_quantity);
 			for(int i = 0; i < localized_pokemon->coordinates_quantity; i++) {
 				Coordinate* loc_coordinate = list_get(localized_pokemon->pokemon->coordinates, i);
-				log_info(swl->logger, "Coordenada: x=%d, y=%d", loc_coordinate->pos_x, loc_coordinate->pos_y);
+				log_info(swl->logger, "Coordinate %d (x=%d, y=%d)", i, loc_coordinate->pos_x, loc_coordinate->pos_y);
+				free(loc_coordinate);
 			}
 			break;
 		case CATCH: ;
 			Pokemon* catch_pokemon = recv_pokemon(swl->socket, false);
-			recv(swl->socket,&message_id,sizeof(uint32_t),0);
-			log_info(swl->logger, "Operation: CATCH");
-			log_info(swl->logger, "Message ID: %d", message_id);
-			log_info(swl->logger, "Nombre del pokemon: %s", catch_pokemon->name->value);
+			recv(swl->socket, &message_id, sizeof(uint32_t), 0);
 			Coordinate* catch_coordinate = list_get(catch_pokemon->coordinates, 0);
-			log_info(swl->logger, "Coordenada: x=%d, y=%d", catch_coordinate->pos_x, catch_coordinate->pos_y);
+			log_info(swl->logger, "Message received (operation=CATCH, message_id=%d, pokemon=%s, x=%d, y=%d)", message_id, catch_pokemon->name, catch_coordinate->pos_x, catch_coordinate->pos_y);
+			free(catch_coordinate);
 			break;
 		case CAUGHT: ;
 			Caught* caught_pokemon = recv_caught(swl->socket);
 			recv(swl->socket,&correlational_id,sizeof(uint32_t),0);
-			log_info(swl->logger, "Operation: CAUGHT");
-			log_info(swl->logger, "Correlational ID: %d", correlational_id);
-			log_info(swl->logger, "Resultado: %d", caught_pokemon->result);
+			log_info(swl->logger, "Message received (operation=CAUGHT, correlational_id=%d, result=%s)", correlational_id, get_result_by_value(caught_pokemon->result));
 			break;
 		}
 	}
 }
-
 
 Operation get_operation(char* operation_name) {
 	if (string_equals_ignore_case("NEW_POKEMON", operation_name)) {
@@ -209,6 +204,5 @@ Operation get_operation(char* operation_name) {
 		exit(EXIT_FAILURE);
 	}
 }
-
 
 ControladorGameBoy controladorBroker = {.proceso=BROKER, .atenderPedido=atenderPedidoBroker};
