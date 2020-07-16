@@ -1,13 +1,175 @@
 #include "dynamic.h"
 
-static bool _is_free(Partition*);
-static t_link_element* _list_find_element(t_list *self, bool(*condition)(void*), int* index);
+static void _consolidate();
+static void _compact();
+static Partition* find_partition_dynamic(uint32_t);
+static Partition* _negative_frecuency(uint32_t);
+static Partition* _positive_frecuency(uint32_t);
+static Partition* _zero_frecuency(uint32_t);
 
-// cuando guardamos el dato, hay que setearle el access_time a la particion
-// devolver puntero a la particion
-void guardar_dato(dato, particion) {
+void save_to_cache_dynamic_partitions(void* data, Message* message){
+	Partition* partition;
 
+	if(FRECUENCIA_COMPACTACION < 0 ){
+		partition = _negative_frecuency(message->data_size);
+	} else if(FRECUENCIA_COMPACTACION == 0) {
+		partition = _zero_frecuency(message->data_size);
+	} else {
+		partition = _positive_frecuency(message->data_size);
+	}
+	partition->message = message;
+	memcpy(partition->start, data, message->data_size);
 }
+
+/*
+ * Tengo toda las particiones, debo agarrar las libres y hacer una sola con todos los tamaños.
+ * Esa la tengo que agregar al final de la lista.
+ *
+ * */
+
+static Partition* _negative_frecuency(uint32_t data_size){
+	Partition* partition = NULL;
+
+	while(partition == NULL){
+		partition = find_partition_dynamic(data_size);
+		if (partition == NULL) {
+			choose_victim();//que tambien la mata
+			_consolidate();
+		}
+	}
+
+	return partition;
+}
+
+static Partition* _zero_frecuency(uint32_t data_size){
+	Partition* partition = NULL;
+	bool kill = false;
+
+	while(partition == NULL){
+		partition = find_partition_dynamic(data_size);
+		if (partition == NULL) {
+			if(kill){
+				choose_victim();//que tambien la mata
+				_consolidate();
+				kill = false;
+			} else {
+				kill = true;
+			}
+			_compact();
+		}
+	}
+
+	return partition;
+}
+
+static Partition* _positive_frecuency(uint32_t data_size){
+	int partitions_killed = 0;
+	Partition* partition = NULL;
+
+	while(partition == NULL){
+		partition = find_partition_dynamic(data_size);
+
+		if(partition == NULL){
+			if(FRECUENCIA_COMPACTACION == partitions_killed){
+				_compact();
+				partitions_killed = 0;
+			} else {
+				choose_victim();//que tambien la mata
+				_consolidate();
+				partitions_killed++;
+			}
+		}
+	}
+
+	return partition;
+}
+
+static void _compact() {
+
+	t_list* occupied = get_occupied_partitions();
+
+	for(int i = 0; i < occupied->elements_count; i+2){
+
+		Partition* first_partition = list_get(occupied, i);
+		Partition* second_partition = list_get(occupied, i+1);
+
+		if(i == 0){
+			first_partition->start = memory->cache;
+		} else {
+			Partition* third_partition = list_get(occupied, i-1);
+			first_partition->start = third_partition->start + third_partition->size;
+		}
+
+		second_partition = first_partition->start + first_partition->size;
+	}
+
+	t_list* not_occupied = get_free_partitions();
+
+	int free_size = 0;
+
+	int _sum_all_sizes(int accum, Partition* partition){
+		return accum += partition->size;
+	}
+
+	list_fold(not_occupied, free_size, &_sum_all_sizes);
+
+	Partition* last_occupied = list_get(occupied, occupied->elements_count -1);
+
+	Partition* new_free_partition = create_partition(last_occupied->position + last_occupied->size, last_occupied->start + last_occupied->size, free_size);
+
+	void _remove(Partition* partition) {
+		remove_partition_at(partition->start);
+	}
+	list_iterate(not_occupied, &_remove);
+	add_partition_next_to(last_occupied->start, new_free_partition);
+
+	//checks for nulls
+}
+
+
+/** PRIVATE FUNCTIONS **/
+
+/*Busco la primera libre.
+ * Me fijo si la siguiente esta libre. Si es asi, la absorbo.
+ * Por las dudas tengo que fijarme si la siguiente tambien esta libre (caso en el que borro una particion que esta rodeada de dos libres).
+ * Si es asi, la absorbo.
+ */
+static void _consolidate(){
+
+	Partition* left_partition;
+	Partition* middle_partition;
+	Partition* right_partition;
+
+	for(int i = 0; i < memory->partitions->elements_count; i++){
+		Partition* element = list_get(memory->partitions, i);
+		Partition* element_next = list_get(memory->partitions, i+1);
+		Partition* element_next2 = list_get(memory->partitions, i+2);
+		if(element->free && element_next->free && element_next != NULL && element != NULL){
+			left_partition = element;
+			middle_partition = element_next;
+
+			if(element_next2->free && element_next2 != NULL){
+				right_partition = element_next2;
+			}
+			break;
+		}
+	}
+
+	if(left_partition != NULL){
+
+		left_partition->size = left_partition->size + middle_partition->size;
+
+		if(right_partition != NULL){
+
+			left_partition->size = left_partition->size + right_partition->size;
+
+			remove_partition_at(right_partition->start);
+		}
+
+		remove_partition_at(middle_partition->start);
+	}
+}
+
 // 1) filtramos las particiones libres que satisfacen el tamañoAGuardar
 // 2) buscamos la particion en base al algoritmo FF / BF
 // 3) si encontre una, la rompo si hace falta en 2 particiones (1 del tamanioQueVoyAGuardar)
@@ -19,110 +181,39 @@ void guardar_dato(dato, particion) {
 
 // first . filter(free && tamanio>=tamanioABuscar)
 
-Partition* find_partition_dynamic(uint32_t tamanioABuscar) {
-/*
-	t_list* partitions = find_partition(tamanioABuscar);
+static Partition* find_partition_dynamic(uint32_t size_of_data) {
 
-	if(partitions->elements_count > 0) {
-		if(strcmp(ALGORITMO_PARTICION_LIBRE, "BF")) {
-			list_sort(partitions, &menorTamanio);
+	Partition* partition = find_partition(size_of_data);
+
+	if(partition != NULL) {
+
+		int new_size = MAX_PARTITION_SIZE(size_of_data);
+
+		int old_size = partition->size;
+
+		if(old_size != new_size){
+			partition->size = new_size;
+			partition->free = false;
+			int now = (int) ahoraEnTimeT();
+			partition->access_time = now;
+			partition->creation_time = now;
+
+			Partition* new_partition = create_partition(partition->position + new_size, partition->start + new_size, old_size - new_size);
+
+			add_partition_next_to(partition->start, new_partition);
 		}
-		t_link_element* elegida = _list_get_element(partitions, 0);
-		t_link_element* next_partition = elegida->next;
 
-		int nuevo_tamanio_particion = MAX_PARTITION_SIZE(tamanioABuscar);
-
-		Partition* elegidaPartition = elegida->data;
-		int tamanio_viejo = elegidaPartition->size;
-
-		elegidaPartition->size = nuevo_tamanio_particion;
-		elegidaPartition->free = false;
-		elegidaPartition->access_time = (int)ahoraEnTimeT();
-		// TODO: ver access time,
-		 // ver metodo de seba nueva particion
-
-
-		Partition* new_partition = malloc(sizeof(Partition));
-		new_partition->free = true;
-		new_partition->size = tamanio_viejo - nuevo_tamanio_particion;
-		new_partition->start = elegidaPartition->start + nuevo_tamanio_particion;
-		new_partition->position = elegidaPartition->position + nuevo_tamanio_particion;
-
-		t_link_element* new_element = malloc(sizeof(t_link_element));
-		new_element->data = new_partition;
-		new_element->next = next_partition;
-		elegida->next = new_element;
-
+		partition->free = false;
+		int now = (int) ahoraEnTimeT();
+		partition->access_time = now;
+		partition->creation_time = now;
 
 		// ROMPER LA PARTICION
 		// tamanio particion encontrada == tamanioAGuardar -> devuelvo asi
 		// tamanio particion encontrada >  tamanioAGuardar -> trunco particion encontrada y genero una nueva con el excedente
-		return elegidaPartition;
+		return partition;
 	} else {
 		return NULL;
 	}
-	*/
-}
-
-
-void save_to_cache_dynamic_partitions(void* data, Message* message) {
-	int partitions_killed = 0;
-	Partition* partition = NULL;
-
-	while(partition == NULL){
-		partition = find_partition(message->data_size);
-		if (partition != NULL) {
-			guardar_dato(data);
-		} else {
-			if(FRECUENCIA_COMPACTACION == partitions_killed) {//casos igual o 0
-				compactar();
-			} else {
-				choose_victim();//que tambien la mata
-				consolidate();
-			}
-			partitions_killed++;
-		}
-	}
-}
-
-/*Busco la primera libre.
- * Me fijo si la siguiente esta libre. Si es asi, la absorbo.
- * Por las dudas tengo que fijarme si la siguiente tambien esta libre (caso en el que borro una particion que esta rodeada de dos libres).
- * Si es asi, la absorbo.
- */
-void consolidate(){
-
-	t_link_element* first_free = _list_find_element(memory->partitions, &_is_free, NULL);
-
-	while(first_free->next != NULL){
-
-	}
-
-}
-
-void compactar() {
-
-}
-
-/** PRIVATE FUNCTIONS **/
-
-static bool _is_free(Partition* partition) {
-	return !partition->free;
-}
-
-static t_link_element* _list_find_element(t_list *self, bool(*condition)(void*), int* index) {
-	t_link_element *element = self->head;
-	int position = 0;
-
-	while (element != NULL && !condition(element->data)) {
-		element = element->next;
-		position++;
-	}
-
-	if (index != NULL) {
-		*index = position;
-	}
-
-	return element;
 }
 

@@ -2,7 +2,6 @@
 
 static void _init_logger();
 static void _init_config();
-static void _init_queues();
 static void _init_semaphores();
 static void _init_context();
 static void _init_threads();
@@ -12,7 +11,6 @@ static void _init_dump();
 int main(){
 	_init_logger();
 	_init_config();
-	_init_queues();
 	_init_semaphores();
 	_init_context();
 	_init_threads();
@@ -50,23 +48,8 @@ static void _init_config() {
 	}
 }
 
-static void _init_queues() {
-	NEW_QUEUE = queue_create();
-	APPEARED_QUEUE = queue_create();
-	GET_QUEUE = queue_create();
-	LOCALIZED_QUEUE = queue_create();
-	CATCH_QUEUE = queue_create();
-	CAUGHT_QUEUE = queue_create();
-}
-
 static void _init_semaphores() {
 	pthread_mutex_init(&MUTEX_MESSAGE_ID, NULL);
-	pthread_mutex_init(&MUTEX_NEW_QUEUE, NULL);
-	pthread_mutex_init(&MUTEX_APPEARED_QUEUE, NULL);
-	pthread_mutex_init(&MUTEX_GET_QUEUE, NULL);
-	pthread_mutex_init(&MUTEX_LOCALIZED_QUEUE, NULL);
-	pthread_mutex_init(&MUTEX_CATCH_QUEUE, NULL);
-	pthread_mutex_init(&MUTEX_CAUGHT_QUEUE, NULL);
 	pthread_mutex_init(&MUTEX_SUBSCRIBERS_BY_QUEUE, NULL);
 	pthread_mutex_init(&MUTEX_MEMORY, NULL);
 

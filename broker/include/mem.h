@@ -10,5 +10,6 @@
 #include "buddy.h"
 
 void save_message(void*, Operation, uint32_t, uint32_t);
+t_list* messages_from_operation(Operation);
 
 #endif /* BROKER_INCLUDE_MEM_H_ */

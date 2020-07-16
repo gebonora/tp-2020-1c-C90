@@ -3,6 +3,7 @@
 
 #include "delibird/protocol.h"
 #include "constants.h"
+#include "delibird/interface.h"
 #include "mem.h"
 
 uint32_t get_id();

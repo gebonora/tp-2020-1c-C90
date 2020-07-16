@@ -70,11 +70,6 @@ void process_request(int cod_op, int socket) {
 			log_info(LOGGER, "Nombre pokemon: %s", new_pokemon->pokemon->name->value);
 			log_info(LOGGER, "Cantidad: %d", new_pokemon->quantity);
 
-			pthread_mutex_lock(&MUTEX_NEW_QUEUE);
-			queue_push(NEW_QUEUE, new_pokemon);
-			pthread_mutex_unlock(&MUTEX_NEW_QUEUE);
-			sem_post(&NEW_MESSAGES);
-
 			send(socket, &generated_id, sizeof(uint32_t), 0);
 
 			save_message(new_pokemon, NEW, generated_id, correlational_id);
@@ -96,11 +91,6 @@ void process_request(int cod_op, int socket) {
 				log_info(LOGGER, "Resultado: %d", caught_pokemon->result);
 				log_info(LOGGER, "Id correlational: %d", correlational_id);
 
-				pthread_mutex_lock(&MUTEX_CAUGHT_QUEUE);
-				queue_push(CAUGHT_QUEUE, caught_pokemon);
-				pthread_mutex_unlock(&MUTEX_CAUGHT_QUEUE);
-				sem_post(&CAUGHT_MESSAGES);
-
 				send(socket, &generated_id, sizeof(uint32_t), 0);
 
 				save_message(caught_pokemon, CAUGHT, generated_id, correlational_id);
@@ -117,11 +107,6 @@ void process_request(int cod_op, int socket) {
 		if(get_pokemon != NULL){
 			log_info(LOGGER, "Me llego un get");
 			log_info(LOGGER, "Nombre del pokemon: %s", get_pokemon->name->value);
-
-			pthread_mutex_lock(&MUTEX_GET_QUEUE);
-			queue_push(GET_QUEUE, get_pokemon);
-			pthread_mutex_unlock(&MUTEX_GET_QUEUE);
-			sem_post(&GET_MESSAGES);
 
 			send(socket, &generated_id, sizeof(uint32_t), 0);
 
@@ -147,11 +132,6 @@ void process_request(int cod_op, int socket) {
 					log_info(LOGGER, "Coordenada: x=%d, y=%d", loc_coordinate->pos_x, loc_coordinate->pos_y);
 				}
 
-				pthread_mutex_lock(&MUTEX_LOCALIZED_QUEUE);
-				queue_push(LOCALIZED_QUEUE, localized_pokemon);
-				pthread_mutex_unlock(&MUTEX_LOCALIZED_QUEUE);
-				sem_post(&LOCALIZED_MESSAGES);
-
 				send(socket, &generated_id, sizeof(uint32_t), 0);
 
 				save_message(localized_pokemon, LOCALIZED, generated_id, correlational_id);
@@ -175,11 +155,6 @@ void process_request(int cod_op, int socket) {
 				Coordinate* coordinate = list_get(appeared_pokemon->coordinates, 0);
 				log_info(LOGGER, "Coordenada: x=%d, y=%d", coordinate->pos_x, coordinate->pos_y);
 
-				pthread_mutex_lock(&MUTEX_APPEARED_QUEUE);
-				queue_push(APPEARED_QUEUE, appeared_pokemon);
-				pthread_mutex_unlock(&MUTEX_APPEARED_QUEUE);
-				sem_post(&APPEARED_MESSAGES);
-
 				send(socket, &generated_id, sizeof(uint32_t), 0);
 
 				save_message(appeared_pokemon, APPEARED, generated_id, correlational_id);
@@ -198,11 +173,6 @@ void process_request(int cod_op, int socket) {
 			log_info(LOGGER, "Nombre del pokemon: %s", catch_pokemon->name->value);
 			Coordinate* catch_coordinate = list_get(catch_pokemon->coordinates, 0);
 			log_info(LOGGER, "Coordenada: x=%d, y=%d", catch_coordinate->pos_x, catch_coordinate->pos_y);
-
-			pthread_mutex_lock(&MUTEX_CATCH_QUEUE);
-			queue_push(CATCH_QUEUE, catch_pokemon);
-			pthread_mutex_unlock(&MUTEX_CATCH_QUEUE);
-			sem_post(&CATCH_MESSAGES);
 
 			send(socket, &generated_id, sizeof(uint32_t), 0);
 
@@ -260,7 +230,6 @@ void process_request(int cod_op, int socket) {
 		}
 
 		break;
-	case 0:
 	case -1:
 		close(socket);
 		break;
