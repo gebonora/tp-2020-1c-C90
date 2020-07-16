@@ -35,12 +35,6 @@ char* ALGORITMO_PARTICION_LIBRE;
 
 uint32_t MESSAGE_ID;
 t_log* LOGGER;
-t_queue* NEW_QUEUE;
-t_queue* APPEARED_QUEUE;
-t_queue* GET_QUEUE;
-t_queue* LOCALIZED_QUEUE;
-t_queue* CATCH_QUEUE;
-t_queue* CAUGHT_QUEUE;
 pthread_mutex_t MUTEX_NEW_QUEUE;
 pthread_mutex_t MUTEX_APPEARED_QUEUE;
 pthread_mutex_t MUTEX_GET_QUEUE;
@@ -59,7 +53,6 @@ sem_t CAUGHT_MESSAGES;
 t_dictionary* SUBSCRIBERS_BY_QUEUE;
 pthread_mutex_t MUTEX_SUBSCRIBERS_BY_QUEUE;
 sem_t SUBSCRIBERS;
-
 
 typedef struct {
 	void* cache;

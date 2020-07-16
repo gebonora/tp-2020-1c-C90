@@ -12,8 +12,8 @@ void save_message(void* data, Operation operation, uint32_t message_id, uint32_t
 	Message* message = _create_message(operation, message_id, correlational_id, _calculate_data_size(data, operation));
 	if(sizeof(data) <= TAMANO_MEMORIA){
 		_save_to_cache(data, message);
-		sem_t semaphore = _semaphore_from_operation(operation);
-		sem_post(&semaphore);
+		//sem_t semaphore = _semaphore_from_operation(operation);
+		//sem_post(&semaphore);
 	} else {
 		log_error(LOGGER, "Message size is bigger than memory size. Message will be not saved. Memory size: %d , Message size: %d", TAMANO_MEMORIA, sizeof(data));
 	}
