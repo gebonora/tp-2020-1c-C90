@@ -58,6 +58,7 @@ extern const struct ManejadorDeEventosClass {
 ListaSincronizada* iniciarListaSincronizada();
 void destruirListaSincronizada(ListaSincronizada* listaSincronizada, void (*destructorElemento)(void*));
 void destruirMensajeGet(void* puntero);
+void destruirCapturaPokemon(CapturaPokemon * capturaPokemon);
 
 ManejadorDeEventos manejadorDeEventos;
 

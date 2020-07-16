@@ -115,6 +115,7 @@ static void destruir(ManejadorDeEventos * this) {
 	destruirListaSincronizada(this->listaGetEnEspera, destruirMensajeGet);
 	list_destroy_and_destroy_elements(this->listaLocalizedAppearedsRecibidos, free);
 	// TODO: destruir ListaCatchEnEspera, ver si se puede liberar la memoria acá o CapturaPokemon se está liberando en otro lado.
+    destruirListaSincronizada(this->listaCatchEnEspera, (void (*)(void *)) destruirCapturaPokemon);
 }
 
 static ManejadorDeEventos new() {
@@ -151,4 +152,8 @@ void destruirMensajeGet(void* puntero) {
 	MensajeGet* mensajeGet = (MensajeGet*) puntero;
 	free(mensajeGet->nombrePokemon);
 	free(mensajeGet);
+}
+
+void destruirCapturaPokemon(CapturaPokemon * capturaPokemon) {
+    capturaPokemon->destruir(capturaPokemon);
 }
