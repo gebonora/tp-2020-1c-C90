@@ -125,19 +125,21 @@ void liberarRecursos() {
     // Logger
     log_debug(INTERNAL_LOGGER, "Liberando logger obligatorio...");
     log_destroy(MANDATORY_LOGGER);
-    log_debug(INTERNAL_LOGGER, "Liberando servicios...");
 
     // Servicios
+    log_debug(INTERNAL_LOGGER, "Liberando servicios...");
     servicioDeConfiguracion.destruir(&servicioDeConfiguracion);
     servicioDePlanificacionProcesoTeam->destruir(servicioDePlanificacionProcesoTeam);
 
     // Componentes
     log_debug(INTERNAL_LOGGER, "Liberando componentes del sistema...");
+    manejadorDeEventos.destruir(&manejadorDeEventos);
     pthread_mutex_destroy(&MTX_INTERNAL_LOG);
     sem_destroy(&semaforoObjetivoGlobalCompletado);
 
     // Proceso Team
     log_debug(INTERNAL_LOGGER, "Liberando participantes del proceso Team...");
+    servicioDeCapturaProcesoTeam->destruir(servicioDeCapturaProcesoTeam);
     destruirEquipo(equipoProcesoTeam);
     objetivoGlobal.destruirObjetivoGlobal(&objetivoGlobal);
     mapaProcesoTeam.destruir(&mapaProcesoTeam);
