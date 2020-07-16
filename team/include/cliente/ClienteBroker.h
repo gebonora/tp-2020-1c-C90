@@ -23,7 +23,10 @@
 #include "utils/sockets/Sockets.h"
 #include "servidor/ServidorTeam.h"
 #include "manejadorDeEventos/ManejadorDeEventos.h"
+#include "modelo/pokemon/CapturaPokemon.h"
+#include "servicios/servicioDeCaptura/ServicioDeCaptura.h"
 
-void atenderCaughtRecibido(Caught* unCaught, uint32_t);
+void enviarCatch(CapturaPokemon* capturaPokemon);
+void enviarGet(char* nombrePokemon);
 
 #endif //TEAM_CLIENTEBROKER_H

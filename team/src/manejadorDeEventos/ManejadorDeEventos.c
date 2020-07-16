@@ -4,78 +4,151 @@
 
 #include "manejadorDeEventos/ManejadorDeEventos.h"
 
-static void notificarNuevoPokemon(ManejadorDeEventos* this) {
-	//esto se dispara cuando llega un APPEARED o LOCALIZED, agrega el pokemon al mapa y demás cosas a TODO: definir
-	log_debug(this->logger, "Llego un LOCALIZED");
+static void registrarCatchEnEspera(ManejadorDeEventos* this, CapturaPokemon* capturaPokemon) {
+	// Llega desde Cliente.
+	pthread_mutex_lock(&(this->listaCatchEnEspera->mtx));
+	list_add(this->listaCatchEnEspera->lista, capturaPokemon);
+	pthread_mutex_unlock(&(this->listaCatchEnEspera->mtx));
 }
 
-static void notificarPokemonCapturado(ManejadorDeEventos* this) {
-	//se dispara cuando llega un CATCH, saca al pokemon del mapa y TODO: mas cosas a definir.
+static void registrarGetEnEspera(ManejadorDeEventos* this, MensajeGet* mensajeGet) {
+	// Llega desde Cliente.
+	pthread_mutex_lock(&(this->listaGetEnEspera->mtx));
+	list_add(this->listaGetEnEspera->lista, mensajeGet);
+	pthread_mutex_unlock(&(this->listaGetEnEspera->mtx));
 }
 
-static void registrarMensajeEnEsperaEnLista(ManejadorDeEventos* this, char* nombrePokemon, uint32_t idAsignado, ListaSincronizada* lista) {
-	//creamos un MensajeEsperado y lo agregamos a la lista
-	//el nombrePokemon no se libera, dejamos como responsabilidad que lo libere el que llama a esta funcion de afuera.
-	//el MensajeEsperado se libera cuando se saca de la lista
+static void procesarLocalizedRecibido(ManejadorDeEventos* this, Localized* unLocalized, uint32_t idMensaje) {
+	// Llega desde Server.
+	t_list* ptrLista = this->listaGetEnEspera->lista;
+	t_list* ptrListaRecibidos = this->listaLocalizedAppearedsRecibidos;
+	MensajeGet* mensajeGet = NULL;
 
-	MensajeEsperado* mensajeEsperado = malloc(sizeof(MensajeEsperado));
-	mensajeEsperado->nombrePokemon = string_duplicate(nombrePokemon);
-	mensajeEsperado->idMensaje = idAsignado;
+	// Consultar la lista de gets, región crítica, minimizar procesamiento.
+	pthread_mutex_lock(&(this->listaGetEnEspera->mtx));
+	for (int a = 0; a < list_size(ptrLista); a++) {
+		MensajeGet* auxPtr = list_get(ptrLista, a);
+		if (auxPtr->idCorrelatividad == idMensaje) {
+			mensajeGet = auxPtr;
+			list_remove(ptrLista, a);
+		}
+	}
+	pthread_mutex_unlock(&(this->listaGetEnEspera->mtx));
 
-	pthread_mutex_lock(&(lista->mtx));
-	list_add(lista->lista, mensajeEsperado);
-	pthread_mutex_unlock(&(lista->mtx));
+	// Si no coincide con ningun mensaje esperado, lo ignoramos, liberar memoria y cerrar.
+	if (mensajeGet == NULL) {
+		free_localized(unLocalized);
+		return;
+	}
 
-}
+	// Consultar lista de recibidos, si ya está lo ignoramos, liberar memoria y cerrar.
+	for (int a = 0; a < list_size(ptrListaRecibidos); a++) {
+		if (string_equals(list_get(ptrListaRecibidos, a), unLocalized->pokemon->name->value)) {
+			//liberar memoria y cerrar.
+			free_localized(unLocalized);
+			destruirMensajeGet(mensajeGet);
+			return;
+		}
+	}
 
-static void procesarLocalizedRecibido(ManejadorDeEventos* this, Localized* unLocalized) {
-	//nos fijamos que sea un localized que hayamos pedido y llamamos a notificarNuevoPokemon para cada coordenada.
+	// Agregamos a lista de recibidos
+	list_add(ptrListaRecibidos, string_duplicate(unLocalized->pokemon->name->value));
+
+	// Foreach coordenada llamar al ServicioDeCaptura;
+	t_list* coordenadas = unLocalized->pokemon->coordinates;
+	for (int a = 0; a < list_size(coordenadas); a++) {
+		Coordinate* auxCoor = list_get(coordenadas, a);
+		// Quiero pasare al servicio una copia de los datos, para evitar leaks.
+		servicioDeCapturaProcesoTeam->procesarPokemonCapturable(servicioDeCapturaProcesoTeam,string_duplicate(unLocalized->pokemon->name->value), convertirACoordenada(auxCoor));
+	}
+
+	free_localized(unLocalized);
+	destruirMensajeGet(mensajeGet);
 }
 
 static void procesarAppearedRecibido(ManejadorDeEventos* this, Pokemon* unPokemon) {
-	//pasamanos para llamar a notificarNuevoPokemon.
+	// Llega desde Server.
+	t_list* ptrLista = this->listaLocalizedAppearedsRecibidos;
+	// Guardamos el nombre del pokemon en la lista de recibidos, para saber de que pokemon tenemos info e ignorar sus localizeds.
+	list_add(ptrLista, string_duplicate(unPokemon->name->value));
+
+	Coordinate* auxCoor = list_get(unPokemon->coordinates, 0);
+	servicioDeCapturaProcesoTeam->procesarPokemonCapturable(servicioDeCapturaProcesoTeam, string_duplicate(unPokemon->name->value), convertirACoordenada(auxCoor));
+	free_pokemon(unPokemon);
 }
 
 static void procesarCaughtRecibido(ManejadorDeEventos* this, Caught* unCaught, uint32_t idMensaje) {
-	//nos fijamos que sea un caught que hayamos pedido y llamamos a notificarPokemonCapturado.
+	// Llega desde Server.
+	t_list* ptrLista = this->listaCatchEnEspera->lista;
+	CapturaPokemon* capturaPokemon = NULL;
 
-	for(int a =0; a<list_size(this->listaCatchEnEspera->lista); a++){
-		MensajeEsperado* elem = (MensajeEsperado*) list_get((this->listaCatchEnEspera->lista),a);
-		if (elem->idMensaje == idMensaje){
-			//sacar del mapa y demas
-			//sacarlo de la lista y liberar memoria.
-			//TODO: tengo que tener al entrenador para avisarle que tuvo exito, desde el cliente tengo que guardar esto en MensajeEsperado???
-			//capaz conviene que el cliente cree el MensajeEsperado, sino va a quedar long parameter list
-			//  agregarPresenciaACasillaExistenteOCrearUna
-			// el entrenador como lo obtengo? por un id entrenador?
+	// Consultar la lista, región crítica, minimizar procesamiento.
+	pthread_mutex_lock(&(this->listaCatchEnEspera->mtx));
+	for (int a = 0; a < list_size(ptrLista); a++) {
+		CapturaPokemon* auxPtr = list_get(ptrLista, a);
+		if (auxPtr->idCorrelatividad == idMensaje) {
+			capturaPokemon = auxPtr;
+			list_remove(ptrLista, a);
 		}
 	}
+	pthread_mutex_unlock(&(this->listaCatchEnEspera->mtx));
+
+	// Si no coincide con ningun mensaje esperado, lo ignoramos, liberar memoria y cerrar.
+	if (capturaPokemon == NULL) {
+		free(unCaught);
+		return;
+	}
+
+	// Coincide con un pedido, ver el resultado
+	if (unCaught->result == FAIL) {
+		// Informar que falló, liberar memoria y cerrar.
+		free(unCaught);
+		return;
+	}
+	// Caso feliz:
+	servicioDeCapturaProcesoTeam->registrarCapturaExitosa(servicioDeCapturaProcesoTeam, capturaPokemon);
+	free(unCaught);
 }
 
 static void destruir(ManejadorDeEventos * this) {
 	log_destroy(this->logger);
+	destruirListaSincronizada(this->listaGetEnEspera, destruirMensajeGet);
+	list_destroy_and_destroy_elements(this->listaLocalizedAppearedsRecibidos, free);
+	// TODO: destruir ListaCatchEnEspera, ver si se puede liberar la memoria acá o CapturaPokemon se está liberando en otro lado.
 }
 
 static ManejadorDeEventos new() {
 	return (ManejadorDeEventos ) {
 		.logger = log_create(TEAM_INTERNAL_LOG_FILE, "ManejadorDeEventos", SHOW_INTERNAL_CONSOLE, INTERNAL_LOG_LEVEL),
-		.listaGetEnEspera = iniciarListaSincronizada(),
+		.listaGetEnEspera =	iniciarListaSincronizada(),
 		.listaCatchEnEspera = iniciarListaSincronizada(),
-		&notificarNuevoPokemon,
-		&notificarPokemonCapturado,
-		&registrarMensajeEnEsperaEnLista,
+		.listaLocalizedAppearedsRecibidos = list_create(),
+		&registrarCatchEnEspera,
+		&registrarGetEnEspera,
 		&procesarLocalizedRecibido,
 		&procesarAppearedRecibido,
 		&procesarCaughtRecibido,
 		&destruir,
-	};
+	} ;
 }
 
 const struct ManejadorDeEventosClass ManejadorDeEventosConstructor = { .new = &new };
 
-ListaSincronizada* iniciarListaSincronizada(){
+ListaSincronizada* iniciarListaSincronizada() {
 	ListaSincronizada* listaSincronizada = malloc(sizeof(ListaSincronizada));
 	listaSincronizada->lista = list_create();
-	pthread_mutex_init(&(listaSincronizada->mtx),NULL);
+	pthread_mutex_init(&(listaSincronizada->mtx), NULL);
 	return listaSincronizada;
+}
+
+void destruirListaSincronizada(ListaSincronizada* listaSincronizada, void (*destructorElemento)(void*)) {
+	pthread_mutex_destroy(&(listaSincronizada->mtx));
+	list_destroy_and_destroy_elements(listaSincronizada->lista, destructorElemento);
+	free(listaSincronizada);
+}
+
+void destruirMensajeGet(void* puntero) {
+	MensajeGet* mensajeGet = (MensajeGet*) puntero;
+	free(mensajeGet->nombrePokemon);
+	free(mensajeGet);
 }

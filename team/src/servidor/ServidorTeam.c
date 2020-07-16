@@ -25,9 +25,6 @@ void configurarServer() {
 	Id_Team = config_get_int_value(configServer, "ID_TEAM");
 
 	config_destroy(configServer);
-
-	printf("%d\n", Tiempo_Reconexion); //TODO: Volar o loguear en internal logger.
-
 }
 
 void eliminarConfigServer() {
@@ -51,9 +48,6 @@ void atenderConexiones() {
 
 	pthread_create(&threadGameboy, NULL, (void*) atenderGameboy, NULL);
 	pthread_detach(threadGameboy);
-
-	while (1)
-		sleep(10); //esto se va cuando haya algo en main que impida que termine. existe solo para probar el server por ahora.
 }
 
 void apagarServer() {

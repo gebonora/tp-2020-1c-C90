@@ -114,6 +114,7 @@ void configurarEstadoInicialProcesoTeam() {
     list_iterate(equipoProcesoTeam, (void (*)(void *)) registrarEquipo);
     log_debug(INTERNAL_LOGGER, "Agregando equipo a la planificacion...");
     servicioDePlanificacionProcesoTeam->asignarEquipoAPlanificar(servicioDePlanificacionProcesoTeam, equipoProcesoTeam);
+    servicioDeCapturaProcesoTeam = ServicioDeCapturaConstructor.new(mapaProcesoTeam, equipoProcesoTeam, servicioDePlanificacionProcesoTeam);
 }
 
 void liberarRecursos() {
