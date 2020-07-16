@@ -3,26 +3,22 @@
 static void _consolidate();
 static void _compact();
 static Partition* find_partition_dynamic(uint32_t);
+static Partition* _negative_frecuency(uint32_t);
+static Partition* _positive_frecuency(uint32_t);
+static Partition* _zero_frecuency(uint32_t);
 
-void save_to_cache_dynamic_partitions(void* data, Message* message) {
-	int partitions_killed = 0;
-	Partition* partition = NULL;
+void save_to_cache_dynamic_partitions(void* data, Message* message){
+	Partition* partition;
 
-	while(partition == NULL){
-		partition = find_partition_dynamic(message->data_size);
-		if (partition != NULL) {
-			partition->message = message;
-			memcpy(partition->start, data, message->data_size);
-		} else {
-			if(FRECUENCIA_COMPACTACION == partitions_killed) {//casos igual o 0
-				_compact();
-			} else {
-				choose_victim();//que tambien la mata
-				_consolidate();
-			}
-			partitions_killed++;
-		}
+	if(FRECUENCIA_COMPACTACION < 0 ){
+		partition = _negative_frecuency(message->data_size);
+	} else if(FRECUENCIA_COMPACTACION == 0) {
+		partition = _zero_frecuency(message->data_size);
+	} else {
+		partition = _positive_frecuency(message->data_size);
 	}
+	partition->message = message;
+	memcpy(partition->start, data, message->data_size);
 }
 
 /*
@@ -30,6 +26,64 @@ void save_to_cache_dynamic_partitions(void* data, Message* message) {
  * Esa la tengo que agregar al final de la lista.
  *
  * */
+
+static Partition* _negative_frecuency(uint32_t data_size){
+	Partition* partition = NULL;
+
+	while(partition == NULL){
+		partition = find_partition_dynamic(data_size);
+		if (partition == NULL) {
+			choose_victim();//que tambien la mata
+			_consolidate();
+		}
+	}
+
+	return partition;
+}
+
+static Partition* _zero_frecuency(uint32_t data_size){
+	Partition* partition = NULL;
+	bool kill = false;
+
+	while(partition == NULL){
+		partition = find_partition_dynamic(data_size);
+		if (partition == NULL) {
+			if(kill){
+				choose_victim();//que tambien la mata
+				_consolidate();
+				kill = false;
+			} else {
+				kill = true;
+			}
+			_compact();
+		}
+	}
+
+	return partition;
+}
+
+static Partition* _positive_frecuency(uint32_t data_size){
+	int partitions_killed = 0;
+	Partition* partition = NULL;
+
+	while(partition == NULL){
+		partition = find_partition_dynamic(data_size);
+
+		if(partition == NULL){
+			if(FRECUENCIA_COMPACTACION == partitions_killed){
+				_compact();
+				partitions_killed = 0;
+			} else {
+				choose_victim();//que tambien la mata
+				_consolidate();
+				partitions_killed++;
+			}
+		}
+	}
+
+	return partition;
+}
+
 static void _compact() {
 
 	t_list* occupied = get_occupied_partitions();
@@ -59,15 +113,15 @@ static void _compact() {
 
 	list_fold(not_occupied, free_size, &_sum_all_sizes);
 
-	Partition* last_ocupied = list_get(occupied, occupied->elements_count -1);
+	Partition* last_occupied = list_get(occupied, occupied->elements_count -1);
 
-	Partition* new_free_partition = create_partition(last_ocupied->start + last_ocupied->size, free_size);
+	Partition* new_free_partition = create_partition(last_occupied->position + last_occupied->size, last_occupied->start + last_occupied->size, free_size);
 
 	void _remove(Partition* partition) {
 		remove_partition_at(partition->start);
 	}
 	list_iterate(not_occupied, &_remove);
-	add_partition_next_to(last_ocupied->start, new_free_partition);
+	add_partition_next_to(last_occupied->start, new_free_partition);
 
 	//checks for nulls
 }
@@ -137,17 +191,22 @@ static Partition* find_partition_dynamic(uint32_t size_of_data) {
 
 		int old_size = partition->size;
 
-		partition->size = new_size;
+		if(old_size != new_size){
+			partition->size = new_size;
+			partition->free = false;
+			int now = (int) ahoraEnTimeT();
+			partition->access_time = now;
+			partition->creation_time = now;
+
+			Partition* new_partition = create_partition(partition->position + new_size, partition->start + new_size, old_size - new_size);
+
+			add_partition_next_to(partition->start, new_partition);
+		}
+
 		partition->free = false;
 		int now = (int) ahoraEnTimeT();
 		partition->access_time = now;
-		if(size_of_data == old_size) partition->creation_time = now;
-
-		replace_partition_at(partition->start, partition);
-
-		Partition* new_partition = create_partition(partition->start + new_size, old_size - new_size);
-
-		add_partition_next_to(partition->start, new_partition);
+		partition->creation_time = now;
 
 		// ROMPER LA PARTICION
 		// tamanio particion encontrada == tamanioAGuardar -> devuelvo asi
