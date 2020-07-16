@@ -8,7 +8,7 @@
 #include "servicios/servicioDeResolucionDeDeadlocks/ServicioDeResolucionDeDeadlocks.h"
 
 void destruirServicioDeResolucionDeDeadlocks(ServicioDeResolucionDeDeadlocks * this) {
-    log_debug(this->logger, "Se procede a destruir al servicio de captura");
+    log_debug(this->logger, "Se procede a destruir al servicio de resolución de deadlocks");
     log_destroy(this->logger);
     free(this);
 }
@@ -16,7 +16,7 @@ void destruirServicioDeResolucionDeDeadlocks(ServicioDeResolucionDeDeadlocks * t
 static ServicioDeResolucionDeDeadlocks * new(Mapa mapa, Equipo equipo, ServicioDePlanificacion * servicioDePlanificacion) {
 	ServicioDeResolucionDeDeadlocks * servicio = malloc(sizeof(ServicioDeResolucionDeDeadlocks));
 
-    servicio->logger = log_create(TEAM_INTERNAL_LOG_FILE, "ServicioDeCaptura", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_INFO);
+    servicio->logger = log_create(TEAM_INTERNAL_LOG_FILE, "ServicioDeResolucionDeDeadlocks", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_INFO);
     servicio->mapa = mapa;
     servicio->equipo = equipo;
     servicio->servicioDePlanificacion = servicioDePlanificacion;

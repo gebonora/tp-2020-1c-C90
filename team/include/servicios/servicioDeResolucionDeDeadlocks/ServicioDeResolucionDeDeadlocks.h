@@ -50,8 +50,8 @@ typedef struct ServicioDeResolucionDeDeadlocks {
 
 extern const struct ServicioDeResolucionDeDeadlocksClass {
 	ServicioDeResolucionDeDeadlocks * (*new)(Mapa mapa, Equipo equipo, ServicioDePlanificacion * servicioDePlanificacion);
-} ServicioDeCapturaConstructor;
+} ServicioDeResolucionDeDeadlocksConstructor;
 
-ServicioDeResolucionDeDeadlocks * servicioDeCapturaProcesoTeam;
+ServicioDeResolucionDeDeadlocks * servicioDeResolucionDeDeadlocksProcesoTeam;
 
 #endif /* INCLUDE_SERVICIOS_SERVICIODERESOLUCIONDEDEADLOCKS_SERVICIODERESOLUCIONDEDEADLOCKS_H_ */
