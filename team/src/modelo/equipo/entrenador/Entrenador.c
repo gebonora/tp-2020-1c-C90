@@ -104,21 +104,23 @@ const struct EntrenadorClass EntrenadorConstructor = {.new=&new};
 ContadorPokemones agruparPokemonesPorNombre(char * nombresDeLosPokemones) {
     ContadorPokemones contador = dictionary_create();
 
-    char ** arrayPokemon = string_split(nombresDeLosPokemones, "|");
+    if (!string_equals_ignore_case(nombresDeLosPokemones, NO_POKEMON)) {
+        char ** arrayPokemon = string_split(nombresDeLosPokemones, "|");
 
-    t_list * pokemones = (t_list *) list_from((void **) arrayPokemon);
+        t_list * pokemones = (t_list *) list_from((void **) arrayPokemon);
 
-    for (int i=0; i < list_size(pokemones); i++) {
-        char * nombrePokemon = list_get(pokemones, i);
-        if (dictionary_has_key(contador, nombrePokemon)) {
-            dictionary_put(contador, nombrePokemon, dictionary_get(contador, nombrePokemon) + 1);
-        } else {
-            dictionary_put(contador, nombrePokemon, (void *) 1);
+        for (int i=0; i < list_size(pokemones); i++) {
+            char * nombrePokemon = list_get(pokemones, i);
+            if (dictionary_has_key(contador, nombrePokemon)) {
+                dictionary_put(contador, nombrePokemon, dictionary_get(contador, nombrePokemon) + 1);
+            } else {
+                dictionary_put(contador, nombrePokemon, (void *) 1);
+            }
         }
-    }
 
-    list_destroy_and_destroy_elements(pokemones, free);
-    free(arrayPokemon);
+        list_destroy_and_destroy_elements(pokemones, free);
+        free(arrayPokemon);
+    }
 
     return contador;
 }

@@ -25,9 +25,6 @@ void configurarServer() {
 	Id_Team = config_get_int_value(configServer, "ID_TEAM");
 
 	config_destroy(configServer);
-
-	printf("%d\n", Tiempo_Reconexion); //TODO: Volar o loguear en internal logger.
-
 }
 
 void eliminarConfigServer() {
@@ -51,9 +48,6 @@ void atenderConexiones() {
 
 	pthread_create(&threadGameboy, NULL, (void*) atenderGameboy, NULL);
 	pthread_detach(threadGameboy);
-
-	while (1)
-		sleep(10); //esto se va cuando haya algo en main que impida que termine. existe solo para probar el server por ahora.
 }
 
 void apagarServer() {
@@ -121,7 +115,9 @@ void procesarHiloAppeared(ArgumentosHilo* argumentosHilo) {
 	}
 	log_info(MANDATORY_LOGGER, "Llegó un Appeared. idMensaje: '%s', pokemon: '%s', posX: '%d', posY: '%d'.", aux, unAppeared->name->value,
 			((Coordinate*) (unAppeared->coordinates->head->data))->pos_x, ((Coordinate*) (unAppeared->coordinates->head->data))->pos_y);
+	//TODO: logear en el manejador para informar si fue aceptado o no el paquete
 	free(aux);
+	//TODO:
 	//Pasar el paquete y el id a otro subproceso. ver donde se va a liberar la memoria!
 	//Si se termina el hilo, la memoria se libera????? -> crear una copia y pasar la copia.
 	//cerrar hilo
@@ -171,6 +167,8 @@ void procesarHiloCaught(ArgumentosHilo* argumentosHilo) {
 	Caught* unCaught = (Caught*) argumentosHilo->mensaje;
 	uint32_t idMensaje = argumentosHilo->idMensaje;
 	log_info(MANDATORY_LOGGER, "Llegó un Caught. idMensaje: '%d', resultado: '%s'.", idMensaje, traducirResult(unCaught->result));
+	//TODO: logear en el manejador para informar si fue aceptado o no el paquete.
+	//TODO:
 	//Pasar el paquete y el id a otro subproceso. ver donde se va a liberar la memoria!
 	//Si se termina el hilo, la memoria se libera????? -> crear una copia y pasar la copia.
 	//cerrar hilo

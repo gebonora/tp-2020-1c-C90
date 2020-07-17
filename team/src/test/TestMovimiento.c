@@ -5,6 +5,8 @@
 #include "test/TestDeIntegracion.h"
 
 void testDeMovimiento() {
+    t_log * testLogger = log_create(TEAM_INTERNAL_LOG_FILE, "TestMovimiento", 1, LOG_LEVEL_INFO);
+
     log_info(testLogger, "Testeando la correcta generacion de caminos entre coordenadas");
     Coordinate origen = {.pos_x = 1, .pos_y = 3};
     Coordinate destino = {.pos_x = 5, .pos_y = 2};
@@ -26,4 +28,5 @@ void testDeMovimiento() {
     assert(paso5->pos_x == 5 && paso5->pos_y == 2);
 
     list_destroy_and_destroy_elements(camino, free);
+    log_destroy(testLogger);
 }

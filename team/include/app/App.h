@@ -11,6 +11,7 @@
 #include "modelo/equipo/Equipo.h"
 #include "modelo/objetivo/ObjetivoGlobal.h"
 #include "test/TestDeIntegracion.h"
+#include "manejadorDeEventos/ManejadorDeEventos.h"
 
 void warmUp();
 void mostrarTitulo(t_log * logger);

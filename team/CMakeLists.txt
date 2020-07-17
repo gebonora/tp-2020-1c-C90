@@ -8,7 +8,10 @@ if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug" OR "${CMAKE_BUILD_TYPE}" STREQUAL "DEB
             -DTEAM_DEVELOPMENT_MODE
             -DINTERNAL_LOG_LEVEL=LOG_LEVEL_DEBUG
             -DSHOW_INTERNAL_CONSOLE=1
-            -DCORRER_TESTS=1)
+            -DCORRER_TESTS=1
+            -DESPERAR_OBJETIVO_GLOBAL=0
+            -DACTIVAR_RETARDO_CPU=0
+    )
 endif()
 
 # .h files

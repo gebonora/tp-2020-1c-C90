@@ -44,4 +44,6 @@ AlgoritmoPlanificador roundRobin;
 AlgoritmoPlanificador shortestJobFirst; // Por defecto es sin desalojo
 AlgoritmoPlanificador shortestRemainingTimeFirst; // Esta es otra forma de llamar al SJF con desalojo
 
+char * nombreAlgoritmoCompleto(char * nombreCorto);
+
 #endif //TEAM_ALGORITMOPLANIFICADOR_H

@@ -5,6 +5,8 @@
 #include "test/TestDeIntegracion.h"
 
 void testDeTareas() {
+    t_log * testLogger = log_create(TEAM_INTERNAL_LOG_FILE, "TestTareas", 1, LOG_LEVEL_INFO);
+
     log_info(testLogger, "Testeando la generacion de una tarea de captura");
     Entrenador * entrenador = EntrenadorConstructor.new("4|1", "A", "B");
     Mapa mapita = MapaConstructor.new();
@@ -41,4 +43,5 @@ void testDeTareas() {
     tareaCaptura->destruir(tareaCaptura);
     entrenador->destruir(entrenador);
     mapita.destruir(&mapita);
+    log_destroy(testLogger);
 }

@@ -12,3 +12,4 @@ char * registrarEnMapaPosicion##T(Mapa * mapaDeRegistro, T* posicionable){ \
 }
 
 defineRegistrarEnMapaPosicion(Entrenador)
+defineRegistrarEnMapaPosicion(PokemonAtrapable)

@@ -5,29 +5,50 @@
 #include "test/TestDeIntegracion.h"
 
 void testDeIntegracion() {
-    testLogger = log_create(TEAM_INTERNAL_LOG_FILE, "TestsDeIntegracion", 1, LOG_LEVEL_INFO);
+    t_log * testLogger = log_create(TEAM_INTERNAL_LOG_FILE, "TestDeIntegracion", 1, LOG_LEVEL_INFO);
+    t_list * tests = list_create();
+
+    // Libs
+    list_add(tests, testLibs);
 
     // Entrenadores
-    testDeEntrenadores();
+    list_add(tests, testDeEntrenadores);
+
+    // Pokemones
+    list_add(tests, testDePokemones);
 
     // Movimiento
-    testDeMovimiento();
+    list_add(tests, testDeMovimiento);
 
     // Mapa
-    testDeMapa();
+    list_add(tests, testDeMapa);
 
     // Algoritmos
-    testDeAlgoritmos();
+    list_add(tests, testDeAlgoritmos);
 
     // Tareas
-    testDeTareas();
+    list_add(tests, testDeTareas);
 
-    // Planificacion
-    testDePlanificable();
+    // Planificador
+    list_add(tests, testDePlanificador);
+
+    // ServicioDePlanificacion
+    list_add(tests, testServicioDePlanificacion);
+
+    // ServicioDeCaptura
+    list_add(tests, testServicioDeCaptura);
+
+    // Unidad planificable
+    list_add(tests, testDePlanificable);
 
     // Eventos
-    testDeEventos();
+    list_add(tests, testDeEventos);
 
-    log_info(testLogger, "Pruebas de integracion finalizadas con exito");
+    for (int i = 0; i < list_size(tests); i++){
+        log_info(testLogger, "-------- Ejecutando test %d/%d --------", i + 1, list_size(tests));
+        ((void (*)()) list_get(tests, i))();
+    }
+
+    list_destroy(tests);
     log_destroy(testLogger);
 }

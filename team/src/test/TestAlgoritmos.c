@@ -6,6 +6,8 @@
 
 
 void testDeAlgoritmos() {
+    t_log * testLogger = log_create(TEAM_INTERNAL_LOG_FILE, "TestAlgoritmos", 1, LOG_LEVEL_INFO);
+
     log_info(testLogger, "Testeando los algoritmos de planificacion");
     t_list * listaReady = list_create();
     Entrenador * entrenador = EntrenadorConstructor.new("1|2", "A|B", "A|C");
@@ -26,4 +28,5 @@ void testDeAlgoritmos() {
     list_destroy_and_destroy_elements(listaReady, (void (*)(void *)) hiloEntrenadorPlanificable->destruir);
     entrenador->destruir(entrenador);
     entrenador2->destruir(entrenador2);
+    log_destroy(testLogger);
 }

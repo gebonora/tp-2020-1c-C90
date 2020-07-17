@@ -19,16 +19,22 @@
 #include "delibird/utils/strings/ExtensionStrings.h"
 #include "delibird/utils/programadorDeTareas/ProgramadorDeTareas.h"
 #include "modelo/mapa/movimiento/Movimiento.h"
+#include "servicios/servicioDePlanificacion/ServicioDePlanificacion.h"
+#include "servicios/servicioDeCaptura/ServicioDeCaptura.h"
 
 void testDeIntegracion();
 void testDeEntrenadores();
+void testDePokemones();
 void testDeMovimiento();
 void testDeMapa();
 void testDeAlgoritmos();
 void testDeTareas();
 void testDePlanificable();
 void testDeEventos();
-
-t_log * testLogger;
+void testServicioDePlanificacion();
+void testDePlanificador();
+void testDeTransicionadorDeEstados();
+void testServicioDeCaptura();
+void testLibs();
 
 #endif //TEAM_TESTDEINTEGRACION_H

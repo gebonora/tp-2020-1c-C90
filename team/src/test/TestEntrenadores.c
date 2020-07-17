@@ -5,6 +5,8 @@
 #include "test/TestDeIntegracion.h"
 
 void testDeEntrenadores() {
+    t_log * testLogger = log_create(TEAM_INTERNAL_LOG_FILE, "TestEntrenadores", 1, LOG_LEVEL_INFO);
+
     log_info(testLogger, "Testeando los metodos de los entrenadores");
     Entrenador * entrenador = EntrenadorConstructor.new("1|2", "A|B", "A|C|C");
     Entrenador * entrenador2 = EntrenadorConstructor.new("2|4", "A|B", "A|B");
@@ -22,11 +24,17 @@ void testDeEntrenadores() {
     assert((int) dictionary_get(entrenador2->pokemonesObjetivo, "A") == 1);
     assert((int) dictionary_get(entrenador2->pokemonesObjetivo, "B") == 1);
 
+    log_info(testLogger, "Testeando entrenador sin pokemones capturados");
+    Entrenador * entrenador3 = EntrenadorConstructor.new("2|4", "None", "A|B");
+    assert(dictionary_size(entrenador3->pokemonesCapturados) == 0);
+    entrenador3->destruir(entrenador3);
+
+    log_info(testLogger, "Testeando los metodos del objetivo global");
+
     Equipo equipito = list_create();
     list_add(equipito, entrenador);
     list_add(equipito, entrenador2);
 
-    log_info(testLogger, "Testeando los metodos del objetivo global");
     ObjetivoGlobal objetivo = ObjetivoGlobalConstructor.new(equipito);
 
     t_list * especiesNecesarias = objetivo.especiesNecesarias(&objetivo);
@@ -53,4 +61,6 @@ void testDeEntrenadores() {
     list_destroy(especiesNecesarias);
     destruirEquipo(equipito);
     objetivo.destruirObjetivoGlobal(&objetivo);
+
+    log_destroy(testLogger);
 }

@@ -5,14 +5,18 @@
 #ifndef TEAM_SERVICIODEPLANIFICACION_H
 #define TEAM_SERVICIODEPLANIFICACION_H
 
+#include "semaphore.h"
+#include "app/Global.h"
+#include "delibird/utils/hilos/HiloFacil.h"
+#include "modelo/equipo/Equipo.h"
+#include "planificador/Planificador.h"
+
 /**
  * Esta clase es conocedora de que implicancias a nivel planificacion tienen los eventos del sistema.
  *
  * Problemas:
  *  - Alguien tiene que persistir los ids, ¿Sera que puedo modelar los eventos y guardarlos ahi?
  *      Modelar eventos esperables y registrarlos en el event-handler.
- *  - ¿Esto deberia soportar la posibilidad de procesamiento asincronico?
- *      Si. Vamos a tener que armar una cola de trabajo y correr en un hilo aparte.
  *  - Llego hasta tener al entrenador bloqueado esperando la respuesta del CATCH, ¿ya hago return void?
  *      Registro en el ManejadorDeEventos que necesito un CAUGHT y retorno.
  *
@@ -20,31 +24,67 @@
  *  - Tiene conocimiento de las reglas de movimiento de los entrenadores en los diferentes estados.
  *  - Colaborar con la resolucion de deadlock facilitando mover entrenadores y realizar intercambios.
  *
- * Ejemplo de flujo CATCH-CAUGHT:
- *      El servidor recibe el evento "LOCALIZED SQUIRTLE 4 4", por lo que debe notificar al servicio eso.
- *          Aclaracion:
- *              Si vienen N ejemplares pero necesito M < N, mando M entrenadores, NO mas!!!
- *              Si fallo la captura, puedo probar con los otros ejemplares en el mapa.
- *              Si vienen N ejemplares y necesito N, mando N entrenadores (el algoritmo dira quien va pri).
- *      El servicio resuelve qué entrenador/es está mas cerca y le dice al planificador que lo mande a READY.
- *      El algoritmo selecciona a uno y lo manda a EXEC
- *      El entrenador en EXEC gasta un ciclo de CPU (c/u dura N segundos) por cada desplazamiento hasta llegar.
- *      El proceso llama al cliente Broker y envia "CATCH SQUIRTLE 4 4".
- *      El cliente recibe un ID de correlatividad.
- *      El entrenador pasa a BLOCKED a la espera de un evento con el ID de correlatividad persistido.
- *      El event handler detecto que hubo un caught con un id requerido por un entrenador, le avisa al planificador.
- *      El entrenador se adjudica el pokemon (lo sacamos del mapa compartido) y se determina su futuro.
- *          Si cumple su objetivo, EXIT.
- *          Sino
- *              Si ya no puede seguir atrapando por capacidad maxima, BLOCKED (saldra por deadlock)
- *              Sino
- *                  Si hay pokemones para atrapar, vuelve a READY para que pueda seguir capturando.
- *                  Si no pasa a BLOCKED (saldra por evento LOCALIZED)
- *      El servicio queda a la expera de nuevos eventos, pero el planificador debe seguir trabajando con las capturas.
+ * ¿Que es un trabajo?
+ *     - Tanto LOCALIZED como APPEARED involucran hacer las mismas acciones, asi que lo englobamos en CAPTURA_POKEMON.
+ *     - CAUGHT: Agarra al entrenador correspondiente y le informa el resultado de su CATCH. -> NOTIFY_CAUGHT_RESULT
+ *     - El intercambio por deadlock se va a representar con un DEADLOCK_RESOLUTION.
+ *
+ * Importante: Por el momento entendemos que si dejaron un trabajo es porque se puede cumplir.
+ *
+ * CAPTURA_POKEMON: Genera Tarea.
+ *     Alguien mas arriba determinó que se puede capturar a cierto pokemon.
+ *     Necesito tener a mano la ESPECIE y DONDE se encuentra.
+ *     Al final genera una TareaDeCaptura.
+ *
+ * NOTIFY_CAUGHT_RESULT: No genera tarea.
+ *     -- Esto podria hacerse en otro lado -- CapturaPokemonClass ponele.
+ *     Tenemos que hacerle llegar al entrenador correspondiente el resultado de su CATCH.
+ *     Si salio OK,
+ *          Problema: Definir como guardar el intento de captura
+ *          Solucion: Al momento de registrar que estamos esperando un caught, indicamos el pokemon y su posicion.
+ *          mapa.eliminarPresencia(pokemon, posicion).
+ *          entrenador.agregarPokemonCapturado(pikachu).
+ *     Des-Registramos el evento esperado en el manejador de eventos.
+ *     -- Esta parte afecta la planificacion --
+ *     Habilitamos a que el entrenador sea nuevamente planificado.
+ *
+ * DEADLOCK_RESOLUTION: Genera Tarea.
+ *     Nuestro algoritmo de detección encontró que hay DEADLOCK.
+ *     El algoritmo de resolucion generará una o varias tareas de intercambio para solucionarlo.
  */
 
+typedef enum TipoTrabajoPlanificador {
+    CAPTURA_POKEMON,
+    NOTIFY_CAUGHT_RESULT,
+    DEADLOCK_RESOLUTION
+} TipoTrabajoPlanificador;
+
+typedef struct TrabajoPlanificador {
+    TipoTrabajoPlanificador tipo;
+    char * objetivo;
+    Coordinate coordenadaObjetivo;
+} TrabajoPlanificador;
+
 typedef struct ServicioDePlanificacion {
+    t_log * logger;
+    t_queue * colaDeTrabajo; // Posee TrabajoPlanificador
+    bool finDeTrabajo;
+    sem_t semaforoFinDeTrabajo;
+    sem_t semaforoEjecucionHabilitada;
+    Planificador planificador;
     // Interfaz publica
+    void (*trabajar)(struct ServicioDePlanificacion * this);
+    void (*asignarEquipoAPlanificar)(struct ServicioDePlanificacion * this, Equipo equipo);
+    void (*destruir)(struct ServicioDePlanificacion * this);
 } ServicioDePlanificacion;
+
+extern const struct ServicioDePlanificacionClass {
+    ServicioDePlanificacion * (*new)();
+} ServicioDePlanificacionConstructor;
+
+ServicioDePlanificacion * servicioDePlanificacionProcesoTeam;
+
+t_list * convertirAUnidadesPlanificables(Equipo equipo);
+void destruirUnidadPlanificable(UnidadPlanificable * unidadPlanificable);
 
 #endif //TEAM_SERVICIODEPLANIFICACION_H

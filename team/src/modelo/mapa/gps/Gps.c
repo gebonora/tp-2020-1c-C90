@@ -4,6 +4,10 @@
 
 #include "modelo/mapa/gps/Gps.h"
 
+bool borrarPosicionDelMapa(Gps * this) {
+    return this->mapa->borrarPosicion(this->mapa, this->uuid);
+}
+
 Posicion posicionActual(Gps * this) {
     Mapa * mapa = this->mapa;
     Posicion posicion = mapa->obtenerPosicion(mapa, this->uuid);
@@ -35,6 +39,7 @@ static Gps * new(Mapa * mapaDeRegistro, char * uuid) {
     gps->mapa = mapaDeRegistro;
     gps->posicionActual = &posicionActual;
     gps->irA = &irA;
+    gps->borrarPosicionDelMapa = &borrarPosicionDelMapa;
     gps->destruirGps = &destruirGps;
 
     return gps;

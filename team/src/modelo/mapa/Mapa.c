@@ -10,9 +10,21 @@ bool mismoUUID(void * _posiblePresencia) { \
     return string_equals(posiblePresencia->uuid, uuid); \
 }
 
+int cantidadPosicionables(Mapa * this) {
+    int cantidad = 0;
+
+    void sumarPosicionables(char * coordenadaClave, void * casilla_) {
+        Casilla * casilla = (Casilla *) casilla_;
+        cantidad += list_size(casilla);
+    }
+
+    dictionary_iterator(this->plano, sumarPosicionables);
+    return cantidad;
+}
+
 void moverPosicionable(Mapa * this, char * uuid, Coordinate destino) {
     char * posicionDestino = coordenadaClave(destino);
-    log_debug(this->logger, "Moviendo a posicion %s el posicionable %s", posicionDestino, uuid);
+    log_debug(this->logger, "Intentando mover a la posicion %s el posicionable %s", posicionDestino, uuid);
     Posicion posicionActual = this->obtenerPosicion(this, uuid);
     if (posicionActual.valida) {
         char * posicionComoClave = coordenadaClave(posicionActual.coordenada);
@@ -21,6 +33,7 @@ void moverPosicionable(Mapa * this, char * uuid, Coordinate destino) {
         filtrarPormismoUUID(uuid);
         Presencia * presencia = list_remove_by_condition(casillaActual, mismoUUID);
         this->agregarPresenciaACasillaExistenteOCrearUna(this, posicionDestino, presencia);
+        log_info(this->logger, "Se movio con exito el %s a %s", nombreTipoPosicionable(presencia->tipoPosicionable), posicionDestino);
     } else {
         log_error(this->logger, "Movimiento cancelado. No se pudo encontrar en el mapa a %s", uuid);
     }
@@ -49,6 +62,22 @@ char * registrarPosicion(Mapa * this, Coordinate posicion, TipoPosicionable tipo
     free(posicionComoClave);
     this->dibujarMapa(this);
     return presencia->uuid;
+}
+
+bool borrarPosicion(Mapa * this, char * uuid) {
+    Posicion posiblePosicion = this->obtenerPosicion(this, uuid);
+    if (posiblePosicion.valida) {
+        char * posicionComoClave = coordenadaClave(posiblePosicion.coordenada);
+        Casilla casillaActual = dictionary_get(this->plano, posicionComoClave);
+        filtrarPormismoUUID(uuid);
+        Presencia * presencia = list_remove_by_condition(casillaActual, mismoUUID);
+        log_info(this->logger, "Se borró del mapa un %s en %s", nombreTipoPosicionable(presencia->tipoPosicionable), posicionComoClave);
+        free(posicionComoClave);
+        destruirPresencia(presencia);
+        return true;
+    }
+    log_warning(this->logger, "Se intentó borrar un posicionable inexistente");
+    return false;
 }
 
 Posicion obtenerPosicion(Mapa * this, char * uuid) {
@@ -85,25 +114,27 @@ static void dibujarMapa(Mapa * this) {
     list_destroy(coordenadasClave);
 
     char * separadorDibujo = string_new();
-    for (int s = 0; s < ((max * 3) + 1) / 2; s++) {
+    for (int s = 0; s < ((max * 6) + 4) / 2; s++) { // Acompaña crecimiento del plano
         string_append(&separadorDibujo, "#");
     }
     log_debug(this->logger, "%s Mapa %s", separadorDibujo, separadorDibujo);
 
-    char * enumeracionColumnas = string_from_format("   ");
-    for (int e = 1; e <= max; e++) {
-        string_append_with_format(&enumeracionColumnas, " %-2d", e);
+    char * enumeracionColumnas = string_from_format("     "); //Acomoda indices
+    for (int e = 0; e <= max; e++) {
+        string_append_with_format(&enumeracionColumnas, " %-5d", e); //Agranda tamaño celda
     }
     log_debug(this->logger, enumeracionColumnas);
     free(enumeracionColumnas);
 
-    for (int x = 1; x <= max; x++) {
+    t_dictionary * ocurrencias = dictionary_create();
+
+    for (int x = 0; x <= max; x++) {
         char * arriba = string_new();
         char * medio = string_new();
         string_append(&arriba, "   ");
         string_append_with_format(&medio, "%-3d", x);
-        for (int y = 1; y <= max; y++) {
-            string_append(&arriba, "+--");
+        for (int y = 0; y <= max; y++) {
+            string_append(&arriba, "+-----"); //Agranda tamaño celda
 
             char * representacionPresencia = string_new();
             char * coordenadaClave = armarCoordenadaClave(x,y);
@@ -112,14 +143,26 @@ static void dibujarMapa(Mapa * this) {
                 Casilla casilla = dictionary_get(this->plano, coordenadaClave);
                 for (int p = 0; p < list_size(casilla); p++) {
                     Presencia * presencia = list_get(casilla, p);
-                    char * inicialPresencia = string_substring(nombreTipoPosicionable(presencia->tipoPosicionable), 0, 1);
-                    if (!string_contains(representacionPresencia, inicialPresencia)) {
-                        string_append(&representacionPresencia, inicialPresencia);
+                    char * nombrePosicionable = nombreTipoPosicionable(presencia->tipoPosicionable);
+
+                    if (dictionary_has_key(ocurrencias, nombrePosicionable)) {
+                        int * contadorAIncrementar = dictionary_get(ocurrencias, nombrePosicionable);
+                        (*contadorAIncrementar)++;
+                    } else {
+                        int * nuevoContador = malloc(sizeof(int));
+                        *nuevoContador = 1;
+                        dictionary_put(ocurrencias, nombrePosicionable, nuevoContador);
                     }
-                    free(inicialPresencia);
+
+                    int * nroOcurrencia = dictionary_get(ocurrencias, nombrePosicionable);
+                    char * inicialTipoPresencia = string_substring(nombrePosicionable, 0, 1);
+                    char * idPresencia = string_from_format("%s%d", inicialTipoPresencia, *nroOcurrencia);
+                    free(inicialTipoPresencia);
+                    string_append(&representacionPresencia, idPresencia);
+                    free(idPresencia);
                 }
             }
-            string_append_with_format(&medio, "|%-2s", representacionPresencia);
+            string_append_with_format(&medio, "|%-5s", representacionPresencia); //Agranda tamaño celda
             free(coordenadaClave);
             free(representacionPresencia);
         }
@@ -131,10 +174,12 @@ static void dibujarMapa(Mapa * this) {
         free(medio);
     }
 
+    dictionary_destroy_and_destroy_elements(ocurrencias, free);
+
     char * final = string_new();
     string_append(&final, "   ");
-    for (int b = 0; b < max; b ++) {
-        string_append(&final, "+--");
+    for (int b = 0; b <= max; b ++) {
+        string_append(&final, "+-----"); //Agranda tamaño celda
     }
     string_append(&final, "+");
     log_debug(this->logger, final);
@@ -154,9 +199,11 @@ static Mapa new() {
     return (Mapa) {
             .logger = log_create(TEAM_INTERNAL_LOG_FILE, "Mapa", SHOW_INTERNAL_CONSOLE, INTERNAL_LOG_LEVEL),
             .plano = crearPlano(),
+            &cantidadPosicionables,
             &moverPosicionable,
             &agregarPresenciaACasillaExistenteOCrearUna,
             &registrarPosicion,
+            &borrarPosicion,
             &obtenerPosicion,
             &dibujarMapa,
             &destruir

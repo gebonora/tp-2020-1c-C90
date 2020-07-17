@@ -5,7 +5,6 @@
 #ifndef TEAM_ENTRENADOR_H
 #define TEAM_ENTRENADOR_H
 
-
 #include "app/Global.h"
 #include "delibird/servicios/servicioDeConfiguracion/ServicioDeConfiguracion.h"
 #include "delibird/utils/memoria/Memoria.h"
@@ -17,6 +16,8 @@
 /**
  * El entrenador se mueve y caza pokemones. La idea es llevar ese registro acá.
  */
+
+#define NO_POKEMON "None"
 
 typedef t_dictionary * ContadorPokemones; // La key es el nombre del pokemon, el value es la cantidad.
 
@@ -34,6 +35,7 @@ typedef struct Entrenador {
     bool (*objetivoCompletado)(struct Entrenador * this); // Es true si pokemones_objetivo es igual a pokemones_capturados.
     bool (*puedeAtraparPokemones)(struct Entrenador * this); // Es true si es < a limiteDeCaptura.
     Posicion (*posicion)(struct Entrenador * this); // Le pregunta al mapa donde esta, pasandole su uuid.
+    // TODO: void (*agregarPokemonCapturado)(struct Entrenador * this, char * especiePokemon);
     void (*destruir)(struct Entrenador * this);
 } Entrenador;
 
