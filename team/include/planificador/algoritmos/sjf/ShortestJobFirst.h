@@ -8,10 +8,12 @@
 
 double alpha;
 double estInicial;
+int primeraEjecucion = 0;
 
 extern const struct ShortestJobFirstClass {
     AlgoritmoPlanificador (*new)();
 } ShortestJobFirstConstructor;
+
 
 
 #endif //TEAM_SHORTESTJOBFIRST_H

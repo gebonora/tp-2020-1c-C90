@@ -18,9 +18,9 @@ typedef struct UnidadPlanificable {
     void* unidad;
 
     //por ahora agrego aca elementos para el calculo de la estimacion
-    double est_raf_ant;
-    double real_raf_ant;
-    double est_raf_actual;
+    //double est_raf_ant;
+    //double real_raf_ant;
+    //double est_raf_actual;
     // fin de datos para sjf
 
     // Interfaz publica
