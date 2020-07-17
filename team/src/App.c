@@ -1,55 +1,57 @@
 #include "app/App.h"
 
 int main() {
-	// Precalentamiento
-	warmUp();
-	log_info(INTERNAL_LOGGER, "========================= Inicio de ejecución ============================");
+    // Precalentamiento
+    warmUp();
+    log_info(INTERNAL_LOGGER, "========================= Inicio de ejecución ============================");
 
-	// Config
-	log_debug(INTERNAL_LOGGER, "Levantando configuracion...");
-	servicioDeConfiguracion = ServicioDeConfiguracionConstructor.new(TEAM_CONFIG_FILE, TEAM_INTERNAL_LOG_FILE);
+    // Config
+    log_debug(INTERNAL_LOGGER, "Levantando configuracion...");
+    servicioDeConfiguracion = ServicioDeConfiguracionConstructor.new(TEAM_CONFIG_FILE, TEAM_INTERNAL_LOG_FILE);
 
-	// Logger obligatorio
-	log_debug(INTERNAL_LOGGER, "Configurando logger obligatorio...");
-	char * mandatoryLogPath = servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, LOG_FILE);
-	MANDATORY_LOGGER = log_create(mandatoryLogPath, "LogObligatorio", 1, LOG_LEVEL_INFO);
+    // Logger obligatorio
+    log_debug(INTERNAL_LOGGER, "Configurando logger obligatorio...");
+    char * mandatoryLogPath = servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, LOG_FILE);
+    MANDATORY_LOGGER = log_create(mandatoryLogPath, "LogObligatorio", 1, LOG_LEVEL_INFO);
 
-	// Setup de los componentes del sistema
-	log_info(INTERNAL_LOGGER, "Inicializando componentes del sistema...");
-	inicializarComponentesDelSistema();
+    // Setup de los componentes del sistema
+    log_info(INTERNAL_LOGGER, "Inicializando componentes del sistema...");
+    inicializarComponentesDelSistema();
 
-	// Estado inicial del proceso Team
-	log_info(INTERNAL_LOGGER, "Configurando el estado inicial del proceso Team...");
-	configurarEstadoInicialProcesoTeam();
+    // Reservado a pruebas de integracion. Si logica de negocio rompe, explota el programa aca.
+    if (CORRER_TESTS) {
+        log_info(INTERNAL_LOGGER, "@@@@@@@@@@@@@@@@@@@@@ Realizando pruebas de integracion... @@@@@@@@@@@@@@@@@@@@@");
+        testDeIntegracion();
+        log_info(INTERNAL_LOGGER, "@@@@@@@@@@@@@@@@@@@@@ Pruebas de integracion finalizadas con exito @@@@@@@@@@@@@");
+    }
 
-	// Reservado a pruebas de integracion. Si logica de negocio rompe, explota el programa aca.
-	if (CORRER_TESTS) {
-		log_info(INTERNAL_LOGGER, "@@@@@@@@@@@@@@@@@@@@@ Realizando pruebas de integracion... @@@@@@@@@@@@@@@@@@@@@");
-		testDeIntegracion();
-		log_info(INTERNAL_LOGGER, "@@@@@@@@@@@@@@@@@@@@@ Pruebas de integracion finalizadas con exito @@@@@@@@@@@@@");
-	}
+    // Estado inicial del proceso Team
+    log_info(INTERNAL_LOGGER, "Configurando el estado inicial del proceso Team...");
+    configurarEstadoInicialProcesoTeam();
 
-	// Server
-	log_info(INTERNAL_LOGGER, "Levantando el server...");
-	configurarServer(); //TODO: Usar como fuente de datos el servicio de config
-	atenderConexiones(); //TODO: Hacer apagable
+    // Server
+    log_info(INTERNAL_LOGGER, "Levantando el server...");
+    configurarServer(); //TODO: Usar como fuente de datos el servicio de config
+    if (ESPERAR_OBJETIVO_GLOBAL) {
+        atenderConexiones(); //TODO: Hacer apagable por si logramos cumplir con el objetivo.
+    }
 
-	// Por cada pokemon del objetivo global, enviar un GET [POKEMON].
-	log_info(INTERNAL_LOGGER, "Solicitando la ubicacion de los pokemones objetivo para comenzar...");
-	objetivoGlobal.solicitarUbicacionPokemonesNecesitados(&objetivoGlobal);
+    // Por cada pokemon del objetivo global, enviar un GET [POKEMON].
+    log_info(INTERNAL_LOGGER, "Solicitando la ubicacion de los pokemones objetivo para comenzar...");
+    objetivoGlobal.solicitarUbicacionPokemonesNecesitados(&objetivoGlobal);
 
-	// Cuando se complete el objetivo global, podremos finalizar el proceso y liberar los recursos.
-	if (ESPERAR_OBJETIVO_GLOBAL) {
-		log_info(INTERNAL_LOGGER, "Esperando a que se complete el objetivo global...");
-		sem_wait(&semaforoObjetivoGlobalCompletado);
-	}
+    // Cuando se complete el objetivo global, podremos finalizar el proceso y liberar los recursos.
+    if (ESPERAR_OBJETIVO_GLOBAL) {
+        log_info(INTERNAL_LOGGER, "Esperando a que se complete el objetivo global...");
+        sem_wait(&semaforoObjetivoGlobalCompletado);
+    }
 
-	// Liberacion
-	log_info(INTERNAL_LOGGER, "Finalizando proceso Team...");
-	liberarRecursos();
-	log_info(INTERNAL_LOGGER, "============================ Fin de ejecución ============================");
-	log_destroy(INTERNAL_LOGGER);
-	return 0;
+    // Liberacion
+    log_info(INTERNAL_LOGGER, "Finalizando proceso Team...");
+    liberarRecursos();
+    log_info(INTERNAL_LOGGER, "============================ Fin de ejecución ============================");
+    log_destroy(INTERNAL_LOGGER);
+    return 0;
 }
 
 void warmUp() {

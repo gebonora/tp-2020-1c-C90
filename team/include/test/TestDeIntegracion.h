@@ -36,5 +36,6 @@ void testDePlanificador();
 void testDeTransicionadorDeEstados();
 void testServicioDeCaptura();
 void testLibs();
+void testDeAlgoritmosSJFsinDesalojo();
 
 #endif //TEAM_TESTDEINTEGRACION_H

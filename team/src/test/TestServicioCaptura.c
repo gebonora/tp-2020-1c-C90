@@ -11,7 +11,7 @@ void testServicioDeCaptura() {
     Mapa mapa = MapaConstructor.new();
     Entrenador * entrenador = EntrenadorConstructor.new("1|2", "", "");
     free(entrenador->id);
-    entrenador->id = string_from_format("EntrenadorPiola");
+    entrenador->id = string_duplicate("EntrenadorPiola");
     registrarEnMapaPosicionEntrenador(&mapa, entrenador);
     Equipo equipo = list_create();
     list_add(equipo, entrenador);
