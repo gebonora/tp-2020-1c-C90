@@ -33,6 +33,7 @@ typedef enum TipoPosicionable {
 typedef struct Presencia {
     char * uuid;
     TipoPosicionable tipoPosicionable;
+    char * descripcion;
 } Presencia;
 
 typedef struct Posicion {
@@ -48,7 +49,7 @@ typedef struct Mapa {
     int (*cantidadPosicionables)(struct Mapa * this);
     void (*moverPosicionable)(struct Mapa * this, char * uuid, Coordinate destino);
     void (* agregarPresenciaACasillaExistenteOCrearUna)(struct Mapa * this, char * posicion, Presencia * presencia);
-    char * (*registrarPosicion)(struct Mapa * this, Coordinate posicion, TipoPosicionable tipoPosicionable);
+    char * (*registrarPosicion)(struct Mapa * this, Coordinate posicion, TipoPosicionable tipoPosicionable, char * descripcion);
     bool (*borrarPosicion)(struct Mapa * this, char * uuid);
     Posicion (*obtenerPosicion)(struct Mapa * this, char * uuid); // Si le paso un uuid me dice en que (x,y) se encuentra.
     void (*dibujarMapa)(struct Mapa * this);
@@ -60,7 +61,7 @@ extern const struct MapaClass {
 } MapaConstructor;
 
 // Funciones estaticas
-Presencia * crearPresencia(TipoPosicionable posicionable);
+Presencia * crearPresencia(TipoPosicionable posicionable, char * descripcion);
 Plano crearPlano();
 Casilla crearCasilla();
 void destruirCasilla(Casilla casilla);
