@@ -69,6 +69,7 @@ static void procesarLocalizedRecibido(ManejadorDeEventos* this, Localized* unLoc
 	char* coor = logCoordenadas(unLocalized->pokemon->coordinates);
 	log_info(MANDATORY_LOGGER, "Llegó un LOCALIZED con idCorrelativo: %d, pokemon: %s%s. Coincide con un pedido previo. Se procede a procesarlo.", idMensaje,
 			unLocalized->pokemon->name->value, coor);
+	free(coor);
 	// Foreach coordenada llamar al ServicioDeCaptura;
 	t_list* coordenadas = unLocalized->pokemon->coordinates;
 	for (int a = 0; a < list_size(coordenadas); a++) {
