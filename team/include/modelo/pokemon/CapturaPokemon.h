@@ -19,7 +19,7 @@ typedef struct CapturaPokemon {
 } CapturaPokemon;
 
 extern const struct CapturaPokemonClass {
-    CapturaPokemon * (*new)(char * idEntrenador, char * idCorrelatividad, PokemonAtrapable * pokemon);
+    CapturaPokemon * (*new)(char * idEntrenador, uint32_t idCorrelatividad, PokemonAtrapable * pokemon);
 } CapturaPokemonConstructor;
 
 #endif //TEAM_CAPTURAPOKEMON_H
