@@ -30,6 +30,10 @@ static Posicion posicion(PokemonAtrapable * this) {
     return gps->posicionActual(gps);
 }
 
+static char * descripcion(PokemonAtrapable * this) {
+    return this->especie;
+}
+
 static bool esAtrapable(PokemonAtrapable * this) {
     bool atrapable;
     pthread_mutex_lock(&this->mutexAtrapable);
@@ -83,6 +87,7 @@ static PokemonAtrapable * new(char * especie, char * posicionInicial) {
     pokemonAtrapable->marcarComoObjetivo = &marcarComoObjetivo;
     pokemonAtrapable->esAtrapable = &esAtrapable;
     pokemonAtrapable->borrarPosicion = &borrarPosicion;
+    pokemonAtrapable->descripcion = &descripcion;
     pokemonAtrapable->destruir = &destruirPokemonAtrapable;
 
     return pokemonAtrapable;

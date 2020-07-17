@@ -64,6 +64,10 @@ Posicion posicion(Entrenador * this) {
     return gps->posicionActual(gps);
 }
 
+static char * descripcion(Entrenador * this) {
+    return this->id;
+}
+
 static void destruir(Entrenador * this) {
     log_debug(this->logger, "Se procede a destruir al entrenador");
     log_destroy(this->logger);
@@ -91,6 +95,7 @@ static Entrenador *new(char * posicionInicial, char * pokemonesIniciales, char *
     entrenador->objetivoCompletado = &objetivoCompletado;
     entrenador->puedeAtraparPokemones = &puedeAtraparPokemones;
     entrenador->posicion = &posicion;
+    entrenador->descripcion = &descripcion;
     entrenador->destruir = &destruir;
 
     log_debug(entrenador->logger, "Se instanció al entrenador con pokemones iniciales: %s, y objetivos: %s", pokemonesIniciales, pokemonesObjetivos);

@@ -35,6 +35,7 @@ typedef struct Entrenador {
     bool (*objetivoCompletado)(struct Entrenador * this); // Es true si pokemones_objetivo es igual a pokemones_capturados.
     bool (*puedeAtraparPokemones)(struct Entrenador * this); // Es true si es < a limiteDeCaptura.
     Posicion (*posicion)(struct Entrenador * this); // Le pregunta al mapa donde esta, pasandole su uuid.
+    char * (*descripcion)(struct Entrenador * this);
     // TODO: void (*agregarPokemonCapturado)(struct Entrenador * this, char * especiePokemon);
     void (*destruir)(struct Entrenador * this);
 } Entrenador;

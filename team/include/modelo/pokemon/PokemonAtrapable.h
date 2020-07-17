@@ -29,6 +29,7 @@ typedef struct PokemonAtrapable {
     bool (*esAtrapable)(struct PokemonAtrapable * this); //Es true si ningun entrenador lo marcó como objetivo
     // capturar(Entrenador) : void - Se registra en el entrenador y muere. ver como hacer la secuencia de llamadas con el entrenador.
     bool (*borrarPosicion)(struct PokemonAtrapable * this);
+    char * (*descripcion)(struct PokemonAtrapable * this);
     void (*destruir)(struct PokemonAtrapable * this);
 } PokemonAtrapable;
 
