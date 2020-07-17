@@ -20,7 +20,8 @@ static void registrarGetEnEspera(ManejadorDeEventos* this, MensajeGet* mensajeGe
 	pthread_mutex_lock(&(this->listaGetEnEspera->mtx));
 	list_add(this->listaGetEnEspera->lista, mensajeGet);
 	pthread_mutex_unlock(&(this->listaGetEnEspera->mtx));
-	log_debug(this->logger, "Se agregó un MensajeGet a la listaDeGetsEnEspera para pokemon: %s, idCorrelativo: %d.", mensajeGet->nombrePokemon, mensajeGet->idCorrelatividad);
+	log_debug(this->logger, "Se agregó un MensajeGet a la listaDeGetsEnEspera para pokemon: %s, idCorrelativo: %d.", mensajeGet->nombrePokemon,
+			mensajeGet->idCorrelatividad);
 }
 
 static void procesarLocalizedRecibido(ManejadorDeEventos* this, Localized* unLocalized, uint32_t idMensaje) {
@@ -75,7 +76,8 @@ static void procesarLocalizedRecibido(ManejadorDeEventos* this, Localized* unLoc
 	for (int a = 0; a < list_size(coordenadas); a++) {
 		Coordinate* auxCoor = list_get(coordenadas, a);
 		// Quiero pasarle al servicio una copia de los datos, para evitar leaks.
-		servicioDeCapturaProcesoTeam->procesarPokemonCapturable(servicioDeCapturaProcesoTeam,string_duplicate(unLocalized->pokemon->name->value), convertirACoordenada(auxCoor));
+		this->servicioDeCaptura->procesarPokemonCapturable(this->servicioDeCaptura, string_duplicate(unLocalized->pokemon->name->value),
+				convertirACoordenada(auxCoor));
 	}
 
 	free_localized(unLocalized);
@@ -89,18 +91,18 @@ static void procesarAppearedRecibido(ManejadorDeEventos* this, Pokemon* unPokemo
 	list_add(ptrLista, string_duplicate(unPokemon->name->value));
 
 	char* aux;
-		if (idMensaje == UINT32_MAX) {
-			aux = string_from_format("gameboy");
-		} else {
-			aux = string_from_format("%d", idMensaje);
-		}
+	if (idMensaje == UINT32_MAX) {
+		aux = string_from_format("gameboy");
+	} else {
+		aux = string_from_format("%d", idMensaje);
+	}
 	char* coor = logCoordenadas(unPokemon->coordinates);
 	log_info(MANDATORY_LOGGER, "Llegó un APPEARED con idMensaje: %s, pokemon: %s%s. Se procede a procesarlo.", aux, unPokemon->name->value, coor);
 	free(aux);
 	free(coor);
 
 	Coordinate* auxCoor = list_get(unPokemon->coordinates, 0);
-	servicioDeCapturaProcesoTeam->procesarPokemonCapturable(servicioDeCapturaProcesoTeam, string_duplicate(unPokemon->name->value), convertirACoordenada(auxCoor));
+	this->servicioDeCaptura->procesarPokemonCapturable(this->servicioDeCaptura, string_duplicate(unPokemon->name->value), convertirACoordenada(auxCoor));
 	free_pokemon(unPokemon);
 }
 
@@ -122,12 +124,14 @@ static void procesarCaughtRecibido(ManejadorDeEventos* this, Caught* unCaught, u
 
 	// Si no coincide con ningun mensaje esperado, lo ignoramos, liberar memoria y cerrar.
 	if (capturaPokemon == NULL) {
-		log_info(MANDATORY_LOGGER, "Llegó un CAUGHT con idCorrelatividad: %d, resultado: %s. No coincide con ningún pedido previo. Se procede a destruirlo.", idMensaje, traducirResult(unCaught->result));
+		log_info(MANDATORY_LOGGER, "Llegó un CAUGHT con idCorrelatividad: %d, resultado: %s. No coincide con ningún pedido previo. Se procede a destruirlo.", idMensaje,
+				traducirResult(unCaught->result));
 		free(unCaught);
 		return;
 	}
 
-	log_info(MANDATORY_LOGGER, "Llegó un CAUGHT con idCorrelatividad: %d, resultado: %s. Coincide con un pedido previo. Se procede a procesarlo.", idMensaje, traducirResult(unCaught->result));
+	log_info(MANDATORY_LOGGER, "Llegó un CAUGHT con idCorrelatividad: %d, resultado: %s. Coincide con un pedido previo. Se procede a procesarlo.", idMensaje,
+			traducirResult(unCaught->result));
 
 	// Coincide con un pedido, ver el resultado
 	if (unCaught->result == FAIL) {
@@ -136,7 +140,7 @@ static void procesarCaughtRecibido(ManejadorDeEventos* this, Caught* unCaught, u
 		return;
 	}
 	// Caso feliz:
-	servicioDeCapturaProcesoTeam->registrarCapturaExitosa(servicioDeCapturaProcesoTeam, capturaPokemon);
+	this->servicioDeCaptura->registrarCapturaExitosa(this->servicioDeCaptura, capturaPokemon);
 	//servicioDeCapturaProcesoTeam->
 	free(unCaught);
 }
@@ -145,22 +149,26 @@ static void destruir(ManejadorDeEventos * this) {
 	log_destroy(this->logger);
 	destruirListaSincronizada(this->listaGetEnEspera, destruirMensajeGet);
 	list_destroy_and_destroy_elements(this->listaLocalizedAppearedsRecibidos, free);
-    destruirListaSincronizada(this->listaCatchEnEspera, (void (*)(void *)) destruirCapturaPokemon);
+	destruirListaSincronizada(this->listaCatchEnEspera, (void (*)(void *)) destruirCapturaPokemon);
+	free(this);
 }
 
-static ManejadorDeEventos new() {
-	return (ManejadorDeEventos ) {
-		.logger = log_create(TEAM_INTERNAL_LOG_FILE, "ManejadorDeEventos", SHOW_INTERNAL_CONSOLE, INTERNAL_LOG_LEVEL),
-		.listaGetEnEspera =	iniciarListaSincronizada(),
-		.listaCatchEnEspera = iniciarListaSincronizada(),
-		.listaLocalizedAppearedsRecibidos = list_create(),
-		&registrarCatchEnEspera,
-		&registrarGetEnEspera,
-		&procesarLocalizedRecibido,
-		&procesarAppearedRecibido,
-		&procesarCaughtRecibido,
-		&destruir,
-	} ;
+static ManejadorDeEventos* new(ServicioDeCaptura* servicioDeCaptura) {
+	ManejadorDeEventos* manejador = malloc(sizeof(ManejadorDeEventos));
+
+	manejador->logger = log_create(TEAM_INTERNAL_LOG_FILE, "ManejadorDeEventos", SHOW_INTERNAL_CONSOLE, INTERNAL_LOG_LEVEL);
+	manejador->listaGetEnEspera = iniciarListaSincronizada();
+	manejador->listaCatchEnEspera = iniciarListaSincronizada();
+	manejador->listaLocalizedAppearedsRecibidos = list_create();
+	manejador->servicioDeCaptura = servicioDeCaptura;
+	manejador->registrarCatchEnEspera = &registrarCatchEnEspera;
+	manejador->registrarGetEnEspera = &registrarGetEnEspera;
+	manejador->procesarLocalizedRecibido = &procesarLocalizedRecibido;
+	manejador->procesarAppearedRecibido = &procesarAppearedRecibido;
+	manejador->procesarCaughtRecibido = &procesarCaughtRecibido;
+	manejador->destruir = &destruir;
+
+	return manejador;
 }
 
 const struct ManejadorDeEventosClass ManejadorDeEventosConstructor = { .new = &new };
@@ -185,6 +193,6 @@ void destruirMensajeGet(void* puntero) {
 }
 
 void destruirCapturaPokemon(CapturaPokemon * capturaPokemon) {
-    capturaPokemon->destruir(capturaPokemon);
+	capturaPokemon->destruir(capturaPokemon);
 }
 

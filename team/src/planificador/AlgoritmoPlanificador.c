@@ -25,6 +25,11 @@ void inicializarAlgoritmosDePlanificacion() {
     shortestJobFirst = ShortestJobFirstConstructor.new();
 }
 
+void destruirAlgoritmosDePlanificacion(){
+	firstInFirstOut.destruir(&firstInFirstOut);
+	shortestJobFirst.destruir(&shortestJobFirst);
+}
+
 char * nombreAlgoritmoCompleto(char * nombreCorto) {
     if (string_equals_ignore_case(nombreCorto, "FIFO")) {
         return "FIFO - First In First Out";

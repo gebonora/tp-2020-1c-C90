@@ -93,7 +93,6 @@ void inicializarComponentesDelSistema() {
 	mapaProcesoTeam = MapaConstructor.new();
 	pthread_mutex_init(&MTX_INTERNAL_LOG, NULL); //TODO: por ahi conviene moverlo a configurarServer()
 	servicioDePlanificacionProcesoTeam = ServicioDePlanificacionConstructor.new();
-	manejadorDeEventos = ManejadorDeEventosConstructor.new();
 	sem_init(&semaforoObjetivoGlobalCompletado, 0, 0);
 }
 
@@ -117,6 +116,7 @@ void configurarEstadoInicialProcesoTeam() {
 	log_debug(INTERNAL_LOGGER, "Agregando equipo a la planificacion...");
 	servicioDePlanificacionProcesoTeam->asignarEquipoAPlanificar(servicioDePlanificacionProcesoTeam, equipoProcesoTeam);
 	servicioDeCapturaProcesoTeam = ServicioDeCapturaConstructor.new(mapaProcesoTeam, equipoProcesoTeam, servicioDePlanificacionProcesoTeam);
+	manejadorDeEventosProcesoTeam = ManejadorDeEventosConstructor.new(servicioDeCapturaProcesoTeam);
 }
 
 void liberarRecursos() {
@@ -135,7 +135,7 @@ void liberarRecursos() {
 
 	// Componentes
 	log_debug(INTERNAL_LOGGER, "Liberando componentes del sistema...");
-	manejadorDeEventos.destruir(&manejadorDeEventos);
+	manejadorDeEventosProcesoTeam->destruir(manejadorDeEventosProcesoTeam);
 	pthread_mutex_destroy(&MTX_INTERNAL_LOG);
 	sem_destroy(&semaforoObjetivoGlobalCompletado);
 
@@ -145,4 +145,5 @@ void liberarRecursos() {
 	destruirEquipo(equipoProcesoTeam);
 	objetivoGlobal.destruirObjetivoGlobal(&objetivoGlobal);
 	mapaProcesoTeam.destruir(&mapaProcesoTeam);
+	destruirAlgoritmosDePlanificacion();
 }

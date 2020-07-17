@@ -51,6 +51,7 @@ typedef struct ManejadorDeEventos {
 	ListaSincronizada* listaGetEnEspera;
 	ListaSincronizada* listaCatchEnEspera;
 	t_list* listaLocalizedAppearedsRecibidos;
+	ServicioDeCaptura* servicioDeCaptura;
 
 	// Interfaz publica
 	void (*registrarCatchEnEspera)(struct ManejadorDeEventos* this, CapturaPokemon* capturaPokemon);
@@ -64,7 +65,7 @@ typedef struct ManejadorDeEventos {
 } ManejadorDeEventos;
 
 extern const struct ManejadorDeEventosClass {
-	ManejadorDeEventos (*new)();
+	ManejadorDeEventos* (*new)(ServicioDeCaptura* servicioDeCaptura);
 } ManejadorDeEventosConstructor;
 
 ListaSincronizada* iniciarListaSincronizada();
@@ -72,6 +73,6 @@ void destruirListaSincronizada(ListaSincronizada* listaSincronizada, void (*dest
 void destruirMensajeGet(void* puntero);
 void destruirCapturaPokemon(CapturaPokemon * capturaPokemon);
 
-ManejadorDeEventos manejadorDeEventos;
+ManejadorDeEventos* manejadorDeEventosProcesoTeam;
 
 #endif //TEAM_MANEJADORDEEVENTOS_H

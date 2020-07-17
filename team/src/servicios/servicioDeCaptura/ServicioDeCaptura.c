@@ -34,7 +34,7 @@ static void encargarTrabajoDeCaptura(ServicioDeCaptura * this, char * especie, C
 
 static bool registrarCapturaExitosa(ServicioDeCaptura * this, CapturaPokemon * capturaPokemon) {
     bool sePudoRegistrar = false;
-
+log_debug(this->logger, "PRBANDO ENTRENADOR: %s", capturaPokemon->idEntrenador);
     mismoIdEntrenador(capturaPokemon->idEntrenador);
     Entrenador * entrenador = list_find(this->equipo, matcheaIdEntrenador);
     if (entrenador != NULL) {
