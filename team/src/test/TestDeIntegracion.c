@@ -44,6 +44,9 @@ void testDeIntegracion() {
     // Eventos
     list_add(tests, testDeEventos);
 
+    // SJF sin Desalojo
+    list_add(tests, testDeAlgoritmosSJFsinDesalojo);
+
     for (int i = 0; i < list_size(tests); i++){
         log_info(testLogger, "-------- Ejecutando test %d/%d --------", i + 1, list_size(tests));
         ((void (*)()) list_get(tests, i))();

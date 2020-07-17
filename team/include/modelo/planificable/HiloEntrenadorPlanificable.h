@@ -30,8 +30,7 @@
 
 typedef struct InfoUltimaEjecucion {
     double est_raf_ant;
-    double real_raf_ant; // este debe ser actualizado al terminar de ejecutarse el proceso con la
-    					 // cantidad de ciclos de cpu que utilizo el proceso
+    double real_raf_ant; // TODO: Cuando se termina de ejecutar una rafaga, modificar este valor con el tamaño de la rafaga terminada.
     double est_raf_actual;
     bool primeraEstimacion;
 } InfoUltimaEjecucion;
