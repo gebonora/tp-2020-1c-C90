@@ -18,7 +18,7 @@ static void destruirCapturaPokemon(CapturaPokemon * this) {
     free(this);
 }
 
-static CapturaPokemon * new(char * idEntrenador, char * idCorrelatividad, PokemonAtrapable * pokemon) {
+static CapturaPokemon * new(char * idEntrenador, uint32_t idCorrelatividad, PokemonAtrapable * pokemon) {
     CapturaPokemon * capturaPokemon = malloc(sizeof(CapturaPokemon));
 
     capturaPokemon->logger = log_create(TEAM_INTERNAL_LOG_FILE, "CapturaPokemon", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_INFO);

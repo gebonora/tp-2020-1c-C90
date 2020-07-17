@@ -31,7 +31,7 @@ void testServicioDeCaptura() {
     log_info(testLogger, "Testeando el impacto de una captura exitosa");
     PokemonAtrapable * pokemonAtrapable = PokemonAtrapableConstructor.new("Pikachu", "1|2");
     char * uuidPokemon = string_duplicate(registrarEnMapaPosicionPokemonAtrapable(&mapa, pokemonAtrapable));
-    CapturaPokemon * capturaPokemon = CapturaPokemonConstructor.new("EntrenadorPiola", "1", pokemonAtrapable);
+    CapturaPokemon * capturaPokemon = CapturaPokemonConstructor.new("EntrenadorPiola", 1, pokemonAtrapable);
 
     log_info(testLogger, "Testeando que se haya podido concretar la captura");
     bool resultadoCaptura = servicioDeCaptura->registrarCapturaExitosa(servicioDeCaptura, capturaPokemon);

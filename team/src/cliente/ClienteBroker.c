@@ -20,8 +20,12 @@ void enviarGet(char* nombrePokemon) {
 		mensajeGet->nombrePokemon = string_duplicate(nombrePokemon);
 		mensajeGet->idCorrelatividad = idAsignado;
 
+		log_info(MANDATORY_LOGGER, "Se envió al Broker un GET pokemon: %s. Se le asignó el idMensaje: %d. Se procede a registrarlo en espera de su respuesta.",
+				nombrePokemon, idAsignado);
+
 		manejadorDeEventos.registrarGetEnEspera(&manejadorDeEventos, mensajeGet);
 	} else {
+		log_warning(MANDATORY_LOGGER, "No se pudo enviar un GET pokemon: %s. Se procede a asumir que no hay coordenadas para el pokemon", nombrePokemon);
 		// Comportamiento caso broker caido: se asume que no hay coordenadas del pokemon pedido.
 		// El unico efecto es agregar una entrada a la lista del ManejadorDeEventos. TODO: o no es necesario?
 	}
@@ -45,9 +49,19 @@ void enviarCatch(CapturaPokemon* capturaPokemon) { //cambiar return a
 
 	if (!flagBrokerCaido) {
 		capturaPokemon->idCorrelatividad = idAsignado;
+
+		char* coor = capturaPokemon->posicion(capturaPokemon);
+		log_info(MANDATORY_LOGGER,
+				"Se envió al Broker un CATCH pokemon: %s, coordenadas: %s. Se le asignó el idMensaje: %d. Se procede a registrarlo en espero de se respuesta",
+				capturaPokemon->pokemonAtrapable->especie, coor, idAsignado);
+		free(coor);
 		manejadorDeEventos.registrarCatchEnEspera(&manejadorDeEventos, capturaPokemon);
 	} else {
 		// Comportamiento caso broker caido: se asume que la captura fue exitosa.
+		char* coor = capturaPokemon->posicion(capturaPokemon);
+		log_warning(MANDATORY_LOGGER, "No se puedo enviar un CATCH pokemon: %s, coordenadas: %s. Se procede a asumir que fue capturado con éxito",
+				capturaPokemon->pokemonAtrapable->especie, coor);
+		free(coor);
 		servicioDeCapturaProcesoTeam->registrarCapturaExitosa(servicioDeCapturaProcesoTeam, capturaPokemon);
 	}
 }
