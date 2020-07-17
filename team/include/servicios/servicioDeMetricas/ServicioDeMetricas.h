@@ -20,6 +20,9 @@
 
 typedef struct ServicioDeMetricas {
 	t_log * logger;
+	int cantidadCambiosDeContexto;
+	int cantidadDeadlocksProducidos;
+	int cantidadDeadlocksResueltos;
 	//Interfaz publica
 	void (*foo)(struct ServicioDeMetricas * this);
 	//Metodos privados
