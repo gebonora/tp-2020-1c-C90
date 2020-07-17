@@ -89,7 +89,7 @@ void esperarBrokerAppeared(int socketDeEscucha) {
 		}
 
 		if (flagError) {
-			log_error(MANDATORY_LOGGER, "Se perdió la conexión con el Broker. Iniciando reconexión.");
+			log_error(MANDATORY_LOGGER, "Cola: APPEARED. Se perdió la conexión con el Broker. Iniciando reconexión.");
 			close(socketDeEscucha);
 			socketDeEscucha = subscribirseACola(APPEARED, MANDATORY_LOGGER);
 		} else {
@@ -107,16 +107,6 @@ void esperarBrokerAppeared(int socketDeEscucha) {
 void procesarHiloAppeared(ArgumentosHilo* argumentosHilo) {
 	Pokemon* unAppeared = (Pokemon*) argumentosHilo->mensaje;
 	uint32_t idMensaje = argumentosHilo->idMensaje;
-	char* aux;
-	if (idMensaje == UINT32_MAX) {
-		aux = string_from_format("gameboy");
-	} else {
-		aux = string_from_format("%d", idMensaje);
-	}
-	log_info(MANDATORY_LOGGER, "Llegó un Appeared. idMensaje: '%s', pokemon: '%s', posX: '%d', posY: '%d'.", aux, unAppeared->name->value,
-			((Coordinate*) (unAppeared->coordinates->head->data))->pos_x, ((Coordinate*) (unAppeared->coordinates->head->data))->pos_y);
-	//TODO: logear en el manejador para informar si fue aceptado o no el paquete
-	free(aux);
 	//TODO:
 	//Pasar el paquete y el id a otro subproceso. ver donde se va a liberar la memoria!
 	//Si se termina el hilo, la memoria se libera????? -> crear una copia y pasar la copia.
@@ -147,7 +137,7 @@ void esperarBrokerCaught(int socketDeEscucha) {
 		}
 
 		if (flagError) {
-			log_error(MANDATORY_LOGGER, "Se perdió la conexión con el Broker. Iniciando reconexión.");
+			log_error(MANDATORY_LOGGER, "Cola: CAUGHT, Se perdió la conexión con el Broker. Iniciando reconexión.");
 			close(socketDeEscucha);
 			socketDeEscucha = subscribirseACola(CAUGHT, MANDATORY_LOGGER);
 		} else {
@@ -166,8 +156,6 @@ void esperarBrokerCaught(int socketDeEscucha) {
 void procesarHiloCaught(ArgumentosHilo* argumentosHilo) {
 	Caught* unCaught = (Caught*) argumentosHilo->mensaje;
 	uint32_t idMensaje = argumentosHilo->idMensaje;
-	log_info(MANDATORY_LOGGER, "Llegó un Caught. idMensaje: '%d', resultado: '%s'.", idMensaje, traducirResult(unCaught->result));
-	//TODO: logear en el manejador para informar si fue aceptado o no el paquete.
 	//TODO:
 	//Pasar el paquete y el id a otro subproceso. ver donde se va a liberar la memoria!
 	//Si se termina el hilo, la memoria se libera????? -> crear una copia y pasar la copia.
@@ -200,7 +188,7 @@ void esperarBrokerLocalized(int socketDeEscucha) {
 		}
 
 		if (flagError) {
-			log_error(MANDATORY_LOGGER, "Se perdió la conexión con el Broker. Iniciando reconexión.");
+			log_error(MANDATORY_LOGGER, "Cola: LOCALIZED. Se perdió la conexión con el Broker. Iniciando reconexión.");
 			close(socketDeEscucha);
 			socketDeEscucha = subscribirseACola(LOCALIZED, MANDATORY_LOGGER);
 		} else {
@@ -314,21 +302,27 @@ int iniciarSocketDeEscucha(Operation cola) {
 int subscribirseACola(Operation cola, t_log* logger) {
 	int socketDeEscucha = iniciarSocketDeEscucha(cola);
 	while (socketDeEscucha == -1) {
-		log_error(logger, "Error al conectar con Broker. Reintentando en '%d' segundos...", Tiempo_Reconexion);
+		log_error(MANDATORY_LOGGER, "Cola: %s. Error al conectar con Broker. Reintentando en '%d' segundos...", traducirOperacion(cola), Tiempo_Reconexion);
 		sleep(Tiempo_Reconexion);
 		socketDeEscucha = iniciarSocketDeEscucha(cola);
 	}
 	if (socketDeEscucha > 0) {
-		log_info(logger, "Subscripto al Broker con el socket: '%d' Escuchando mensajes...", socketDeEscucha);
+		log_info(MANDATORY_LOGGER, "Cola: %s. Subscripto al Broker con el socket: '%d'. Escuchando mensajes...", traducirOperacion(cola), socketDeEscucha);
 	}
 	return socketDeEscucha;
 }
 
 char* traducirOperacion(Operation operacion) {
-	if (operacion == APPEARED) {
+
+	switch (operacion) {
+	case APPEARED:
 		return "APPEARED";
-	} else {
-		return "MENSAJE ERRONEO";
+	case CAUGHT:
+		return "CAUGHT";
+	case LOCALIZED:
+		return "LOCALIZED";
+	default:
+		return "OPERACIÓN DESCONICDA. ALGO ANDA MAL!";
 	}
 }
 
@@ -349,9 +343,9 @@ char* logCoordenadas(t_list* listaCoor) {
 	char* ret = string_new();
 	for (int a = 0; a < listaCoor->elements_count; a++) {
 		if (a == 0)
-			string_append_with_format(&ret, " ,coordenadas: '(%d,%d)'", ((Coordinate*) (list_get(listaCoor, a)))->pos_x, ((Coordinate*) (list_get(listaCoor, a)))->pos_y);
+			string_append_with_format(&ret, ", coordenadas: (%d,%d)", ((Coordinate*) (list_get(listaCoor, a)))->pos_x, ((Coordinate*) (list_get(listaCoor, a)))->pos_y);
 		else
-			string_append_with_format(&ret, "|'(%d,%d)'", ((Coordinate*) (list_get(listaCoor, a)))->pos_x, ((Coordinate*) (list_get(listaCoor, a)))->pos_y);
+			string_append_with_format(&ret, "|(%d,%d)", ((Coordinate*) (list_get(listaCoor, a)))->pos_x, ((Coordinate*) (list_get(listaCoor, a)))->pos_y);
 	}
 	return ret;
 }
