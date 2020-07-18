@@ -13,9 +13,6 @@
 /*
  * Esta clase se encarga de registrar metricas e imprimirlas.
  *
- * TODO:
- * 		Definir dependencias, variables y metodos.
- *
  */
 
 typedef struct ServicioDeMetricas {
@@ -23,10 +20,15 @@ typedef struct ServicioDeMetricas {
 	int cantidadCambiosDeContexto;
 	int cantidadDeadlocksProducidos;
 	int cantidadDeadlocksResueltos;
+	t_dictionary* hashMap;
 	//Interfaz publica
-	void (*foo)(struct ServicioDeMetricas * this);
+	void (*imprimirMetricas)(struct ServicioDeMetricas * this);
+	void (*registrarCicloRealizadoPorEntrenador)(struct ServicioDeMetricas * this, char* entrenadorId);
+	void (*registrarCambioDeContexto)(struct ServicioDeMetricas * this);
+	void (*registrarDeadlockProducido)(struct ServicioDeMetricas * this);
+	void (*registrarDeadlockResuelto)(struct ServicioDeMetricas * this);
 	//Metodos privados
-	void (*bar)(struct ServicioDeMetricas * this);
+	int (*calcularCiclosTotales)(struct ServicioDeMetricas * this);
 	void (*destruir)(struct ServicioDeMetricas * this);
 } ServicioDeMetricas;
 

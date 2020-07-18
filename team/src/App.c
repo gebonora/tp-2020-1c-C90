@@ -117,6 +117,7 @@ void configurarEstadoInicialProcesoTeam() {
 	servicioDePlanificacionProcesoTeam->asignarEquipoAPlanificar(servicioDePlanificacionProcesoTeam, equipoProcesoTeam);
 	servicioDeCapturaProcesoTeam = ServicioDeCapturaConstructor.new(mapaProcesoTeam, equipoProcesoTeam, servicioDePlanificacionProcesoTeam);
 	manejadorDeEventosProcesoTeam = ManejadorDeEventosConstructor.new(servicioDeCapturaProcesoTeam);
+	servicioDeMetricasProcesoTeam = ServicioDeMetricasConstructor.new();
 }
 
 void liberarRecursos() {
@@ -146,4 +147,5 @@ void liberarRecursos() {
 	objetivoGlobal.destruirObjetivoGlobal(&objetivoGlobal);
 	mapaProcesoTeam.destruir(&mapaProcesoTeam);
 	destruirAlgoritmosDePlanificacion();
+	servicioDeMetricasProcesoTeam->destruir(servicioDeMetricasProcesoTeam);
 }

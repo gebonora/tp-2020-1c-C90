@@ -16,7 +16,7 @@ void destruirServicioDeResolucionDeDeadlocks(ServicioDeResolucionDeDeadlocks * t
 static ServicioDeResolucionDeDeadlocks * new(Mapa mapa, Equipo equipo, ServicioDePlanificacion * servicioDePlanificacion) {
 	ServicioDeResolucionDeDeadlocks * servicio = malloc(sizeof(ServicioDeResolucionDeDeadlocks));
 
-    servicio->logger = log_create(TEAM_INTERNAL_LOG_FILE, "ServicioDeResolucionDeDeadlocks", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_INFO);
+    servicio->logger = log_create(TEAM_INTERNAL_LOG_FILE, "ServicioDeResolucionDeDeadlocks", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_DEBUG);
     servicio->mapa = mapa;
     servicio->equipo = equipo;
     servicio->servicioDePlanificacion = servicioDePlanificacion;

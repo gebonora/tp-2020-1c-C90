@@ -21,6 +21,7 @@
 #include "modelo/mapa/movimiento/Movimiento.h"
 #include "servicios/servicioDePlanificacion/ServicioDePlanificacion.h"
 #include "servicios/servicioDeCaptura/ServicioDeCaptura.h"
+#include  "servicios/servicioDeMetricas/ServicioDeMetricas.h"
 
 void testDeIntegracion();
 void testDeEntrenadores();
@@ -37,5 +38,6 @@ void testDeTransicionadorDeEstados();
 void testServicioDeCaptura();
 void testLibs();
 void testDeAlgoritmosSJFsinDesalojo();
+void testDeServicioDeMetricas();
 
 #endif //TEAM_TESTDEINTEGRACION_H

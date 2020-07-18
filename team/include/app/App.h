@@ -12,6 +12,7 @@
 #include "modelo/objetivo/ObjetivoGlobal.h"
 #include "test/TestDeIntegracion.h"
 #include "manejadorDeEventos/ManejadorDeEventos.h"
+#include "servicios/servicioDeMetricas/ServicioDeMetricas.h"
 
 void warmUp();
 void mostrarTitulo(t_log * logger);

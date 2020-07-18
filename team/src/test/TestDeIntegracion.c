@@ -5,53 +5,56 @@
 #include "test/TestDeIntegracion.h"
 
 void testDeIntegracion() {
-    t_log * testLogger = log_create(TEAM_INTERNAL_LOG_FILE, "TestDeIntegracion", 1, LOG_LEVEL_INFO);
-    t_list * tests = list_create();
+	t_log * testLogger = log_create(TEAM_INTERNAL_LOG_FILE, "TestDeIntegracion", 1, LOG_LEVEL_INFO);
+	t_list * tests = list_create();
 
-    // Libs
-    list_add(tests, testLibs);
+	// Libs
+	list_add(tests, testLibs);
 
-    // Entrenadores
-    list_add(tests, testDeEntrenadores);
+	// Entrenadores
+	list_add(tests, testDeEntrenadores);
 
-    // Pokemones
-    list_add(tests, testDePokemones);
+	// Pokemones
+	list_add(tests, testDePokemones);
 
-    // Movimiento
-    list_add(tests, testDeMovimiento);
+	// Movimiento
+	list_add(tests, testDeMovimiento);
 
-    // Mapa
-    list_add(tests, testDeMapa);
+	// Mapa
+	list_add(tests, testDeMapa);
 
-    // Algoritmos
-    list_add(tests, testDeAlgoritmos);
+	// Algoritmos
+	list_add(tests, testDeAlgoritmos);
 
-    // Tareas
-    list_add(tests, testDeTareas);
+	// Tareas
+	list_add(tests, testDeTareas);
 
-    // Planificador
-    list_add(tests, testDePlanificador);
+	// Planificador
+	list_add(tests, testDePlanificador);
 
-    // ServicioDePlanificacion
-    list_add(tests, testServicioDePlanificacion);
+	// ServicioDePlanificacion
+	list_add(tests, testServicioDePlanificacion);
 
-    // ServicioDeCaptura
-    list_add(tests, testServicioDeCaptura);
+	// ServicioDeCaptura
+	list_add(tests, testServicioDeCaptura);
 
-    // Unidad planificable
-    list_add(tests, testDePlanificable);
+	// Unidad planificable
+	list_add(tests, testDePlanificable);
 
-    // Eventos
-    list_add(tests, testDeEventos);
+	// Eventos
+	list_add(tests, testDeEventos);
 
-    // SJF sin Desalojo
-    list_add(tests, testDeAlgoritmosSJFsinDesalojo);
+	// SJF sin Desalojo
+	list_add(tests, testDeAlgoritmosSJFsinDesalojo);
 
-    for (int i = 0; i < list_size(tests); i++){
-        log_info(testLogger, "-------- Ejecutando test %d/%d --------", i + 1, list_size(tests));
-        ((void (*)()) list_get(tests, i))();
-    }
+	// Servicio de Métricas
+	list_add(tests, testDeServicioDeMetricas);
 
-    list_destroy(tests);
-    log_destroy(testLogger);
+	for (int i = 0; i < list_size(tests); i++) {
+		log_info(testLogger, "-------- Ejecutando test %d/%d --------", i + 1, list_size(tests));
+		((void (*)()) list_get(tests, i))();
+	}
+
+	list_destroy(tests);
+	log_destroy(testLogger);
 }
