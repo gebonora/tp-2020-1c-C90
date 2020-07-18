@@ -36,11 +36,8 @@
 
 typedef struct ServicioDeResolucionDeDeadlocks {
 	t_log * logger;
-	Mapa mapa;
-	Equipo equipo;
-	ServicioDePlanificacion * servicioDePlanificacion;
 	//Interfaz publica
-	void (*detectarDeadlock)(struct ServicioDeResolucionDeDeadlocks * this);
+	bool (*detectarDeadlock)(struct ServicioDeResolucionDeDeadlocks * this, t_list* entrenadoresBloqueados);
 	void (*puedeResolverDeadlock)(struct ServicioDeResolucionDeDeadlocks * this);
 	void (*resolverDeadlock)(struct ServicioDeResolucionDeDeadlocks * this);
 	//Metodos privados
@@ -49,7 +46,7 @@ typedef struct ServicioDeResolucionDeDeadlocks {
 } ServicioDeResolucionDeDeadlocks;
 
 extern const struct ServicioDeResolucionDeDeadlocksClass {
-	ServicioDeResolucionDeDeadlocks * (*new)(Mapa mapa, Equipo equipo, ServicioDePlanificacion * servicioDePlanificacion);
+	ServicioDeResolucionDeDeadlocks * (*new)();
 } ServicioDeResolucionDeDeadlocksConstructor;
 
 ServicioDeResolucionDeDeadlocks * servicioDeResolucionDeDeadlocksProcesoTeam;
