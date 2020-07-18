@@ -1,6 +1,5 @@
 #include "planificador/algoritmos/sjf/ShortestJobFirst.h"
 
-//TODO: faltaria ver donde obtenemos y actualizamos la rafaga real anterior
 
 static UnidadPlanificable * proximoAEjecutar(AlgoritmoPlanificador * this, t_list * listaReady) {
 	if (list_is_empty(listaReady)) {
@@ -46,17 +45,16 @@ double calcularEstimacion(UnidadPlanificable *elem) {
 	return estimacion;
 }
 
-void* asignarEstimacionAUnElemento(void* elem) {
+void asignarEstimacionAUnElemento(void* elem) {
 	UnidadPlanificable* unidad = (UnidadPlanificable*) elem;
 	unidad->infoUltimaEjecucion.est_raf_ant = unidad->infoUltimaEjecucion.est_raf_actual;
 	// asignamos la actual anterior como est anterior
 	unidad->infoUltimaEjecucion.est_raf_actual = calcularEstimacion(unidad);
 	// calculamos el nuevo estimado y se lo asignamos
-	return (void*) unidad;
 }
 
 void asignarEstimacionATodosLosElementosDeLaLista(t_list *list) {
-	list_map(list, asignarEstimacionAUnElemento);
+	list_iterate(list, asignarEstimacionAUnElemento);
 }
 
 void obtenerConfiguracionesSJF() {
