@@ -10,6 +10,8 @@
 
 #include "fileSystem.h"
 
+void correrTests();
+
 void testCreacionCoordenadasMultiplesPokemon(char* nombrePokemon, int cantidadIteraciones);
 
 void testCreacionCoordenadaPokemon(char* nombrePokemon, int cantidadIteraciones, int corX, int corY);

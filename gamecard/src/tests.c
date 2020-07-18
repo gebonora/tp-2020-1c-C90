@@ -6,6 +6,21 @@
  */
 #include "tests.h"
 
+void correrTests() {
+	testCreacionCoordenadasMultiplesPokemon("pikachu", 30);
+	testCreacionCoordenadaPokemon("charmander", 1, 1, 2);
+	testRemocionCoordenadaPokemon("charmander", 1, 1, 2);
+	testRemocionCoordenadaPokemon("pikachu", 1, 0, 2);
+	testRemocionCoordenadaPokemon("pikachu", 1, 1, 2);
+	testRemocionCoordenadaPokemon("pikachu", 1, 2, 2);
+	testRemocionCoordenadaPokemon("pikachu", 1, 3, 2);
+	testRemocionCoordenadaPokemon("pikachu", 1, 4, 2);
+	testRemocionCoordenadaPokemon("pikachu", 1, 5, 2);
+	testGetPokemon("pikachu");
+	testGetPokemon("charmander");
+
+}
+
 void testCreacionCoordenadasMultiplesPokemon(char* nombrePokemon, int cantidadIteraciones) {
 
 	for (int a = 0; a < cantidadIteraciones; a++) {
