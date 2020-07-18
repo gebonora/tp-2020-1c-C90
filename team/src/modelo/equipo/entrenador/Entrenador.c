@@ -7,10 +7,12 @@
 static void iniciarCaptura(Entrenador * this, char * especie, Coordinate * posicionPokemon) {
     char * posicion = coordenadaPuntero(posicionPokemon);
     log_info(this->logger, "Intentando capturar a %s en %s", especie, posicion);
-//    char * posicionInicial = separarCoordenada(posicionPokemon, "|");
-//    PokemonAtrapable * pokemonAtrapable = PokemonAtrapableConstructor.new(especie, posicionInicial);
-//    CapturaPokemon * capturaPokemon = CapturaPokemonConstructor.new(this->id, 0, pokemonAtrapable);
+    char * posicionInicial = separarPunteroCoordenada(posicionPokemon, "|");
+    PokemonAtrapable * pokemonAtrapable = PokemonAtrapableConstructor.new(especie, posicionInicial);
+    CapturaPokemon * capturaPokemon = CapturaPokemonConstructor.new(this->id, 0, pokemonAtrapable);
 //    enviarCatch(capturaPokemon);
+    capturaPokemon->destruir(capturaPokemon);
+    free(posicionInicial);
     free(posicion);
 }
 

@@ -29,4 +29,13 @@
 void enviarCatch(CapturaPokemon* capturaPokemon);
 void enviarGet(char* nombrePokemon);
 
+typedef struct ClienteBroker {
+    t_log * logger;
+    void (*destruir)(struct ClienteBroker * this);
+} ClienteBroker;
+
+extern const struct ClienteBrokerClass {
+    ClienteBroker (*new)();
+} ClienteBrokerConstructor;
+
 #endif //TEAM_CLIENTEBROKER_H
