@@ -37,6 +37,7 @@ typedef struct Entrenador {
     bool (*puedeAtraparPokemones)(struct Entrenador * this); // Es true si es < a limiteDeCaptura.
     Posicion (*posicion)(struct Entrenador * this); // Le pregunta al mapa donde esta, pasandole su uuid.
     char * (*descripcion)(struct Entrenador * this);
+    void (*iniciarCaptura)(struct Entrenador * this, char * especie, Coordinate * posicionPokemon);
     void (*registrarCaptura)(struct Entrenador * this, CapturaPokemon * capturaPokemon);
     void (*destruir)(struct Entrenador * this);
 } Entrenador;
