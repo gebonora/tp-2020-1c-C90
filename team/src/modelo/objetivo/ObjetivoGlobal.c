@@ -36,7 +36,7 @@ void solicitarPokemones(ObjetivoGlobal * this) {
     for (int i = 0; i < list_size(especiesNecesarias); i++) {
         char * pokemon = list_get(especiesNecesarias, i);
         log_debug(this->logger, "Solicitando especie: %s", pokemon);
-        //TODO: hacer enviarGet(pokemon);
+        enviarGet(pokemon);
     }
 
     list_destroy(especiesNecesarias);
