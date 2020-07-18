@@ -112,6 +112,15 @@ void ejecutarInstruccion(Instruccion * instruccion, void * sujetoDeAplicacion) {
     }
 }
 
+Instruccion * crearInstruccion(int posicion, void (*funcion)(void * argumentos, ...),char * descripcion, t_list * args) {
+    Instruccion *instruccion = malloc(sizeof(Instruccion));
+    instruccion->posicion = posicion;
+    instruccion->funcion = funcion;
+    instruccion->descripcion = descripcion;
+    instruccion->argumentos = args;
+    return instruccion;
+}
+
 void destruirInstruccion(Instruccion * instruccion) {
     free(instruccion->descripcion);
     list_destroy_and_destroy_elements(instruccion->argumentos, free);

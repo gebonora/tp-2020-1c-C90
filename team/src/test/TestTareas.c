@@ -11,7 +11,7 @@ void testDeTareas() {
     Entrenador * entrenador = EntrenadorConstructor.new("4|1", "A", "B");
     Mapa mapita = MapaConstructor.new();
     registrarEnMapaPosicionEntrenador(&mapita, entrenador);
-    Coordinate posicionPokemon = (Coordinate){.pos_x=6, .pos_y=1};
+    Coordinate posicionPokemon = (Coordinate){.pos_x=5, .pos_y=1};
     TareaPlanificable * tareaCaptura = generarTareaDeCaptura(entrenador, "A", posicionPokemon);
 
     assert(list_size(tareaCaptura->instrucciones) == 2);

@@ -46,6 +46,9 @@ int main() {
         sem_wait(&semaforoObjetivoGlobalCompletado);
     }
 
+    // Mostramos las metricas para comparar contra otros procesos team
+    servicioDeMetricasProcesoTeam->imprimirMetricas(servicioDeMetricasProcesoTeam);
+
     // Liberacion
     log_info(INTERNAL_LOGGER, "Finalizando proceso Team...");
     liberarRecursos();
