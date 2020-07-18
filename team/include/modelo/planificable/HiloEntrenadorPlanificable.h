@@ -37,7 +37,7 @@ typedef struct InfoUltimaEjecucion {
 
 typedef struct HiloEntrenadorPlanificable {
     t_log * logger;
-    Entrenador *entrenador;
+    Entrenador * entrenador;
     int retardoInstruccion;
     bool finDeTrabajo;
     sem_t semaforoEjecucionHabilitada;

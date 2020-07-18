@@ -13,6 +13,7 @@
 #include "modelo/mapa/coordenadas/UtilidadesCoordenadas.h"
 #include "modelo/mapa/movimiento/Movimiento.h"
 #include "modelo/pokemon/CapturaPokemon.h"
+//#include "cliente/ClienteBroker.h"
 
 /**
  * El entrenador se mueve y caza pokemones. La idea es llevar ese registro acá.

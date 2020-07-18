@@ -36,10 +36,7 @@ void solicitarPokemones(ObjetivoGlobal * this) {
     for (int i = 0; i < list_size(especiesNecesarias); i++) {
         char * pokemon = list_get(especiesNecesarias, i);
         log_debug(this->logger, "Solicitando especie: %s", pokemon);
-        //RespuestaBroker rta = this->clienteBroker.get(pokemon);
-        //if(rta.valida) {
-        // manejadorDeEventos.registarEventoLocalizedEsperado(rta.idCorrelatividad);
-        // }
+        //TODO: hacer enviarGet(pokemon);
     }
 
     list_destroy(especiesNecesarias);
