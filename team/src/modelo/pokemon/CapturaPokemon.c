@@ -4,6 +4,10 @@
 
 #include "modelo/pokemon/CapturaPokemon.h"
 
+static char * especie(CapturaPokemon * this) {
+    return this->pokemonAtrapable->especie;
+}
+
 static char * posicion(CapturaPokemon * this) {
     return coordenadaClave(this->pokemonAtrapable->posicionInicial);
 }
@@ -27,6 +31,7 @@ static CapturaPokemon * new(char * idEntrenador, uint32_t idCorrelatividad, Poke
     capturaPokemon->pokemonAtrapable = pokemon;
     capturaPokemon->eliminarPokemonCapturadoDelMapa = &eliminarPokemonCapturadoDelMapa;
     capturaPokemon->posicion = &posicion;
+    capturaPokemon->especie = &especie;
     capturaPokemon->destruir = &destruirCapturaPokemon;
 
     return capturaPokemon;

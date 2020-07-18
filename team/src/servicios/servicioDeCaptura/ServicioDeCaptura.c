@@ -34,7 +34,7 @@ static void encargarTrabajoDeCaptura(ServicioDeCaptura * this, char * especie, C
 
 static bool registrarCapturaExitosa(ServicioDeCaptura * this, CapturaPokemon * capturaPokemon) {
     bool sePudoRegistrar = false;
-log_debug(this->logger, "PRBANDO ENTRENADOR: %s", capturaPokemon->idEntrenador);
+    log_debug(this->logger, "Intentando impactar en el sistema la captura de %s por parte de %s", capturaPokemon->especie(capturaPokemon), capturaPokemon->idEntrenador);
     mismoIdEntrenador(capturaPokemon->idEntrenador);
     Entrenador * entrenador = list_find(this->equipo, matcheaIdEntrenador);
     if (entrenador != NULL) {
@@ -42,7 +42,7 @@ log_debug(this->logger, "PRBANDO ENTRENADOR: %s", capturaPokemon->idEntrenador);
         log_debug(this->logger, "Eliminando al pokemon capturado del mapa...");
         bool sePudoEliminarDelMapa = capturaPokemon->eliminarPokemonCapturadoDelMapa(capturaPokemon, this->mapa);
         if (sePudoEliminarDelMapa) {
-            // TODO: Actualizar el estado del entrenador que lo capturó, sumandole 1 a su contabilidad.
+            entrenador->registrarCaptura(entrenador, capturaPokemon);
             // TODO: Avisarle al servicio de planificacion con NOTIFY_CAUGHT_RESULT que ya puede habilitar al entrenador bloqueado.
         }
         sePudoRegistrar = true;

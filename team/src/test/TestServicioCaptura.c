@@ -21,7 +21,7 @@ void testServicioDeCaptura() {
 
     log_info(testLogger, "Testeando la aparicion de un pokemon");
     Coordinate posicion = {.pos_x = 1, .pos_y = 2};
-    log_info(testLogger, "No deberia poder capturarse porque el unico entrenador no tiene espacio");
+    log_info(testLogger, "No deberia poder encargarse la captura porque el unico entrenador no tiene espacio");
     servicioDeCaptura->procesarPokemonCapturable(servicioDeCaptura, "MissigNO", posicion);
 
     log_info(testLogger, "Testeando que en el mapa exista 1 entrenador y 1 pokemon");

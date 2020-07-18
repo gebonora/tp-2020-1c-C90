@@ -4,6 +4,16 @@
 
 #include "modelo/equipo/entrenador/Entrenador.h"
 
+static void registrarCaptura(Entrenador * this, CapturaPokemon * capturaPokemon){
+    char * especie = capturaPokemon->especie(capturaPokemon);
+    if (dictionary_has_key(this->pokemonesCapturados, especie)) {
+        int * ejemplares = dictionary_get(this->pokemonesCapturados, especie);
+        (*ejemplares)++;
+    } else {
+        dictionary_put(this->pokemonesCapturados, especie, (void *) 1);
+    }
+}
+
 void mover(Entrenador * this, Coordinate * posicionObjetivo) {
     Posicion posicionActual = this->posicion(this);
     if (posicionActual.valida) {
@@ -96,6 +106,7 @@ static Entrenador *new(char * posicionInicial, char * pokemonesIniciales, char *
     entrenador->puedeAtraparPokemones = &puedeAtraparPokemones;
     entrenador->posicion = &posicion;
     entrenador->descripcion = &descripcion;
+    entrenador->registrarCaptura = &registrarCaptura;
     entrenador->destruir = &destruir;
 
     log_debug(entrenador->logger, "Se instanció al entrenador con pokemones iniciales: %s, y objetivos: %s", pokemonesIniciales, pokemonesObjetivos);

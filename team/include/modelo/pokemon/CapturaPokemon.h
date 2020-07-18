@@ -15,6 +15,7 @@ typedef struct CapturaPokemon {
     PokemonAtrapable * pokemonAtrapable;
     bool (*eliminarPokemonCapturadoDelMapa)(struct CapturaPokemon * this, Mapa mapa);
     char * (*posicion)(struct CapturaPokemon * this);
+    char * (*especie)(struct CapturaPokemon * this);
     void (*destruir)(struct CapturaPokemon * this);
 } CapturaPokemon;
 

@@ -102,7 +102,7 @@ static void procesarAppearedRecibido(ManejadorDeEventos* this, Pokemon* unPokemo
 	free(coor);
 
 	Coordinate* auxCoor = list_get(unPokemon->coordinates, 0);
-	this->servicioDeCaptura->procesarPokemonCapturable(this->servicioDeCaptura, string_duplicate(unPokemon->name->value), convertirACoordenada(auxCoor));
+	this->servicioDeCaptura->procesarPokemonCapturable(this->servicioDeCaptura, unPokemon->name->value, convertirACoordenada(auxCoor));
 	free_pokemon(unPokemon);
 }
 
