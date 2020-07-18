@@ -12,6 +12,7 @@
 #include "modelo/pokemon/PokemonAtrapable.h"
 #include "modelo/pokemon/CapturaPokemon.h"
 #include "modelo/mapa/coordenadas/UtilidadesCoordenadas.h"
+#include "modelo/mapa/registro/RegistradorDePosiciones.h"
 
 typedef struct ServicioDeCaptura {
     t_log * logger;

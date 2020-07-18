@@ -25,8 +25,7 @@ void testServicioDeCaptura() {
     servicioDeCaptura->procesarPokemonCapturable(servicioDeCaptura, "MissigNO", posicion);
 
     log_info(testLogger, "Testeando que en el mapa exista 1 entrenador y 1 pokemon");
-    //assert(mapa.cantidadPosicionables(&mapa) == 2);
-    //TODO: Sacamos el uuid de la lista de pokemones del servicio y matcheamos en el mapa las coordenadas
+    assert(mapa.cantidadPosicionables(&mapa) == 2);
 
     log_info(testLogger, "Testeando el impacto de una captura exitosa");
     PokemonAtrapable * pokemonAtrapable = PokemonAtrapableConstructor.new("Pikachu", "1|2");

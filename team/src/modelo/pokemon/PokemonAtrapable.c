@@ -4,10 +4,6 @@
 
 #include "modelo/pokemon/PokemonAtrapable.h"
 
-static bool capturar(PokemonAtrapable * this) {
-  //TODO
-}
-
 static bool borrarPosicion(PokemonAtrapable * this) {
     Gps * gps = this->gps;
     if (gps == NULL) {
