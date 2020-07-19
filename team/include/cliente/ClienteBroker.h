@@ -21,21 +21,24 @@
 #include <pthread.h>
 #include "app/Global.h"
 #include "utils/sockets/Sockets.h"
-#include "servidor/ServidorTeam.h"
 #include "manejadorDeEventos/ManejadorDeEventos.h"
-#include "modelo/pokemon/CapturaPokemon.h"
 #include "servicios/servicioDeCaptura/ServicioDeCaptura.h"
 
-void enviarCatch(CapturaPokemon* capturaPokemon);
-void enviarGet(char* nombrePokemon);
-
 typedef struct ClienteBroker {
-    t_log * logger;
-    void (*destruir)(struct ClienteBroker * this);
+	t_log * logger;
+	char* ipBroker;
+	char* puertoBroker;
+	ManejadorDeEventos* manejadorDeEventos;
+	ServicioDeCaptura* servicioDeCaptura;
+	void (*enviarGet)(struct ClienteBroker * this, char* nombrePokemon);
+	void (*enviarCatch)(struct ClienteBroker * this, CapturaPokemon* capturaPokemon);
+	void (*destruir)(struct ClienteBroker * this);
 } ClienteBroker;
 
 extern const struct ClienteBrokerClass {
-    ClienteBroker (*new)();
+	ClienteBroker * (*new)(ManejadorDeEventos* manejadorDeEventos, ServicioDeCaptura* servicioDeCaptura);
 } ClienteBrokerConstructor;
+
+ClienteBroker* clienteBrokerProcesoTeam;
 
 #endif //TEAM_CLIENTEBROKER_H

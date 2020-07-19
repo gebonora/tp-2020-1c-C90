@@ -109,8 +109,13 @@ void inicializarComponentesDelSistema() {
 void configurarEstadoInicialProcesoTeam() {
 	log_debug(INTERNAL_LOGGER, "Instanciando entrenadores y armando el equipo...");
 	equipoProcesoTeam = crearEquipoPorConfiguracion();
+
+	servicioDeCapturaProcesoTeam = ServicioDeCapturaConstructor.new(mapaProcesoTeam, equipoProcesoTeam, servicioDePlanificacionProcesoTeam);
+	manejadorDeEventosProcesoTeam = ManejadorDeEventosConstructor.new(servicioDeCapturaProcesoTeam);
+	clienteBrokerProcesoTeam = ClienteBrokerConstructor.new(manejadorDeEventosProcesoTeam, servicioDeCapturaProcesoTeam);
+
 	log_debug(INTERNAL_LOGGER, "Calculando el objetivo global...");
-	objetivoGlobal = ObjetivoGlobalConstructor.new(equipoProcesoTeam);
+	objetivoGlobal = ObjetivoGlobalConstructor.new(equipoProcesoTeam, clienteBrokerProcesoTeam);
 	log_debug(INTERNAL_LOGGER, "Registrando al equipo en el mapa...");
 	void registrarEquipo(Entrenador * entrenador) {
 		registrarEnMapaPosicionEntrenador(&mapaProcesoTeam, entrenador);
@@ -118,8 +123,7 @@ void configurarEstadoInicialProcesoTeam() {
 	list_iterate(equipoProcesoTeam, (void (*)(void *)) registrarEquipo);
 	log_debug(INTERNAL_LOGGER, "Agregando equipo a la planificacion...");
 	servicioDePlanificacionProcesoTeam->asignarEquipoAPlanificar(servicioDePlanificacionProcesoTeam, equipoProcesoTeam);
-	servicioDeCapturaProcesoTeam = ServicioDeCapturaConstructor.new(mapaProcesoTeam, equipoProcesoTeam, servicioDePlanificacionProcesoTeam);
-	manejadorDeEventosProcesoTeam = ManejadorDeEventosConstructor.new(servicioDeCapturaProcesoTeam);
+
 	servicioDeMetricasProcesoTeam = ServicioDeMetricasConstructor.new();
 }
 
@@ -151,4 +155,5 @@ void liberarRecursos() {
 	mapaProcesoTeam.destruir(&mapaProcesoTeam);
 	destruirAlgoritmosDePlanificacion();
 	servicioDeMetricasProcesoTeam->destruir(servicioDeMetricasProcesoTeam);
+	clienteBrokerProcesoTeam->destruir(clienteBrokerProcesoTeam);
 }

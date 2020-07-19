@@ -23,6 +23,7 @@ typedef struct ContabilidadEspecie {
 typedef struct ObjetivoGlobal {
     t_log *logger;
     t_dictionary * contabilidadEspecies; // La key es el nombre del pokemon, el value seria CotabilidadEspecie
+    ClienteBroker* clienteBroker;
     //Interfaz publica
     t_list * (*especiesNecesarias)(struct ObjetivoGlobal * this); //Nos dice los unique de los pokemones necesarios. (ver GET)
     bool (*puedeCapturarse)(struct ObjetivoGlobal * this, char * especiePokemon); // Nos dice si todavia necesitamos el pokemon para cumplir el objetivo. (ver LOCALIZED)
@@ -32,7 +33,7 @@ typedef struct ObjetivoGlobal {
 } ObjetivoGlobal;
 
 extern const struct ObjetivoGlobalClass {
-    ObjetivoGlobal (*new)(Equipo equipo);
+    ObjetivoGlobal (*new)(Equipo equipo, ClienteBroker* clienteBroker);
 } ObjetivoGlobalConstructor;
 
 //Funciones estaticas

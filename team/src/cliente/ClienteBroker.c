@@ -1,8 +1,8 @@
 #include "cliente/ClienteBroker.h"
 
-void enviarGet(char* nombrePokemon) {
+static void enviarGet(ClienteBroker* this, char* nombrePokemon) {
 	// Dejamos como responsabilidad la liberacion de nombrePokemon afuera de esta funcion.
-	int socketDescartable = crearSocketCliente(IP_Broker, Puerto_Broker);
+	int socketDescartable = crearSocketCliente(this->ipBroker, this->puertoBroker);
 	int flagBrokerCaido = 0;
 	Get* unGet = create_get_pokemon(nombrePokemon);
 
@@ -23,7 +23,7 @@ void enviarGet(char* nombrePokemon) {
 		log_info(MANDATORY_LOGGER, "Se envió al Broker un GET pokemon: %s. Se le asignó el idMensaje: %d. Se procede a registrarlo en espera de su respuesta.",
 				nombrePokemon, idAsignado);
 
-		manejadorDeEventosProcesoTeam->registrarGetEnEspera(manejadorDeEventosProcesoTeam, mensajeGet);
+		this->manejadorDeEventos->registrarGetEnEspera(this->manejadorDeEventos, mensajeGet);
 	} else {
 		log_warning(MANDATORY_LOGGER, "No se pudo enviar un GET pokemon: %s. Se procede a asumir que no hay coordenadas para el pokemon", nombrePokemon);
 		// Comportamiento caso broker caido: se asume que no hay coordenadas del pokemon pedido.
@@ -31,9 +31,9 @@ void enviarGet(char* nombrePokemon) {
 	}
 }
 
-void enviarCatch(CapturaPokemon* capturaPokemon) { //cambiar return a
+static void enviarCatch(ClienteBroker* this, CapturaPokemon* capturaPokemon) { //cambiar return a
 	// Dejamos como responsabilidad la liberacion de capturaPokemon afuera de esta funcion.
-	int socketDescartable = crearSocketCliente(IP_Broker, Puerto_Broker);
+	int socketDescartable = crearSocketCliente(this->ipBroker, this->puertoBroker);
 	int flagBrokerCaido = 0;
 	Pokemon* unPokemon = create_pokemon(capturaPokemon->pokemonAtrapable->especie, capturaPokemon->pokemonAtrapable->posicionInicial.pos_x,
 			capturaPokemon->pokemonAtrapable->posicionInicial.pos_y);
@@ -55,27 +55,36 @@ void enviarCatch(CapturaPokemon* capturaPokemon) { //cambiar return a
 				"Se envió al Broker un CATCH pokemon: %s, coordenadas: %s. Se le asignó el idMensaje: %d. Se procede a registrarlo en espero de se respuesta",
 				capturaPokemon->pokemonAtrapable->especie, coor, idAsignado);
 		free(coor);
-		manejadorDeEventosProcesoTeam->registrarCatchEnEspera(manejadorDeEventosProcesoTeam, capturaPokemon);
+		this->manejadorDeEventos->registrarCatchEnEspera(this->manejadorDeEventos, capturaPokemon);
 	} else {
 		// Comportamiento caso broker caido: se asume que la captura fue exitosa.
 		char* coor = capturaPokemon->posicion(capturaPokemon);
 		log_warning(MANDATORY_LOGGER, "No se puedo enviar un CATCH pokemon: %s, coordenadas: %s. Se procede a asumir que fue capturado con éxito",
 				capturaPokemon->pokemonAtrapable->especie, coor);
 		free(coor);
-		servicioDeCapturaProcesoTeam->registrarCapturaExitosa(servicioDeCapturaProcesoTeam, capturaPokemon);
+		this->servicioDeCaptura->registrarCapturaExitosa(this->servicioDeCaptura, capturaPokemon);
 	}
 }
 
 static void destruir(ClienteBroker * this) {
-    log_debug(this->logger, "Se procede a destruir el Cliente Broker");
-    log_destroy(this->logger);
+	log_debug(this->logger, "Se procede a destruir el Cliente Broker");
+	log_destroy(this->logger);
+	free(this);
 }
 
-static ClienteBroker new() {
-    return (ClienteBroker) {
-            .logger = log_create(TEAM_INTERNAL_LOG_FILE, "ClienteBroker", SHOW_INTERNAL_CONSOLE, INTERNAL_LOG_LEVEL),
-            &destruir
-    };
+static ClienteBroker * new(ManejadorDeEventos* manejadorDeEventos, ServicioDeCaptura* servicioDeCaptura) {
+	ClienteBroker* clienteBroker = malloc(sizeof(ClienteBroker));
+	clienteBroker->ipBroker = servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, "IP_BROKER");
+	clienteBroker->puertoBroker = servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, "PUERTO_BROKER");
+
+	clienteBroker->logger = log_create(TEAM_INTERNAL_LOG_FILE, "ClienteBroker", SHOW_INTERNAL_CONSOLE, INTERNAL_LOG_LEVEL);
+	clienteBroker->manejadorDeEventos = manejadorDeEventos;
+	clienteBroker->servicioDeCaptura = servicioDeCaptura;
+	clienteBroker->enviarCatch=&enviarCatch;
+	clienteBroker->enviarGet=&enviarGet;
+	clienteBroker->destruir = &destruir;
+
+	return clienteBroker;
 }
 
 const struct ClienteBrokerClass ClienteBrokerConstructor = { .new = &new };

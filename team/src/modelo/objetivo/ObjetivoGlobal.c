@@ -36,7 +36,7 @@ void solicitarPokemones(ObjetivoGlobal * this) {
     for (int i = 0; i < list_size(especiesNecesarias); i++) {
         char * pokemon = list_get(especiesNecesarias, i);
         log_debug(this->logger, "Solicitando especie: %s", pokemon);
-        enviarGet(pokemon);
+        this->clienteBroker->enviarGet(this->clienteBroker, pokemon);
     }
 
     list_destroy(especiesNecesarias);
@@ -48,10 +48,11 @@ void destruirObjetivoGlobal(ObjetivoGlobal * this) {
     dictionary_destroy_and_destroy_elements(this->contabilidadEspecies, free);
 }
 
-static ObjetivoGlobal new(Equipo unEquipo) {
+static ObjetivoGlobal new(Equipo unEquipo, ClienteBroker* clienteBroker) {
     ObjetivoGlobal objetivo = {
             .logger = log_create(TEAM_INTERNAL_LOG_FILE, "ObjetivoGlobal", SHOW_INTERNAL_CONSOLE, INTERNAL_LOG_LEVEL),
             .contabilidadEspecies = calcularObjetivoEspecies(unEquipo),
+			.clienteBroker = clienteBroker,
             &especiesNecesarias,
             &puedeCapturarse,
             &imprimirObjetivoGlobal,
