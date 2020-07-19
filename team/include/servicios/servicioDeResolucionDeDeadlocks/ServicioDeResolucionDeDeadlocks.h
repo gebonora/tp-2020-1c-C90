@@ -51,4 +51,12 @@ extern const struct ServicioDeResolucionDeDeadlocksClass {
 
 ServicioDeResolucionDeDeadlocks * servicioDeResolucionDeDeadlocksProcesoTeam;
 
+// Funciones estáticas
+
+bool hayDependencias(t_list* listaCapturas, t_list* listaObjetivos);
+t_list* obtenerListaDePokemon(ContadorPokemones contador);
+void imprimirListaStrings(t_list* lista);
+t_list* restarPrimerListaASegunda(t_list* lista1, t_list* lista2);
+t_list* copiarListaYElementos(t_list* lista);
+
 #endif /* INCLUDE_SERVICIOS_SERVICIODERESOLUCIONDEDEADLOCKS_SERVICIODERESOLUCIONDEDEADLOCKS_H_ */
