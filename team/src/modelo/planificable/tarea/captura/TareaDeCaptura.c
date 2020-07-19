@@ -26,6 +26,17 @@ TareaPlanificable * generarTareaDeCaptura(Entrenador * entrenador, char * pokemo
             list_add(instrucciones, instruccion);
         }
 
+        t_list * argumentosCaptura = list_create();
+        list_add(argumentosCaptura, string_duplicate(pokemon));
+        list_add(argumentosCaptura, convertirAPunteroDeCoordenada(posicionPokemon));
+        Instruccion * instruccionFinal = crearInstruccion(
+                list_size(instrucciones),
+                (void (*)(void *, ...)) entrenador->iniciarCaptura,
+                string_from_format("Intento de captura de %s", pokemon),
+                argumentosCaptura
+                );
+        list_add(instrucciones, instruccionFinal);
+
         TareaPlanificable * tareaDeCaptura = TareaPlanificableConstructor.new(instrucciones);
         list_destroy_and_destroy_elements(camino, free);
 

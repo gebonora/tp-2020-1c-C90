@@ -21,7 +21,7 @@ static void procesarPokemonCapturable(ServicioDeCaptura * this, char * especie, 
 }
 
 static void altaDePokemon(ServicioDeCaptura * this, char * especie, Coordinate posicion) {
-    char * ubicacionPokemonACapturar = string_from_format("%d|%d", posicion.pos_x, posicion.pos_y);
+    char * ubicacionPokemonACapturar = separarCoordenada(posicion, "|");
     PokemonAtrapable * pokemonAtrapable = PokemonAtrapableConstructor.new(especie, ubicacionPokemonACapturar);
     registrarEnMapaPosicionPokemonAtrapable(&this->mapa, pokemonAtrapable);
     log_info(this->logger, "Agregamos un %s en la posición %s", especie, ubicacionPokemonACapturar);

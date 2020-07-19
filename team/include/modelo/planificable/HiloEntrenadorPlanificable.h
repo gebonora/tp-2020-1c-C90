@@ -30,14 +30,14 @@
 
 typedef struct InfoUltimaEjecucion {
     double est_raf_ant;
-    double real_raf_ant; // TODO: Cuando se termina de ejecutar una rafaga, modificar este valor con el tamaño de la rafaga terminada.
+    double real_raf_ant;
     double est_raf_actual;
     bool primeraEstimacion;
 } InfoUltimaEjecucion;
 
 typedef struct HiloEntrenadorPlanificable {
     t_log * logger;
-    Entrenador *entrenador;
+    Entrenador * entrenador;
     int retardoInstruccion;
     bool finDeTrabajo;
     sem_t semaforoEjecucionHabilitada;

@@ -8,14 +8,20 @@
 #include "servicios/servicioDeMetricas/ServicioDeMetricas.h"
 
 static void imprimirMetricas(ServicioDeMetricas* this) {
-	log_info(MANDATORY_LOGGER, "Ciclos de CPU ejecutados en total: %d.", this->calcularCiclosTotales(this));
-	void imprimirEntrenador(char* entrenadorId, void* cantidad) {
-		log_info(MANDATORY_LOGGER, "Ciclos de CPU ejecutados por el entrenador '%s': %d.", entrenadorId, cantidad);
+    log_info(MANDATORY_LOGGER, "------------------------------------------------------------------");
+    log_info(MANDATORY_LOGGER, "                    Resultado del proceso TEAM                    ");
+    log_info(MANDATORY_LOGGER, "------------------------------------------------------------------");
+	log_info(MANDATORY_LOGGER, "%-60s%6d", "Ciclos de CPU ejecutados en total:", this->calcularCiclosTotales(this));
+    void imprimirEntrenador(char* entrenadorId, void* cantidad) {
+        char * entrada = string_from_format("Ciclos de CPU ejecutados por el entrenador '%s':", entrenadorId);
+		log_info(MANDATORY_LOGGER, "%-60s%6d", entrada, cantidad);
+		free(entrada);
 	}
-	dictionary_iterator(this->hashMap, imprimirEntrenador);
-	log_info(MANDATORY_LOGGER, "Cantidad total de cambios de contexto: %d.", this->cantidadCambiosDeContexto);
-	log_info(MANDATORY_LOGGER, "Cantidad total de deadlocks producidos: %d.", this->cantidadDeadlocksProducidos);
-	log_info(MANDATORY_LOGGER, "Cantidad total de deadlocks resueltos: %d.", this->cantidadDeadlocksResueltos);
+    dictionary_iterator(this->hashMap, imprimirEntrenador);
+    log_info(MANDATORY_LOGGER, "%-60s%6d", "Cantidad total de cambios de contexto:", this->cantidadCambiosDeContexto);
+    log_info(MANDATORY_LOGGER, "%-60s%6d", "Cantidad total de deadlocks producidos:", this->cantidadDeadlocksProducidos);
+    log_info(MANDATORY_LOGGER, "%-60s%6d", "Cantidad total de deadlocks resueltos:", this->cantidadDeadlocksResueltos);
+    log_info(MANDATORY_LOGGER, "------------------------------------------------------------------");
 }
 
 static void registrarCicloRealizadoPorEntrenador(ServicioDeMetricas * this, char* entrenadorId) {

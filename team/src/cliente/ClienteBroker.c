@@ -65,3 +65,17 @@ void enviarCatch(CapturaPokemon* capturaPokemon) { //cambiar return a
 		servicioDeCapturaProcesoTeam->registrarCapturaExitosa(servicioDeCapturaProcesoTeam, capturaPokemon);
 	}
 }
+
+static void destruir(ClienteBroker * this) {
+    log_debug(this->logger, "Se procede a destruir el Cliente Broker");
+    log_destroy(this->logger);
+}
+
+static ClienteBroker new() {
+    return (ClienteBroker) {
+            .logger = log_create(TEAM_INTERNAL_LOG_FILE, "ClienteBroker", SHOW_INTERNAL_CONSOLE, INTERNAL_LOG_LEVEL),
+            &destruir
+    };
+}
+
+const struct ClienteBrokerClass ClienteBrokerConstructor = { .new = &new };
