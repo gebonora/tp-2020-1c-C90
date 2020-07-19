@@ -31,6 +31,7 @@ typedef struct Entrenador {
     Coordinate posicionInicial;
     ContadorPokemones pokemonesCapturados;
     ContadorPokemones pokemonesObjetivo;
+    bool estaIntercambiando; // Para deadlock. True si está involucrado en un trade, ya sea moviendose a otro entrenador o con otro entrenador moviendose hacia él.
     int limiteDeCaptura; // Establece cuantos pokemones puede capturar
     // Interfaz publica
     void (*mover)(struct Entrenador * this, Coordinate * posicionObjetivo);
