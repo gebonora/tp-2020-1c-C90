@@ -26,12 +26,14 @@ void inicializarAlgoritmosDePlanificacion() {
     firstInFirstOut = FirstInFirstOutConstructor.new();
     shortestJobFirst = ShortestJobFirstConstructor.new();
     roundRobin = RoundRobinConstructor.new();
+    shortestRemainingTimeFirst = ShortestJobFirstConstructor.new();
 }
 
 void destruirAlgoritmosDePlanificacion(){
 	firstInFirstOut.destruir(&firstInFirstOut);
 	shortestJobFirst.destruir(&shortestJobFirst);
 	roundRobin.destruir(&roundRobin);
+	shortestRemainingTimeFirst.destruir(&shortestRemainingTimeFirst);
 }
 
 char * nombreAlgoritmoCompleto(char * nombreCorto) {
