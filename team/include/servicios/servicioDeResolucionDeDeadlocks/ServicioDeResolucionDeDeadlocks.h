@@ -10,15 +10,14 @@
 
 #include "app/Global.h"
 #include "servicios/servicioDePlanificacion/ServicioDePlanificacion.h"
+#include "servicios/servicioDeMetricas/ServicioDeMetricas.h"
 #include "modelo/mapa/Mapa.h"
 #include "modelo/equipo/Equipo.h"
+#include "delibird/utils/colecciones/ExtensionColecciones.h"
 
 /*
  * Esta clase se encarga de detección y resolución de deadlocks.
  * TODO:
- * 		Definir dependencias.
- *  	Implementar algoritmo de deteccion.
- *  	Implementar algoritmo para determinar si se puede resolver deadlock.
  *  	Implementar algoritmo para resolver deadlock.
  *
  *  Posibles soluciones.
@@ -32,7 +31,13 @@
  *  	Como el team captura lo que necesita, el maximo deadlock posible es de todos los entrenadores, que se da al capturar todos los pokemon,
  *  	tiene solucion realizando intercambios.
  *
+ *  	NOTA IMPORTANTE: asumimos que un entrenador no va ser iniciado desde config con un pokemon que no necesita el equipo.
+ *
  */
+
+typedef t_list* ListaDeEntrenadores;
+typedef t_list* ListaDeDependencias;
+typedef t_list* ListaDeListaDeString;
 
 typedef struct Intercambio { // Esto puede definir tambien que pokemon dan / reciben, o lo dejamos que lo determine el que genera la tarea (me gusta mas esto)
 	char* entrenadorQueSeMueve;
@@ -46,40 +51,35 @@ typedef struct Dependencias {
 
 typedef struct ServicioDeResolucionDeDeadlocks {
 	t_log * logger;
+	bool primeraVez;
+	ServicioDeMetricas* servicioDeMetricas;
 	//Interfaz publica
-	bool (*detectarDeadlock)(struct ServicioDeResolucionDeDeadlocks * this, t_list* entrenadoresBloqueados);
-	void (*puedeResolverDeadlock)(struct ServicioDeResolucionDeDeadlocks * this);
-	void (*resolverDeadlock)(struct ServicioDeResolucionDeDeadlocks * this);
+	t_list* (*procesarDeadlock)(struct ServicioDeResolucionDeDeadlocks * this, t_list* entrenadoresBloqueados);
 	//Metodos privados
-	void (*foo)(struct ServicioDeResolucionDeDeadlocks * this);
+	t_list* (*crearListaDeDependencias)(struct ServicioDeResolucionDeDeadlocks* this, ListaDeEntrenadores entrenadoresFiltrados);
+	void (*detectarEnDetalleYLogear)(struct ServicioDeResolucionDeDeadlocks* this, ListaDeDependencias listaDeDependencias);
+	t_list* (*resolverDeadlock)(struct ServicioDeResolucionDeDeadlocks * this, ListaDeDependencias listaDeDependencias);
 	void (*destruir)(struct ServicioDeResolucionDeDeadlocks * this);
 } ServicioDeResolucionDeDeadlocks;
 
 extern const struct ServicioDeResolucionDeDeadlocksClass {
-	ServicioDeResolucionDeDeadlocks * (*new)();
+	ServicioDeResolucionDeDeadlocks * (*new)(ServicioDeMetricas* servicioDeMetricas);
 } ServicioDeResolucionDeDeadlocksConstructor;
 
 ServicioDeResolucionDeDeadlocks * servicioDeResolucionDeDeadlocksProcesoTeam;
 
 // Funciones estáticas
 
-bool hayDependencias(t_list* listaCapturas, t_list* listaObjetivos);
-t_list* obtenerListaDePokemon(ContadorPokemones contador);
-void imprimirListaStrings(t_list* lista);
-t_list* restarPrimerListaASegunda(t_list* lista1, t_list* lista2);
-t_list* copiarListaYElementos(t_list* lista);
-void agregarCopiaSinRepetir(t_list* lista, char* elem);
-bool perteneceALista(t_list* lista, char* elem);
-void agregarCopiaDeElementosAListaSinRepetir(t_list* listaQueRecibe, t_list* listaQueDa);
-bool hayElementoEnComun(t_list* lista1, t_list* lista2);
-void detectarEnDetalleYLogear(t_list* listaDeListas);
-bool hayDependencias(t_list* listaCapturas, t_list* listaObjetivos);
-void imprimirListaDeListas(t_list* listaDeListas);
+bool hayDependencias(ListaDeStrings listaCapturas, ListaDeStrings listaObjetivos);
+ListaDeStrings obtenerListaDePokemon(ContadorPokemones contador);
+void imprimirListaStrings(ListaDeStrings lista);
+bool hayDependencias(ListaDeStrings listaCapturas, ListaDeStrings listaObjetivos);
+void imprimirListaDeListas(ListaDeListaDeString listaDeListas);
 void imprimirDependencias(Dependencias* dependencias);
-void imprimirListaDeDependencias(t_list* listaDeDependencias);
+void imprimirListaDeDependencias(ListaDeDependencias listaDeDependencias);
 bool hayDependenciaEnComun(Dependencias* dependencia1, Dependencias* dependencia2);
-t_list* eliminarListasRepetidas(t_list* listaDeListas);
-void destruirListaDeStrings(void* elem);
+ListaDeStrings eliminarListasRepetidas(ListaDeStrings listaDeListas);
 void destruirDependencia(void * elem);
+char* obtenerReporteDeadlocks(t_list* deadlocks);
 
 #endif /* INCLUDE_SERVICIOS_SERVICIODERESOLUCIONDEDEADLOCKS_SERVICIODERESOLUCIONDEDEADLOCKS_H_ */

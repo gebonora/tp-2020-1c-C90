@@ -7,59 +7,56 @@
 
 #include "servicios/servicioDeResolucionDeDeadlocks/ServicioDeResolucionDeDeadlocks.h"
 
-bool detectarDeadlock(ServicioDeResolucionDeDeadlocks * this, t_list* entrenadoresBloqueados) {
+t_list* procesarDeadlock(ServicioDeResolucionDeDeadlocks * this, t_list* entrenadoresBloqueados) {
 	/* Me llegan los entrenadores llenos y bloqueados desde el planificador.
 	 * 		Va a haber uno o mas deadlocks.
 	 * 		Quiero llamar al servicio de metricas 1 vez cuando detecto el primer pantallazo de deadlocks, ya que corro el algorimo varias veces
 	 * 		pero el numero de deadlocks que hubo a nivel sistema es fijo.
 	 *
 	 * 		Adentro de esta funcion llamo a resolverDeadlock, que retorna una serie de tareas para resolver los deadlocks.
-	 *
-	 *
-	 *
-	 *
 	 */
-
 	bool esProcesable(void* elem) { // Capaz sacarla afuera.
 		Entrenador* entrenador = (Entrenador*) elem;
 		return !entrenador->estaIntercambiando;
 	}
-	t_list* entrenadoresFiltrados = list_filter(entrenadoresBloqueados, esProcesable); // TODO: Esta copia hay que liberarla? SI pero no los elementos.
+	ListaDeEntrenadores entrenadoresFiltrados = list_filter(entrenadoresBloqueados, esProcesable); // Esto libera se libera, pero no sus elementos!!!
 
-	t_list* listaDeDepencias = list_create();
+	ListaDeDependencias listaDeDependencias = this->crearListaDeDependencias(this, entrenadoresFiltrados);
 
+	if (this->primeraVez) {	// Flag aca
+		this->detectarEnDetalleYLogear(this, listaDeDependencias);
+		this->primeraVez = false;
+	}
+
+	// Resolución:
+	t_list* tareasADevolver = this->resolverDeadlock(this, listaDeDependencias);
+
+	list_destroy_and_destroy_elements(listaDeDependencias, destruirDependencia);
+	list_destroy(entrenadoresFiltrados);
+	return NULL;
+}
+
+ListaDeDependencias crearListaDeDependencias(ServicioDeResolucionDeDeadlocks* this, ListaDeEntrenadores entrenadoresFiltrados) {
+	ListaDeDependencias listaDeDependencias = list_create();
 	for (int a = 0; a < list_size(entrenadoresFiltrados); a++) {
 		Entrenador* entrenadorActual = (Entrenador*) list_get(entrenadoresFiltrados, a);
-		printf("ENTRENADOR: %s\n", entrenadorActual->id);
-		t_list* listaCapturasEntrenadorActual = obtenerListaDePokemon(entrenadorActual->pokemonesCapturados);
-		t_list* listaObjetivosEntrenadorActual = obtenerListaDePokemon(entrenadorActual->pokemonesObjetivo);
-
-		// Filtrar las listas para sacar del procesamiento a los pokemon que tengo capturas y necesito, así que no se toquen.
-		puts("CAPTURAS:");
-		imprimirListaStrings(listaCapturasEntrenadorActual);
-		puts("OBJETIVOS:");
-		imprimirListaStrings(listaObjetivosEntrenadorActual);
-
-		t_list* objetivosFiltrados = restarPrimerListaASegunda(listaObjetivosEntrenadorActual, listaCapturasEntrenadorActual);
+		ListaDeStrings listaCapturasEntrenadorActual = obtenerListaDePokemon(entrenadorActual->pokemonesCapturados);
+		ListaDeStrings listaObjetivosEntrenadorActual = obtenerListaDePokemon(entrenadorActual->pokemonesObjetivo);
+		ListaDeStrings objetivosFiltrados = restarPrimerListaASegunda(listaObjetivosEntrenadorActual, listaCapturasEntrenadorActual); // Devuelve nueva lista con copia de elementos.
 
 		Dependencias* dependenciasEntrenadorActual = malloc(sizeof(Dependencias));
 		dependenciasEntrenadorActual->nombreEntrenador = string_duplicate(entrenadorActual->id);
 		dependenciasEntrenadorActual->listaDependencias = list_create();
 
-		puts("OBJETIVOS FILTRADOS:");
-		imprimirListaStrings(objetivosFiltrados);
-
 		for (int b = 0; b < list_size(entrenadoresFiltrados); b++) {
 			if (a != b) { // Ignorarse a si mismo. De todas formas no debería tener dependecias con sí mismo, porque se filtraron.
 				Entrenador* entrenadorIterando = (Entrenador*) list_get(entrenadoresFiltrados, b);
-				t_list* listaCapturasEntrenadorIterando = obtenerListaDePokemon(entrenadorIterando->pokemonesCapturados);
-				t_list* listaObjetivosEntrenadorIterando = obtenerListaDePokemon(entrenadorIterando->pokemonesObjetivo);
-				t_list* capturasFiltradasEntrenadorIterando = restarPrimerListaASegunda(listaCapturasEntrenadorIterando, listaObjetivosEntrenadorIterando);
-
+				ListaDeStrings listaCapturasEntrenadorIterando = obtenerListaDePokemon(entrenadorIterando->pokemonesCapturados);
+				ListaDeStrings listaObjetivosEntrenadorIterando = obtenerListaDePokemon(entrenadorIterando->pokemonesObjetivo);
+				ListaDeStrings capturasFiltradasEntrenadorIterando = restarPrimerListaASegunda(listaCapturasEntrenadorIterando, listaObjetivosEntrenadorIterando);
 				if (hayDependencias(capturasFiltradasEntrenadorIterando, objetivosFiltrados)) {
 					list_add(dependenciasEntrenadorActual->listaDependencias, string_duplicate(entrenadorIterando->id));
 				}
-
 				list_destroy_and_destroy_elements(listaCapturasEntrenadorIterando, free);
 				list_destroy_and_destroy_elements(listaObjetivosEntrenadorIterando, free);
 				list_destroy_and_destroy_elements(capturasFiltradasEntrenadorIterando, free);
@@ -69,45 +66,24 @@ bool detectarDeadlock(ServicioDeResolucionDeDeadlocks * this, t_list* entrenador
 		list_destroy_and_destroy_elements(listaObjetivosEntrenadorActual, free);
 		list_destroy_and_destroy_elements(objetivosFiltrados, free);
 		if (list_size(dependenciasEntrenadorActual->listaDependencias)) {
-			list_add(listaDeDepencias, dependenciasEntrenadorActual);
+			list_add(listaDeDependencias, dependenciasEntrenadorActual);
 		} else {
 			destruirDependencia(dependenciasEntrenadorActual);
 		}
-
 	}
-
-	// tengo en lista de lista una entrada por entrenador con sus dependencias (representadas como string nombreEntrenador).
-	// Para resolucion me voy a basar en esta lista de listas. Capaz sacar lo que está hasta ahora en otra funcion, que devuelva la lista de listas,
-	// Voy a tener un flag para que la primera vez que se llame al servicio, se haga la detección completa y printee (o servicioMetricas) cuantos deadlocks hay
-	// y los entrenadores involucrados. Luego se pasa solo a resolucion. Queremos que el servicioDeadlock tenga un solo punto de entrada desde el planificador.
-	// Y devuelva una serie de tareas de intercambio que pueden ejecutarse en paralelo.
-
-	// NOTA IMPORTANTE: asumimos que un entrenador no va ser iniciado desde config con un pokemon que no necesita el equipo.
-
-	imprimirListaDeDependencias(listaDeDepencias);
-	if (1) {	// Flag aca
-		detectarEnDetalleYLogear(listaDeDepencias);
-	}
-
-	list_destroy_and_destroy_elements(listaDeDepencias, destruirDependencia);
-	list_destroy(entrenadoresFiltrados);
-	return true;
+	return listaDeDependencias;
 }
 
-// Funciones por ahora estáticas.
-
-void detectarEnDetalleYLogear(t_list* listaDeDepencias) {
+void detectarEnDetalleYLogear(ServicioDeResolucionDeDeadlocks* this, ListaDeDependencias listaDeDependencias) {
 	// listaDeDependencias no se toca!!
-	t_list* deadlocksTotales = list_create(); // es lista de listas
-	puts("caca");
-
-	for (int a = 0; a < list_size(listaDeDepencias); a++) {
-		Dependencias* dependenciaActual = (Dependencias*) list_get(listaDeDepencias, a);
+	ListaDeListaDeString deadlocksTotales = list_create(); // es lista de listas
+	log_info(MANDATORY_LOGGER, "Iniciando el algoritmo de detección de deadlocks...");
+	for (int a = 0; a < list_size(listaDeDependencias); a++) {
+		Dependencias* dependenciaActual = (Dependencias*) list_get(listaDeDependencias, a);
 		bool flag = false;
-		t_list* unDeadlock = list_create();
-
-		for (int b = 0; b < list_size(listaDeDepencias); b++) {
-			Dependencias* dependenciaIterada = (Dependencias*) list_get(listaDeDepencias, b);
+		ListaDeStrings unDeadlock = list_create();
+		for (int b = 0; b < list_size(listaDeDependencias); b++) {
+			Dependencias* dependenciaIterada = (Dependencias*) list_get(listaDeDependencias, b);
 			if (hayDependenciaEnComun(dependenciaActual, dependenciaIterada)) {
 				agregarCopiaDeElementosAListaSinRepetir(unDeadlock, dependenciaIterada->listaDependencias);
 			}
@@ -115,36 +91,66 @@ void detectarEnDetalleYLogear(t_list* listaDeDepencias) {
 		list_add(deadlocksTotales, unDeadlock);
 	}
 	// Deberia tener en deadlocks una entrada con una lista maxima, quiero sacarle los repetidos a esa lista y estaria ok. Con 1 lista por conjunto de procesos en deadlock.
-	puts("DEADLOCKS SIN PROCESAR:");
-	imprimirListaDeListas(deadlocksTotales);
-	t_list* deadlocks = eliminarListasRepetidas(deadlocksTotales);
-	puts("DEADLOCKS PROCESADOS:");
-
-	imprimirListaDeListas(deadlocks);
-
+	ListaDeListaDeString deadlocks = eliminarListasRepetidas(deadlocksTotales);
+	char* reporte = obtenerReporteDeadlocks(deadlocks);
+	log_info(MANDATORY_LOGGER, "Resultado del algoritmo de detección: %s", reporte);
+	free(reporte);
+	// Registrar en servicioDeMetricas la cantidad de deadlocks.
+	for (int a = 0; a < list_size(deadlocks); a++) {
+		this->servicioDeMetricas->registrarDeadlockProducido(this->servicioDeMetricas);
+		this->servicioDeMetricas->registrarDeadlockResuelto(this->servicioDeMetricas); // TODO: los deadlocks tienen que ser resueltos, sino el servicio de metricas no es llamado.
+	}
 	list_destroy_and_destroy_elements(deadlocksTotales, destruirListaDeStrings);
 	list_destroy(deadlocks);
 }
 
-void destruirDependencia(void * elem) {
-	Dependencias* dependencia = (Dependencias*) elem;
+t_list* resolverDeadlock(ServicioDeResolucionDeDeadlocks * this, ListaDeDependencias listaDeDependencias) {
+	puts("RESOLUCION:");
+	imprimirListaDeDependencias(listaDeDependencias);
+	return NULL;
+
+}
+
+// Funciones por ahora estáticas.
+
+char* obtenerReporteDeadlocks(t_list* deadlocks) {
+	char* reporte = string_new();
+	if (list_is_empty(deadlocks)) {
+		string_append(&reporte, "No se encontraron deadlocks");
+		return reporte;
+	}
+	string_append_with_format(&reporte, "Se encontraron '%d' deadlocks.", list_size(deadlocks));
+	for (int a = 0; a < list_size(deadlocks); a++) {
+		string_append_with_format(&reporte, " Deadlock %d entre: ", a + 1);
+		t_list* listaEntrenadores = (t_list*) list_get(deadlocks, a);
+		for (int b = 0; b < list_size(listaEntrenadores); b++) {
+			if (b == 0) {
+				string_append_with_format(&reporte, " '%s'", (char*) list_get(listaEntrenadores, b));
+			} else {
+				string_append_with_format(&reporte, ", '%s'", (char*) list_get(listaEntrenadores, b));
+			}
+		}
+		string_append(&reporte, ".");
+	}
+	return reporte;
+}
+
+void destruirDependencia(void * aDestruir) {
+	Dependencias* dependencia = (Dependencias*) aDestruir;
 	free(dependencia->nombreEntrenador);
 	list_destroy_and_destroy_elements(dependencia->listaDependencias, free);
 	free(dependencia);
 }
 
-void destruirListaDeStrings(void* elem) {
-	t_list* lista = (t_list*) elem;
-	list_destroy_and_destroy_elements(lista, free);
-}
-
-t_list* eliminarListasRepetidas(t_list* listaDeListas) {
-	t_list* listaConMismosElementos = list_duplicate(listaDeListas);
+ListaDeListaDeString eliminarListasRepetidas(ListaDeListaDeString listaDeListas) {
+	// Retorna un puntero con un subconjunto de los elementos de la lista que llega por parámetro.
+	// Fuera de esta función liberar con: list_destroy a la lista retornada, y list_destroy_and_elements a la lista que llega por parámetro.
+	ListaDeListaDeString listaConMismosElementos = list_duplicate(listaDeListas);
 	for (int a = 0; a < list_size(listaConMismosElementos); a++) {
-		t_list* listaActual = (t_list*) list_get(listaConMismosElementos, a);
+		ListaDeStrings listaActual = (ListaDeStrings) list_get(listaConMismosElementos, a);
 		for (int b = 0; b < list_size(listaConMismosElementos); b++) {
 			if (a != b) {
-				t_list* listaIterada = (t_list*) list_get(listaConMismosElementos, b);
+				ListaDeStrings listaIterada = (ListaDeStrings) list_get(listaConMismosElementos, b);
 				if (hayElementoEnComun(listaActual, listaIterada)) {
 					list_remove(listaConMismosElementos, a);
 				}
@@ -154,7 +160,8 @@ t_list* eliminarListasRepetidas(t_list* listaDeListas) {
 	return listaConMismosElementos;
 }
 
-void imprimirListaDeListas(t_list* listaDeListas) {
+void imprimirListaDeListas(ListaDeListaDeString listaDeListas) {
+	// Printea una lista de lista con strings.
 	puts("IMPRIENDO LISTA DE LISTAS:");
 	printf("TAMANIO LISTA DE LISTAS: %d\n", list_size(listaDeListas));
 	for (int a = 0; a < list_size(listaDeListas); a++) {
@@ -164,7 +171,7 @@ void imprimirListaDeListas(t_list* listaDeListas) {
 	}
 }
 
-void imprimirListaDeDependencias(t_list* listaDeDependencias) {
+void imprimirListaDeDependencias(ListaDeDependencias listaDeDependencias) {
 	puts("IMPRIMIENDO LISTA DE DEPENDENCIAS:");
 	printf("TAMANIO LISTA DE DEPENDENCIAS: %d\n", list_size(listaDeDependencias));
 	for (int a = 0; a < list_size(listaDeDependencias); a++) {
@@ -179,16 +186,8 @@ void imprimirDependencias(Dependencias* dependencias) {
 	imprimirListaStrings(dependencias->listaDependencias);
 }
 
-bool hayElementoEnComun(t_list* lista1, t_list* lista2) {
-	for (int a = 0; a < list_size(lista1); a++) {
-		char* elem = list_get(lista1, a);
-		if (perteneceALista(lista2, elem))
-			return true;
-	}
-	return false;
-}
-
 bool hayDependenciaEnComun(Dependencias* dependencia1, Dependencias* dependencia2) {
+	// Evalua la dependencia para deadlocks,
 	t_list* lista1 = copiarListaYElementos(dependencia1->listaDependencias);
 	list_add(lista1, string_duplicate(dependencia1->nombreEntrenador));
 	t_list* lista2 = copiarListaYElementos(dependencia2->listaDependencias);
@@ -199,13 +198,7 @@ bool hayDependenciaEnComun(Dependencias* dependencia1, Dependencias* dependencia
 	return resultado;
 }
 
-void agregarCopiaDeElementosAListaSinRepetir(t_list* listaQueRecibe, t_list* listaQueDa) {
-	for (int a = 0; a < list_size(listaQueDa); a++) {
-		agregarCopiaSinRepetir(listaQueRecibe, (char*) list_get(listaQueDa, a));
-	}
-}
-
-bool hayDependencias(t_list* listaCapturas, t_list* listaObjetivos) {
+bool hayDependencias(ListaDeStrings listaCapturas, ListaDeStrings listaObjetivos) {
 // Evalua si en la listaCapturas hay un elemento de listaObjetivos;
 	for (int a = 0; a < list_size(listaObjetivos); a++) {
 		char * elemActual = (char*) list_get(listaObjetivos, a);
@@ -219,30 +212,9 @@ bool hayDependencias(t_list* listaCapturas, t_list* listaObjetivos) {
 	return false;
 }
 
-t_list* restarPrimerListaASegunda(t_list* lista1, t_list* lista2) {
-	t_list* listaA = copiarListaYElementos(lista1);
-	t_list* listaB = copiarListaYElementos(lista2);
-	void recursion() {
-		for (int a = 0; a < list_size(listaA); a++) {
-			char * elemActual = (char*) list_get(listaA, a);
-			for (int b = 0; b < list_size(listaB); b++) {
-				char* elemIterado = (char*) list_get(listaB, b);
-				if (string_equals_ignore_case(elemActual, elemIterado)) {
-					list_remove_and_destroy_element(listaA, a, free);
-					list_remove_and_destroy_element(listaB, b, free);
-					recursion();
-				}
-			}
-		}
-	}
-	recursion();
-	list_destroy_and_destroy_elements(listaB, free);
-	return listaA;
-}
-
-t_list* obtenerListaDePokemon(ContadorPokemones contador) {
-// Crea una lista, los elementos son copia del original, para evitar posibles conflictos
-// list_destroy_and_elements cuando se termina de usar la lista.
+ListaDeStrings obtenerListaDePokemon(ContadorPokemones contador) {
+	// Crea una lista, los elementos son copia del original, para evitar posibles conflictos
+	// list_destroy_and_elements cuando se termina de usar la lista.
 	t_list* listaDePokemon = list_create();
 	void iterar(char* pokemon, void* cantidad) {
 		for (int a = 0; a < (int) cantidad; a++) {
@@ -253,35 +225,12 @@ t_list* obtenerListaDePokemon(ContadorPokemones contador) {
 	return listaDePokemon;
 }
 
-void imprimirListaStrings(t_list* lista) { // Por ahora con printf.
+void imprimirListaStrings(ListaDeStrings lista) { // Por ahora con printf.
 	void imprimirElemento(void* elem) {
 		char* string = (char*) elem;
 		printf("%s\n", string);
 	}
 	list_iterate(lista, imprimirElemento);
-}
-
-t_list* copiarListaYElementos(t_list* lista) {
-	t_list* retorno = list_create();
-	for (int a = 0; a < list_size(lista); a++) {
-		list_add(retorno, string_duplicate((char*) list_get(lista, a)));
-	}
-	return retorno;
-}
-
-void agregarCopiaSinRepetir(t_list* lista, char* elem) {
-	if (perteneceALista(lista, elem))
-		return;
-	else {
-		list_add(lista, string_duplicate(elem));
-	}
-}
-
-bool perteneceALista(t_list* lista, char* elem) {
-	bool esIgual(void* string) {
-		return string_equals_ignore_case(elem, (char*) string);
-	}
-	return list_any_satisfy(lista, esIgual);
 }
 
 // End funciones por ahora estáticas
@@ -292,11 +241,16 @@ static void destruirServicioDeResolucionDeDeadlocks(ServicioDeResolucionDeDeadlo
 	free(this);
 }
 
-static ServicioDeResolucionDeDeadlocks * new() {
+static ServicioDeResolucionDeDeadlocks * new(ServicioDeMetricas* servicioDeMetricas) {
 	ServicioDeResolucionDeDeadlocks * servicio = malloc(sizeof(ServicioDeResolucionDeDeadlocks));
 
 	servicio->logger = log_create(TEAM_INTERNAL_LOG_FILE, "ServicioDeResolucionDeDeadlocks", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_DEBUG);
-	servicio->detectarDeadlock = &detectarDeadlock;
+	servicio->primeraVez = true;
+	servicio->servicioDeMetricas = servicioDeMetricas;
+	servicio->procesarDeadlock = &procesarDeadlock;
+	servicio->crearListaDeDependencias = &crearListaDeDependencias;
+	servicio->detectarEnDetalleYLogear = &detectarEnDetalleYLogear;
+	servicio->resolverDeadlock = &resolverDeadlock;
 	servicio->destruir = &destruirServicioDeResolucionDeDeadlocks;
 
 	return servicio;

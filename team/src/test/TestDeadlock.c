@@ -11,7 +11,8 @@ void testDeadlock() {
 	t_log * testLogger = log_create(TEAM_INTERNAL_LOG_FILE, "TestDeadlock", 1, LOG_LEVEL_DEBUG);
 	log_info(testLogger, "Testeando deadlocks");
 
-	ServicioDeResolucionDeDeadlocks* servicioDeadlockTest = ServicioDeResolucionDeDeadlocksConstructor.new();
+	ServicioDeMetricas* servicioMetricasTest = ServicioDeMetricasConstructor.new();
+	ServicioDeResolucionDeDeadlocks* servicioDeadlockTest = ServicioDeResolucionDeDeadlocksConstructor.new(servicioMetricasTest);
 
 	t_list* listaEntrenadores = list_create();
 
@@ -32,9 +33,9 @@ void testDeadlock() {
 	list_add(listaEntrenadores, entrenador2);
 	list_add(listaEntrenadores, entrenador3);
 
-	servicioDeadlockTest->detectarDeadlock(servicioDeadlockTest, listaEntrenadores);
+	servicioDeadlockTest->procesarDeadlock(servicioDeadlockTest, listaEntrenadores);
 
-	log_info(testLogger, "Dos deadlocks: ASH y GANDALF. BROCK y ARAGORN");
+	log_info(testLogger, "Deberia haber dos deadlocks: ASH y GANDALF. BROCK y ARAGORN");
 	t_list* lista2 = list_create();
 	Entrenador * entrenador4 = EntrenadorConstructor.new("1|2", "X|Y|A", "X|Y|G"); // posicion, iniciales, objetivo.
 	free(entrenador4->id);
@@ -52,14 +53,13 @@ void testDeadlock() {
 	free(entrenador7->id);
 	entrenador7->id = string_duplicate("GANDALF");
 
-
-
 	list_add(lista2, entrenador4);
 	list_add(lista2, entrenador5);
 	list_add(lista2, entrenador6);
 	list_add(lista2, entrenador7);
 
-	servicioDeadlockTest->detectarDeadlock(servicioDeadlockTest, lista2);
+	servicioDeadlockTest->primeraVez = true;
+	servicioDeadlockTest->procesarDeadlock(servicioDeadlockTest, lista2);
 
 	entrenador->destruir(entrenador);
 	entrenador2->destruir(entrenador2);
@@ -70,6 +70,7 @@ void testDeadlock() {
 	entrenador7->destruir(entrenador7);
 
 	servicioDeadlockTest->destruir(servicioDeadlockTest);
+	servicioMetricasTest->destruir(servicioMetricasTest);
 	log_destroy(testLogger);
 	list_destroy(listaEntrenadores);
 	list_destroy(lista2);
