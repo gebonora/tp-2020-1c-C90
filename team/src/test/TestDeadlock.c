@@ -33,7 +33,8 @@ void testDeadlock() {
 	list_add(listaEntrenadores, entrenador2);
 	list_add(listaEntrenadores, entrenador3);
 
-	servicioDeadlockTest->procesarDeadlock(servicioDeadlockTest, listaEntrenadores);
+	t_list* resultado = servicioDeadlockTest->procesarDeadlock(servicioDeadlockTest, listaEntrenadores);
+	list_destroy_and_destroy_elements(resultado, destruirIntercambio);
 
 	log_info(testLogger, "Deberia haber dos deadlocks: ASH y GANDALF. BROCK y ARAGORN");
 	t_list* lista2 = list_create();
@@ -59,20 +60,72 @@ void testDeadlock() {
 	list_add(lista2, entrenador7);
 
 	servicioDeadlockTest->primeraVez = true;
-	servicioDeadlockTest->procesarDeadlock(servicioDeadlockTest, lista2);
+	t_list* resultado1 = servicioDeadlockTest->procesarDeadlock(servicioDeadlockTest, lista2);
+	list_destroy_and_destroy_elements(resultado1, destruirIntercambio);
 
-	entrenador->destruir(entrenador);
-	entrenador2->destruir(entrenador2);
-	entrenador3->destruir(entrenador3);
-	entrenador4->destruir(entrenador4);
-	entrenador5->destruir(entrenador5);
-	entrenador6->destruir(entrenador6);
-	entrenador7->destruir(entrenador7);
+	log_info(testLogger, "Deberia haber tres deadlocks: ");
+
+	t_list* lista3 = list_create();
+
+	Entrenador * e1 = EntrenadorConstructor.new("2|4", "A", "B");
+	free(e1->id);
+	e1->id = string_from_format("D1E1");
+
+	Entrenador * e2 = EntrenadorConstructor.new("2|4", "B", "C");
+	free(e2->id);
+	e2->id = string_from_format("D1E2");
+
+	Entrenador * e3 = EntrenadorConstructor.new("2|4", "C", "A");
+	free(e3->id);
+	e3->id = string_from_format("D1E3");
+
+	Entrenador * e4 = EntrenadorConstructor.new("2|4", "1", "2");
+	free(e4->id);
+	e4->id = string_from_format("circularE1");
+
+	Entrenador * e5 = EntrenadorConstructor.new("2|4", "2", "3");
+	free(e5->id);
+	e5->id = string_from_format("ciruclarE2");
+
+	Entrenador * e6 = EntrenadorConstructor.new("2|4", "3", "4");
+	free(e6->id);
+	e6->id = string_from_format("circukarE3");
+
+	Entrenador * e7 = EntrenadorConstructor.new("2|4", "4", "1");
+	free(e7->id);
+	e7->id = string_from_format("circularE4");
+
+	Entrenador * e8 = EntrenadorConstructor.new("2|4", "AA|CC|BB|ESTE", "AA|CC|BB|OTRO");
+	free(e8->id);
+	e8->id = string_from_format("D3E1");
+
+	Entrenador * e9 = EntrenadorConstructor.new("2|4", "C|OTRO", "C|ESTE");
+	free(e9->id);
+	e9->id = string_from_format("D3E2");
+
+	list_add(lista3, e1);
+	list_add(lista3, e2);
+	list_add(lista3, e3);
+	list_add(lista3, e4);
+	list_add(lista3, e5);
+	list_add(lista3, e6);
+	list_add(lista3, e7);
+	list_add(lista3, e8);
+	list_add(lista3, e9);
+
+	servicioDeadlockTest->primeraVez = true;
+	t_list* resultado2 = servicioDeadlockTest->procesarDeadlock(servicioDeadlockTest, lista3);
+	list_destroy_and_destroy_elements(resultado2, destruirIntercambio);
 
 	servicioDeadlockTest->destruir(servicioDeadlockTest);
 	servicioMetricasTest->destruir(servicioMetricasTest);
 	log_destroy(testLogger);
-	list_destroy(listaEntrenadores);
-	list_destroy(lista2);
+	void killEntrenador(void* elem) {
+		Entrenador* this = (Entrenador*) elem;
+		this->destruir(this);
+	}
+	list_destroy_and_destroy_elements(listaEntrenadores, killEntrenador);
+	list_destroy_and_destroy_elements(lista2, killEntrenador);
+	list_destroy_and_destroy_elements(lista3, killEntrenador);
 
 }

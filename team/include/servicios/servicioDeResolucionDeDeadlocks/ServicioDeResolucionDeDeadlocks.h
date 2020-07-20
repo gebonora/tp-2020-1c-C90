@@ -80,6 +80,8 @@ void imprimirListaDeDependencias(ListaDeDependencias listaDeDependencias);
 bool hayDependenciaEnComun(Dependencias* dependencia1, Dependencias* dependencia2);
 ListaDeStrings eliminarListasRepetidas(ListaDeStrings listaDeListas);
 void destruirDependencia(void * elem);
+void destruirIntercambio(void* aDestruir);
 char* obtenerReporteDeadlocks(t_list* deadlocks);
+ListaDeListaDeString sumarListasSiHayMatch(ListaDeListaDeString listaDeListas);
 
 #endif /* INCLUDE_SERVICIOS_SERVICIODERESOLUCIONDEDEADLOCKS_SERVICIODERESOLUCIONDEDEADLOCKS_H_ */

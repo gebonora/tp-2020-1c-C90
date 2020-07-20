@@ -5,27 +5,27 @@
 #include "utils/colecciones/ExtensionColecciones.h"
 
 t_list * list_from(void ** array) {
-    t_list * lista = list_create();
+	t_list * lista = list_create();
 
-    void ** comienzo = array;
-    while(*comienzo != NULL) {
-        list_add(lista, *comienzo);
-        comienzo++;
-    }
+	void ** comienzo = array;
+	while (*comienzo != NULL) {
+		list_add(lista, *comienzo);
+		comienzo++;
+	}
 
-    return lista;
+	return lista;
 }
 
 t_list * dictionary_keys(t_dictionary * dict) {
-    t_list * claves = list_create();
+	t_list * claves = list_create();
 
-    void obtenerClaves(char * clave, void * valor) {
-        list_add(claves, clave);
-    }
+	void obtenerClaves(char * clave, void * valor) {
+		list_add(claves, clave);
+	}
 
-    dictionary_iterator(dict, obtenerClaves);
+	dictionary_iterator(dict, obtenerClaves);
 
-    return claves;
+	return claves;
 }
 
 void destruirListaDeStrings(void* aDestruir) {
