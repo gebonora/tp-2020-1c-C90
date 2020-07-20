@@ -34,6 +34,16 @@
  *
  */
 
+typedef struct Intercambio { // Esto puede definir tambien que pokemon dan / reciben, o lo dejamos que lo determine el que genera la tarea (me gusta mas esto)
+	char* entrenadorQueSeMueve;
+	char* entrenadorQueEspera;
+} Intercambio;
+
+typedef struct Dependencias {
+	char* nombreEntrenador;
+	t_list* listaDependencias;
+} Dependencias;
+
 typedef struct ServicioDeResolucionDeDeadlocks {
 	t_log * logger;
 	//Interfaz publica
@@ -58,5 +68,18 @@ t_list* obtenerListaDePokemon(ContadorPokemones contador);
 void imprimirListaStrings(t_list* lista);
 t_list* restarPrimerListaASegunda(t_list* lista1, t_list* lista2);
 t_list* copiarListaYElementos(t_list* lista);
+void agregarCopiaSinRepetir(t_list* lista, char* elem);
+bool perteneceALista(t_list* lista, char* elem);
+void agregarCopiaDeElementosAListaSinRepetir(t_list* listaQueRecibe, t_list* listaQueDa);
+bool hayElementoEnComun(t_list* lista1, t_list* lista2);
+void detectarEnDetalleYLogear(t_list* listaDeListas);
+bool hayDependencias(t_list* listaCapturas, t_list* listaObjetivos);
+void imprimirListaDeListas(t_list* listaDeListas);
+void imprimirDependencias(Dependencias* dependencias);
+void imprimirListaDeDependencias(t_list* listaDeDependencias);
+bool hayDependenciaEnComun(Dependencias* dependencia1, Dependencias* dependencia2);
+t_list* eliminarListasRepetidas(t_list* listaDeListas);
+void destruirListaDeStrings(void* elem);
+void destruirDependencia(void * elem);
 
 #endif /* INCLUDE_SERVICIOS_SERVICIODERESOLUCIONDEDEADLOCKS_SERVICIODERESOLUCIONDEDEADLOCKS_H_ */
