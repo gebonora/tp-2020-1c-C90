@@ -43,10 +43,6 @@ void logearLocalizedProcesado(Localized* unLocalized, uint32_t idMensaje);
 
 char* logCoordenadas(t_list* listaCoor);
 
-#define PATH_LOGGER_MAIN "logs/loggerMain.log"
-#define PATH_LOGGER_NEW "logs/loggerNew.log"
-#define PATH_LOGGER_CATCH "logs/loggerCatch.log"
-#define PATH_LOGGER_GET "logs/loggerGet.log"
-#define PATH_LOGGER_GAMEBOY "logs/loggerGameboy.log"
+#define PATH_LOGGER_GAMECARD "logs/logGamecard.log"
 
 #endif /* GAMECARD_INCLUDE_LOGGER_H_ */
