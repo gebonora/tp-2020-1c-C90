@@ -21,6 +21,9 @@ void init_server() {
         if ((socket_servidor = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1)
             continue;
 
+        if(setsockopt(socket_servidor, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int)) == -1)
+        	continue;
+
         if (bind(socket_servidor, p->ai_addr, p->ai_addrlen) == -1) {
             close(socket_servidor);
             continue;
@@ -78,7 +81,7 @@ static void _process_request(uint32_t cod_op, int socket) {
 
 			send(socket, &generated_id, sizeof(uint32_t), 0);
 
-			save_message(new_pokemon, NEW, generated_id, correlational_id);
+			send_message(new_pokemon, NEW, generated_id, correlational_id);
 
 			free_new(new_pokemon);
 		} else {
@@ -99,7 +102,7 @@ static void _process_request(uint32_t cod_op, int socket) {
 
 				send(socket, &generated_id, sizeof(uint32_t), 0);
 
-				save_message(caught_pokemon, CAUGHT, generated_id, correlational_id);
+				send_message(caught_pokemon, CAUGHT, generated_id, correlational_id);
 
 				free(caught_pokemon);
 			}
@@ -116,7 +119,7 @@ static void _process_request(uint32_t cod_op, int socket) {
 
 			send(socket, &generated_id, sizeof(uint32_t), 0);
 
-			save_message(get_pokemon, GET, generated_id, correlational_id);
+			send_message(get_pokemon, GET, generated_id, correlational_id);
 
 			free_get(get_pokemon);
 		} else {
@@ -128,21 +131,21 @@ static void _process_request(uint32_t cod_op, int socket) {
 		Localized* localized_pokemon = recv_localized(socket);
 
 		if(localized_pokemon != NULL){
+			log_info(LOGGER, "Me llego un localized (name=%s, coordinates_quantity=%d)", localized_pokemon->pokemon->name->value, localized_pokemon->coordinates_quantity);
+			for(int i = 0; i < localized_pokemon->coordinates_quantity; i++) {
+				Coordinate* loc_coordinate = list_get(localized_pokemon->pokemon->coordinates, i);
+				log_info(LOGGER, "Coordenada (x=%d, y=%d)", loc_coordinate->pos_x, loc_coordinate->pos_y);
+			}
 			int result = recv(socket,&correlational_id,sizeof(uint32_t),0);
 			if (result > 0) {
-				log_info(LOGGER, "Me llego un localized");
-				log_info(LOGGER, "Nombre del pokemon: %s", localized_pokemon->pokemon->name->value);
-				log_info(LOGGER, "Cantidad de coordenadas: %d", localized_pokemon->coordinates_quantity);
-				for(int i = 0; i < localized_pokemon->coordinates_quantity; i++) {
-					Coordinate* loc_coordinate = list_get(localized_pokemon->pokemon->coordinates, i);
-					log_info(LOGGER, "Coordenada: x=%d, y=%d", loc_coordinate->pos_x, loc_coordinate->pos_y);
-				}
-
+				log_info(LOGGER, "Correlative ID: %d", correlational_id);
 				send(socket, &generated_id, sizeof(uint32_t), 0);
 
-				save_message(localized_pokemon, LOCALIZED, generated_id, correlational_id);
+				send_message(localized_pokemon, LOCALIZED, generated_id, correlational_id);
 
 				free_localized(localized_pokemon);
+			} else {
+				log_info(LOGGER, "Se cayo el cliente %d", socket);
 			}
 		} else {
 			log_info(LOGGER, "Se cayo el cliente: %d", socket);
@@ -163,7 +166,7 @@ static void _process_request(uint32_t cod_op, int socket) {
 
 				send(socket, &generated_id, sizeof(uint32_t), 0);
 
-				save_message(appeared_pokemon, APPEARED, generated_id, correlational_id);
+				send_message(appeared_pokemon, APPEARED, generated_id, correlational_id);
 
 				free_pokemon(appeared_pokemon);
 			}
@@ -182,7 +185,7 @@ static void _process_request(uint32_t cod_op, int socket) {
 
 			send(socket, &generated_id, sizeof(uint32_t), 0);
 
-			save_message(catch_pokemon, CATCH, generated_id, correlational_id);
+			send_message(catch_pokemon, CATCH, generated_id, correlational_id);
 
 			free_pokemon(catch_pokemon);
 		} else {
@@ -215,25 +218,32 @@ static void _process_request(uint32_t cod_op, int socket) {
 			break;
 		}
 
-		char* op = get_operation_by_value(cod_cola);
-		pthread_mutex_lock(&MUTEX_SUBSCRIBERS_BY_QUEUE);
-		t_list* subscribers = dictionary_get(SUBSCRIBERS_BY_QUEUE, op);
-		list_add(subscribers, socket);
-		pthread_mutex_unlock(&MUTEX_SUBSCRIBERS_BY_QUEUE);
+		log_info(LOGGER, "Suscripcion (process=%s, id=%d, queue=%s, socket=%d)", get_process_by_value(cod_process), process_id, get_operation_by_value(cod_cola), socket);
 
-		log_info(LOGGER, "Suscripcion del proceso: %d, con id: %d", cod_process, process_id);
-		log_info(LOGGER, "Suscripcion en cola: %d", cod_cola);
-
-		// esto es de prueba nomas, cuando funcionen las queues y los envios hay que borrarlo
-		while(1) {
-			Result result =  OK;
-			if(send(socket, &result, sizeof(Result), MSG_NOSIGNAL) < 0) {
-				log_info(LOGGER, "Client is down, closing connection");
-				break;
-			}
-			log_info(LOGGER, "Message sent");
-			sleep(1);
+		bool _inline_find_subscriber(Subscriber* to_compare) {
+			return cod_process == to_compare->process && process_id == to_compare->id;
 		}
+
+		pthread_mutex_lock(&MUTEX_SUBSCRIBERS_BY_QUEUE);
+		t_list* subscribers = dictionary_get(SUBSCRIBERS_BY_QUEUE, get_operation_by_value(cod_cola));
+		Subscriber* subscriber = list_find(subscribers, &_inline_find_subscriber);
+
+		// si existe en la lista solo hay que actualizar el socket, sino lo agrego a la lista
+		if (subscriber != NULL) {
+			log_debug(LOGGER, "Subscriber already in list, updating socket from=%d, to=%d", subscriber->socket_subscriber, socket);
+			subscriber->socket_subscriber = socket;
+		} else {
+			log_debug(LOGGER, "Subscriber not present in list, creating new one");
+			subscriber = malloc(sizeof(Subscriber));
+			subscriber->id = process_id;
+			subscriber->process = (Process) cod_process;
+			subscriber->socket_subscriber = socket;
+			list_add(subscribers, subscriber);
+		}
+
+		consumer_queue(cod_cola, subscriber);
+
+		pthread_mutex_unlock(&MUTEX_SUBSCRIBERS_BY_QUEUE);
 
 		break;
 	case -1:

@@ -4,7 +4,6 @@ static void _init_logger();
 static void _init_config();
 static void _init_semaphores();
 static void _init_context();
-static void _init_threads();
 static void _init_memory();
 static void _init_dump();
 
@@ -13,7 +12,6 @@ int main(){
 	_init_config();
 	_init_semaphores();
 	_init_context();
-	_init_threads();
 	_init_memory();
 	_init_dump();
 	// TODO: esto borrarlo luego de los tests
@@ -62,13 +60,6 @@ static void _init_semaphores() {
 	pthread_mutex_init(&MUTEX_SUBSCRIBERS_BY_QUEUE, NULL);
 	pthread_mutex_init(&MUTEX_MEMORY, NULL);
 
-	sem_init(&NEW_MESSAGES, 0, 0);
-	sem_init(&APPEARED_MESSAGES, 0, 0);
-	sem_init(&GET_MESSAGES, 0, 0);
-	sem_init(&LOCALIZED_MESSAGES, 0, 0);
-	sem_init(&CATCH_MESSAGES, 0, 0);
-	sem_init(&CAUGHT_MESSAGES, 0, 0);
-	sem_init(&SUBSCRIBERS, 0, 0);
 }
 
 static void _init_context() {
@@ -80,32 +71,6 @@ static void _init_context() {
 	dictionary_put(SUBSCRIBERS_BY_QUEUE, "LOCALIZED", list_create());
 	dictionary_put(SUBSCRIBERS_BY_QUEUE, "CATCH", list_create());
 	dictionary_put(SUBSCRIBERS_BY_QUEUE, "CAUGHT", list_create());
-}
-
-static void _init_threads() {
-	pthread_t thread_new;
-	pthread_create(&thread_new, NULL,(void*)consumer_new_queue, NULL);
-	pthread_detach(thread_new);
-
-	pthread_t thread_get;
-	pthread_create(&thread_get, NULL,(void*)consumer_get_queue, NULL);
-	pthread_detach(thread_get);
-
-	pthread_t thread_appeared;
-	pthread_create(&thread_appeared, NULL,(void*)consumer_appeared_queue, NULL);
-	pthread_detach(thread_appeared);
-
-	pthread_t thread_localized;
-	pthread_create(&thread_localized, NULL,(void*)consumer_localized_queue, NULL);
-	pthread_detach(thread_localized);
-
-	pthread_t thread_catch;
-	pthread_create(&thread_catch, NULL,(void*)consumer_catch_queue, NULL);
-	pthread_detach(thread_new);
-
-	pthread_t thread_caught;
-	pthread_create(&thread_caught, NULL,(void*)consumer_caught_queue, NULL);
-	pthread_detach(thread_caught);
 }
 
 static void _init_memory() {

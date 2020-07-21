@@ -7,7 +7,7 @@ static Partition* _negative_frecuency(uint32_t);
 static Partition* _positive_frecuency(uint32_t);
 static Partition* _zero_frecuency(uint32_t);
 
-void save_to_cache_dynamic_partitions(void* data, Message* message){
+Partition* save_to_cache_dynamic_partitions(void* data, Message* message){
 	Partition* partition;
 
 	log_debug(LOGGER, "Frecuencia Compactacion: %d", FRECUENCIA_COMPACTACION);
@@ -25,6 +25,7 @@ void save_to_cache_dynamic_partitions(void* data, Message* message){
 	log_debug(LOGGER, "Copying bytes to cache");
 	memcpy(partition->start, data, message->data_size);
 	log_debug(LOGGER, "memcpy done");
+	return partition;
 }
 
 /*

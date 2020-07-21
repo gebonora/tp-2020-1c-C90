@@ -35,20 +35,8 @@ char* ALGORITMO_PARTICION_LIBRE;
 
 uint32_t MESSAGE_ID;
 t_log* LOGGER;
-pthread_mutex_t MUTEX_NEW_QUEUE;
-pthread_mutex_t MUTEX_APPEARED_QUEUE;
-pthread_mutex_t MUTEX_GET_QUEUE;
-pthread_mutex_t MUTEX_LOCALIZED_QUEUE;
-pthread_mutex_t MUTEX_CATCH_QUEUE;
-pthread_mutex_t MUTEX_CAUGHT_QUEUE;
 pthread_mutex_t MUTEX_MESSAGE_ID;
 pthread_mutex_t MUTEX_MEMORY;
-sem_t NEW_MESSAGES;
-sem_t APPEARED_MESSAGES;
-sem_t GET_MESSAGES;
-sem_t LOCALIZED_MESSAGES;
-sem_t CATCH_MESSAGES;
-sem_t CAUGHT_MESSAGES;
 
 t_dictionary* SUBSCRIBERS_BY_QUEUE;
 pthread_mutex_t MUTEX_SUBSCRIBERS_BY_QUEUE;
@@ -69,7 +57,7 @@ typedef struct {
 typedef struct {
 	Process process;
 	uint32_t id;
-	int socket;
+	int socket_subscriber;
 } Subscriber;
 
 typedef struct {

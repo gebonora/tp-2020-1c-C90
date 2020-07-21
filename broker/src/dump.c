@@ -3,6 +3,7 @@
 static void _create_dump();
 static void _show_memory_status();
 static void _show_partition(Partition*, int);
+static void _show_subscriber(Subscriber*);
 static void _show_message(Message*);
 
 void dump_handler(int signum) {
@@ -72,7 +73,12 @@ static void _show_partition(Partition* partition, int number) {
 	if(!partition->free) {
 		_show_message(partition->message);
 	}
+	list_iterate(partition->notified_suscribers, &_show_subscriber);
 	log_info(LOGGER, "--------------------------------");
+}
+
+static void _show_subscriber(Subscriber* subscriber) {
+	log_info(LOGGER, "Notified Subscriber (process=%s, id=%d, socket=%d)", get_process_by_value(subscriber->process), subscriber->id, subscriber->socket_subscriber);
 }
 
 static void _show_message(Message* message) {
