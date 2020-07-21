@@ -15,7 +15,7 @@ t_list* procesarDeadlock(ServicioDeResolucionDeDeadlocks * this, t_list* entrena
 	 *
 	 * 		Adentro de esta funcion llamo a resolverDeadlock, que retorna una serie de tareas para resolver los deadlocks.
 	 */
-	bool esProcesable(void* elem) { // Capaz sacarla afuera.
+	bool esProcesable(void* elem) {
 		Entrenador* entrenador = (Entrenador*) elem;
 		return !entrenador->estaIntercambiando;
 	}
@@ -23,7 +23,7 @@ t_list* procesarDeadlock(ServicioDeResolucionDeDeadlocks * this, t_list* entrena
 
 	ListaDeDependencias listaDeDependencias = this->crearListaDeDependencias(this, entrenadoresFiltrados);
 
-	if (this->primeraVez) {	// Flag aca
+	if (this->primeraVez) {
 		this->detectarEnDetalleYLogear(this, listaDeDependencias);
 		this->primeraVez = false;
 	}
@@ -45,6 +45,13 @@ ListaDeDependencias crearListaDeDependencias(ServicioDeResolucionDeDeadlocks* th
 		ListaDeStrings listaObjetivosEntrenadorActual = obtenerListaDePokemon(entrenadorActual->pokemonesObjetivo);
 		ListaDeStrings objetivosFiltrados = restarPrimerListaASegunda(listaObjetivosEntrenadorActual, listaCapturasEntrenadorActual); // Devuelve nueva lista con copia de elementos.
 
+		if (list_is_empty(objetivosFiltrados)) { // Lista vacia
+			list_destroy_and_destroy_elements(listaCapturasEntrenadorActual, free);
+			list_destroy_and_destroy_elements(listaObjetivosEntrenadorActual, free);
+			list_destroy_and_destroy_elements(objetivosFiltrados, free);
+			continue;
+		}
+
 		Dependencias* dependenciasEntrenadorActual = malloc(sizeof(Dependencias));
 		dependenciasEntrenadorActual->nombreEntrenador = string_duplicate(entrenadorActual->id);
 		dependenciasEntrenadorActual->listaDependencias = list_create();
@@ -55,6 +62,7 @@ ListaDeDependencias crearListaDeDependencias(ServicioDeResolucionDeDeadlocks* th
 				ListaDeStrings listaCapturasEntrenadorIterando = obtenerListaDePokemon(entrenadorIterando->pokemonesCapturados);
 				ListaDeStrings listaObjetivosEntrenadorIterando = obtenerListaDePokemon(entrenadorIterando->pokemonesObjetivo);
 				ListaDeStrings capturasFiltradasEntrenadorIterando = restarPrimerListaASegunda(listaCapturasEntrenadorIterando, listaObjetivosEntrenadorIterando);
+
 				if (hayDependencias(capturasFiltradasEntrenadorIterando, objetivosFiltrados)) {
 					list_add(dependenciasEntrenadorActual->listaDependencias, string_duplicate(entrenadorIterando->id));
 				}
@@ -66,7 +74,7 @@ ListaDeDependencias crearListaDeDependencias(ServicioDeResolucionDeDeadlocks* th
 		list_destroy_and_destroy_elements(listaCapturasEntrenadorActual, free);
 		list_destroy_and_destroy_elements(listaObjetivosEntrenadorActual, free);
 		list_destroy_and_destroy_elements(objetivosFiltrados, free);
-		if (list_size(dependenciasEntrenadorActual->listaDependencias)) {
+		if (!list_is_empty(dependenciasEntrenadorActual->listaDependencias)) {
 			list_add(listaDeDependencias, dependenciasEntrenadorActual);
 		} else {
 			destruirDependencia(dependenciasEntrenadorActual);
@@ -89,8 +97,6 @@ void detectarEnDetalleYLogear(ServicioDeResolucionDeDeadlocks* this, ListaDeDepe
 			if (hayDependenciaEnComun(dependenciaActual, dependenciaIterada)) {
 				agregarCopiaDeElementosAListaSinRepetir(unDeadlock, dependenciaIterada->listaDependencias);
 				agregarCopiaDeElementosAListaSinRepetir(unDeadlock, dependenciaActual->listaDependencias);
-				//	agregarCopiaSinRepetir(unDeadlock, dependenciaIterada->nombreEntrenador);
-				//agregarCopiaSinRepetir(unDeadlock, dependenciaActual->nombreEntrenador);
 			}
 		}
 		list_add(deadlocksTotales, unDeadlock);
@@ -98,7 +104,9 @@ void detectarEnDetalleYLogear(ServicioDeResolucionDeDeadlocks* this, ListaDeDepe
 	// Deberia tener en deadlocks una entrada con una lista maxima, quiero sacarle los repetidos a esa lista y estaria ok. Con 1 lista por conjunto de procesos en deadlock.
 	ListaDeListaDeString aux = sumarListasSiHayMatch(deadlocksTotales);
 	list_destroy_and_destroy_elements(deadlocksTotales, destruirListaDeStrings);
-	imprimirListaDeListas(aux);
+
+	// Descomentar para debug.
+	//imprimirListaDeListas(aux);
 
 	ListaDeListaDeString deadlocks = eliminarListasRepetidas(aux);
 	char* reporte = obtenerReporteDeadlocks(deadlocks);
@@ -107,15 +115,13 @@ void detectarEnDetalleYLogear(ServicioDeResolucionDeDeadlocks* this, ListaDeDepe
 	// Registrar en servicioDeMetricas la cantidad de deadlocks.
 	for (int a = 0; a < list_size(deadlocks); a++) {
 		this->servicioDeMetricas->registrarDeadlockProducido(this->servicioDeMetricas);
-		this->servicioDeMetricas->registrarDeadlockResuelto(this->servicioDeMetricas); // TODO: los deadlocks tienen que ser resueltos, sino el servicio de metricas no es llamado.
+		this->servicioDeMetricas->registrarDeadlockResuelto(this->servicioDeMetricas); // Con nuestro diseño metricas informa al final, entonces los deadlocks se resolvieron.
 	}
 	list_destroy_and_destroy_elements(aux, destruirListaDeStrings);
 	list_destroy(deadlocks);
 }
 
 t_list* resolverDeadlock(ServicioDeResolucionDeDeadlocks * this, ListaDeDependencias listaDeDependencias) {
-	puts("RESOLUCION:");
-	imprimirListaDeDependencias(listaDeDependencias);
 	ListaDeStrings listaInvolucrados = list_create();
 	t_list* listaDeIntercambios = list_create();
 
@@ -124,7 +130,7 @@ t_list* resolverDeadlock(ServicioDeResolucionDeDeadlocks * this, ListaDeDependen
 		if (!perteneceALista(listaInvolucrados, dependenciaActual->nombreEntrenador)) {
 			for (int b = 0; b < list_size(dependenciaActual->listaDependencias); b++) {
 				char* nombreIterado = (char*) list_get(dependenciaActual->listaDependencias, b);
-				if (!perteneceALista(listaInvolucrados, nombreIterado)) {
+				if (!perteneceALista(listaInvolucrados, nombreIterado) && !perteneceALista(listaInvolucrados, dependenciaActual->nombreEntrenador)) {
 					Intercambio* intercambio = malloc(sizeof(Intercambio));
 					intercambio->entrenadorQueSeMueve = string_duplicate(dependenciaActual->nombreEntrenador);
 					intercambio->entrenadorQueEspera = string_duplicate(nombreIterado);
@@ -141,7 +147,30 @@ t_list* resolverDeadlock(ServicioDeResolucionDeDeadlocks * this, ListaDeDependen
 	return listaDeIntercambios;
 }
 
-// Funciones por ahora estáticas.
+static void destruirServicioDeResolucionDeDeadlocks(ServicioDeResolucionDeDeadlocks * this) {
+	log_debug(this->logger, "Se procede a destruir al servicio de resolución de deadlocks");
+	log_destroy(this->logger);
+	free(this);
+}
+
+static ServicioDeResolucionDeDeadlocks * new(ServicioDeMetricas* servicioDeMetricas) {
+	ServicioDeResolucionDeDeadlocks * servicio = malloc(sizeof(ServicioDeResolucionDeDeadlocks));
+
+	servicio->logger = log_create(TEAM_INTERNAL_LOG_FILE, "ServicioDeResolucionDeDeadlocks", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_DEBUG);
+	servicio->primeraVez = true;
+	servicio->servicioDeMetricas = servicioDeMetricas;
+	servicio->procesarDeadlock = &procesarDeadlock;
+	servicio->crearListaDeDependencias = &crearListaDeDependencias;
+	servicio->detectarEnDetalleYLogear = &detectarEnDetalleYLogear;
+	servicio->resolverDeadlock = &resolverDeadlock;
+	servicio->destruir = &destruirServicioDeResolucionDeDeadlocks;
+
+	return servicio;
+}
+
+const struct ServicioDeResolucionDeDeadlocksClass ServicioDeResolucionDeDeadlocksConstructor = { .new = &new };
+
+// Funciones estáticas.
 
 char* obtenerReporteDeadlocks(t_list* deadlocks) {
 	char* reporte = string_new();
@@ -196,8 +225,8 @@ ListaDeListaDeString sumarListasSiHayMatch(ListaDeListaDeString listaDeListas) {
 }
 
 ListaDeListaDeString eliminarListasRepetidas(ListaDeListaDeString listaDeListas) {
-// Retorna un puntero con un subconjunto de los elementos de la lista que llega por parámetro.
-// Fuera de esta función liberar con: list_destroy a la lista retornada, y list_destroy_and_elements a la lista que llega por parámetro.
+	// Retorna un puntero con un subconjunto de los elementos de la lista que llega por parámetro.
+	// Fuera de esta función liberar con: list_destroy a la lista retornada, y list_destroy_and_elements a la lista que llega por parámetro.
 
 	ListaDeListaDeString resultado = list_create();
 	ListaDeStrings buffer = list_create();
@@ -285,27 +314,3 @@ void imprimirListaStrings(ListaDeStrings lista) { // Por ahora con printf.
 	list_iterate(lista, imprimirElemento);
 }
 
-// End funciones por ahora estáticas
-
-static void destruirServicioDeResolucionDeDeadlocks(ServicioDeResolucionDeDeadlocks * this) {
-	log_debug(this->logger, "Se procede a destruir al servicio de resolución de deadlocks");
-	log_destroy(this->logger);
-	free(this);
-}
-
-static ServicioDeResolucionDeDeadlocks * new(ServicioDeMetricas* servicioDeMetricas) {
-	ServicioDeResolucionDeDeadlocks * servicio = malloc(sizeof(ServicioDeResolucionDeDeadlocks));
-
-	servicio->logger = log_create(TEAM_INTERNAL_LOG_FILE, "ServicioDeResolucionDeDeadlocks", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_DEBUG);
-	servicio->primeraVez = true;
-	servicio->servicioDeMetricas = servicioDeMetricas;
-	servicio->procesarDeadlock = &procesarDeadlock;
-	servicio->crearListaDeDependencias = &crearListaDeDependencias;
-	servicio->detectarEnDetalleYLogear = &detectarEnDetalleYLogear;
-	servicio->resolverDeadlock = &resolverDeadlock;
-	servicio->destruir = &destruirServicioDeResolucionDeDeadlocks;
-
-	return servicio;
-}
-
-const struct ServicioDeResolucionDeDeadlocksClass ServicioDeResolucionDeDeadlocksConstructor = { .new = &new };

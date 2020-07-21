@@ -117,6 +117,45 @@ void testDeadlock() {
 	t_list* resultado2 = servicioDeadlockTest->procesarDeadlock(servicioDeadlockTest, lista3);
 	list_destroy_and_destroy_elements(resultado2, destruirIntercambio);
 
+	log_info(testLogger, "Debería haber deadlock entre todos:");
+
+	t_list* lista4 = list_create();
+
+	Entrenador * a1 = EntrenadorConstructor.new("2|4", "1|2", "6|5");
+	free(a1->id);
+	a1->id = string_from_format("a1");
+
+	Entrenador * a2 = EntrenadorConstructor.new("2|4", "5", "6");
+	free(a2->id);
+	a2->id = string_from_format("a2");
+
+	Entrenador * a3 = EntrenadorConstructor.new("2|4", "1|2|3", "4|5|2");
+	free(a3->id);
+	a3->id = string_from_format("a3");
+
+	Entrenador * a4 = EntrenadorConstructor.new("2|4", "4|3", "1|2");
+	free(a4->id);
+	a4->id = string_from_format("a4");
+
+	Entrenador * a5 = EntrenadorConstructor.new("2|4", "5|2", "3|1");
+	free(a5->id);
+	a5->id = string_from_format("a5");
+
+	Entrenador * a6 = EntrenadorConstructor.new("2|4", "6|6", "2|3");
+	free(a6->id);
+	a6->id = string_from_format("a6");
+
+	list_add(lista4, a1);
+	list_add(lista4, a2);
+	list_add(lista4, a3);
+	list_add(lista4, a4);
+	list_add(lista4, a5);
+	list_add(lista4, a6);
+
+	servicioDeadlockTest->primeraVez = true;
+	t_list* resultado4 = servicioDeadlockTest->procesarDeadlock(servicioDeadlockTest, lista4);
+	list_destroy_and_destroy_elements(resultado4, destruirIntercambio);
+
 	servicioDeadlockTest->destruir(servicioDeadlockTest);
 	servicioMetricasTest->destruir(servicioMetricasTest);
 	log_destroy(testLogger);
@@ -127,5 +166,5 @@ void testDeadlock() {
 	list_destroy_and_destroy_elements(listaEntrenadores, killEntrenador);
 	list_destroy_and_destroy_elements(lista2, killEntrenador);
 	list_destroy_and_destroy_elements(lista3, killEntrenador);
-
+	list_destroy_and_destroy_elements(lista4, killEntrenador);
 }
