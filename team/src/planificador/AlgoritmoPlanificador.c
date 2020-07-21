@@ -6,7 +6,7 @@
 #include "planificador/algoritmos/fifo/FirstInFirstOut.h"
 #include "planificador/algoritmos/sjf/ShortestJobFirst.h"
 #include "planificador/algoritmos/rr/RoundRobin.h"
-
+#include "planificador/algoritmos/sjf/ShortestRemainingTimeFirst.h"
 
 AlgoritmoPlanificador obtenerAlgoritmo(char * nombreAlgoritmo) {
     if (string_equals_ignore_case(nombreAlgoritmo, "FIFO")) {
@@ -26,7 +26,7 @@ void inicializarAlgoritmosDePlanificacion() {
     firstInFirstOut = FirstInFirstOutConstructor.new();
     shortestJobFirst = ShortestJobFirstConstructor.new();
     roundRobin = RoundRobinConstructor.new();
-    shortestRemainingTimeFirst = ShortestJobFirstConstructor.new();
+    shortestRemainingTimeFirst = ShortestRemainingTimeFirstConstructor.new();
 }
 
 void destruirAlgoritmosDePlanificacion(){
