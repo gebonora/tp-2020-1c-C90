@@ -60,4 +60,7 @@ extern const struct ManejadorDeEventosClass {
 
 ManejadorDeEventos * manejadorDeEventosProcesoTeam;
 
+char* logCoordenadas(t_list* listaCoor);
+char* traducirResult(Result result);
+
 #endif //TEAM_MANEJADORDEEVENTOS_H

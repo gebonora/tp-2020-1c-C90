@@ -23,7 +23,7 @@ static void procesarLocalizedRecibido(ManejadorDeEventos* this, Localized* unLoc
 
 	// Si no coincide con ningun mensaje esperado, lo ignoramos, liberar memoria y cerrar.
 	if (mensajeGet == NULL) {
-	    char * coords = logCoordenadas(unLocalized->pokemon->coordinates);
+		char * coords = logCoordenadas(unLocalized->pokemon->coordinates);
 		log_info(MANDATORY_LOGGER, "Llegó un LOCALIZED con idCorrelativo: %d, pokemon: %s%s. No coincide con ningún pedido previo. Se procede a destruirlo.", idMensaje,
 				unLocalized->pokemon->name->value, coords);
 		free_localized(unLocalized);
@@ -58,8 +58,7 @@ static void procesarLocalizedRecibido(ManejadorDeEventos* this, Localized* unLoc
 	for (int a = 0; a < list_size(coordenadas); a++) {
 		Coordinate* auxCoor = list_get(coordenadas, a);
 		// Quiero pasarle al servicio una copia de los datos, para evitar leaks.
-		this->servicioDeCaptura->procesarPokemonCapturable(this->servicioDeCaptura, string_duplicate(unLocalized->pokemon->name->value),
-				convertirACoordenada(auxCoor));
+		this->servicioDeCaptura->procesarPokemonCapturable(this->servicioDeCaptura, string_duplicate(unLocalized->pokemon->name->value), convertirACoordenada(auxCoor));
 	}
 
 	free_localized(unLocalized);
@@ -136,7 +135,7 @@ static ManejadorDeEventos* new(ServicioDeCaptura* servicioDeCaptura, Registrador
 	ManejadorDeEventos* manejador = malloc(sizeof(ManejadorDeEventos));
 
 	manejador->logger = log_create(TEAM_INTERNAL_LOG_FILE, "ManejadorDeEventos", SHOW_INTERNAL_CONSOLE, INTERNAL_LOG_LEVEL);
-    manejador->registradorDeEventos = registradorDeEventos;
+	manejador->registradorDeEventos = registradorDeEventos;
 	manejador->listaLocalizedAppearedsRecibidos = list_create();
 	manejador->servicioDeCaptura = servicioDeCaptura;
 	manejador->procesarLocalizedRecibido = &procesarLocalizedRecibido;
@@ -148,3 +147,29 @@ static ManejadorDeEventos* new(ServicioDeCaptura* servicioDeCaptura, Registrador
 }
 
 const struct ManejadorDeEventosClass ManejadorDeEventosConstructor = { .new = &new };
+
+// Funciones estáticas
+
+char* traducirResult(Result result) {
+	switch (result) {
+	case OK:
+		return "OK";
+	case FAIL:
+		return "FAIL";
+	case ACKNOWLEDGE:
+		return "ACKONWLEDGE";
+	default:
+		return "RESULTADO DESCONOCIDO. ALGO ANDA MAL!";
+	}
+}
+
+char* logCoordenadas(t_list* listaCoor) {
+	char* ret = string_new();
+	for (int a = 0; a < listaCoor->elements_count; a++) {
+		if (a == 0)
+			string_append_with_format(&ret, ", coordenadas: (%d,%d)", ((Coordinate*) (list_get(listaCoor, a)))->pos_x, ((Coordinate*) (list_get(listaCoor, a)))->pos_y);
+		else
+			string_append_with_format(&ret, "|(%d,%d)", ((Coordinate*) (list_get(listaCoor, a)))->pos_x, ((Coordinate*) (list_get(listaCoor, a)))->pos_y);
+	}
+	return ret;
+}

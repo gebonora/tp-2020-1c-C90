@@ -333,26 +333,4 @@ char* traducirOperacion(Operation operacion) {
 	}
 }
 
-char* traducirResult(Result result) {
-	switch (result) {
-	case OK:
-		return "OK";
-	case FAIL:
-		return "FAIL";
-	case ACKNOWLEDGE:
-		return "ACKONWLEDGE";
-	default:
-		return "RESULTADO DESCONOCIDO. ALGO ANDA MAL!";
-	}
-}
 
-char* logCoordenadas(t_list* listaCoor) {
-	char* ret = string_new();
-	for (int a = 0; a < listaCoor->elements_count; a++) {
-		if (a == 0)
-			string_append_with_format(&ret, ", coordenadas: (%d,%d)", ((Coordinate*) (list_get(listaCoor, a)))->pos_x, ((Coordinate*) (list_get(listaCoor, a)))->pos_y);
-		else
-			string_append_with_format(&ret, "|(%d,%d)", ((Coordinate*) (list_get(listaCoor, a)))->pos_x, ((Coordinate*) (list_get(listaCoor, a)))->pos_y);
-	}
-	return ret;
-}
