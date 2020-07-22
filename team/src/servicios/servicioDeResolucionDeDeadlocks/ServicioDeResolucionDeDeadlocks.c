@@ -305,8 +305,9 @@ ListaDeStrings obtenerListaDePokemon(ContadorPokemones contador) {
 // Crea una lista, los elementos son copia del original, para evitar posibles conflictos
 // list_destroy_and_elements cuando se termina de usar la lista.
 	t_list* listaDePokemon = list_create();
-	void iterar(char* pokemon, void* cantidad) {
-		for (int a = 0; a < (int) cantidad; a++) {
+	void iterar(char* pokemon, void* size) {
+		int* cantidad = (int*) size;
+		for (int a = 0; a < *cantidad; a++) {
 			list_add(listaDePokemon, string_duplicate(pokemon));
 		}
 	}

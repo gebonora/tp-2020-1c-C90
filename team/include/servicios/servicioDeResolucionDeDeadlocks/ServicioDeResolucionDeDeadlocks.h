@@ -36,6 +36,7 @@
 typedef t_list* ListaDeEntrenadores;
 typedef t_list* ListaDeDependencias;
 typedef t_list* ListaDeListaDeString;
+typedef t_list* ListaDeStrings; // Para que Eclipse no chille.
 
 typedef struct Intercambio { // Esto puede definir tambien que pokemon dan / reciben, o lo dejamos que lo determine el que genera la tarea (me gusta mas esto)
 	char* entrenadorQueSeMueve; // Si queremos tener la ref al entenador en vez del nombre, podemos cambiarlo facil con la función, recuperarReferencia.

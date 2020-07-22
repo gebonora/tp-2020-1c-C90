@@ -16,7 +16,7 @@ void testDeadlock() {
 
 	t_list* listaEntrenadores = list_create();
 
-	log_info(testLogger, "Espera Circular entre 3 entrenadores. Debería informar 1 dealocks con los 3");
+	log_info(testLogger, "Espera Circular entre 3 entrenadores. Debería informar 1 deadlock con los 3");
 	Entrenador * entrenador = EntrenadorConstructor.new("1|2", "X|Y|Z", "F|G|T"); // posicion, iniciales, objetivo.
 	free(entrenador->id);
 	entrenador->id = string_from_format("JUAN");
