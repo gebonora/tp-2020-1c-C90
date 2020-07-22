@@ -10,14 +10,12 @@ void testServicioDeCaptura() {
     log_info(testLogger, "Testeando el servicio de captura");
     Mapa mapa = MapaConstructor.new();
     Entrenador * entrenador = EntrenadorConstructor.new("1|2", "", "");
-    free(entrenador->id);
-    entrenador->id = string_duplicate("EntrenadorPiola");
     registrarEnMapaPosicionEntrenador(&mapa, entrenador);
     Equipo equipo = list_create();
     list_add(equipo, entrenador);
 
     ServicioDePlanificacion * servicioPlanificacion = ServicioDePlanificacionConstructor.new();
-    ServicioDeCaptura * servicioDeCaptura = ServicioDeCapturaConstructor.new(mapa, equipo, servicioPlanificacion);
+    ServicioDeCaptura * servicioDeCaptura = ServicioDeCapturaConstructor.new(mapa, servicioPlanificacion);
 
     log_info(testLogger, "Testeando la aparicion de un pokemon");
     Coordinate posicion = {.pos_x = 1, .pos_y = 2};
@@ -30,7 +28,7 @@ void testServicioDeCaptura() {
     log_info(testLogger, "Testeando el impacto de una captura exitosa");
     PokemonAtrapable * pokemonAtrapable = PokemonAtrapableConstructor.new("Pikachu", "1|2");
     char * uuidPokemon = string_duplicate(registrarEnMapaPosicionPokemonAtrapable(&mapa, pokemonAtrapable));
-    CapturaPokemon * capturaPokemon = CapturaPokemonConstructor.new("EntrenadorPiola", 1, pokemonAtrapable);
+    CapturaPokemon * capturaPokemon = CapturaPokemonConstructor.new(entrenador, 1, pokemonAtrapable);
 
     log_info(testLogger, "Testeando que se haya podido concretar la captura");
     bool resultadoCaptura = servicioDeCaptura->registrarCapturaExitosa(servicioDeCaptura, capturaPokemon);
