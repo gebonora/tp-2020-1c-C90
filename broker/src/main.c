@@ -58,12 +58,16 @@ static void _init_config() {
 static void _init_semaphores() {
 	pthread_mutex_init(&MUTEX_MESSAGE_ID, NULL);
 	pthread_mutex_init(&MUTEX_SUBSCRIBERS_BY_QUEUE, NULL);
-	pthread_mutex_init(&MUTEX_MEMORY, NULL);
+	pthread_mutex_init(&MUTEX_READERS, NULL);
+	pthread_mutex_init(&MUTEX_TIME, NULL);
+	sem_init(&MEMORY, 0, 1);
 
 }
 
 static void _init_context() {
 	MESSAGE_ID = 0;
+	READERS = 0;
+	TIME = 0;
 	SUBSCRIBERS_BY_QUEUE = dictionary_create();
 	dictionary_put(SUBSCRIBERS_BY_QUEUE, "NEW", list_create());
 	dictionary_put(SUBSCRIBERS_BY_QUEUE, "APPEARED", list_create());

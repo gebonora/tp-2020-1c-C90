@@ -36,11 +36,16 @@ char* ALGORITMO_PARTICION_LIBRE;
 uint32_t MESSAGE_ID;
 t_log* LOGGER;
 pthread_mutex_t MUTEX_MESSAGE_ID;
-pthread_mutex_t MUTEX_MEMORY;
+pthread_mutex_t MUTEX_READERS;
+pthread_mutex_t MUTEX_TIME;
+sem_t MEMORY;
 
 t_dictionary* SUBSCRIBERS_BY_QUEUE;
 pthread_mutex_t MUTEX_SUBSCRIBERS_BY_QUEUE;
 sem_t SUBSCRIBERS;
+
+int READERS;
+uint32_t TIME;
 
 typedef struct {
 	void* cache;

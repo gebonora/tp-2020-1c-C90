@@ -33,12 +33,23 @@ void send_message(void* data, Operation operation, uint32_t message_id, uint32_t
 	Partition* partition = save_message(serialized_data, message);
 
 	if(partition != NULL){
+		pthread_mutex_lock(&MUTEX_READERS);
+		READERS ++;
+		if(READERS == 1) sem_wait(&MEMORY);
+		pthread_mutex_unlock(&MUTEX_READERS);
 		send_messages_to_subscribers(partition);
+		pthread_mutex_lock(&MUTEX_READERS);
+		READERS --;
+		if(READERS == 0) sem_post(&MEMORY);
+		pthread_mutex_unlock(&MUTEX_READERS);
 	}
 }
 
 void consumer_queue(Operation operation, Subscriber* subscriber) {
-
+	pthread_mutex_lock(&MUTEX_READERS);
+	READERS ++;
+	if(READERS == 1) sem_wait(&MEMORY);
+	pthread_mutex_unlock(&MUTEX_READERS);
 	log_debug(LOGGER, "Consuming messages from operation: %s", get_operation_by_value(operation));
 	log_debug(LOGGER, "Getting partitions");
 
@@ -60,6 +71,10 @@ void consumer_queue(Operation operation, Subscriber* subscriber) {
 
 		list_iterate(partitions, &_inline_send_message);
 	}
+	pthread_mutex_lock(&MUTEX_READERS);
+	READERS --;
+	if(READERS == 0) sem_post(&MEMORY);
+	pthread_mutex_unlock(&MUTEX_READERS);
 }
 
 /*PRIVATE FUNCTIONS*/
@@ -88,7 +103,7 @@ static t_list* _get_subscribers(char* queue_key) {
 }
 
 static void* _transform_messages(Partition* partition, Operation operation, int bytes) { //todo: esto vamos a tener que sincronizarlo porque se leen aca los datos de los start de las particiones.
-	int now = (int) ahoraEnTimeT();
+	uint64_t now = get_time();
 	partition->access_time = now;
 
 	void* message = malloc(bytes);

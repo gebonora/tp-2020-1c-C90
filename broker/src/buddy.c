@@ -14,6 +14,7 @@ static uint32_t _buddy_position(Partition*);
 //   	   2.b.ii) genero n buddys particionando hasta que me queda el tamanio del buddy = pot2 calculadass
 //   3) si no encontre ninguna particion, elijo una victima y vuelvo a lanzar la busqueda
 Partition* save_to_cache_buddy_system(void* data, Message* message) {
+	sem_wait(&MEMORY);
 	log_debug(LOGGER, "MAX between MIN_PARTITION_SIZE (%d) and next_power_of_2 of data_size (%d)", TAMANO_MINIMO_PARTICION, message->data_size);
 	int desired_size = MAX_PARTITION_SIZE(next_power_of_2(message->data_size));
 
@@ -41,8 +42,8 @@ Partition* save_to_cache_buddy_system(void* data, Message* message) {
 
 	// marco la particion como ocupada, y completo el resto de los atributos
 	partition->message = message;
-	partition->creation_time = (int) ahoraEnTimeT();
-	partition->access_time = (int) ahoraEnTimeT();
+	partition->creation_time = get_time();
+	partition->access_time = get_time();
 	partition->free = false;
 
 
@@ -51,6 +52,7 @@ Partition* save_to_cache_buddy_system(void* data, Message* message) {
 	memcpy(partition->start, data, message->data_size);
 
 	log_debug(LOGGER, "Done memcpy");
+	sem_post(&MEMORY);
 	return partition;
 
 }
@@ -86,7 +88,7 @@ static void _consolidate_buddy(Partition* partition) {
 		log_debug(LOGGER, "Buddy Position: %d, Size: %d, Free: %s", buddy->position, buddy->size, buddy->free ? "true" : "false");
 	}
 
-	partition->creation_time = (int) ahoraEnTimeT();
+	partition->creation_time = get_time();
 
 	log_debug(LOGGER, "Buddy is not free or same size...done consolidating");
 }

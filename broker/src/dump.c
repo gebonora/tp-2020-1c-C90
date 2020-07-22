@@ -37,9 +37,9 @@ static void _create_dump() {
 	for(int index = 0, number = 1; index < memory->partitions->elements_count; index++, number++) {
 		partition = list_get(memory->partitions, index);
 		if(partition->free) {
-			fprintf(dump_file, "Partición %d:	|	%x (%d)  -  %x (%d).	|	[%s]	|	Size: %d b	|	LRU: %s |\n", number, partition->start, partition->position, partition->start + partition->size, partition->position + partition->size, "L", partition->size, date_time_to_string(partition->access_time));
+			fprintf(dump_file, "Partición %d:	|	%x (%d)  -  %x (%d).	|	[%s]	|	Size: %d b	|	LRU: %s |\n", number, partition->start, partition->position, partition->start + partition->size, partition->position + partition->size, "L", partition->size, date_time_to_string((time_t)partition->access_time));
 		} else {
-			fprintf(dump_file, "Partición %d:	|	%x (%d)  -  %x (%d).	|	[%s]	|	Size: %d b	|	LRU: %s |	COLA: %s	|	ID: %d	|\n", number, partition->start, partition->position, partition->start + partition->size, partition->position + partition->size, "X", partition->size, date_time_to_string(partition->access_time), get_operation_by_value(partition->message->operation_code), partition->message->message_id);
+			fprintf(dump_file, "Partición %d:	|	%x (%d)  -  %x (%d).	|	[%s]	|	Size: %d b	|	LRU: %s |	COLA: %s	|	ID: %d	|\n", number, partition->start, partition->position, partition->start + partition->size, partition->position + partition->size, "X", partition->size, date_time_to_string((time_t)partition->access_time), get_operation_by_value(partition->message->operation_code), partition->message->message_id);
 		}
 	}
 
@@ -68,8 +68,8 @@ static void _show_partition(Partition* partition, int number) {
 	if (string_equals_ignore_case(ALGORITMO_MEMORIA, BUDDY_SYSTEM)) {
 		log_info(LOGGER, "Buddy: %d", xor_int_and_int(partition->position, partition->size));
 	}
-	log_info(LOGGER, "Creation time: %d - %s", partition->creation_time, date_time_to_string(partition->creation_time));
-	log_info(LOGGER, "Last access: %d - %s", partition->access_time, date_time_to_string(partition->access_time));
+	log_info(LOGGER, "Creation time: %d", partition->creation_time);
+	log_info(LOGGER, "Last access: %d ", partition->access_time);
 	if(!partition->free) {
 		_show_message(partition->message);
 	}

@@ -79,9 +79,9 @@ static void _process_request(uint32_t cod_op, int socket) {
 			log_info(LOGGER, "Nombre pokemon: %s", new_pokemon->pokemon->name->value);
 			log_info(LOGGER, "Cantidad: %d", new_pokemon->quantity);
 
-			send(socket, &generated_id, sizeof(uint32_t), 0);
-
 			send_message(new_pokemon, NEW, generated_id, correlational_id);
+
+			send(socket, &generated_id, sizeof(uint32_t), 0);
 
 			free_new(new_pokemon);
 		} else {
@@ -99,10 +99,9 @@ static void _process_request(uint32_t cod_op, int socket) {
 				log_info(LOGGER, "Me llego un caught");
 				log_info(LOGGER, "Resultado: %d", caught_pokemon->result);
 				log_info(LOGGER, "Id correlational: %d", correlational_id);
+				send_message(caught_pokemon, CAUGHT, generated_id, correlational_id);
 
 				send(socket, &generated_id, sizeof(uint32_t), 0);
-
-				send_message(caught_pokemon, CAUGHT, generated_id, correlational_id);
 
 				free(caught_pokemon);
 			}
@@ -117,9 +116,9 @@ static void _process_request(uint32_t cod_op, int socket) {
 			log_info(LOGGER, "Me llego un get");
 			log_info(LOGGER, "Nombre del pokemon: %s", get_pokemon->name->value);
 
-			send(socket, &generated_id, sizeof(uint32_t), 0);
-
 			send_message(get_pokemon, GET, generated_id, correlational_id);
+
+			send(socket, &generated_id, sizeof(uint32_t), 0);
 
 			free_get(get_pokemon);
 		} else {
@@ -139,9 +138,9 @@ static void _process_request(uint32_t cod_op, int socket) {
 			int result = recv(socket,&correlational_id,sizeof(uint32_t),0);
 			if (result > 0) {
 				log_info(LOGGER, "Correlative ID: %d", correlational_id);
-				send(socket, &generated_id, sizeof(uint32_t), 0);
 
 				send_message(localized_pokemon, LOCALIZED, generated_id, correlational_id);
+				send(socket, &generated_id, sizeof(uint32_t), 0);
 
 				free_localized(localized_pokemon);
 			} else {
@@ -164,9 +163,9 @@ static void _process_request(uint32_t cod_op, int socket) {
 				Coordinate* coordinate = list_get(appeared_pokemon->coordinates, 0);
 				log_info(LOGGER, "Coordenada: x=%d, y=%d", coordinate->pos_x, coordinate->pos_y);
 
-				send(socket, &generated_id, sizeof(uint32_t), 0);
-
 				send_message(appeared_pokemon, APPEARED, generated_id, correlational_id);
+
+				send(socket, &generated_id, sizeof(uint32_t), 0);
 
 				free_pokemon(appeared_pokemon);
 			}
@@ -183,9 +182,9 @@ static void _process_request(uint32_t cod_op, int socket) {
 			Coordinate* catch_coordinate = list_get(catch_pokemon->coordinates, 0);
 			log_info(LOGGER, "Coordenada: x=%d, y=%d", catch_coordinate->pos_x, catch_coordinate->pos_y);
 
-			send(socket, &generated_id, sizeof(uint32_t), 0);
-
 			send_message(catch_pokemon, CATCH, generated_id, correlational_id);
+
+			send(socket, &generated_id, sizeof(uint32_t), 0);
 
 			free_pokemon(catch_pokemon);
 		} else {
