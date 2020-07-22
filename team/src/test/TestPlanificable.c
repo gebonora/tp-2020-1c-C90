@@ -8,13 +8,20 @@ void testDePlanificable() {
     t_log * testLogger = log_create(TEAM_INTERNAL_LOG_FILE, "TestPlanificable", 1, LOG_LEVEL_INFO);
 
     log_info(testLogger, "Testeando la unidad planificable de los entrenadores");
-    Entrenador * entrenador = EntrenadorConstructor.new("1|2", "A", "B");
+
+    log_info(testLogger, "Sobreescribimos temporalmente el servicio de captura global");
+    ServicioDeCaptura * servicioDeCapturaOriginal;
+    servicioDeCapturaOriginal = servicioDeCapturaProcesoTeam;
+    ServicioDePlanificacion * servicioDePlanificacion = ServicioDePlanificacionConstructor.new();
     Mapa mapita = MapaConstructor.new();
-    registrarEnMapaPosicionEntrenador(&mapita, entrenador);
-    HiloEntrenadorPlanificable * hiloEntrenadorPlanificable = HiloEntrenadorPlanificableConstructor.new(entrenador);
+    servicioDeCapturaProcesoTeam = ServicioDeCapturaConstructor.new(mapita, servicioDePlanificacion);
 
     log_info(testLogger, "Testeando la ejecucion total de una tarea de captura");
+    Entrenador * entrenador = EntrenadorConstructor.new("1|2", "A", "A|A|A");
+    registrarEnMapaPosicionEntrenador(&mapita, entrenador);
+    HiloEntrenadorPlanificable * hiloEntrenadorPlanificable = HiloEntrenadorPlanificableConstructor.new(entrenador);
     Coordinate posicionPokemon = (Coordinate){.pos_x=2, .pos_y=3};
+    servicioDeCapturaProcesoTeam->altaDePokemon(servicioDeCapturaProcesoTeam, "A", posicionPokemon);
     TareaPlanificable * tareaCaptura = generarTareaDeCaptura(hiloEntrenadorPlanificable->entrenador, "A", posicionPokemon);
     hiloEntrenadorPlanificable->asignarTarea(hiloEntrenadorPlanificable, tareaCaptura);
     hiloEntrenadorPlanificable->ejecutar(hiloEntrenadorPlanificable);
@@ -51,7 +58,11 @@ void testDePlanificable() {
     assert(posicionEnCaminoACapturar.coordenada.pos_x == 0);
     assert(posicionEnCaminoACapturar.coordenada.pos_y == 1);
 
+    servicioDePlanificacion->destruir(servicioDePlanificacion);
     hiloEntrenadorPlanificable->destruir(hiloEntrenadorPlanificable);
+    servicioDeCapturaProcesoTeam->destruir(servicioDeCapturaProcesoTeam);
+    log_info(testLogger, "Restauramos el servicio de captura global original");
+    servicioDeCapturaProcesoTeam = servicioDeCapturaOriginal;
     entrenador->destruir(entrenador);
     mapita.destruir(&mapita);
     log_destroy(testLogger);

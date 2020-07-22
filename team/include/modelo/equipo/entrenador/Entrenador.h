@@ -12,8 +12,7 @@
 #include "modelo/mapa/gps/Gps.h"
 #include "modelo/mapa/coordenadas/UtilidadesCoordenadas.h"
 #include "modelo/mapa/movimiento/Movimiento.h"
-#include "modelo/pokemon/CapturaPokemon.h"
-//#include "cliente/ClienteBroker.h"
+#include "cliente/ClienteBrokerV2.h"
 
 /**
  * El entrenador se mueve y caza pokemones. La idea es llevar ese registro acá.
@@ -39,8 +38,7 @@ typedef struct Entrenador {
     bool (*puedeAtraparPokemones)(struct Entrenador * this); // Es true si es < a limiteDeCaptura.
     Posicion (*posicion)(struct Entrenador * this); // Le pregunta al mapa donde esta, pasandole su uuid.
     char * (*descripcion)(struct Entrenador * this);
-    void (*iniciarCaptura)(struct Entrenador * this, char * especie, Coordinate * posicionPokemon);
-    void (*registrarCaptura)(struct Entrenador * this, CapturaPokemon * capturaPokemon);
+    void (*registrarCaptura)(struct Entrenador * this, char * especie);
     void (*destruir)(struct Entrenador * this);
 } Entrenador;
 

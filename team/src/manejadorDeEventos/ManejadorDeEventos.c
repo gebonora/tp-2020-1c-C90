@@ -4,34 +4,14 @@
 
 #include "manejadorDeEventos/ManejadorDeEventos.h"
 
-static void registrarCatchEnEspera(ManejadorDeEventos* this, CapturaPokemon* capturaPokemon) {
-	// Llega desde Cliente.
-	pthread_mutex_lock(&(this->listaCatchEnEspera->mtx));
-	list_add(this->listaCatchEnEspera->lista, capturaPokemon);
-	pthread_mutex_unlock(&(this->listaCatchEnEspera->mtx));
-	char* coor = capturaPokemon->posicion(capturaPokemon);
-	log_debug(this->logger, "Se agregó una CapturaPokemon a la listaDeCatchsEnEspera para entrenadorId: %s, pokemon: %s,coordenadas: %s, idCorrelativo: %d.",
-			capturaPokemon->idEntrenador, capturaPokemon->pokemonAtrapable->especie, coor, capturaPokemon->idCorrelatividad);
-	free(coor);
-}
-
-static void registrarGetEnEspera(ManejadorDeEventos* this, MensajeGet* mensajeGet) {
-	// Llega desde Cliente.
-	pthread_mutex_lock(&(this->listaGetEnEspera->mtx));
-	list_add(this->listaGetEnEspera->lista, mensajeGet);
-	pthread_mutex_unlock(&(this->listaGetEnEspera->mtx));
-	log_debug(this->logger, "Se agregó un MensajeGet a la listaDeGetsEnEspera para pokemon: %s, idCorrelativo: %d.", mensajeGet->nombrePokemon,
-			mensajeGet->idCorrelatividad);
-}
-
 static void procesarLocalizedRecibido(ManejadorDeEventos* this, Localized* unLocalized, uint32_t idMensaje) {
 	// Llega desde Server.
-	t_list* ptrLista = this->listaGetEnEspera->lista;
+	t_list* ptrLista = this->registradorDeEventos->listaGetEnEspera->lista;
 	t_list* ptrListaRecibidos = this->listaLocalizedAppearedsRecibidos;
 	MensajeGet* mensajeGet = NULL;
 
 	// Consultar la lista de gets, región crítica, minimizar procesamiento.
-	pthread_mutex_lock(&(this->listaGetEnEspera->mtx));
+	pthread_mutex_lock(&(this->registradorDeEventos->listaGetEnEspera->mtx));
 	for (int a = 0; a < list_size(ptrLista); a++) {
 		MensajeGet* auxPtr = list_get(ptrLista, a);
 		if (auxPtr->idCorrelatividad == idMensaje) {
@@ -39,13 +19,15 @@ static void procesarLocalizedRecibido(ManejadorDeEventos* this, Localized* unLoc
 			list_remove(ptrLista, a);
 		}
 	}
-	pthread_mutex_unlock(&(this->listaGetEnEspera->mtx));
+	pthread_mutex_unlock(&(this->registradorDeEventos->listaGetEnEspera->mtx));
 
 	// Si no coincide con ningun mensaje esperado, lo ignoramos, liberar memoria y cerrar.
 	if (mensajeGet == NULL) {
+	    char * coords = logCoordenadas(unLocalized->pokemon->coordinates);
 		log_info(MANDATORY_LOGGER, "Llegó un LOCALIZED con idCorrelativo: %d, pokemon: %s%s. No coincide con ningún pedido previo. Se procede a destruirlo.", idMensaje,
-				unLocalized->pokemon->name->value, logCoordenadas(unLocalized->pokemon->coordinates));
+				unLocalized->pokemon->name->value, coords);
 		free_localized(unLocalized);
+		free(coords);
 		return;
 	}
 
@@ -85,7 +67,7 @@ static void procesarLocalizedRecibido(ManejadorDeEventos* this, Localized* unLoc
 }
 
 static void procesarAppearedRecibido(ManejadorDeEventos* this, Pokemon* unPokemon, uint32_t idMensaje) {
-	// Llega desde Server.
+	// Llega desde Server. TODO: No se llama en ningun lado
 	t_list* ptrLista = this->listaLocalizedAppearedsRecibidos;
 	// Guardamos el nombre del pokemon en la lista de recibidos, para saber de que pokemon tenemos info e ignorar sus localizeds.
 	list_add(ptrLista, string_duplicate(unPokemon->name->value));
@@ -107,12 +89,12 @@ static void procesarAppearedRecibido(ManejadorDeEventos* this, Pokemon* unPokemo
 }
 
 static void procesarCaughtRecibido(ManejadorDeEventos* this, Caught* unCaught, uint32_t idMensaje) {
-	// Llega desde Server.
-	t_list* ptrLista = this->listaCatchEnEspera->lista;
+	// Llega desde Server. TODO: No se llama en ningun lado.
+	t_list* ptrLista = this->registradorDeEventos->listaCatchEnEspera->lista;
 	CapturaPokemon* capturaPokemon = NULL;
 
 	// Consultar la lista, región crítica, minimizar procesamiento.
-	pthread_mutex_lock(&(this->listaCatchEnEspera->mtx));
+	pthread_mutex_lock(&(this->registradorDeEventos->listaCatchEnEspera->mtx));
 	for (int a = 0; a < list_size(ptrLista); a++) {
 		CapturaPokemon* auxPtr = list_get(ptrLista, a);
 		if (auxPtr->idCorrelatividad == idMensaje) {
@@ -120,7 +102,7 @@ static void procesarCaughtRecibido(ManejadorDeEventos* this, Caught* unCaught, u
 			list_remove(ptrLista, a);
 		}
 	}
-	pthread_mutex_unlock(&(this->listaCatchEnEspera->mtx));
+	pthread_mutex_unlock(&(this->registradorDeEventos->listaCatchEnEspera->mtx));
 
 	// Si no coincide con ningun mensaje esperado, lo ignoramos, liberar memoria y cerrar.
 	if (capturaPokemon == NULL) {
@@ -141,28 +123,22 @@ static void procesarCaughtRecibido(ManejadorDeEventos* this, Caught* unCaught, u
 	}
 	// Caso feliz:
 	this->servicioDeCaptura->registrarCapturaExitosa(this->servicioDeCaptura, capturaPokemon);
-	//servicioDeCapturaProcesoTeam->
 	free(unCaught);
 }
 
 static void destruir(ManejadorDeEventos * this) {
 	log_destroy(this->logger);
-	destruirListaSincronizada(this->listaGetEnEspera, destruirMensajeGet);
 	list_destroy_and_destroy_elements(this->listaLocalizedAppearedsRecibidos, free);
-	destruirListaSincronizada(this->listaCatchEnEspera, (void (*)(void *)) destruirCapturaPokemon);
 	free(this);
 }
 
-static ManejadorDeEventos* new(ServicioDeCaptura* servicioDeCaptura) {
+static ManejadorDeEventos* new(ServicioDeCaptura* servicioDeCaptura, RegistradorDeEventos * registradorDeEventos) {
 	ManejadorDeEventos* manejador = malloc(sizeof(ManejadorDeEventos));
 
 	manejador->logger = log_create(TEAM_INTERNAL_LOG_FILE, "ManejadorDeEventos", SHOW_INTERNAL_CONSOLE, INTERNAL_LOG_LEVEL);
-	manejador->listaGetEnEspera = iniciarListaSincronizada();
-	manejador->listaCatchEnEspera = iniciarListaSincronizada();
+    manejador->registradorDeEventos = registradorDeEventos;
 	manejador->listaLocalizedAppearedsRecibidos = list_create();
 	manejador->servicioDeCaptura = servicioDeCaptura;
-	manejador->registrarCatchEnEspera = &registrarCatchEnEspera;
-	manejador->registrarGetEnEspera = &registrarGetEnEspera;
 	manejador->procesarLocalizedRecibido = &procesarLocalizedRecibido;
 	manejador->procesarAppearedRecibido = &procesarAppearedRecibido;
 	manejador->procesarCaughtRecibido = &procesarCaughtRecibido;
@@ -172,27 +148,3 @@ static ManejadorDeEventos* new(ServicioDeCaptura* servicioDeCaptura) {
 }
 
 const struct ManejadorDeEventosClass ManejadorDeEventosConstructor = { .new = &new };
-
-ListaSincronizada* iniciarListaSincronizada() {
-	ListaSincronizada* listaSincronizada = malloc(sizeof(ListaSincronizada));
-	listaSincronizada->lista = list_create();
-	pthread_mutex_init(&(listaSincronizada->mtx), NULL);
-	return listaSincronizada;
-}
-
-void destruirListaSincronizada(ListaSincronizada* listaSincronizada, void (*destructorElemento)(void*)) {
-	pthread_mutex_destroy(&(listaSincronizada->mtx));
-	list_destroy_and_destroy_elements(listaSincronizada->lista, destructorElemento);
-	free(listaSincronizada);
-}
-
-void destruirMensajeGet(void* puntero) {
-	MensajeGet* mensajeGet = (MensajeGet*) puntero;
-	free(mensajeGet->nombrePokemon);
-	free(mensajeGet);
-}
-
-void destruirCapturaPokemon(CapturaPokemon * capturaPokemon) {
-	capturaPokemon->destruir(capturaPokemon);
-}
-

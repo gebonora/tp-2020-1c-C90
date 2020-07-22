@@ -44,6 +44,7 @@
 #define LOG_FILE "LOG_FILE"
 #define IP_TEAM_GAMEBOY "IP_TEAM_GAMEBOY"
 #define PUERTO_TEAM_GAMEBOY "PUERTO_TEAM_GAMEBOY"
+#define ID_TEAM "ID_TEAM"
 
 // Mutex de los recursos compartidos
 pthread_mutex_t MTX_INTERNAL_LOG;

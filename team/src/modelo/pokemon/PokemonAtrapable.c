@@ -7,7 +7,7 @@
 static bool borrarPosicion(PokemonAtrapable * this) {
     Gps * gps = this->gps;
     if (gps == NULL) {
-        return true;
+        return false;
     }
     bool sePudoBorrar = gps->borrarPosicionDelMapa(gps);
     if (sePudoBorrar) {

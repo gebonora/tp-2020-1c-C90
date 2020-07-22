@@ -11,6 +11,9 @@ void testDeIntegracion() {
 	// Libs
 	list_add(tests, testLibs);
 
+	// Cliente Broker
+	list_add(tests, testClienteBroker);
+
 	// Entrenadores
 	list_add(tests, testDeEntrenadores);
 
