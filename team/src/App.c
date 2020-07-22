@@ -38,7 +38,7 @@ int main() {
 
     // Por cada pokemon del objetivo global, enviar un GET [POKEMON].
     log_info(INTERNAL_LOGGER, "Solicitando la ubicacion de los pokemones objetivo para comenzar...");
-    objetivoGlobal.solicitarUbicacionPokemonesNecesitados(&objetivoGlobal);
+    objetivoGlobalProcesoTeam.solicitarUbicacionPokemonesNecesitados(&objetivoGlobalProcesoTeam);
 
     // Cuando se complete el objetivo global, podremos finalizar el proceso y liberar los recursos.
     if (ESPERAR_OBJETIVO_GLOBAL) {
@@ -90,13 +90,33 @@ void mostrarTitulo(t_log * logger) {
 }
 
 void inicializarComponentesDelSistema() {
-	srandom(time(NULL));
-	inicializarAlgoritmosDePlanificacion();
-	log_debug(INTERNAL_LOGGER, "Creando el mapa de coordenadas...");
-	mapaProcesoTeam = MapaConstructor.new();
-	pthread_mutex_init(&MTX_INTERNAL_LOG, NULL); //TODO: por ahi conviene moverlo a configurarServer()
-	servicioDePlanificacionProcesoTeam = ServicioDePlanificacionConstructor.new();
-	sem_init(&semaforoObjetivoGlobalCompletado, 0, 0);
+    srandom(time(NULL));
+    pthread_mutex_init(&MTX_INTERNAL_LOG, NULL); //TODO: por ahi conviene moverlo a configurarServer()
+
+    log_debug(INTERNAL_LOGGER, "Creando el cliente para comunicarse con el broker...");
+    clienteBrokerV2ProcesoTeam = ClienteBrokerV2Constructor.new();
+
+    log_debug(INTERNAL_LOGGER, "Preparando los algoritmos de planificacion...");
+    inicializarAlgoritmosDePlanificacion();
+
+    log_debug(INTERNAL_LOGGER, "Creando el mapa de coordenadas...");
+    mapaProcesoTeam = MapaConstructor.new();
+
+    log_debug(INTERNAL_LOGGER, "Creando el servicio de métricas...");
+    servicioDeMetricasProcesoTeam = ServicioDeMetricasConstructor.new();
+
+    log_debug(INTERNAL_LOGGER, "Creando el servicio de planificacion...");
+    servicioDePlanificacionProcesoTeam = ServicioDePlanificacionConstructor.new();
+
+    log_debug(INTERNAL_LOGGER, "Creando el servicio de captura...");
+    servicioDeCapturaProcesoTeam = ServicioDeCapturaConstructor.new(mapaProcesoTeam, servicioDePlanificacionProcesoTeam);
+
+    log_debug(INTERNAL_LOGGER, "Creando estructuras para eventos...");
+    registradorDeEventosProcesoTeam = RegistradorDeEventosConstructor.new();
+    manejadorDeEventosProcesoTeam = ManejadorDeEventosConstructor.new(servicioDeCapturaProcesoTeam, registradorDeEventosProcesoTeam);
+
+    log_debug(INTERNAL_LOGGER, "Inicializando semanforo de fin de proceso...");
+    sem_init(&semaforoObjetivoGlobalCompletado, 0, 0);
 }
 
 /**
@@ -104,18 +124,13 @@ void inicializarComponentesDelSistema() {
  * Armar el objetivo global - OK
  * Armar los hilos de entrenador planificables - OK
  * Enviar a los entrenadores a new - OK
- * Finalmente, con el cliente broker a mano: Por cada pokemon del objetivo global, enviar un GET \[POKEMON\] - TODO
+ * Finalmente, con el cliente broker a mano: Por cada pokemon del objetivo global, enviar un GET \[POKEMON\] - OK
  */
 void configurarEstadoInicialProcesoTeam() {
 	log_debug(INTERNAL_LOGGER, "Instanciando entrenadores y armando el equipo...");
 	equipoProcesoTeam = crearEquipoPorConfiguracion();
-
-	servicioDeCapturaProcesoTeam = ServicioDeCapturaConstructor.new(mapaProcesoTeam, equipoProcesoTeam, servicioDePlanificacionProcesoTeam);
-	manejadorDeEventosProcesoTeam = ManejadorDeEventosConstructor.new(servicioDeCapturaProcesoTeam);
-	clienteBrokerProcesoTeam = ClienteBrokerConstructor.new(manejadorDeEventosProcesoTeam, servicioDeCapturaProcesoTeam);
-
 	log_debug(INTERNAL_LOGGER, "Calculando el objetivo global...");
-	objetivoGlobal = ObjetivoGlobalConstructor.new(equipoProcesoTeam, clienteBrokerProcesoTeam);
+    objetivoGlobalProcesoTeam = ObjetivoGlobalConstructor.new(equipoProcesoTeam, clienteBrokerV2ProcesoTeam, registradorDeEventosProcesoTeam);
 	log_debug(INTERNAL_LOGGER, "Registrando al equipo en el mapa...");
 	void registrarEquipo(Entrenador * entrenador) {
 		registrarEnMapaPosicionEntrenador(&mapaProcesoTeam, entrenador);
@@ -123,8 +138,6 @@ void configurarEstadoInicialProcesoTeam() {
 	list_iterate(equipoProcesoTeam, (void (*)(void *)) registrarEquipo);
 	log_debug(INTERNAL_LOGGER, "Agregando equipo a la planificacion...");
 	servicioDePlanificacionProcesoTeam->asignarEquipoAPlanificar(servicioDePlanificacionProcesoTeam, equipoProcesoTeam);
-
-	servicioDeMetricasProcesoTeam = ServicioDeMetricasConstructor.new();
 }
 
 void liberarRecursos() {
@@ -136,24 +149,25 @@ void liberarRecursos() {
 	log_debug(INTERNAL_LOGGER, "Liberando logger obligatorio...");
 	log_destroy(MANDATORY_LOGGER);
 
-	// Servicios
-	log_debug(INTERNAL_LOGGER, "Liberando servicios...");
-	servicioDeConfiguracion.destruir(&servicioDeConfiguracion);
-	servicioDePlanificacionProcesoTeam->destruir(servicioDePlanificacionProcesoTeam);
+    // Proceso Team
+    log_debug(INTERNAL_LOGGER, "Liberando participantes del proceso Team...");
+    destruirEquipo(equipoProcesoTeam);
+    objetivoGlobalProcesoTeam.destruirObjetivoGlobal(&objetivoGlobalProcesoTeam);
 
-	// Componentes
-	log_debug(INTERNAL_LOGGER, "Liberando componentes del sistema...");
-	manejadorDeEventosProcesoTeam->destruir(manejadorDeEventosProcesoTeam);
-	pthread_mutex_destroy(&MTX_INTERNAL_LOG);
-	sem_destroy(&semaforoObjetivoGlobalCompletado);
+    // Servicios
+    log_debug(INTERNAL_LOGGER, "Liberando servicios...");
+    servicioDeConfiguracion.destruir(&servicioDeConfiguracion);
+    servicioDeCapturaProcesoTeam->destruir(servicioDeCapturaProcesoTeam);
+    servicioDePlanificacionProcesoTeam->destruir(servicioDePlanificacionProcesoTeam);
+    servicioDeMetricasProcesoTeam->destruir(servicioDeMetricasProcesoTeam);
 
-	// Proceso Team
-	log_debug(INTERNAL_LOGGER, "Liberando participantes del proceso Team...");
-	servicioDeCapturaProcesoTeam->destruir(servicioDeCapturaProcesoTeam);
-	destruirEquipo(equipoProcesoTeam);
-	objetivoGlobal.destruirObjetivoGlobal(&objetivoGlobal);
-	mapaProcesoTeam.destruir(&mapaProcesoTeam);
-	destruirAlgoritmosDePlanificacion();
-	servicioDeMetricasProcesoTeam->destruir(servicioDeMetricasProcesoTeam);
-	clienteBrokerProcesoTeam->destruir(clienteBrokerProcesoTeam);
+    // Componentes
+    log_debug(INTERNAL_LOGGER, "Liberando componentes del sistema...");
+    manejadorDeEventosProcesoTeam->destruir(manejadorDeEventosProcesoTeam);
+    pthread_mutex_destroy(&MTX_INTERNAL_LOG);
+    sem_destroy(&semaforoObjetivoGlobalCompletado);
+    registradorDeEventosProcesoTeam->destruir(registradorDeEventosProcesoTeam);
+    destruirAlgoritmosDePlanificacion();
+    mapaProcesoTeam.destruir(&mapaProcesoTeam);
+    clienteBrokerV2ProcesoTeam->destruir(clienteBrokerV2ProcesoTeam);
 }

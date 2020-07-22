@@ -4,6 +4,10 @@
 
 #include "modelo/pokemon/CapturaPokemon.h"
 
+static char * idEntrenador(CapturaPokemon * this) {
+    return this->entrenador->id;
+}
+
 static char * especie(CapturaPokemon * this) {
     return this->pokemonAtrapable->especie;
 }
@@ -22,16 +26,17 @@ static void destruirCapturaPokemon(CapturaPokemon * this) {
     free(this);
 }
 
-static CapturaPokemon * new(char * idEntrenador, uint32_t idCorrelatividad, PokemonAtrapable * pokemon) {
+static CapturaPokemon * new(Entrenador * entrenador, uint32_t idCorrelatividad, PokemonAtrapable * pokemon) {
     CapturaPokemon * capturaPokemon = malloc(sizeof(CapturaPokemon));
 
     capturaPokemon->logger = log_create(TEAM_INTERNAL_LOG_FILE, "CapturaPokemon", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_INFO);
-    capturaPokemon->idEntrenador = idEntrenador;
+    capturaPokemon->entrenador = entrenador;
     capturaPokemon->idCorrelatividad = idCorrelatividad;
     capturaPokemon->pokemonAtrapable = pokemon;
     capturaPokemon->eliminarPokemonCapturadoDelMapa = &eliminarPokemonCapturadoDelMapa;
     capturaPokemon->posicion = &posicion;
     capturaPokemon->especie = &especie;
+    capturaPokemon->idEntrenador = &idEntrenador;
     capturaPokemon->destruir = &destruirCapturaPokemon;
 
     return capturaPokemon;
