@@ -102,6 +102,7 @@ static Entrenador *new(char * posicionInicial, char * pokemonesIniciales, char *
     entrenador->tipoPosicionable = ENTRENADOR;
     entrenador->pokemonesCapturados = agruparPokemonesPorNombre(pokemonesIniciales);
     entrenador->pokemonesObjetivo = agruparPokemonesPorNombre(pokemonesObjetivos);
+    entrenador->estaIntercambiando = false;
     entrenador->limiteDeCaptura = totalDePokemones(entrenador->pokemonesObjetivo);
     entrenador->mover = &mover;
     entrenador->objetivoCompletado = &objetivoCompletado;
