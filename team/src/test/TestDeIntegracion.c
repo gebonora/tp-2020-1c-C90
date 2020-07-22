@@ -11,6 +11,9 @@ void testDeIntegracion() {
 	// Libs
 	list_add(tests, testLibs);
 
+	// Cliente Broker
+	list_add(tests, testClienteBroker);
+
 	// Entrenadores
 	list_add(tests, testDeEntrenadores);
 
@@ -49,6 +52,9 @@ void testDeIntegracion() {
 
 	// Servicio de Métricas
 	list_add(tests, testDeServicioDeMetricas);
+
+	// Servicio de Deadlock
+	list_add(tests, testDeadlock);
 
 	for (int i = 0; i < list_size(tests); i++) {
 		log_info(testLogger, "-------- Ejecutando test %d/%d --------", i + 1, list_size(tests));

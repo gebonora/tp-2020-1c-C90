@@ -4,25 +4,15 @@
 
 #include "modelo/equipo/entrenador/Entrenador.h"
 
-static void iniciarCaptura(Entrenador * this, char * especie, Coordinate * posicionPokemon) {
-    char * posicion = coordenadaPuntero(posicionPokemon);
-    log_info(this->logger, "Intentando capturar a %s en %s", especie, posicion);
-    char * posicionInicial = separarPunteroCoordenada(posicionPokemon, "|");
-    PokemonAtrapable * pokemonAtrapable = PokemonAtrapableConstructor.new(especie, posicionInicial);
-    CapturaPokemon * capturaPokemon = CapturaPokemonConstructor.new(this->id, 0, pokemonAtrapable);
-//    enviarCatch(capturaPokemon);
-    capturaPokemon->destruir(capturaPokemon);
-    free(posicionInicial);
-    free(posicion);
-}
-
-static void registrarCaptura(Entrenador * this, CapturaPokemon * capturaPokemon){
-    char * especie = capturaPokemon->especie(capturaPokemon);
+static void registrarCaptura(Entrenador * this, char * especie){
+    log_info(this->logger, "Se agrega un %s a los pokemons capturados", especie);
     if (dictionary_has_key(this->pokemonesCapturados, especie)) {
         int * ejemplares = dictionary_get(this->pokemonesCapturados, especie);
         (*ejemplares)++;
     } else {
-        dictionary_put(this->pokemonesCapturados, especie, (void *) 1);
+        int * nuevoContador = malloc(sizeof(int));
+        *nuevoContador = 1;
+        dictionary_put(this->pokemonesCapturados, especie, nuevoContador);
     }
 }
 
@@ -57,10 +47,10 @@ bool objetivoCompletado(Entrenador * this) {
 
     while (fueCompletado && i < list_size(pokemones)) {
         char * pokemon = list_get(pokemones, i);
-        int cantidadRequerida = (int) dictionary_get(this->pokemonesObjetivo, pokemon);
+        int cantidadRequerida = *(int *) dictionary_get(this->pokemonesObjetivo, pokemon);
         int cantidadCapturada = 0;
         if (dictionary_has_key(this->pokemonesCapturados, pokemon)) {
-            cantidadCapturada = (int) dictionary_get(this->pokemonesCapturados, pokemon);
+            cantidadCapturada = *(int *) dictionary_get(this->pokemonesCapturados, pokemon);
         }
         if (cantidadCapturada != cantidadRequerida) {
             fueCompletado = false;
@@ -93,8 +83,8 @@ static char * descripcion(Entrenador * this) {
 static void destruir(Entrenador * this) {
     log_debug(this->logger, "Se procede a destruir al entrenador");
     log_destroy(this->logger);
-    dictionary_destroy(this->pokemonesCapturados);
-    dictionary_destroy(this->pokemonesObjetivo);
+    dictionary_destroy_and_destroy_elements(this->pokemonesCapturados, free);
+    dictionary_destroy_and_destroy_elements(this->pokemonesObjetivo, free);
     if (this->gps) {
         this->gps->destruirGps(this->gps);
     }
@@ -112,13 +102,13 @@ static Entrenador *new(char * posicionInicial, char * pokemonesIniciales, char *
     entrenador->tipoPosicionable = ENTRENADOR;
     entrenador->pokemonesCapturados = agruparPokemonesPorNombre(pokemonesIniciales);
     entrenador->pokemonesObjetivo = agruparPokemonesPorNombre(pokemonesObjetivos);
+    entrenador->estaIntercambiando = false;
     entrenador->limiteDeCaptura = totalDePokemones(entrenador->pokemonesObjetivo);
     entrenador->mover = &mover;
     entrenador->objetivoCompletado = &objetivoCompletado;
     entrenador->puedeAtraparPokemones = &puedeAtraparPokemones;
     entrenador->posicion = &posicion;
     entrenador->descripcion = &descripcion;
-    entrenador->iniciarCaptura = &iniciarCaptura;
     entrenador->registrarCaptura = &registrarCaptura;
     entrenador->destruir = &destruir;
 
@@ -141,9 +131,12 @@ ContadorPokemones agruparPokemonesPorNombre(char * nombresDeLosPokemones) {
         for (int i=0; i < list_size(pokemones); i++) {
             char * nombrePokemon = list_get(pokemones, i);
             if (dictionary_has_key(contador, nombrePokemon)) {
-                dictionary_put(contador, nombrePokemon, dictionary_get(contador, nombrePokemon) + 1);
+                int * ejemplares = dictionary_get(contador, nombrePokemon);
+                (*ejemplares)++;
             } else {
-                dictionary_put(contador, nombrePokemon, (void *) 1);
+                int * nuevoContador = malloc(sizeof(int));
+                *nuevoContador = 1;
+                dictionary_put(contador, nombrePokemon, nuevoContador);
             }
         }
 
@@ -157,7 +150,7 @@ ContadorPokemones agruparPokemonesPorNombre(char * nombresDeLosPokemones) {
 int totalDePokemones(ContadorPokemones contadorPokemones) {
     int total = 0;
     void sumar_al_total(char * pokemon, void * cantidad){
-        total += (int) cantidad;
+        total += *(int *)cantidad;
     }
     dictionary_iterator(contadorPokemones, sumar_al_total);
     return total;

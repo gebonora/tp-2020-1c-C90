@@ -5,11 +5,10 @@
 #ifndef TEAM_MANEJADORDEEVENTOS_H
 #define TEAM_MANEJADORDEEVENTOS_H
 
-#include "app/Global.h"
 #include <pthread.h>
-#include "modelo/pokemon/CapturaPokemon.h"
+#include "app/Global.h"
 #include "servicios/servicioDeCaptura/ServicioDeCaptura.h"
-#include "servidor/ServidorTeam.h"
+#include "manejadorDeEventos/registro/RegistradorDeEventos.h"
 
 /**
  * El server va a llamar al manejador de eventos cuando recibamos los mensajes, y el cliente cuando enviemos mensajes.
@@ -36,26 +35,17 @@
  *
  */
 
-typedef struct MensajeGet {
-	char* nombrePokemon;
-	uint32_t idCorrelatividad;
-} MensajeGet;
-
-typedef struct ListaSincronizada {
-	t_list* lista;
-	pthread_mutex_t mtx;
-} ListaSincronizada;
-
 typedef struct ManejadorDeEventos {
 	t_log * logger;
-	ListaSincronizada* listaGetEnEspera;
-	ListaSincronizada* listaCatchEnEspera;
+	RegistradorDeEventos * registradorDeEventos;
+	//ListaSincronizada* listaGetEnEspera;
+	//ListaSincronizada* listaCatchEnEspera;
 	t_list* listaLocalizedAppearedsRecibidos;
 	ServicioDeCaptura* servicioDeCaptura;
 
 	// Interfaz publica
-	void (*registrarCatchEnEspera)(struct ManejadorDeEventos* this, CapturaPokemon* capturaPokemon);
-	void (*registrarGetEnEspera)(struct ManejadorDeEventos* this, MensajeGet* mensajeGet);
+	//void (*registrarCatchEnEspera)(struct ManejadorDeEventos* this, CapturaPokemon* capturaPokemon);
+	//void (*registrarGetEnEspera)(struct ManejadorDeEventos* this, MensajeGet* mensajeGet);
 
 	void (*procesarLocalizedRecibido)(struct ManejadorDeEventos* this, Localized* unLocalized, uint32_t idMensaje);
 	void (*procesarAppearedRecibido)(struct ManejadorDeEventos* this, Pokemon* unPokemon, uint32_t idMensaje);
@@ -65,14 +55,9 @@ typedef struct ManejadorDeEventos {
 } ManejadorDeEventos;
 
 extern const struct ManejadorDeEventosClass {
-	ManejadorDeEventos* (*new)(ServicioDeCaptura* servicioDeCaptura);
+	ManejadorDeEventos* (*new)(ServicioDeCaptura* servicioDeCaptura, RegistradorDeEventos * registradorDeEventos);
 } ManejadorDeEventosConstructor;
 
-ListaSincronizada* iniciarListaSincronizada();
-void destruirListaSincronizada(ListaSincronizada* listaSincronizada, void (*destructorElemento)(void*));
-void destruirMensajeGet(void* puntero);
-void destruirCapturaPokemon(CapturaPokemon * capturaPokemon);
-
-ManejadorDeEventos* manejadorDeEventosProcesoTeam;
+ManejadorDeEventos * manejadorDeEventosProcesoTeam;
 
 #endif //TEAM_MANEJADORDEEVENTOS_H
