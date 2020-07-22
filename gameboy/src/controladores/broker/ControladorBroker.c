@@ -128,6 +128,8 @@ void atenderPedidoBroker(PedidoGameBoy pedidoGameBoy, t_log * logger) {
     	send(socket_broker, &process_gameboy, sizeof(uint32_t), 0);
     	send(socket_broker, &destination_queue, sizeof(uint32_t), 0);
     	send(socket_broker, &id_gameboy, sizeof(uint32_t), 0);
+    	Result result;
+    	recv(socket_broker, &result, sizeof(Result),0);
 
     	socket_with_logger* swl = malloc(sizeof(socket_with_logger));
     	swl->logger = logger;

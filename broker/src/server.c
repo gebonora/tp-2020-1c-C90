@@ -217,6 +217,9 @@ static void _process_request(uint32_t cod_op, int socket) {
 			break;
 		}
 
+		Result okRespuesta = OK;
+		send(socket, &okRespuesta, sizeof(Result),MSG_NOSIGNAL);
+
 		log_info(LOGGER, "Suscripcion (process=%s, id=%d, queue=%s, socket=%d)", get_process_by_value(cod_process), process_id, get_operation_by_value(cod_cola), socket);
 
 		bool _inline_find_subscriber(Subscriber* to_compare) {

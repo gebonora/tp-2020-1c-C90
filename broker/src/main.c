@@ -28,7 +28,7 @@ static void _init_logger() {
 }
 
 static void _init_config() {
-	t_config* config = config_create("/home/utnso/tp-2020-1c-C90/broker/config/broker.config");
+	t_config* config = config_create("config/broker.config");
 
 	IP = config_get_string_value(config, "IP_BROKER");
 	PUERTO = config_get_string_value(config, "PUERTO_BROKER");
