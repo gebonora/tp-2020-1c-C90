@@ -141,7 +141,6 @@ t_list* resolverDeadlock(ServicioDeResolucionDeDeadlocks * this, ListaDeDependen
 				}
 			}
 		}
-
 	}
 	list_destroy_and_destroy_elements(listaInvolucrados, free);
 	return listaDeIntercambios;
@@ -172,6 +171,15 @@ const struct ServicioDeResolucionDeDeadlocksClass ServicioDeResolucionDeDeadlock
 
 // Funciones estáticas.
 
+Entrenador* recuperarReferencia(t_list* listaEntrenadores, char* idEntrenador) {
+	for (int a = 0; a < list_size(listaEntrenadores); a++) {
+		Entrenador* entrenadorActual = (Entrenador*) list_get(listaEntrenadores, a);
+		if (string_equals_ignore_case(entrenadorActual->id, idEntrenador)) {
+			return entrenadorActual;
+		}
+	}
+	return NULL;
+}
 char* obtenerReporteDeadlocks(t_list* deadlocks) {
 	char* reporte = string_new();
 	if (list_is_empty(deadlocks)) {
@@ -225,8 +233,8 @@ ListaDeListaDeString sumarListasSiHayMatch(ListaDeListaDeString listaDeListas) {
 }
 
 ListaDeListaDeString eliminarListasRepetidas(ListaDeListaDeString listaDeListas) {
-	// Retorna un puntero con un subconjunto de los elementos de la lista que llega por parámetro.
-	// Fuera de esta función liberar con: list_destroy a la lista retornada, y list_destroy_and_elements a la lista que llega por parámetro.
+// Retorna un puntero con un subconjunto de los elementos de la lista que llega por parámetro.
+// Fuera de esta función liberar con: list_destroy a la lista retornada, y list_destroy_and_elements a la lista que llega por parámetro.
 
 	ListaDeListaDeString resultado = list_create();
 	ListaDeStrings buffer = list_create();

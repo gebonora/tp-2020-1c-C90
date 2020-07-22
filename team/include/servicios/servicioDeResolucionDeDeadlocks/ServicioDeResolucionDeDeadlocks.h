@@ -17,8 +17,6 @@
 
 /*
  * Esta clase se encarga de detección y resolución de deadlocks.
- * TODO:
- *  	Implementar algoritmo para resolver deadlock.
  *
  *  Posibles soluciones.
  *
@@ -40,7 +38,7 @@ typedef t_list* ListaDeDependencias;
 typedef t_list* ListaDeListaDeString;
 
 typedef struct Intercambio { // Esto puede definir tambien que pokemon dan / reciben, o lo dejamos que lo determine el que genera la tarea (me gusta mas esto)
-	char* entrenadorQueSeMueve;
+	char* entrenadorQueSeMueve; // Si queremos tener la ref al entenador en vez del nombre, podemos cambiarlo facil con la función, recuperarReferencia.
 	char* entrenadorQueEspera;
 } Intercambio;
 
@@ -83,5 +81,6 @@ void destruirDependencia(void * elem);
 void destruirIntercambio(void* aDestruir);
 char* obtenerReporteDeadlocks(t_list* deadlocks);
 ListaDeListaDeString sumarListasSiHayMatch(ListaDeListaDeString listaDeListas);
+Entrenador* recuperarReferencia(t_list* listaEntrenadores, char* idEntrenador);
 
 #endif /* INCLUDE_SERVICIOS_SERVICIODERESOLUCIONDEDEADLOCKS_SERVICIODERESOLUCIONDEDEADLOCKS_H_ */
