@@ -14,7 +14,7 @@ extern const struct ShortestJobFirstClass {
 void *ObtenerProximoMasCorto(t_list *lista);
 bool unidadConRafagaEstimadaMasCorta(void* elem1, void* elem2);
 double calcularEstimacion(UnidadPlanificable *elem);
-void* asignarEstimacionAUnElemento(void* elem);
+void asignarEstimacionAUnElemento(void* elem);
 void asignarEstimacionATodosLosElementosDeLaLista(t_list *list);
 void obtenerConfiguracionesSJF();
 

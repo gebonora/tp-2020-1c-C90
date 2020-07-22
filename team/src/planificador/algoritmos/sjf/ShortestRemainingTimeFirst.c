@@ -1,4 +1,4 @@
-#include "planificador/algoritmos/sjf/ShortestJobFirst.h"
+#include "planificador/algoritmos/sjf/ShortestRemainingTimeFirst.h"
 
 
 static UnidadPlanificable * proximoAEjecutar(AlgoritmoPlanificador * this, t_list * listaReady) {
@@ -6,22 +6,22 @@ static UnidadPlanificable * proximoAEjecutar(AlgoritmoPlanificador * this, t_lis
 		log_error(this->logger, "No hay nada para planificar.");
 		return NULL;
 	} else {
-		UnidadPlanificable * unindadProximaAEjecutar = ObtenerProximoMasCorto(listaReady);
+		UnidadPlanificable * unindadProximaAEjecutar = ObtenerProximoMasCortoSRTF(listaReady);
 		log_debug(this->logger, "Proxima unidad planificable a ejecutar seleccionada con éxito");
 		return unindadProximaAEjecutar;
 	}
 }
 
-void *ObtenerProximoMasCorto(t_list *lista) {
+void *ObtenerProximoMasCortoSRTF(t_list *lista) {
 
 	// aqui utilizaria list_sort para ordenar la lista por la rafaga est actual
 	// mas corta y luego proximoAEjecutar simplemente tomaria el mas corto de esta.
-	list_sort(lista, unidadConRafagaEstimadaMasCorta);
+	list_sort(lista, unidadConRafagaEstimadaMasCortaSRTF);
 	return list_get(lista, 0);
 
 }
 
-bool unidadConRafagaEstimadaMasCorta(void* elem1, void* elem2) {
+bool unidadConRafagaEstimadaMasCortaSRTF(void* elem1, void* elem2) {
 
 	UnidadPlanificable* unidad1 = (UnidadPlanificable*) elem1;
 	UnidadPlanificable* unidad2 = (UnidadPlanificable*) elem2;
@@ -32,38 +32,45 @@ bool unidadConRafagaEstimadaMasCorta(void* elem1, void* elem2) {
 	// esta función retorna true si la rafaga estimada de elem1 es menos o igual a la de elem2
 }
 
-double calcularEstimacion(UnidadPlanificable *elem) {
+double calcularEstimacionSRTF(UnidadPlanificable *elem) {
 	double estimacion;
 	if (elem->infoUltimaEjecucion.seEjecutoPrimeraEstimacion == false) {
-		estimacion = estInicial;
+		estimacion = estInicial_SRTF;
 		elem->infoUltimaEjecucion.seEjecutoPrimeraEstimacion = true;
 	} else {
+
 		double est_ant = elem->infoUltimaEjecucion.est_raf_ant;
 		double real_ant = elem->infoUltimaEjecucion.real_raf_ant;
-		estimacion = ((1 - alpha) * est_ant) + (alpha * real_ant);
+		estimacion = ((1 - alpha_SRTF) * est_ant) + (alpha_SRTF * real_ant);
 	}
 	return estimacion;
 }
 
-void asignarEstimacionAUnElemento(void* elem) {
+
+void asignarEstimacionAUnElementoSRTF(void* elem) {
+
 	UnidadPlanificable* unidad = (UnidadPlanificable*) elem;
+
+	if(unidad->infoUltimaEjecucion.rafaga_real_actual <= unidad->infoUltimaEjecucion.rafaga_parcial_ejecutada){
 	unidad->infoUltimaEjecucion.est_raf_ant = unidad->infoUltimaEjecucion.est_raf_actual;
 	// asignamos la actual anterior como est anterior
-	unidad->infoUltimaEjecucion.est_raf_actual = calcularEstimacion(unidad);
+	unidad->infoUltimaEjecucion.est_raf_actual = calcularEstimacionSRTF(unidad);
 	// calculamos el nuevo estimado y se lo asignamos
+	unidad->infoUltimaEjecucion.rafaga_parcial_ejecutada = 0;
+	}
 }
 
-void asignarEstimacionATodosLosElementosDeLaLista(t_list *list) {
-	list_iterate(list, asignarEstimacionAUnElemento);
+void asignarEstimacionATodosLosElementosDeLaListaSRTF(t_list *list) {
+	list_iterate(list, asignarEstimacionAUnElementoSRTF);
 }
 
-void obtenerConfiguracionesSJF() {
-	t_config* configSJF = config_create(TEAM_CONFIG_FILE);
+void obtenerConfiguracionesSRTF() {
+	t_config* configSRTF = config_create(TEAM_CONFIG_FILE);
 
-	alpha = config_get_double_value(configSJF, "ALPHA");
-	estInicial = config_get_double_value(configSJF, "ESTIMACION_INICIAL");
+	alpha_SRTF = config_get_double_value(configSRTF, "ALPHA");
+	estInicial_SRTF = config_get_double_value(configSRTF, "ESTIMACION_INICIAL");
 
-	config_destroy(configSJF);
+	config_destroy(configSRTF);
 }
 
 static void destruir(AlgoritmoPlanificador * this) {
@@ -71,14 +78,14 @@ static void destruir(AlgoritmoPlanificador * this) {
 }
 
 static AlgoritmoPlanificador new() {
-	obtenerConfiguracionesSJF();
+	obtenerConfiguracionesSRTF();
 	return (AlgoritmoPlanificador ) {
-		.logger = log_create(TEAM_INTERNAL_LOG_FILE, "AlgoritmoSJFsinDesalojo", SHOW_INTERNAL_CONSOLE, INTERNAL_LOG_LEVEL),
-		.tipo = SJF_SD,
+		.logger = log_create(TEAM_INTERNAL_LOG_FILE, "AlgoritmoSJFconDesalojo", SHOW_INTERNAL_CONSOLE, INTERNAL_LOG_LEVEL),
+		.tipo = SJF_CD,
 		&proximoAEjecutar,
 		&destruir
 	} ;
 }
 
-const struct ShortestJobFirstClass ShortestJobFirstConstructor = {.new=&new};
+const struct ShortestRemainingTimeFirstClass ShortestRemainingTimeFirstConstructor = {.new=&new};
 

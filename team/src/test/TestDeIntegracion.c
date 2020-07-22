@@ -29,6 +29,9 @@ void testDeIntegracion() {
 	// Algoritmos
 	list_add(tests, testDeAlgoritmos);
 
+	// SJF sin Desalojo
+	list_add(tests, testDeAlgoritmosSJFsinDesalojo);
+
 	// Tareas
 	list_add(tests, testDeTareas);
 
@@ -46,9 +49,6 @@ void testDeIntegracion() {
 
 	// Eventos
 	list_add(tests, testDeEventos);
-
-	// SJF sin Desalojo
-	list_add(tests, testDeAlgoritmosSJFsinDesalojo);
 
 	// Servicio de Métricas
 	list_add(tests, testDeServicioDeMetricas);
