@@ -23,13 +23,13 @@ void testDeAlgoritmosSJFsinDesalojo() {
     HiloEntrenadorPlanificable * hiloEntrenadorPlanificable = HiloEntrenadorPlanificableConstructor.new(entrenador);
     HiloEntrenadorPlanificable * hiloEntrenadorPlanificable2 = HiloEntrenadorPlanificableConstructor.new(entrenador2);
 
-    hiloEntrenadorPlanificable->infoUltimaEjecucion.primeraEstimacion = true;
+    hiloEntrenadorPlanificable->infoUltimaEjecucion.seEjecutoPrimeraEstimacion = true;
     hiloEntrenadorPlanificable->infoUltimaEjecucion.real_raf_ant = 10;
     hiloEntrenadorPlanificable->infoUltimaEjecucion.est_raf_ant = 0;
     hiloEntrenadorPlanificable->infoUltimaEjecucion.est_raf_actual = 5;
 
 
-    hiloEntrenadorPlanificable2->infoUltimaEjecucion.primeraEstimacion = true;
+    hiloEntrenadorPlanificable2->infoUltimaEjecucion.seEjecutoPrimeraEstimacion = true;
     hiloEntrenadorPlanificable2->infoUltimaEjecucion.real_raf_ant = 1;
     hiloEntrenadorPlanificable2->infoUltimaEjecucion.est_raf_ant = 0;
     hiloEntrenadorPlanificable2->infoUltimaEjecucion.est_raf_actual = 1;

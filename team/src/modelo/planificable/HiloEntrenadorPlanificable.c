@@ -99,7 +99,7 @@ static HiloEntrenadorPlanificable *new(Entrenador * entrenador) {
     sem_init(&hiloEntrenadorPlanificable->semaforoCicloCompletado,1 ,0);
     sem_init(&hiloEntrenadorPlanificable->semaforoFinDeTrabajo,1 ,0);
     hiloEntrenadorPlanificable->tareaAsignada = NULL;
-    hiloEntrenadorPlanificable->infoUltimaEjecucion = (InfoUltimaEjecucion) {.real_raf_ant=0, .est_raf_ant=0, .primeraEstimacion=false};
+    hiloEntrenadorPlanificable->infoUltimaEjecucion = (InfoUltimaEjecucion) {.real_raf_ant=0, .est_raf_ant=0, .seEjecutoPrimeraEstimacion=false};
     hiloEntrenadorPlanificable->asignarTarea = &asignarTarea;
     hiloEntrenadorPlanificable->trabajar = &trabajar;
     hiloEntrenadorPlanificable->ejecutarParcialmente = &ejecutarLimitado;

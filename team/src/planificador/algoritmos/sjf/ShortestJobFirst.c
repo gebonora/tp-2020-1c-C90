@@ -34,9 +34,9 @@ bool unidadConRafagaEstimadaMasCorta(void* elem1, void* elem2) {
 
 double calcularEstimacion(UnidadPlanificable *elem) {
 	double estimacion;
-	if (elem->infoUltimaEjecucion.primeraEstimacion == false) {
+	if (elem->infoUltimaEjecucion.seEjecutoPrimeraEstimacion == false) {
 		estimacion = estInicial;
-		elem->infoUltimaEjecucion.primeraEstimacion = true;
+		elem->infoUltimaEjecucion.seEjecutoPrimeraEstimacion = true;
 	} else {
 		double est_ant = elem->infoUltimaEjecucion.est_raf_ant;
 		double real_ant = elem->infoUltimaEjecucion.real_raf_ant;

@@ -32,7 +32,12 @@ typedef struct InfoUltimaEjecucion {
     double est_raf_ant;
     double real_raf_ant;
     double est_raf_actual;
-    bool primeraEstimacion;
+    bool seEjecutoPrimeraEstimacion;
+
+    // parametros para sjf con desalojo
+    double rafaga_real_actual;
+    double rafaga_parcial_ejecutada; // lo que ejecuto para restarselo a la rafaga
+
 } InfoUltimaEjecucion;
 
 typedef struct HiloEntrenadorPlanificable {

@@ -34,13 +34,10 @@ bool unidadConRafagaEstimadaMasCortaSRTF(void* elem1, void* elem2) {
 
 double calcularEstimacionSRTF(UnidadPlanificable *elem) {
 	double estimacion;
-	if (elem->infoUltimaEjecucion.primeraEstimacion == false) {
+	if (elem->infoUltimaEjecucion.seEjecutoPrimeraEstimacion == false) {
 		estimacion = estInicial_SRTF;
-		elem->infoUltimaEjecucion.primeraEstimacion = true;
+		elem->infoUltimaEjecucion.seEjecutoPrimeraEstimacion = true;
 	} else {
-
-		//TODO: revisar ante ejecucion parcial como opera con el estimador
-		// 		y la parte que ya ejecuto de la rafaga
 
 		double est_ant = elem->infoUltimaEjecucion.est_raf_ant;
 		double real_ant = elem->infoUltimaEjecucion.real_raf_ant;
@@ -49,12 +46,18 @@ double calcularEstimacionSRTF(UnidadPlanificable *elem) {
 	return estimacion;
 }
 
+
 void asignarEstimacionAUnElementoSRTF(void* elem) {
+
 	UnidadPlanificable* unidad = (UnidadPlanificable*) elem;
+
+	if(unidad->infoUltimaEjecucion.rafaga_real_actual <= unidad->infoUltimaEjecucion.rafaga_parcial_ejecutada){
 	unidad->infoUltimaEjecucion.est_raf_ant = unidad->infoUltimaEjecucion.est_raf_actual;
 	// asignamos la actual anterior como est anterior
 	unidad->infoUltimaEjecucion.est_raf_actual = calcularEstimacionSRTF(unidad);
 	// calculamos el nuevo estimado y se lo asignamos
+	unidad->infoUltimaEjecucion.rafaga_parcial_ejecutada = 0;
+	}
 }
 
 void asignarEstimacionATodosLosElementosDeLaListaSRTF(t_list *list) {
