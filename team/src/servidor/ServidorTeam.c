@@ -220,7 +220,7 @@ void procesarHiloLocalized(ArgumentosHilo* argumentosHilo) {
 	Localized* unLocalized = (Localized*) argumentosHilo->mensaje;
 	uint32_t idMensaje;
 
-	manejadorDeEventosProcesoTeam->procesarAppearedRecibido(manejadorDeEventosProcesoTeam, unLocalized, idMensaje);
+	manejadorDeEventosProcesoTeam->procesarLocalizedRecibido(manejadorDeEventosProcesoTeam, unLocalized, idMensaje);
 }
 
 void atenderGameboy() {
