@@ -54,7 +54,6 @@ void testDeEventos() {
 	servicioPlanificacion->destruir(servicioPlanificacion);
 	mapa.destruir(&mapa);
 	destruirEquipo(equipo);
-    pokemon->destruir(pokemon); //TODO: Definir bien quien se tiene que encargar de liberar esta estructura.
 	manejadorDeEventosTest->destruir(manejadorDeEventosTest);
     registrador->destruir(registrador);
 	log_destroy(testLogger);

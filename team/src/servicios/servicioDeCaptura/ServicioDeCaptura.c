@@ -63,7 +63,7 @@ static bool registrarCapturaExitosa(ServicioDeCaptura * this, CapturaPokemon * c
     Entrenador * entrenador = capturaPokemon->entrenador;
 
     log_debug(this->logger, "Eliminando al pokemon capturado del mapa...");
-    bool sePudoEliminarDelMapa = capturaPokemon->eliminarPokemonCapturadoDelMapa(capturaPokemon, this->mapa);
+    bool sePudoEliminarDelMapa = capturaPokemon->eliminarPokemonCapturadoDelMapa(capturaPokemon);
 
     if (sePudoEliminarDelMapa) {
         entrenador->registrarCaptura(entrenador, capturaPokemon->especie(capturaPokemon));
@@ -78,6 +78,8 @@ static bool registrarCapturaExitosa(ServicioDeCaptura * this, CapturaPokemon * c
     } else {
         log_error(this->logger, "No se puede capturar un pokemon que no figure en el mapa");
     }
+
+    capturaPokemon->destruir(capturaPokemon);
 
     return sePudoRegistrar;
 }

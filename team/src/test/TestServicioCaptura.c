@@ -41,8 +41,6 @@ void testServicioDeCaptura() {
     assert(posicionPokemon.valida == false);
     //assert(mapa.cantidadPosicionables(&mapa) == 1);
 
-    //pokemonAtrapable->destruir(pokemonAtrapable);
-    capturaPokemon->destruir(capturaPokemon);
     servicioDeCaptura->destruir(servicioDeCaptura);
     servicioPlanificacion->destruir(servicioPlanificacion);
     mapa.destruir(&mapa);

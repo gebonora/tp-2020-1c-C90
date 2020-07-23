@@ -16,12 +16,13 @@ static char * posicion(CapturaPokemon * this) {
     return coordenadaClave(this->pokemonAtrapable->posicionInicial);
 }
 
-static bool eliminarPokemonCapturadoDelMapa(CapturaPokemon * this, Mapa mapa) {
+static bool eliminarPokemonCapturadoDelMapa(CapturaPokemon * this) {
     return this->pokemonAtrapable->borrarPosicion(this->pokemonAtrapable);
 }
 
 static void destruirCapturaPokemon(CapturaPokemon * this) {
     log_destroy(this->logger);
+    // El hecho de destruir una captura es porque dejó de existir el pokemon (ya sea por captura exitosa o no)
     this->pokemonAtrapable->destruir(this->pokemonAtrapable);
     free(this);
 }

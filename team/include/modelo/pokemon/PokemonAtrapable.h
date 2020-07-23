@@ -27,7 +27,6 @@ typedef struct PokemonAtrapable {
     Posicion (*posicion)(struct PokemonAtrapable * this);
     bool (*marcarComoObjetivo)(struct PokemonAtrapable * this, char * idMarcador); //La idea es evitar que 2 entrenadores vayan a la misma posicion.
     bool (*esAtrapable)(struct PokemonAtrapable * this); //Es true si ningun entrenador lo marcó como objetivo
-    // capturar(Entrenador) : void - Se registra en el entrenador y muere. ver como hacer la secuencia de llamadas con el entrenador.
     bool (*borrarPosicion)(struct PokemonAtrapable * this);
     char * (*descripcion)(struct PokemonAtrapable * this);
     void (*destruir)(struct PokemonAtrapable * this);

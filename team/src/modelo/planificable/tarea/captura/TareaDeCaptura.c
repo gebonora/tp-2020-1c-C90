@@ -73,7 +73,6 @@ void iniciarCaptura(Entrenador * entrenador, char * especie, Coordinate * posici
         registradorDeEventosProcesoTeam->registrarCatchEnEspera(registradorDeEventosProcesoTeam, capturaPokemon);
     } else {
         servicioDeCapturaProcesoTeam->registrarCapturaExitosa(servicioDeCapturaProcesoTeam, capturaPokemon);
-        capturaPokemon->destruir(capturaPokemon); //TODO: Ver si ganamos algo moviendo esto al registrarCapturaExitosa
     }
 
     free(posicionInicial);

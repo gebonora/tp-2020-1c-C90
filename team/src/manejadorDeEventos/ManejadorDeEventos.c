@@ -117,7 +117,10 @@ static void procesarCaughtRecibido(ManejadorDeEventos* this, Caught* unCaught, u
 	// Coincide con un pedido, ver el resultado
 	if (unCaught->result == FAIL) {
 		// Informar que falló, liberar memoria y cerrar.
-		free(unCaught);
+        // TODO: Hay que avisarle al servicio de planificacion que el entrenador puede ser seleccionado para futuras planificaciones.
+		capturaPokemon->eliminarPokemonCapturadoDelMapa(capturaPokemon);
+        capturaPokemon->destruir(capturaPokemon);
+        free(unCaught);
 		return;
 	}
 	// Caso feliz:
