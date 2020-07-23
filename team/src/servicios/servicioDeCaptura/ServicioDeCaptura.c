@@ -51,6 +51,16 @@ static PokemonAtrapable * altaDePokemon(ServicioDeCaptura * this, char * especie
 static void encargarTrabajoDeCaptura(ServicioDeCaptura * this, char * especie, Coordinate posicion) {
 	char * ubicacionPokemonACapturar = coordenadaClave(posicion);
 	log_info(this->logger, "Se le encarga al servicio de planificacion que mande a un entrenador a capturar a %s en %s", especie, ubicacionPokemonACapturar);
+
+	// TODO: Acá enganchamos con el serv planificacion.
+
+	void* algo = NULL; // TODO: definir esto. Va a ser lo que consume el ServPlanificacion para generar las tareas.
+
+	pthread_mutex_lock(&this->servicioDePlanificacion->mutexColaDeTrabajo);
+	queue_push(this->servicioDePlanificacion->colaDeTrabajo, algo);
+	pthread_mutex_unlock(&this->servicioDePlanificacion->mutexColaDeTrabajo);
+	sem_post(&this->servicioDePlanificacion->semaforoContadorColaDeTrabajo);
+
 	free(ubicacionPokemonACapturar);
 }
 
