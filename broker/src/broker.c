@@ -86,15 +86,13 @@ static int _calculate_bytes_to_send(Operation operation, int data_size) {
 	switch (operation) {
 	case CATCH:
 	case GET:
-	case LOCALIZED: ;
+	case LOCALIZED:
+	case NEW:
+	case APPEARED: ;
 		size += sizeof(uint32_t) + 1;
 		break;
 	case CAUGHT: ;
 		size += sizeof(uint32_t);
-		break;
-	case NEW:
-	case APPEARED: ;
-		size += 1;
 		break;
 	}
 
@@ -139,6 +137,8 @@ static void* _transform_messages(Partition* partition, Operation operation, int 
 		memcpy(message + displacement, &end_of_string, 1);
 		displacement += 1;
 		memcpy(message + displacement, partition->start + sizeof(uint32_t) + new_name_size, partition->message->data_size - sizeof(uint32_t) - new_name_size);
+		displacement += partition->message->data_size - sizeof(uint32_t) - new_name_size;
+		memcpy(message + displacement, &(partition->message->message_id), sizeof(uint32_t));
 
 		log_debug(LOGGER, "Finishing memcpy");
 		break;
