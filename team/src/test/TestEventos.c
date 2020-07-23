@@ -13,17 +13,18 @@ void testDeEventos() {
 	registrarEnMapaPosicionEntrenador(&mapa, entrenador);
 	Equipo equipo = list_create();
 	list_add(equipo, entrenador);
-
-	ServicioDePlanificacion * servicioPlanificacion = ServicioDePlanificacionConstructor.new();
+	ServicioDeMetricas* metricasTest = ServicioDeMetricasConstructor.new();
+	ServicioDeResolucionDeDeadlocks* deadlocksTest = ServicioDeResolucionDeDeadlocksConstructor.new(metricasTest);
+	ServicioDePlanificacion * servicioPlanificacion = ServicioDePlanificacionConstructor.new(metricasTest, deadlocksTest);
 	ServicioDeCaptura * servicioDeCapturaTest = ServicioDeCapturaConstructor.new(mapa, servicioPlanificacion);
 
-    RegistradorDeEventos * registrador = RegistradorDeEventosConstructor.new();
-    ManejadorDeEventos* manejadorDeEventosTest = ManejadorDeEventosConstructor.new(servicioDeCapturaTest, registrador);
+	RegistradorDeEventos * registrador = RegistradorDeEventosConstructor.new();
+	ManejadorDeEventos* manejadorDeEventosTest = ManejadorDeEventosConstructor.new(servicioDeCapturaTest, registrador);
 
-    //PokemonAtrapable * pokemonAtrapable = PokemonAtrapableConstructor.new("Pikachu", "1|2");
+	//PokemonAtrapable * pokemonAtrapable = PokemonAtrapableConstructor.new("Pikachu", "1|2");
 
-    Coordinate posicion = (Coordinate) {.pos_x = 1, .pos_y = 2};
-    PokemonAtrapable * pokemonAtrapable = servicioDeCapturaTest->altaDePokemon(servicioDeCapturaTest, "Pikachu", posicion);
+	Coordinate posicion = (Coordinate ) { .pos_x = 1, .pos_y = 2 };
+	PokemonAtrapable * pokemonAtrapable = servicioDeCapturaTest->altaDePokemon(servicioDeCapturaTest, "Pikachu", posicion);
 
 	CapturaPokemon* pokemon = CapturaPokemonConstructor.new(entrenador, 200, pokemonAtrapable);
 
@@ -37,11 +38,11 @@ void testDeEventos() {
 	localizedCharmander->pokemon = create_pokemon("Charmander", 1, 3);
 	localizedCharmander->coordinates_quantity = 1;
 
-    registrador->registrarGetEnEspera(registrador, "Charmander", 100);
-    registrador->registrarCatchEnEspera(registrador, pokemon);
+	registrador->registrarGetEnEspera(registrador, "Charmander", 100);
+	registrador->registrarCatchEnEspera(registrador, pokemon);
 
-    assert(list_size(registrador->listaCatchEnEspera->lista) == 1);
-    assert(list_size(registrador->listaGetEnEspera->lista) == 1);
+	assert(list_size(registrador->listaCatchEnEspera->lista) == 1);
+	assert(list_size(registrador->listaGetEnEspera->lista) == 1);
 
 	manejadorDeEventosTest->procesarCaughtRecibido(manejadorDeEventosTest, caughtOK, 200);
 	manejadorDeEventosTest->procesarCaughtRecibido(manejadorDeEventosTest, caughtFAIL, 404);
@@ -54,8 +55,9 @@ void testDeEventos() {
 	servicioPlanificacion->destruir(servicioPlanificacion);
 	mapa.destruir(&mapa);
 	destruirEquipo(equipo);
-    pokemon->destruir(pokemon); //TODO: Definir bien quien se tiene que encargar de liberar esta estructura.
 	manejadorDeEventosTest->destruir(manejadorDeEventosTest);
-    registrador->destruir(registrador);
+	registrador->destruir(registrador);
+	metricasTest->destruir(metricasTest);
+	deadlocksTest->destruir(deadlocksTest);
 	log_destroy(testLogger);
 }

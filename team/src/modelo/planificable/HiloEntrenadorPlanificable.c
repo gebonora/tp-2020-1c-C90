@@ -31,6 +31,8 @@ static void trabajar(HiloEntrenadorPlanificable * this) {
 
         tareaEnEjecucion->notificarEjecucion(tareaEnEjecucion, instruccion->posicion);
 
+        servicioDeMetricasProcesoTeam->registrarCicloRealizadoPorEntrenador(servicioDeMetricasProcesoTeam, this->entrenador->id);
+
         log_debug(this->logger, "Finaliza un ciclo de trabajo muy duro");
 
         sem_post(&this->semaforoCicloCompletado);

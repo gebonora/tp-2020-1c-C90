@@ -15,14 +15,14 @@ void testDeEntrenadores() {
 	assert(entrenador->puedeAtraparPokemones(entrenador) == true);
 	assert(entrenador2->objetivoCompletado(entrenador2) == true);
 	assert(entrenador2->puedeAtraparPokemones(entrenador2) == false);
-	assert(*(int *) dictionary_get(entrenador->pokemonesCapturados, "A") == 1);
-	assert(*(int *) dictionary_get(entrenador->pokemonesCapturados, "B") == 1);
-	assert(*(int *) dictionary_get(entrenador->pokemonesObjetivo, "A") == 1);
-	assert(*(int *) dictionary_get(entrenador->pokemonesObjetivo, "C") == 2);
-	assert(*(int *) dictionary_get(entrenador2->pokemonesCapturados, "A") == 1);
-	assert(*(int *) dictionary_get(entrenador2->pokemonesCapturados, "B") == 1);
-	assert(*(int *) dictionary_get(entrenador2->pokemonesObjetivo, "A") == 1);
-	assert(*(int *) dictionary_get(entrenador2->pokemonesObjetivo, "B") == 1);
+	assert(*(int * ) dictionary_get(entrenador->pokemonesCapturados, "A") == 1);
+	assert(*(int * ) dictionary_get(entrenador->pokemonesCapturados, "B") == 1);
+	assert(*(int * ) dictionary_get(entrenador->pokemonesObjetivo, "A") == 1);
+	assert(*(int * ) dictionary_get(entrenador->pokemonesObjetivo, "C") == 2);
+	assert(*(int * ) dictionary_get(entrenador2->pokemonesCapturados, "A") == 1);
+	assert(*(int * ) dictionary_get(entrenador2->pokemonesCapturados, "B") == 1);
+	assert(*(int * ) dictionary_get(entrenador2->pokemonesObjetivo, "A") == 1);
+	assert(*(int * ) dictionary_get(entrenador2->pokemonesObjetivo, "B") == 1);
 
 	log_info(testLogger, "Testeando entrenador sin pokemones capturados");
 	Entrenador * entrenador3 = EntrenadorConstructor.new("2|4", "None", "A|B");
@@ -31,9 +31,9 @@ void testDeEntrenadores() {
 
 	log_info(testLogger, "Testeando que la captura sume al contador del entrenador");
 	entrenador3->registrarCaptura(entrenador3, "A");
-	assert(*(int *) dictionary_get(entrenador3->pokemonesCapturados, "A") == 1);
+	assert(*(int * ) dictionary_get(entrenador3->pokemonesCapturados, "A") == 1);
 	entrenador3->registrarCaptura(entrenador3, "B");
-	assert(*(int *) dictionary_get(entrenador3->pokemonesCapturados, "B") == 1);
+	assert(*(int * ) dictionary_get(entrenador3->pokemonesCapturados, "B") == 1);
 	assert(entrenador3->objetivoCompletado(entrenador3) == true);
 
 	log_info(testLogger, "Testeando los metodos del objetivo global");
@@ -42,10 +42,13 @@ void testDeEntrenadores() {
 	list_add(equipito, entrenador);
 	list_add(equipito, entrenador2);
 
-	ServicioDePlanificacion* servicioDePlanificacionTest = ServicioDePlanificacionConstructor.new();
+	ServicioDeMetricas* metricasTest = ServicioDeMetricasConstructor.new();
+	ServicioDeResolucionDeDeadlocks* deadlocksTest = ServicioDeResolucionDeDeadlocksConstructor.new(metricasTest);
+
+	ServicioDePlanificacion* servicioDePlanificacionTest = ServicioDePlanificacionConstructor.new(metricasTest, deadlocksTest);
 	Mapa mapaTest = MapaConstructor.new();
 	ServicioDeCaptura* servicioDeCapturaTest = ServicioDeCapturaConstructor.new(mapaTest, servicioDePlanificacionTest);
-    RegistradorDeEventos * registrador = RegistradorDeEventosConstructor.new();
+	RegistradorDeEventos * registrador = RegistradorDeEventosConstructor.new();
 
 	ClienteBrokerV2 * clienteTest = ClienteBrokerV2Constructor.new();
 	ObjetivoGlobal objetivo = ObjetivoGlobalConstructor.new(equipito, clienteTest, registrador);
@@ -71,7 +74,7 @@ void testDeEntrenadores() {
 	assert(contabilidadEspecieC->necesarios == 2);
 	assert(contabilidadEspecieC->capturados == 0);
 
-    objetivo.solicitarUbicacionPokemonesNecesitados(&objetivo);
+	objetivo.solicitarUbicacionPokemonesNecesitados(&objetivo);
 
 	assert(list_size(registrador->listaGetEnEspera->lista) == 0);
 
@@ -85,4 +88,6 @@ void testDeEntrenadores() {
 	mapaTest.destruir(&mapaTest);
 	clienteTest->destruir(clienteTest);
 	registrador->destruir(registrador);
+	metricasTest->destruir(metricasTest);
+	deadlocksTest->destruir(deadlocksTest);
 }

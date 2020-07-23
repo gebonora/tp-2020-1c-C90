@@ -10,6 +10,7 @@
 #include "modelo/equipo/entrenador/Entrenador.h"
 #include "delibird/utils/hilos/HiloFacil.h"
 #include "modelo/planificable/tarea/TareaPlanificable.h"
+#include "servicios/servicioDeMetricas/ServicioDeMetricas.h"
 #include "delibird/servicios/servicioDeConfiguracion/ServicioDeConfiguracion.h"
 
 /**

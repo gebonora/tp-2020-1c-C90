@@ -6,41 +6,41 @@
 
 void configurarServer() {
 
-/*	t_config* configServer = config_create(TEAM_CONFIG_FILE);
+	/*	t_config* configServer = config_create(TEAM_CONFIG_FILE);
+
+	 IP_Broker = string_new();
+	 string_append(&IP_Broker, config_get_string_value(configServer, "IP_BROKER"));
+
+	 Puerto_Broker = string_new();
+	 string_append(&Puerto_Broker, config_get_string_value(configServer, "PUERTO_BROKER"));
+
+	 IP_Team_Gameboy = string_new();
+	 string_append(&IP_Team_Gameboy, config_get_string_value(configServer, "IP_TEAM_GAMEBOY"));
+
+	 Puerto_Team_Gameboy = string_new();
+	 string_append(&Puerto_Team_Gameboy, config_get_string_value(configServer, "PUERTO_TEAM_GAMEBOY"));
+
+	 Tiempo_Reconexion = config_get_int_value(configServer, "TIEMPO_RECONEXION");
+
+	 Id_Team = config_get_int_value(configServer, "ID_TEAM");
+
+	 config_destroy(configServer);*/
 
 	IP_Broker = string_new();
-	string_append(&IP_Broker, config_get_string_value(configServer, "IP_BROKER"));
+	string_append(&IP_Broker, servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, IP_BROKER));
 
 	Puerto_Broker = string_new();
-	string_append(&Puerto_Broker, config_get_string_value(configServer, "PUERTO_BROKER"));
+	string_append(&Puerto_Broker, servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, PUERTO_BROKER));
 
 	IP_Team_Gameboy = string_new();
-	string_append(&IP_Team_Gameboy, config_get_string_value(configServer, "IP_TEAM_GAMEBOY"));
+	string_append(&IP_Team_Gameboy, servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, IP_TEAM_GAMEBOY));
 
 	Puerto_Team_Gameboy = string_new();
-	string_append(&Puerto_Team_Gameboy, config_get_string_value(configServer, "PUERTO_TEAM_GAMEBOY"));
+	string_append(&Puerto_Team_Gameboy, servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, PUERTO_TEAM_GAMEBOY));
 
-	Tiempo_Reconexion = config_get_int_value(configServer, "TIEMPO_RECONEXION");
+	Tiempo_Reconexion = servicioDeConfiguracion.obtenerEntero(&servicioDeConfiguracion, TIEMPO_RECONEXION);
 
-	Id_Team = config_get_int_value(configServer, "ID_TEAM");
-
-    config_destroy(configServer);*/
-
-    IP_Broker = string_new();
-    string_append(&IP_Broker, servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, IP_BROKER));
-
-    Puerto_Broker = string_new();
-    string_append(&Puerto_Broker, servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, PUERTO_BROKER));
-
-    IP_Team_Gameboy = string_new();
-    string_append(&IP_Team_Gameboy, servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, IP_TEAM_GAMEBOY));
-
-    Puerto_Team_Gameboy = string_new();
-    string_append(&Puerto_Team_Gameboy, servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, PUERTO_TEAM_GAMEBOY));
-
-    Tiempo_Reconexion = servicioDeConfiguracion.obtenerEntero(&servicioDeConfiguracion, TIEMPO_RECONEXION);
-
-    Id_Team = servicioDeConfiguracion.obtenerEntero(&servicioDeConfiguracion, ID_TEAM);
+	Id_Team = servicioDeConfiguracion.obtenerEntero(&servicioDeConfiguracion, ID_TEAM);
 }
 
 void eliminarConfigServer() {
@@ -123,10 +123,8 @@ void esperarBrokerAppeared(int socketDeEscucha) {
 void procesarHiloAppeared(ArgumentosHilo* argumentosHilo) {
 	Pokemon* unAppeared = (Pokemon*) argumentosHilo->mensaje;
 	uint32_t idMensaje = argumentosHilo->idMensaje;
-	//TODO:
-	//Pasar el paquete y el id a otro subproceso. ver donde se va a liberar la memoria!
-	//Si se termina el hilo, la memoria se libera????? -> crear una copia y pasar la copia.
-	//cerrar hilo
+
+	manejadorDeEventosProcesoTeam->procesarAppearedRecibido(manejadorDeEventosProcesoTeam, unAppeared, idMensaje);
 }
 
 void atenderCaught() {
@@ -172,10 +170,8 @@ void esperarBrokerCaught(int socketDeEscucha) {
 void procesarHiloCaught(ArgumentosHilo* argumentosHilo) {
 	Caught* unCaught = (Caught*) argumentosHilo->mensaje;
 	uint32_t idMensaje = argumentosHilo->idMensaje;
-	//TODO:
-	//Pasar el paquete y el id a otro subproceso. ver donde se va a liberar la memoria!
-	//Si se termina el hilo, la memoria se libera????? -> crear una copia y pasar la copia.
-	//cerrar hilo
+	//
+	manejadorDeEventosProcesoTeam->procesarCaughtRecibido(manejadorDeEventosProcesoTeam, unCaught, idMensaje);
 }
 
 void atenderLocalized() {
@@ -223,13 +219,8 @@ void esperarBrokerLocalized(int socketDeEscucha) {
 void procesarHiloLocalized(ArgumentosHilo* argumentosHilo) {
 	Localized* unLocalized = (Localized*) argumentosHilo->mensaje;
 	uint32_t idMensaje;
-	char* stringCoor = logCoordenadas(unLocalized->pokemon->coordinates);
-	log_info(MANDATORY_LOGGER, "Llegó un Localized. idMensaje: '%d', pokemon: '%s', cantidadCoordenadas: '%d'%s.", idMensaje, unLocalized->pokemon->name->value,
-			unLocalized->coordinates_quantity, stringCoor);
-	free(stringCoor);
-	//Pasar el paquete y el id a otro subproceso. ver donde se va a liberar la memoria!
-	//Si se termina el hilo, la memoria se libera????? -> crear una copia y pasar la copia.
-	//cerrar hilo
+
+	manejadorDeEventosProcesoTeam->procesarLocalizedRecibido(manejadorDeEventosProcesoTeam, unLocalized, idMensaje);
 }
 
 void atenderGameboy() {
@@ -342,26 +333,4 @@ char* traducirOperacion(Operation operacion) {
 	}
 }
 
-char* traducirResult(Result result) {
-	switch (result) {
-	case OK:
-		return "OK";
-	case FAIL:
-		return "FAIL";
-	case ACKNOWLEDGE:
-		return "ACKONWLEDGE";
-	default:
-		return "RESULTADO DESCONOCIDO. ALGO ANDA MAL!";
-	}
-}
 
-char* logCoordenadas(t_list* listaCoor) {
-	char* ret = string_new();
-	for (int a = 0; a < listaCoor->elements_count; a++) {
-		if (a == 0)
-			string_append_with_format(&ret, ", coordenadas: (%d,%d)", ((Coordinate*) (list_get(listaCoor, a)))->pos_x, ((Coordinate*) (list_get(listaCoor, a)))->pos_y);
-		else
-			string_append_with_format(&ret, "|(%d,%d)", ((Coordinate*) (list_get(listaCoor, a)))->pos_x, ((Coordinate*) (list_get(listaCoor, a)))->pos_y);
-	}
-	return ret;
-}

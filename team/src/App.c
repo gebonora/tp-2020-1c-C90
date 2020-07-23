@@ -105,8 +105,11 @@ void inicializarComponentesDelSistema() {
     log_debug(INTERNAL_LOGGER, "Creando el servicio de métricas...");
     servicioDeMetricasProcesoTeam = ServicioDeMetricasConstructor.new();
 
+    log_debug(INTERNAL_LOGGER, "Creando el servicio de resolucion de deadlocks...");
+    servicioDeResolucionDeDeadlocksProcesoTeam = ServicioDeResolucionDeDeadlocksConstructor.new(servicioDeMetricasProcesoTeam);
+
     log_debug(INTERNAL_LOGGER, "Creando el servicio de planificacion...");
-    servicioDePlanificacionProcesoTeam = ServicioDePlanificacionConstructor.new();
+    servicioDePlanificacionProcesoTeam = ServicioDePlanificacionConstructor.new(servicioDeMetricasProcesoTeam, servicioDeResolucionDeDeadlocksProcesoTeam);
 
     log_debug(INTERNAL_LOGGER, "Creando el servicio de captura...");
     servicioDeCapturaProcesoTeam = ServicioDeCapturaConstructor.new(mapaProcesoTeam, servicioDePlanificacionProcesoTeam);
@@ -159,6 +162,7 @@ void liberarRecursos() {
     servicioDeConfiguracion.destruir(&servicioDeConfiguracion);
     servicioDeCapturaProcesoTeam->destruir(servicioDeCapturaProcesoTeam);
     servicioDePlanificacionProcesoTeam->destruir(servicioDePlanificacionProcesoTeam);
+    servicioDeResolucionDeDeadlocksProcesoTeam->destruir(servicioDeResolucionDeDeadlocksProcesoTeam);
     servicioDeMetricasProcesoTeam->destruir(servicioDeMetricasProcesoTeam);
 
     // Componentes

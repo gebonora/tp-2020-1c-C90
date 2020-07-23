@@ -15,7 +15,8 @@ void testDePlanificador() {
     HiloEntrenadorPlanificable * entrenadorPlanificable1 = HiloEntrenadorPlanificableConstructor.new(entrenador1);
     HiloEntrenadorPlanificable * entrenadorPlanificable2 = HiloEntrenadorPlanificableConstructor.new(entrenador2);
     HiloEntrenadorPlanificable * entrenadorPlanificable3 = HiloEntrenadorPlanificableConstructor.new(entrenador3);
-    Planificador planificador = PlanificadorConstructor.new();
+    ServicioDeMetricas* metricasTest = ServicioDeMetricasConstructor.new();
+    Planificador planificador = PlanificadorConstructor.new(metricasTest);
 
     //TODO: Test de planificador
     log_info(testLogger, "Testeando que una nueva unidad planificable vayan a parar a NEW");
@@ -37,4 +38,5 @@ void testDePlanificador() {
     entrenador3->destruir(entrenador3);
     list_destroy(planificables);
     log_destroy(testLogger);
+    metricasTest->destruir(metricasTest);
 }

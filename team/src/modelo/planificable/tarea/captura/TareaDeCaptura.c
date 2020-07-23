@@ -60,6 +60,9 @@ void iniciarCaptura(Entrenador * entrenador, char * especie, Coordinate * posici
         return;
     }
 
+    log_info(MANDATORY_LOGGER, "El entrenador %s procede a intentar capturar un %s en (%d,%d)",
+            entrenador->id, especie, posicionPokemon->pos_x, posicionPokemon->pos_y);
+
     CapturaPokemon * capturaPokemon = CapturaPokemonConstructor.new(entrenador, 0, pokemonAtrapable);
 
     RespuestaBroker respuestaBroker = clienteBrokerV2ProcesoTeam->enviarCatch(
@@ -73,7 +76,6 @@ void iniciarCaptura(Entrenador * entrenador, char * especie, Coordinate * posici
         registradorDeEventosProcesoTeam->registrarCatchEnEspera(registradorDeEventosProcesoTeam, capturaPokemon);
     } else {
         servicioDeCapturaProcesoTeam->registrarCapturaExitosa(servicioDeCapturaProcesoTeam, capturaPokemon);
-        capturaPokemon->destruir(capturaPokemon); //TODO: Ver si ganamos algo moviendo esto al registrarCapturaExitosa
     }
 
     free(posicionInicial);
