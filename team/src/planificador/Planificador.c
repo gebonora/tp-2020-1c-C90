@@ -12,6 +12,21 @@ void agregarUnidadPlanificable(Planificador * this, UnidadPlanificable * unidadP
     list_add(this->colas->colaNew, unidadPlanificable);
 }
 
+t_list* armarListaEntrenadoresDisponibles (Planificador * this){
+	// retorna NEW y BLOCKED activo
+	return NULL;
+}
+
+UnidadPlanificable* obtenerProximoAEjecutar(Planificador * this){
+	// correr algoritmo
+	return NULL;
+}
+
+int cantidadDeRafagas(Planificador * planificador, UnidadPlanificable * unidadPlanificable){
+	// segun algoritmo calcular numero
+	return 0;
+}
+
 void destruirPlanificador(Planificador * this, void (*destructorUnidadPlanificable)(UnidadPlanificable *)) {
     log_destroy(this->logger);
     this->transicionadorDeEstados.destruir(&this->transicionadorDeEstados);
@@ -31,6 +46,11 @@ static Planificador new() {
             .colas = crearColasDePlanificacion(),
             &agregarUnidadesPlanificables,
             &agregarUnidadPlanificable,
+
+			&armarListaEntrenadoresDisponibles,
+			&obtenerProximoAEjecutar,
+			&cantidadDeRafagas,
+
             &destruirPlanificador,
     };
 

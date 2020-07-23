@@ -28,21 +28,25 @@
  */
 
 typedef struct Planificador {
-    t_log *logger;
-    AlgoritmoPlanificador algoritmoPlanificador;
-    TransicionadorDeEstados transicionadorDeEstados;
-    ColasDePlanificacion * colas;
-    // Interfaz publica
-    void (*agregarUnidadesPlanificables)(struct Planificador * planificador, t_list * unidadesPlanificables);
-    void (*agregarUnidadPlanificable)(struct Planificador * planificador, UnidadPlanificable * unidadPlanificable); // Agrega una UP a la lista y le asigna el estado NEW
-    // int (*cantidadDeRafagas)(struct Planificador * planificador, UnidadPlanificable * unidadPlanificable); // Nos sirve para saber cuanta mecha darle. Es dato.
-    // planificar(UP) - Manda una UP a EXEC.
-    // finalizar(UP) - Manda la UP a EXIT, si no hay mas UP activas, logre el objetivo global.
-    void (*destruir)(struct Planificador *this, void (*destructorUnidadPlanificable)(UnidadPlanificable *));
+	t_log *logger;
+	AlgoritmoPlanificador algoritmoPlanificador;
+	TransicionadorDeEstados transicionadorDeEstados;
+	ColasDePlanificacion * colas;
+	// Interfaz publica
+	void (*agregarUnidadesPlanificables)(struct Planificador * planificador, t_list * unidadesPlanificables); // Usada en el INIT del sistema.
+	void (*agregarUnidadPlanificable)(struct Planificador * planificador, UnidadPlanificable * unidadPlanificable); // Agrega una UP a la lista y le asigna el estado NEW
+
+	t_list* (*armarListaEntrenadoresDisponibles)(struct Planificador * planificador); // retorna cola NEW y BLOCKED sin espera.
+	UnidadPlanificable* (*obtenerProximoAEjecutar)(struct Planificador * planificador);
+	int (*cantidadDeRafagas)(struct Planificador * planificador, UnidadPlanificable * unidadPlanificable); // Nos sirve para saber cuanta mecha darle. Es dato.
+	// TODO: interfaz para cambiar estados.
+	// planificar(UP) - Manda una UP a EXEC.
+	// finalizar(UP) - Manda la UP a EXIT, si no hay mas UP activas, logre el objetivo global.
+	void (*destruir)(struct Planificador *this, void (*destructorUnidadPlanificable)(UnidadPlanificable *));
 } Planificador;
 
 extern const struct PlanificadorClass {
-    Planificador (*new)();
+	Planificador (*new)();
 } PlanificadorConstructor;
 
 #endif //TEAM_PLANIFICADOR_H

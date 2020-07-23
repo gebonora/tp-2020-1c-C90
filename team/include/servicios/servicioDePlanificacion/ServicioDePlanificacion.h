@@ -54,32 +54,35 @@
  */
 
 typedef enum TipoTrabajoPlanificador {
-    CAPTURA_POKEMON,
-    NOTIFY_CAUGHT_RESULT,
-    DEADLOCK_RESOLUTION
+	CAPTURA_POKEMON, NOTIFY_CAUGHT_RESULT, // TODO: Volarlo
+	DEADLOCK_RESOLUTION // TODO: Modelar el intercambio.
 } TipoTrabajoPlanificador;
 
 typedef struct TrabajoPlanificador {
-    TipoTrabajoPlanificador tipo;
-    char * objetivo;
-    Coordinate coordenadaObjetivo;
+	TipoTrabajoPlanificador tipo;
+	char * objetivo;
+	Coordinate coordenadaObjetivo;
 } TrabajoPlanificador;
 
 typedef struct ServicioDePlanificacion {
-    t_log * logger;
-    t_queue * colaDeTrabajo; // Posee TrabajoPlanificador
-    bool finDeTrabajo;
-    sem_t semaforoFinDeTrabajo;
-    sem_t semaforoEjecucionHabilitada;
-    Planificador planificador;
-    // Interfaz publica
-    void (*trabajar)(struct ServicioDePlanificacion * this);
-    void (*asignarEquipoAPlanificar)(struct ServicioDePlanificacion * this, Equipo equipo);
-    void (*destruir)(struct ServicioDePlanificacion * this);
+	t_log * logger;
+	t_queue * colaDeTrabajo; // Posee TrabajoPlanificador TODO: Sincronizarla con los semaforos del notepad++
+	bool finDeTrabajo;
+	sem_t semaforoFinDeTrabajo;
+	sem_t semaforoEjecucionHabilitada;
+	Planificador planificador;
+	pthread_mutex_t mutexColaDeTrabajo;
+	sem_t semaforoContadorColaDeTrabajo;
+	// Interfaz publica
+	void (*trabajar)(struct ServicioDePlanificacion * this);
+	void (*asignarEquipoAPlanificar)(struct ServicioDePlanificacion * this, Equipo equipo);
+	void (*destruir)(struct ServicioDePlanificacion * this);
+	t_list* (*obtenerTareas)(struct ServicioDePlanificacion* this);
+	void (*asignarTareas)(struct ServicioDePlanificacion * this, t_list* listaDeTrabajo, t_list* entrenadoresDisponibles);
 } ServicioDePlanificacion;
 
 extern const struct ServicioDePlanificacionClass {
-    ServicioDePlanificacion * (*new)();
+	ServicioDePlanificacion * (*new)();
 } ServicioDePlanificacionConstructor;
 
 ServicioDePlanificacion * servicioDePlanificacionProcesoTeam;
