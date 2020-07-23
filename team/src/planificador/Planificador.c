@@ -13,11 +13,12 @@ void agregarUnidadPlanificable(Planificador * this, UnidadPlanificable * unidadP
 }
 
 t_list* armarListaEntrenadoresDisponibles(Planificador * this) {
+	// Retorna los de New, Blocked sin Espera y no llenos.
 	t_list* entrenadoresDisponibles = list_duplicate(this->colas->colaNew); // Si hago duplicate a lista vacia, me retorna lista vacia?
 	t_list* auxiliarBlocked = list_duplicate(this->colas->colaBlocked);
 	for (int a = 0; a < list_size(auxiliarBlocked); a++) {
 		HiloEntrenadorPlanificable* elementoIterado = (HiloEntrenadorPlanificable*)list_get(auxiliarBlocked,a);
-		if (!elementoIterado->entrenador->estaEsperandoAlgo){
+		if (!elementoIterado->entrenador->estaEsperandoAlgo && elementoIterado->entrenador->puedeAtraparPokemones(elementoIterado->entrenador)){
 			list_add(entrenadoresDisponibles, elementoIterado);
 		}
 	}

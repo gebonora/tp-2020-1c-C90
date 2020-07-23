@@ -81,7 +81,7 @@ typedef struct ServicioDePlanificacion {
 	void (*trabajar)(struct ServicioDePlanificacion * this);
 	void (*asignarEquipoAPlanificar)(struct ServicioDePlanificacion * this, Equipo equipo);
 	void (*destruir)(struct ServicioDePlanificacion * this);
-	t_list* (*obtenerTareas)(struct ServicioDePlanificacion* this);
+	t_list* (*obtenerTareas)(struct ServicioDePlanificacion* this, int cantidadAPopear);
 	void (*asignarTareas)(struct ServicioDePlanificacion * this, t_list* listaDeTrabajo, t_list* entrenadoresDisponibles);
 } ServicioDePlanificacion;
 

@@ -16,26 +16,32 @@ void trabajar(ServicioDePlanificacion * this) {
 
 		// Cambiar desde acá.
 
-		if(0){ // el IF loco.
+		if (0) { // el IF loco.
+			// SI HAY DEADLOCK PLANIFICAMOS INTERCAMBIOS
+
 			t_list* listaDeadlock = this->planificador.colas->colaBlocked; // TODO: que el planificador nos devuelva los procesos de blocked,
 			// TODO: el servDeadlocks espera entrnadores, no hilos
-			t_list* listaIntercambios = this->servicioDeResolucionDeDeadlocks->procesarDeadlock(this->servicioDeResolucionDeDeadlocks,listaDeadlock);
+			t_list* listaIntercambios = this->servicioDeResolucionDeDeadlocks->procesarDeadlock(this->servicioDeResolucionDeDeadlocks, listaDeadlock);
 			// asignar los intercambios y pasar a planificar next y ejecutar.
-		}
+		} else {
+			// SI NO HAY DEADLOCK PLANIFICAMOS CAPTURAS
 
+			// Me retorna los de New, y los de blocked que no estan en captura y no estan llenos
+			// Esto de llenos lo metí porque no queremos planificarles capturas, eventualmente todos van a estar llenos y vamos a entrar al IF de deadlock.
 
-		sem_wait(&this->semaforoContadorColaDeTrabajo);
-		pthread_mutex_lock(&this->mutexColaDeTrabajo);
-		t_list* tareas = this->obtenerTareas(this);
-		pthread_mutex_unlock(&this->mutexColaDeTrabajo);
+			t_list* entrenadoresDisponibles = this->planificador.armarListaEntrenadoresDisponibles(&this->planificador);
 
-		for (int a = 0; list_size(tareas) - 1; a++) {
 			sem_wait(&this->semaforoContadorColaDeTrabajo);
+			pthread_mutex_lock(&this->mutexColaDeTrabajo);
+			t_list* tareas = this->obtenerTareas(this, list_size(entrenadoresDisponibles));
+			pthread_mutex_unlock(&this->mutexColaDeTrabajo);
+
+			for (int a = 0; list_size(tareas) - 1; a++) {
+				sem_wait(&this->semaforoContadorColaDeTrabajo);
+			}
+
+			this->asignarTareas(this, tareas, entrenadoresDisponibles);
 		}
-
-		t_list* entrenadoresDisponibles = this->planificador.armarListaEntrenadoresDisponibles(&this->planificador);
-		this->asignarTareas(this, tareas, entrenadoresDisponibles);
-
 		HiloEntrenadorPlanificable* aEjecutar = this->planificador.obtenerProximoAEjecutar(&this->planificador);
 		int ciclosAEjecutar = this->planificador.cantidadDeRafagas(&this->planificador, aEjecutar);
 
@@ -78,8 +84,17 @@ void asignarEquipoAPlanificar(ServicioDePlanificacion * this, Equipo equipo) {
 	list_destroy(unidadesPlanificables);
 }
 
-t_list* obtenerTareas(ServicioDePlanificacion* this) {
-	return NULL;
+t_list* obtenerTareas(ServicioDePlanificacion* this, int cantidadAPopear) {
+	// La idea es que tenemos una listaConEntrenadores y queremos popear hasta esa cantidad.
+	// Puede ser que popemos menos porque la cola tiene menor cantidad de elementos que los que pedimos, pero no pasa nada.
+	t_list* listaDeTareas = list_create();
+	int count = 0;
+	while (!queue_is_empty(this->colaDeTrabajo) && count < cantidadAPopear) {
+		list_add(listaDeTareas, queue_pop(this->colaDeTrabajo));
+		// En teoría list_add me mantiene el orden de la queue, el primero de la queue. Iterar lista desde el 1ro y se mantiene el orden.
+		count++;
+	}
+	return listaDeTareas;
 }
 
 void asignarTareas(ServicioDePlanificacion* this, t_list* tareas, t_list* entrenadoresDisponibles) {
