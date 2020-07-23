@@ -109,7 +109,7 @@ void inicializarComponentesDelSistema() {
     servicioDeResolucionDeDeadlocksProcesoTeam = ServicioDeResolucionDeDeadlocksConstructor.new(servicioDeMetricasProcesoTeam);
 
     log_debug(INTERNAL_LOGGER, "Creando el servicio de planificacion...");
-    servicioDePlanificacionProcesoTeam = ServicioDePlanificacionConstructor.new();
+    servicioDePlanificacionProcesoTeam = ServicioDePlanificacionConstructor.new(servicioDeMetricasProcesoTeam, servicioDeResolucionDeDeadlocksProcesoTeam);
 
     log_debug(INTERNAL_LOGGER, "Creando el servicio de captura...");
     servicioDeCapturaProcesoTeam = ServicioDeCapturaConstructor.new(mapaProcesoTeam, servicioDePlanificacionProcesoTeam);

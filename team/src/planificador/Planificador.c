@@ -33,7 +33,7 @@ void destruirPlanificador(Planificador * this, void (*destructorUnidadPlanificab
     destruirColasDePlanificacion(this->colas, destructorUnidadPlanificable);
 }
 
-static Planificador new() { // TODO: asignar servicioDeMetricas que tiene que llegar por parametro.
+static Planificador new(ServicioDeMetricas* servicio) { // TODO: asignar servicioDeMetricas que tiene que llegar por parametro.
     t_log * logger = log_create(TEAM_INTERNAL_LOG_FILE, "Planificador", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_INFO);
 
     char * nombreAlgoritmo = servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, ALGORITMO_PLANIFICACION);
@@ -44,6 +44,7 @@ static Planificador new() { // TODO: asignar servicioDeMetricas que tiene que ll
             .algoritmoPlanificador = obtenerAlgoritmo(nombreAlgoritmo),
             .transicionadorDeEstados = TransicionadorDeEstadosConstructor.new(),
             .colas = crearColasDePlanificacion(),
+			.servicioDeMetricas = servicio,
             &agregarUnidadesPlanificables,
             &agregarUnidadPlanificable,
 

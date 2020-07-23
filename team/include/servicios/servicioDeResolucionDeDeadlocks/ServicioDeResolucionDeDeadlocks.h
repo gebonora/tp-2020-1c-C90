@@ -9,7 +9,6 @@
 #define INCLUDE_SERVICIOS_SERVICIODERESOLUCIONDEDEADLOCKS_SERVICIODERESOLUCIONDEDEADLOCKS_H_
 
 #include "app/Global.h"
-#include "servicios/servicioDePlanificacion/ServicioDePlanificacion.h"
 #include "servicios/servicioDeMetricas/ServicioDeMetricas.h"
 #include "modelo/mapa/Mapa.h"
 #include "modelo/equipo/Equipo.h"

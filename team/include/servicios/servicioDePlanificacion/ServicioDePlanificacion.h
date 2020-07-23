@@ -11,6 +11,7 @@
 #include "modelo/equipo/Equipo.h"
 #include "planificador/Planificador.h"
 #include "servicios/servicioDeResolucionDeDeadlocks/ServicioDeResolucionDeDeadlocks.h"
+#include "servicios/servicioDeMetricas/ServicioDeMetricas.h"
 
 /**
  * Esta clase es conocedora de que implicancias a nivel planificacion tienen los eventos del sistema.
@@ -85,7 +86,7 @@ typedef struct ServicioDePlanificacion {
 } ServicioDePlanificacion;
 
 extern const struct ServicioDePlanificacionClass {
-	ServicioDePlanificacion * (*new)(ServicioDeMetricas* servicioMetricas, ServicioDeResolucionDeDeadlocks* servicioDeadlocks);
+	ServicioDePlanificacion * (*new)(ServicioDeMetricas* servicioDeMetricas, ServicioDeResolucionDeDeadlocks* servicioDeadlocks);
 } ServicioDePlanificacionConstructor;
 
 ServicioDePlanificacion * servicioDePlanificacionProcesoTeam;

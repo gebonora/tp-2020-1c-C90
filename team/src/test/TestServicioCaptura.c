@@ -14,7 +14,9 @@ void testServicioDeCaptura() {
     Equipo equipo = list_create();
     list_add(equipo, entrenador);
 
-    ServicioDePlanificacion * servicioPlanificacion = ServicioDePlanificacionConstructor.new();
+    ServicioDeMetricas* metricasTest = ServicioDeMetricasConstructor.new();
+    ServicioDeResolucionDeDeadlocks* deadlocksTest = ServicioDeResolucionDeDeadlocksConstructor.new(metricasTest);
+    ServicioDePlanificacion * servicioPlanificacion = ServicioDePlanificacionConstructor.new(metricasTest, deadlocksTest);
     ServicioDeCaptura * servicioDeCaptura = ServicioDeCapturaConstructor.new(mapa, servicioPlanificacion);
 
     log_info(testLogger, "Testeando la aparicion de un pokemon");
@@ -43,6 +45,8 @@ void testServicioDeCaptura() {
 
     servicioDeCaptura->destruir(servicioDeCaptura);
     servicioPlanificacion->destruir(servicioPlanificacion);
+    metricasTest->destruir(metricasTest);
+    deadlocksTest->destruir(deadlocksTest);
     mapa.destruir(&mapa);
     destruirEquipo(equipo);
     free(uuidPokemon);

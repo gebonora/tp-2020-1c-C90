@@ -9,6 +9,7 @@
 #include "planificador/transicionador/TransicionadorDeEstados.h"
 #include "planificador/algoritmos/AlgoritmoPlanificador.h"
 #include "delibird/servicios/servicioDeConfiguracion/ServicioDeConfiguracion.h"
+#include "servicios/servicioDeMetricas/ServicioDeMetricas.h"
 
 /**
  * Encargado de darle lugar a los entrenadores para que ejecuten sus acciones 1 a la vez.
@@ -32,6 +33,7 @@ typedef struct Planificador {
 	AlgoritmoPlanificador algoritmoPlanificador;
 	TransicionadorDeEstados transicionadorDeEstados;
 	ColasDePlanificacion * colas;
+	ServicioDeMetricas* servicioDeMetricas;
 	// Interfaz publica
 	void (*agregarUnidadesPlanificables)(struct Planificador * planificador, t_list * unidadesPlanificables); // Usada en el INIT del sistema.
 	void (*agregarUnidadPlanificable)(struct Planificador * planificador, UnidadPlanificable * unidadPlanificable); // Agrega una UP a la lista y le asigna el estado NEW
@@ -46,7 +48,7 @@ typedef struct Planificador {
 } Planificador;
 
 extern const struct PlanificadorClass {
-	Planificador (*new)();
+	Planificador (*new)(ServicioDeMetricas* servicio);
 } PlanificadorConstructor;
 
 #endif //TEAM_PLANIFICADOR_H

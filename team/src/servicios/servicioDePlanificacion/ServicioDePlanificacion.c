@@ -17,7 +17,7 @@ void trabajar(ServicioDePlanificacion * this) {
 		// Cambiar desde acá.
 
 		if(0){
-			servicio
+			//servicio
 		}
 
 
@@ -92,7 +92,7 @@ void destruir(ServicioDePlanificacion * this) {
 	free(this);
 }
 
-static ServicioDePlanificacion * new(ServicioDeMetricas* servicioDeMetricas, ServicioDeResolucionDeDeadlocks servicioDeadlocks) { // TODO arreglar esto para que planificador tenga servicio de metricas
+static ServicioDePlanificacion * new(ServicioDeMetricas* servicioDeMetricas, ServicioDeResolucionDeDeadlocks* servicioDeadlocks) { // TODO arreglar esto para que planificador tenga servicio de metricas
 	ServicioDePlanificacion * servicio = malloc(sizeof(ServicioDePlanificacion));
 
 	servicio->logger = log_create(TEAM_INTERNAL_LOG_FILE, "ServicioDePlanificacion", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_INFO);
@@ -100,11 +100,12 @@ static ServicioDePlanificacion * new(ServicioDeMetricas* servicioDeMetricas, Ser
 	servicio->finDeTrabajo = false;
 	sem_init(&servicio->semaforoFinDeTrabajo, 1, 0);
 	sem_init(&servicio->semaforoEjecucionHabilitada, 1, 0);
-	servicio->planificador = PlanificadorConstructor.new(); // TODO que planificador tenga serv metricas.
+	servicio->planificador = PlanificadorConstructor.new(servicioDeMetricas); // TODO que planificador tenga serv metricas.
 	pthread_mutex_init(&servicio->mutexColaDeTrabajo, NULL);
 	sem_init(&servicio->semaforoContadorColaDeTrabajo, 0, 0); // Arranca en 0, queremos que el productor meta algo para consumir.
 	servicio->asignarEquipoAPlanificar = &asignarEquipoAPlanificar;
 	servicio->servicioDeResolucionDeDeadlocks = servicioDeadlocks;
+	servicio->servicioDeMetricas = servicioDeMetricas;
 	servicio->trabajar = &trabajar;
 	servicio->obtenerTareas = &obtenerTareas;
 	servicio->asignarTareas = &asignarTareas;
