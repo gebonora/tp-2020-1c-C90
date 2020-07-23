@@ -35,6 +35,7 @@ typedef struct Planificador {
     // Interfaz publica
     void (*agregarUnidadesPlanificables)(struct Planificador * planificador, t_list * unidadesPlanificables);
     void (*agregarUnidadPlanificable)(struct Planificador * planificador, UnidadPlanificable * unidadPlanificable); // Agrega una UP a la lista y le asigna el estado NEW
+    // int (*cantidadDeRafagas)(struct Planificador * planificador, UnidadPlanificable * unidadPlanificable); // Nos sirve para saber cuanta mecha darle. Es dato.
     // planificar(UP) - Manda una UP a EXEC.
     // finalizar(UP) - Manda la UP a EXIT, si no hay mas UP activas, logre el objetivo global.
     void (*destruir)(struct Planificador *this, void (*destructorUnidadPlanificable)(UnidadPlanificable *));
