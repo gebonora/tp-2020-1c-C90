@@ -20,6 +20,11 @@ void trabajar(ServicioDePlanificacion * this) {
 		pthread_mutex_lock(&this->mutexColaDeTrabajo);
 		t_list* tareas = this->obtenerTareas(this);
 		pthread_mutex_unlock(&this->mutexColaDeTrabajo);
+
+		for (int a = 0; list_size(tareas) - 1; a++) {
+			sem_wait(&this->semaforoContadorColaDeTrabajo);
+		}
+
 		t_list* entrenadoresDisponibles = this->planificador.armarListaEntrenadoresDisponibles(&this->planificador);
 		this->asignarTareas(this, tareas, entrenadoresDisponibles);
 
