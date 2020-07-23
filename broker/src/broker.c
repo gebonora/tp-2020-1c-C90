@@ -86,9 +86,15 @@ static int _calculate_bytes_to_send(Operation operation, int data_size) {
 	switch (operation) {
 	case CATCH:
 	case GET:
-	case LOCALIZED:
+	case LOCALIZED: ;
+		size += sizeof(uint32_t) + 1;
+		break;
 	case CAUGHT: ;
 		size += sizeof(uint32_t);
+		break;
+	case NEW:
+	case APPEARED: ;
+		size += 1;
 		break;
 	}
 
@@ -103,29 +109,58 @@ static t_list* _get_subscribers(char* queue_key) {
 }
 
 static void* _transform_messages(Partition* partition, Operation operation, int bytes) { //todo: esto vamos a tener que sincronizarlo porque se leen aca los datos de los start de las particiones.
-	uint64_t now = get_time();
+	uint32_t now = get_time();
 	partition->access_time = now;
 
 	void* message = malloc(bytes);
+	char end_of_string = '\0';
+	int displacement = 0;
+	uint32_t real_size;
 
 	log_debug(LOGGER, "Transforming messages for operation=%s, to void* of size=%d", get_operation_by_value(operation), bytes);
 
 	switch(operation){
+	case APPEARED:
 	case NEW: ;
 		log_debug(LOGGER, "Copy from=%x, to=%x, size=%d", &operation, message, sizeof(Operation));
 		memcpy(message, &operation, sizeof(Operation));
-		log_debug(LOGGER, "Copy from=%x, to=%x, size=%d", partition->start, message + sizeof(Operation), partition->message->data_size);
-		memcpy(message + sizeof(Operation), partition->start, partition->message->data_size);
+		displacement += sizeof(Operation);
+
+		uint32_t new_name_size;
+		memcpy(&new_name_size, partition->start, sizeof(uint32_t));
+		log_debug(LOGGER, "New name size: %d", new_name_size);
+		uint32_t real_size = new_name_size +1;
+
+		memcpy(message + displacement, &(real_size),sizeof(uint32_t));
+		displacement += sizeof(uint32_t);
+
+		memcpy(message + displacement, partition->start + sizeof(uint32_t), new_name_size);
+		displacement += new_name_size;
+		memcpy(message + displacement, &end_of_string, 1);
+		displacement += 1;
+		memcpy(message + displacement, partition->start + sizeof(uint32_t) + new_name_size, partition->message->data_size - sizeof(uint32_t) - new_name_size);
+
 		log_debug(LOGGER, "Finishing memcpy");
-		break;
-	case APPEARED: ;
-		memcpy(message, &operation, sizeof(Operation));
-		memcpy(message + sizeof(Operation), partition->start, partition->message->data_size);
 		break;
 	case CATCH: ;
 		memcpy(message, &operation, sizeof(Operation));
-		memcpy(message + sizeof(Operation), partition->start, partition->message->data_size);
-		memcpy(message + sizeof(Operation) + partition->message->data_size, &(partition->message->message_id), sizeof(uint32_t));
+		displacement += sizeof(Operation);
+
+		uint32_t catch_name_size;
+		memcpy(&catch_name_size, partition->start, sizeof(uint32_t));
+		log_debug(LOGGER, "Catch name size: %d", catch_name_size);
+		real_size = catch_name_size +1;
+
+		memcpy(message + displacement, &(real_size),sizeof(uint32_t));
+		displacement += sizeof(uint32_t);
+
+		memcpy(message + displacement, partition->start + sizeof(uint32_t), catch_name_size);
+		displacement += catch_name_size;
+		memcpy(message + displacement, &end_of_string, 1);
+		displacement += 1;
+		memcpy(message + displacement, partition->start + sizeof(uint32_t) + catch_name_size, partition->message->data_size - sizeof(uint32_t) - catch_name_size);
+		displacement += partition->message->data_size - sizeof(uint32_t) - catch_name_size;
+		memcpy(message + displacement, &(partition->message->message_id), sizeof(uint32_t));
 		break;
 	case CAUGHT: ;
 		memcpy(message, &operation, sizeof(Operation));
@@ -133,17 +168,44 @@ static void* _transform_messages(Partition* partition, Operation operation, int 
 		memcpy(message + sizeof(Operation) + partition->message->data_size, &(partition->message->correlational_id), sizeof(uint32_t));
 		break;
 	case LOCALIZED: ;
-		log_debug(LOGGER, "Copy from=%x, to=%x, size=%d", &operation, message, sizeof(Operation));
 		memcpy(message, &operation, sizeof(Operation));
-		log_debug(LOGGER, "Copy from=%x, to=%x, size=%d", partition->start, message + sizeof(Operation), partition->message->data_size);
-		memcpy(message + sizeof(Operation), partition->start, partition->message->data_size);
-		log_debug(LOGGER, "Copy from=%x, to=%x, size=%d", &(partition->message->correlational_id), message + sizeof(Operation) + partition->message->data_size, sizeof(uint32_t));
-		memcpy(message + sizeof(Operation) + partition->message->data_size, &(partition->message->correlational_id), sizeof(uint32_t));
+		displacement += sizeof(Operation);
+
+		uint32_t localized_name_size;
+		memcpy(&localized_name_size, partition->start, sizeof(uint32_t));
+		log_debug(LOGGER, "Catch name size: %d", localized_name_size);
+		real_size = localized_name_size +1;
+
+		memcpy(message + displacement, &(real_size),sizeof(uint32_t));
+		displacement += sizeof(uint32_t);
+
+		memcpy(message + displacement, partition->start + sizeof(uint32_t), localized_name_size);
+		displacement += localized_name_size;
+		memcpy(message + displacement, &end_of_string, 1);
+		displacement += 1;
+		memcpy(message + displacement, partition->start + sizeof(uint32_t) + localized_name_size, partition->message->data_size - sizeof(uint32_t) - localized_name_size);
+		displacement += partition->message->data_size - sizeof(uint32_t) - localized_name_size;
+		memcpy(message + displacement, &(partition->message->correlational_id), sizeof(uint32_t));
 		break;
 	case GET: ;
 		memcpy(message, &operation, sizeof(Operation));
-		memcpy(message + sizeof(Operation), partition->start, partition->message->data_size);
-		memcpy(message + sizeof(Operation) + partition->message->data_size, &(partition->message->message_id), sizeof(uint32_t));
+		displacement += sizeof(Operation);
+
+		uint32_t get_name_size;
+		memcpy(&get_name_size, partition->start, sizeof(uint32_t));
+		log_debug(LOGGER, "Catch name size: %d", get_name_size);
+		real_size = get_name_size +1;
+
+		memcpy(message + displacement, &(real_size),sizeof(uint32_t));
+		displacement += sizeof(uint32_t);
+
+		memcpy(message + displacement, partition->start + sizeof(uint32_t), get_name_size);
+		displacement += get_name_size;
+		memcpy(message + displacement, &end_of_string, 1);
+		displacement += 1;
+		memcpy(message + displacement, partition->start + sizeof(uint32_t) + get_name_size, partition->message->data_size - sizeof(uint32_t) - get_name_size);
+		displacement += partition->message->data_size - sizeof(uint32_t) - get_name_size;
+		memcpy(message +displacement, &(partition->message->message_id), sizeof(uint32_t));
 		break;
 	}
 
@@ -222,17 +284,17 @@ static int _calculate_data_size(void* data, Operation operation) {
 
 	switch (operation) {
 	case NEW: ;
-		size = calculate_new_bytes(data) - sizeof(Operation);
+		size = calculate_new_bytes(data) - sizeof(Operation) - 1;
 		break;
 	case APPEARED:
 	case CATCH: ;
-		size = calculate_pokemon_bytes(data) - sizeof(Operation);
+		size = calculate_pokemon_bytes(data) - sizeof(Operation) - 1;
 		break;
 	case GET: ;
-		size = calculate_get_bytes(data) - sizeof(Operation);
+		size = calculate_get_bytes(data) - sizeof(Operation) - 1;
 		break;
 	case LOCALIZED: ;
-		size = calculate_localized_bytes(data) - sizeof(Operation);
+		size = calculate_localized_bytes(data) - sizeof(Operation) - 1;
 		break;
 	case CAUGHT: ;
 		size = calculate_caught_bytes() - sizeof(Operation);
@@ -252,6 +314,7 @@ static void* _serialize_data(void* data, Operation operation, int bytes) {
 	switch(operation){
 	case NEW: ;
 		New* new_pokemon = (New*) data;
+		new_pokemon->pokemon->name->size -= 1;
 
 		log_debug(LOGGER, "Copy in %x = Start (%x) + Displacement (%d)", serialized + displacement, serialized, displacement);
 		log_debug(LOGGER, "Copying pokemon name size: %d", new_pokemon->pokemon->name->size);
@@ -281,6 +344,7 @@ static void* _serialize_data(void* data, Operation operation, int bytes) {
 		break;
 	case GET: ;
 		Get* get_pokemon = (Get*) data;
+		get_pokemon->name->size -= 1;
 
 		log_debug(LOGGER, "Copy in %x = Start (%x) + Displacement (%d)", serialized + displacement, serialized, displacement);
 		log_debug(LOGGER, "Copying pokemon name size: %d", get_pokemon->name->size);
@@ -295,6 +359,7 @@ static void* _serialize_data(void* data, Operation operation, int bytes) {
 	case APPEARED:
 	case CATCH: ;
 		Pokemon* pokemon = (Pokemon*) data;
+		pokemon->name->size -= 1;
 
 		log_debug(LOGGER, "Copy in %x = Start (%x) + Displacement (%d)", serialized + displacement, serialized, displacement);
 		log_debug(LOGGER, "Copying pokemon name size: %d", pokemon->name->size);
@@ -327,6 +392,7 @@ static void* _serialize_data(void* data, Operation operation, int bytes) {
 		break;
 	case LOCALIZED: ;
 		Localized* localized_pokemon = (Localized*) data;
+		localized_pokemon->pokemon->name->size -= 1;
 
 		memcpy(serialized, &(localized_pokemon->pokemon->name->size), sizeof(uint32_t));
 		displacement += sizeof(uint32_t);
