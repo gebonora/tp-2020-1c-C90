@@ -27,7 +27,10 @@ bool unidadConRafagaEstimadaMasCortaSRTF(void* elem1, void* elem2) {
 	UnidadPlanificable* unidad2 = (UnidadPlanificable*) elem2;
 
 
-	return unidad1->infoUltimaEjecucion.est_raf_actual <= unidad2->infoUltimaEjecucion.est_raf_actual;
+	return (unidad1->infoUltimaEjecucion.est_raf_actual
+			- unidad1->infoUltimaEjecucion.rafaga_parcial_ejecutada)
+			<= (unidad2->infoUltimaEjecucion.est_raf_actual
+			- unidad2->infoUltimaEjecucion.rafaga_parcial_ejecutada);
 
 	// esta función retorna true si la rafaga estimada de elem1 es menos o igual a la de elem2
 }
