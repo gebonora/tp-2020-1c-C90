@@ -10,6 +10,7 @@
 #include "delibird/utils/hilos/HiloFacil.h"
 #include "modelo/equipo/Equipo.h"
 #include "planificador/Planificador.h"
+#include "servicios/servicioDeResolucionDeDeadlocks/ServicioDeResolucionDeDeadlocks.h"
 
 /**
  * Esta clase es conocedora de que implicancias a nivel planificacion tienen los eventos del sistema.
@@ -73,6 +74,8 @@ typedef struct ServicioDePlanificacion {
 	Planificador planificador;
 	pthread_mutex_t mutexColaDeTrabajo;
 	sem_t semaforoContadorColaDeTrabajo;
+	ServicioDeResolucionDeDeadlocks* servicioDeResolucionDeDeadlocks;
+	ServicioDeMetricas* servicioDeMetricas;
 	// Interfaz publica
 	void (*trabajar)(struct ServicioDePlanificacion * this);
 	void (*asignarEquipoAPlanificar)(struct ServicioDePlanificacion * this, Equipo equipo);
@@ -82,7 +85,7 @@ typedef struct ServicioDePlanificacion {
 } ServicioDePlanificacion;
 
 extern const struct ServicioDePlanificacionClass {
-	ServicioDePlanificacion * (*new)();
+	ServicioDePlanificacion * (*new)(ServicioDeMetricas* servicioMetricas, ServicioDeResolucionDeDeadlocks* servicioDeadlocks);
 } ServicioDePlanificacionConstructor;
 
 ServicioDePlanificacion * servicioDePlanificacionProcesoTeam;
