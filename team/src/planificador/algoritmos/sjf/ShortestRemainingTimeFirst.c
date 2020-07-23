@@ -45,6 +45,7 @@ double calcularEstimacionSRTF(UnidadPlanificable *elem) {
 		double est_ant = elem->infoUltimaEjecucion.est_raf_ant;
 		double real_ant = elem->infoUltimaEjecucion.real_raf_ant;
 		estimacion = ((1 - alpha_SRTF) * est_ant) + (alpha_SRTF * real_ant);
+		elem->infoUltimaEjecucion.real_raf_ant = elem->infoUltimaEjecucion.rafaga_real_actual;
 	}
 	return estimacion;
 }
@@ -54,14 +55,17 @@ void asignarEstimacionAUnElementoSRTF(void* elem) {
 
 	UnidadPlanificable* unidad = (UnidadPlanificable*) elem;
 
-	if(unidad->infoUltimaEjecucion.rafaga_real_actual <= unidad->infoUltimaEjecucion.rafaga_parcial_ejecutada){
+	if(unidad->infoUltimaEjecucion.seNecesitaNuevaEstimacion == true){
 	unidad->infoUltimaEjecucion.est_raf_ant = unidad->infoUltimaEjecucion.est_raf_actual;
 	// asignamos la actual anterior como est anterior
 	unidad->infoUltimaEjecucion.est_raf_actual = calcularEstimacionSRTF(unidad);
 	// calculamos el nuevo estimado y se lo asignamos
 	unidad->infoUltimaEjecucion.rafaga_parcial_ejecutada = 0;
+	unidad->infoUltimaEjecucion.seNecesitaNuevaEstimacion = false;
 	}
 }
+// booleano que desde afuera se setiaria en true cuando se necesita una estimacion
+// para remplazar el if de arriba que por ahora no cumple su proposito
 
 void asignarEstimacionATodosLosElementosDeLaListaSRTF(t_list *list) {
 	list_iterate(list, asignarEstimacionAUnElementoSRTF);

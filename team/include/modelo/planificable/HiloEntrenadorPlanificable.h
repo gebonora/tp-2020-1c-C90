@@ -33,9 +33,10 @@ typedef struct InfoUltimaEjecucion {
     double real_raf_ant;
     double est_raf_actual;
     bool seEjecutoPrimeraEstimacion;
-
-    // parametros para sjf con desalojo
     double rafaga_real_actual;
+
+    // parametros para sjf con desalojo}
+    bool seNecesitaNuevaEstimacion;
     double rafaga_parcial_ejecutada; // lo que ejecuto para restarselo a la rafaga
 
 } InfoUltimaEjecucion;

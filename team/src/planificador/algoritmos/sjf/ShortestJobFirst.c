@@ -41,6 +41,7 @@ double calcularEstimacion(UnidadPlanificable *elem) {
 		double est_ant = elem->infoUltimaEjecucion.est_raf_ant;
 		double real_ant = elem->infoUltimaEjecucion.real_raf_ant;
 		estimacion = ((1 - alpha) * est_ant) + (alpha * real_ant);
+		elem->infoUltimaEjecucion.real_raf_ant = elem->infoUltimaEjecucion.rafaga_real_actual;
 	}
 	return estimacion;
 }
