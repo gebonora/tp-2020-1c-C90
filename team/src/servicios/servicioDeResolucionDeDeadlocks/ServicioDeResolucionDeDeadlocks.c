@@ -17,7 +17,7 @@ t_list* procesarDeadlock(ServicioDeResolucionDeDeadlocks * this, t_list* entrena
 	 */
 	bool esProcesable(void* elem) {
 		Entrenador* entrenador = (Entrenador*) elem;
-		return !entrenador->estaIntercambiando;
+		return !entrenador->estaEsperandoAlgo;
 	}
 	ListaDeEntrenadores entrenadoresFiltrados = list_filter(entrenadoresBloqueados, esProcesable); // Esto libera se libera, pero no sus elementos!!!
 
