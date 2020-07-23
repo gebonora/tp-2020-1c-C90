@@ -14,6 +14,8 @@ void trabajar(ServicioDePlanificacion * this) {
             break;
         }
 
+        // Cambiar desde acá.
+
         if (!queue_is_empty(this->colaDeTrabajo)) {
             log_debug(this->logger, "Hay trabajo para hacer en la cola de trabajo");
             TrabajoPlanificador * trabajo = queue_pop(this->colaDeTrabajo);
@@ -32,6 +34,9 @@ void trabajar(ServicioDePlanificacion * this) {
                     break;
             }
         }
+
+
+        // Hasta acá.
     }
     sem_post(&this->semaforoFinDeTrabajo);
 }
