@@ -20,6 +20,13 @@ static bool _partition_with_start(uintptr_t, uintptr_t);
 
 /** PUBLIC FUNCTIONS **/
 
+uint32_t get_time() {
+	pthread_mutex_lock(&MUTEX_TIME);
+	uint32_t time = ++TIME;
+	pthread_mutex_unlock(&MUTEX_TIME);
+	return time;
+}
+
 Partition* find_partition(int size_to_fit) {
 	if(string_equals_ignore_case(ALGORITMO_PARTICION_LIBRE, FIRST_FIT)) {
 		return _find_partition(size_to_fit, false);
@@ -39,7 +46,7 @@ Partition* choose_victim() {
 }
 
 Partition* create_partition(uint32_t position, uintptr_t start, uint32_t size) {
-	int now = (int) ahoraEnTimeT();
+	uint64_t now = get_time();
 	Partition* partition = malloc(sizeof(Partition));
 	partition->creation_time = now;
 	partition->access_time = now;
@@ -145,8 +152,8 @@ static void _show_partition(Partition* partition, int number) {
 	log_info(LOGGER, "Position: %d - %d", partition->position, partition->position + partition->size -1);
 	log_info(LOGGER, "Start: %x (%d) - %x (%d)", partition->start, partition->start, partition->start + partition->size - 1, partition->start + partition->size - 1);
 	log_info(LOGGER, "Buddy: %d", xor_int_and_int(partition->position, partition->size));
-	log_info(LOGGER, "Creation time: %d - %s", partition->creation_time, date_time_to_string(partition->creation_time));
-	log_info(LOGGER, "Last access: %d - %s", partition->access_time, date_time_to_string(partition->access_time));
+	log_info(LOGGER, "Creation time: %d - %s", partition->creation_time, date_time_to_string((time_t)partition->creation_time));
+	log_info(LOGGER, "Last access: %d - %s", partition->access_time, date_time_to_string((time_t)partition->access_time));
 	if(!partition->free) {
 		_show_message(partition->message);
 	}
@@ -172,7 +179,7 @@ static Partition* _choose_victim(bool (*comparator)(void*, void*)) {
 	log_debug(LOGGER, "Getting first partition");
 	Partition* victim = list_get(occupied_partitions, 0);
 	list_destroy(occupied_partitions);
-	log_debug(LOGGER, "Victim Start: %x (%d), Position %d, Size: %d, Creation: %s, Access: %s", victim->start, victim->start, victim->position, victim->size, date_time_to_string(victim->creation_time), date_time_to_string(victim->access_time));
+	log_debug(LOGGER, "Victim Start: %x (%d), Position %d, Size: %d, Creation: %s, Access: %s", victim->start, victim->start, victim->position, victim->size, date_time_to_string((time_t)victim->creation_time), date_time_to_string((time_t)victim->access_time));
 	log_debug(LOGGER, "Setting victim free to true");;
 	victim->free = true;
 	log_debug(LOGGER, "Free partition attributes");

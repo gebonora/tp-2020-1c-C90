@@ -128,6 +128,18 @@ void atenderPedidoBroker(PedidoGameBoy pedidoGameBoy, t_log * logger) {
     	send(socket_broker, &process_gameboy, sizeof(uint32_t), 0);
     	send(socket_broker, &destination_queue, sizeof(uint32_t), 0);
     	send(socket_broker, &id_gameboy, sizeof(uint32_t), 0);
+    	Result r;
+    	recv(socket_broker, &r, sizeof(Result), MSG_WAITALL);
+    	char* _get_result(Result re){
+    		if(re == OK){
+    			return "OK";
+    		} else {
+    			return "FAIL";
+    		}
+    	}
+
+    	char* result = _get_result(r);
+    	log_debug(logger, "Resultado de la suscripcion: %s", result);
 
     	socket_with_logger* swl = malloc(sizeof(socket_with_logger));
     	swl->logger = logger;
@@ -176,14 +188,16 @@ static void _listen_message(socket_with_logger* swl) {
 		switch(swl->operation) {
 		case NEW: ;
 			New* new_pokemon = recv_new(swl->socket);
+			recv(swl->socket, &message_id, sizeof(uint32_t), 0);
 			Coordinate* new_coordinate = new_pokemon->pokemon->coordinates->head->data;
-			log_info(swl->logger, "Message received (operation=NEW, pokemon=%s, pos_x=%d, pos_y=%d, quantity=%d)", new_pokemon->pokemon->name->value, new_coordinate->pos_x, new_coordinate->pos_y, new_pokemon->quantity);
+			log_info(swl->logger, "Message received (operation=NEW, pokemon=%s, pos_x=%d, pos_y=%d, quantity=%d, message_id=%d)", new_pokemon->pokemon->name->value, new_coordinate->pos_x, new_coordinate->pos_y, new_pokemon->quantity, message_id);
 			free_new(new_pokemon);
 			break;
 		case APPEARED: ;
 			Pokemon* appeared_pokemon = recv_pokemon(swl->socket, false);
+			recv(swl->socket, &message_id, sizeof(uint32_t), 0);
 			Coordinate* coordinate = list_get(appeared_pokemon->coordinates, 0);
-			log_info(swl->logger, "Message received (operation=APPEARED, pokemon=%s, x=%d, y=%d)", appeared_pokemon->name->value, coordinate->pos_x, coordinate->pos_y);
+			log_info(swl->logger, "Message received (operation=APPEARED, pokemon=%s, x=%d, y=%d, message_id=%d)", appeared_pokemon->name->value, coordinate->pos_x, coordinate->pos_y, message_id);
 			free(coordinate);
 			break;
 		case GET: ;

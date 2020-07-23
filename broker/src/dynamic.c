@@ -8,6 +8,7 @@ static Partition* _positive_frecuency(uint32_t);
 static Partition* _zero_frecuency(uint32_t);
 
 Partition* save_to_cache_dynamic_partitions(void* data, Message* message){
+	sem_wait(&MEMORY);
 	Partition* partition;
 
 	log_debug(LOGGER, "Frecuencia Compactacion: %d", FRECUENCIA_COMPACTACION);
@@ -25,6 +26,7 @@ Partition* save_to_cache_dynamic_partitions(void* data, Message* message){
 	log_debug(LOGGER, "Copying bytes to cache");
 	memcpy(partition->start, data, message->data_size);
 	log_debug(LOGGER, "memcpy done");
+	sem_post(&MEMORY);
 	return partition;
 }
 
@@ -261,7 +263,7 @@ static Partition* find_partition_dynamic(uint32_t size_of_data) {
 
 			partition->size = new_size;
 			partition->free = false;
-			int now = (int) ahoraEnTimeT();
+			uint64_t now = get_time();
 			partition->access_time = now;
 			partition->creation_time = now;
 
@@ -277,7 +279,7 @@ static Partition* find_partition_dynamic(uint32_t size_of_data) {
 
 		log_debug(LOGGER, "Updating partition attributes (free, creation_time, access_time)");
 		partition->free = false;
-		int now = (int) ahoraEnTimeT();
+		uint64_t now = get_time();
 		partition->access_time = now;
 		partition->creation_time = now;
 
@@ -286,5 +288,6 @@ static Partition* find_partition_dynamic(uint32_t size_of_data) {
 	} else {
 		return NULL;
 	}
+
 }
 
