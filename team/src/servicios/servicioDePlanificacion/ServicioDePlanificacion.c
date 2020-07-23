@@ -16,8 +16,8 @@ void trabajar(ServicioDePlanificacion * this) {
 
 		// Cambiar desde acá.
 
-		if(0){
-			t_list* listaDeadlock = list_create(); // TODO: que el planificador nos devuelva los procesos de blocked,
+		if(0){ // el IF loco.
+			t_list* listaDeadlock = this->planificador.colas->colaBlocked; // TODO: que el planificador nos devuelva los procesos de blocked,
 			// TODO: el servDeadlocks espera entrnadores, no hilos
 			t_list* listaIntercambios = this->servicioDeResolucionDeDeadlocks->procesarDeadlock(this->servicioDeResolucionDeDeadlocks,listaDeadlock);
 			// asignar los intercambios y pasar a planificar next y ejecutar.
@@ -44,7 +44,9 @@ void trabajar(ServicioDePlanificacion * this) {
 
 		// definirYCambiarEstado(aEjecutar) Lo pasa a Ready si no terminó su tarea, Blocked o Exit si terminó su tarea.
 
-		/*if (!queue_is_empty(this->colaDeTrabajo)) {
+		/*
+		 * ESTO QUEDO VIEJO
+		 if (!queue_is_empty(this->colaDeTrabajo)) {
 		 log_debug(this->logger, "Hay trabajo para hacer en la cola de trabajo");
 		 TrabajoPlanificador * trabajo = queue_pop(this->colaDeTrabajo);
 		 switch (trabajo->tipo) {

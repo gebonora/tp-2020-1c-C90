@@ -12,14 +12,21 @@ void agregarUnidadPlanificable(Planificador * this, UnidadPlanificable * unidadP
     list_add(this->colas->colaNew, unidadPlanificable);
 }
 
-t_list* armarListaEntrenadoresDisponibles (Planificador * this){
-	// retorna NEW y BLOCKED activo
-	return NULL;
+t_list* armarListaEntrenadoresDisponibles(Planificador * this) {
+	t_list* entrenadoresDisponibles = list_duplicate(this->colas->colaNew); // Si hago duplicate a lista vacia, me retorna lista vacia?
+	t_list* auxiliarBlocked = list_duplicate(this->colas->colaBlocked);
+	for (int a = 0; a < list_size(auxiliarBlocked); a++) {
+		HiloEntrenadorPlanificable* elementoIterado = (HiloEntrenadorPlanificable*)list_get(auxiliarBlocked,a);
+		if (!elementoIterado->entrenador->estaEsperandoAlgo){
+			list_add(entrenadoresDisponibles, elementoIterado);
+		}
+	}
+	list_destroy(auxiliarBlocked);
+	return entrenadoresDisponibles;
 }
 
-UnidadPlanificable* obtenerProximoAEjecutar(Planificador * this){
-	// correr algoritmo
-	return NULL;
+UnidadPlanificable* obtenerProximoAEjecutar(Planificador * this) {
+	return this->algoritmoPlanificador.proximoAEjecutar(&this->algoritmoPlanificador, this->colas->colaReady);
 }
 
 int cantidadDeRafagas(Planificador * planificador, UnidadPlanificable * unidadPlanificable){
