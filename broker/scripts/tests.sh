@@ -13,6 +13,7 @@ LOGS_PATH=${BROKER_PATH}/tests/logs
 DUMPS_PATH=${BROKER_PATH}/tests/dumps
 SCRIPTS_PATH=${BROKER_PATH}/scripts
 DUMP_SCRIPT=${SCRIPTS_PATH}/dump.sh
+BROKER_SCRIPT=${SCRIPTS_PATH}/broker.sh
 
 declare -a tests=(
                 "buddy_fifo:buddy_basico"
@@ -39,6 +40,10 @@ for test in "${tests[@]}" ; do
     echo "======================================================================" 
 
     echo -e "\nStarting test: ${YELLOW} ${TEST_NAME} ${NC}"
+
+    echo "\n${YELLOW} Starting up broker process ${NC}"
+
+    sh ${BROKER_SCRIPT}
 
     # copio el archivo de config del test, reemplazando el actual del broker
 
@@ -77,6 +82,10 @@ for test in "${tests[@]}" ; do
     else
         echo -e "Completed test ${YELLOW} ${TEST_NAME} ${NC} with status: ${RED} FAIL ${NC}"
     fi
+
+    echo -e "\n${YELLOW} Shuting down broker process ${NC}"
+
+    sh ${BROKER_SCRIPT} -k
 
     sleep 2
 
