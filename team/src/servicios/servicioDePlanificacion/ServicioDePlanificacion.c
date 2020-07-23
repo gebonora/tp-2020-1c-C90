@@ -55,7 +55,7 @@ void destruir(ServicioDePlanificacion * this) {
     free(this);
 }
 
-static ServicioDePlanificacion * new() {
+static ServicioDePlanificacion * new(servicioDeMetricas) {
     ServicioDePlanificacion * servicio = malloc(sizeof(ServicioDePlanificacion));
 
     servicio->logger = log_create(TEAM_INTERNAL_LOG_FILE, "ServicioDePlanificacion", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_INFO);
@@ -63,7 +63,7 @@ static ServicioDePlanificacion * new() {
     servicio->finDeTrabajo = false;
     sem_init(&servicio->semaforoFinDeTrabajo,1 ,0);
     sem_init(&servicio->semaforoEjecucionHabilitada,1 ,0);
-    servicio->planificador = PlanificadorConstructor.new();
+    servicio->planificador = PlanificadorConstructor.new(servicioDeMetricas);
     servicio->asignarEquipoAPlanificar = &asignarEquipoAPlanificar;
     servicio->trabajar = &trabajar;
     servicio->destruir = &destruir;

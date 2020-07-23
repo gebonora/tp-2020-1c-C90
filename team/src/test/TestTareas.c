@@ -9,6 +9,9 @@ void testDeTareas() {
 
     log_info(testLogger, "Testeando la generacion de una tarea de captura");
 
+    log_info(testLogger, "Sobreescribimos temporalmente el servicio de metricas global");
+    ServicioDeMetricas * servicioDeMetricasOriginal = servicioDeMetricasProcesoTeam;
+    servicioDeMetricasProcesoTeam = ServicioDeMetricasConstructor.new();
     log_info(testLogger, "Sobreescribimos temporalmente el servicio de captura global");
     ServicioDeCaptura * servicioDeCapturaOriginal;
     servicioDeCapturaOriginal = servicioDeCapturaProcesoTeam;
@@ -47,7 +50,10 @@ void testDeTareas() {
     assert(tareaCaptura->estado == ABORTADA);
 
     servicioDePlanificacion->destruir(servicioDePlanificacion);
+    servicioDeMetricasProcesoTeam->destruir(servicioDeMetricasProcesoTeam);
     servicioDeCapturaProcesoTeam->destruir(servicioDeCapturaProcesoTeam);
+    log_info(testLogger, "Restauramos el servicio de metricas global original");
+    servicioDeMetricasProcesoTeam = servicioDeMetricasOriginal;
     log_info(testLogger, "Restauramos el servicio de captura global original");
     servicioDeCapturaProcesoTeam = servicioDeCapturaOriginal;
     tareaCaptura->destruir(tareaCaptura);

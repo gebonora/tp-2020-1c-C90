@@ -9,6 +9,9 @@ void testDePlanificable() {
 
     log_info(testLogger, "Testeando la unidad planificable de los entrenadores");
 
+    log_info(testLogger, "Sobreescribimos temporalmente el servicio de metricas global");
+    ServicioDeMetricas * servicioDeMetricasOriginal = servicioDeMetricasProcesoTeam;
+    servicioDeMetricasProcesoTeam = ServicioDeMetricasConstructor.new();
     log_info(testLogger, "Sobreescribimos temporalmente el servicio de captura global");
     ServicioDeCaptura * servicioDeCapturaOriginal;
     servicioDeCapturaOriginal = servicioDeCapturaProcesoTeam;
@@ -60,7 +63,10 @@ void testDePlanificable() {
 
     servicioDePlanificacion->destruir(servicioDePlanificacion);
     hiloEntrenadorPlanificable->destruir(hiloEntrenadorPlanificable);
+    servicioDeMetricasProcesoTeam->destruir(servicioDeMetricasProcesoTeam);
     servicioDeCapturaProcesoTeam->destruir(servicioDeCapturaProcesoTeam);
+    log_info(testLogger, "Restauramos el servicio de metricas global original");
+    servicioDeMetricasProcesoTeam = servicioDeMetricasOriginal;
     log_info(testLogger, "Restauramos el servicio de captura global original");
     servicioDeCapturaProcesoTeam = servicioDeCapturaOriginal;
     entrenador->destruir(entrenador);

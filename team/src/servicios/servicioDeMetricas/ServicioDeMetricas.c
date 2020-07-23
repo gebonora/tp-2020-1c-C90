@@ -22,7 +22,7 @@ static void imprimirMetricas(ServicioDeMetricas* this) {
 	log_info(MANDATORY_LOGGER, "%-70s%6d", "Cantidad total de deadlocks producidos:", this->cantidadDeadlocksProducidos);
 	log_info(MANDATORY_LOGGER, "%-70s%6d", "Cantidad total de deadlocks resueltos:", this->cantidadDeadlocksResueltos);
 	if (list_is_empty(this->deadlocks)) {
-        log_info(MANDATORY_LOGGER, "%-70s%6d", "Cantidad de intercambios realizados para resolver los deadlocks: %d", 0);
+        log_info(MANDATORY_LOGGER, "%-70s%6d", "Cantidad de intercambios realizados para resolver los deadlocks:", 0);
 	}
 	for (int a = 0; a < list_size(this->deadlocks); a++) {
 		char* entrada = string_from_format("Cantidad de intercambios realizados para resolver el deadlock %d:", a + 1);
