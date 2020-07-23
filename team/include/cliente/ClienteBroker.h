@@ -20,8 +20,25 @@
 #include <netdb.h>
 #include <pthread.h>
 #include "app/Global.h"
-#include "utils/sockets/Sockets.h"
+#include "delibird/utils/sockets/Sockets.h"
+#include "manejadorDeEventos/ManejadorDeEventos.h"
+#include "servicios/servicioDeCaptura/ServicioDeCaptura.h"
 
-void atenderCaughtRecibido(Caught* unCaught, uint32_t);
+typedef struct ClienteBroker {
+	t_log * logger;
+	char* ipBroker;
+	char* puertoBroker;
+	ManejadorDeEventos* manejadorDeEventos;
+	ServicioDeCaptura* servicioDeCaptura;
+	void (*enviarGet)(struct ClienteBroker * this, char* nombrePokemon);
+	void (*enviarCatch)(struct ClienteBroker * this, CapturaPokemon* capturaPokemon);
+	void (*destruir)(struct ClienteBroker * this);
+} ClienteBroker;
+
+extern const struct ClienteBrokerClass {
+	ClienteBroker * (*new)(ManejadorDeEventos* manejadorDeEventos, ServicioDeCaptura* servicioDeCaptura);
+} ClienteBrokerConstructor;
+
+ClienteBroker* clienteBrokerProcesoTeam;
 
 #endif //TEAM_CLIENTEBROKER_H

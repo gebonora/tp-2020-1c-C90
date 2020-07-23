@@ -12,6 +12,7 @@
 #include "modelo/mapa/gps/Gps.h"
 #include "modelo/mapa/coordenadas/UtilidadesCoordenadas.h"
 #include "modelo/mapa/movimiento/Movimiento.h"
+#include "cliente/ClienteBrokerV2.h"
 
 /**
  * El entrenador se mueve y caza pokemones. La idea es llevar ese registro acá.
@@ -29,13 +30,15 @@ typedef struct Entrenador {
     Coordinate posicionInicial;
     ContadorPokemones pokemonesCapturados;
     ContadorPokemones pokemonesObjetivo;
+    bool estaEsperandoAlgo; // True si está en una captura o involucrado en un intercambio (yendo o esperando)
     int limiteDeCaptura; // Establece cuantos pokemones puede capturar
     // Interfaz publica
     void (*mover)(struct Entrenador * this, Coordinate * posicionObjetivo);
     bool (*objetivoCompletado)(struct Entrenador * this); // Es true si pokemones_objetivo es igual a pokemones_capturados.
     bool (*puedeAtraparPokemones)(struct Entrenador * this); // Es true si es < a limiteDeCaptura.
     Posicion (*posicion)(struct Entrenador * this); // Le pregunta al mapa donde esta, pasandole su uuid.
-    // TODO: void (*agregarPokemonCapturado)(struct Entrenador * this, char * especiePokemon);
+    char * (*descripcion)(struct Entrenador * this);
+    void (*registrarCaptura)(struct Entrenador * this, char * especie);
     void (*destruir)(struct Entrenador * this);
 } Entrenador;
 

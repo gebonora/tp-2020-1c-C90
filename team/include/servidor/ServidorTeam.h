@@ -16,7 +16,7 @@
 #include <signal.h>
 #include "app/Global.h"
 #include "utils/sockets/Sockets.h"
-#include "cliente/ClienteBroker.h"
+#include "manejadorDeEventos/ManejadorDeEventos.h"
 
 typedef struct {
 	void* mensaje;
@@ -43,9 +43,6 @@ void procesarHiloLocalized(ArgumentosHilo* argumentosHilo);
 int iniciarSocketDeEscucha(Operation cola);
 int subscribirseACola(Operation cola, t_log* logger);
 char* traducirOperacion(Operation operacion);
-char* traducirResult(Result result);
-
-char* logCoordenadas(t_list* listaCoor);
 
 void atenderGameboy();
 

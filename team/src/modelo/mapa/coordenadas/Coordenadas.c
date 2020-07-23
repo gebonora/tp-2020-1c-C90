@@ -4,6 +4,18 @@
 
 #include "modelo/mapa/coordenadas/UtilidadesCoordenadas.h"
 
+char * separarCoordenada(Coordinate posicion, char * separador) {
+    return string_from_format("%d%s%d", posicion.pos_x, separador, posicion.pos_y);
+}
+
+char * separarPunteroCoordenada(Coordinate * posicion, char * separador) {
+    return separarCoordenada(convertirACoordenada(posicion), separador);
+}
+
+Coordinate * convertirAPunteroDeCoordenada(Coordinate posicion){
+    return create_coordinate(posicion.pos_x, posicion.pos_y);
+}
+
 char * armarCoordenadaClave(int x, int y) {
     Coordinate posicion = {.pos_x = x, .pos_y = y};
     return coordenadaClave(posicion);
