@@ -68,7 +68,7 @@ typedef struct TrabajoPlanificador {
 
 typedef struct ServicioDePlanificacion {
 	t_log * logger;
-	t_queue * colaDeTrabajo; // Posee TrabajoPlanificador TODO: Sincronizarla con los semaforos del notepad++
+	t_queue * colaDeTrabajo; // Posee TrabajoPlanificador TODO: Generar tarea de captura / intercambio.
 	bool finDeTrabajo;
 	sem_t semaforoFinDeTrabajo;
 	sem_t semaforoEjecucionHabilitada;
@@ -81,7 +81,7 @@ typedef struct ServicioDePlanificacion {
 	void (*trabajar)(struct ServicioDePlanificacion * this);
 	void (*asignarEquipoAPlanificar)(struct ServicioDePlanificacion * this, Equipo equipo);
 	void (*destruir)(struct ServicioDePlanificacion * this);
-	t_list* (*obtenerTareas)(struct ServicioDePlanificacion* this, int cantidadAPopear);
+	t_list* (*obtenerTrabajo)(struct ServicioDePlanificacion* this, int cantidadAPopear);
 	void (*asignarTareas)(struct ServicioDePlanificacion * this, t_list* listaDeTrabajo, t_list* entrenadoresDisponibles);
 } ServicioDePlanificacion;
 

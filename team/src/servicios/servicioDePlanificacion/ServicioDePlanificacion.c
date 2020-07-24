@@ -16,14 +16,21 @@ void trabajar(ServicioDePlanificacion * this) {
 
 		// Cambiar desde acá.
 
-		if (0) { // el IF loco.
-			// SI HAY DEADLOCK PLANIFICAMOS INTERCAMBIOS
+		if (0/*planificador->estanTodoEnExit*/) {
+			//ripeamos;
+		}
 
+		if (0) { // el IF loco. // TODO: sacarlo a una funcion aparte.
+			// SI HAY DEADLOCK PLANIFICAMOS INTERCAMBIOS
+			// servicioDePlanificaicon.resolverDeadlokcFinal.
+			// break;
 			t_list* listaDeadlock = this->planificador.colas->colaBlocked; // TODO: que el planificador nos devuelva los procesos de blocked,
 			// TODO: el servDeadlocks espera entrnadores, no hilos
 			t_list* listaIntercambios = this->servicioDeResolucionDeDeadlocks->procesarDeadlock(this->servicioDeResolucionDeDeadlocks, listaDeadlock);
 			// asignar los intercambios y pasar a planificar next y ejecutar.
-		} else {
+		}
+
+		else {
 			// SI NO HAY DEADLOCK PLANIFICAMOS CAPTURAS
 
 			// Me retorna los de New, y los de blocked que no estan en captura y no estan llenos
@@ -33,14 +40,15 @@ void trabajar(ServicioDePlanificacion * this) {
 
 			sem_wait(&this->semaforoContadorColaDeTrabajo);
 			pthread_mutex_lock(&this->mutexColaDeTrabajo);
-			t_list* tareas = this->obtenerTareas(this, list_size(entrenadoresDisponibles));
+			t_list* trabajo = this->obtenerTrabajo(this, list_size(entrenadoresDisponibles));
 			pthread_mutex_unlock(&this->mutexColaDeTrabajo);
 
-			for (int a = 0; list_size(tareas) - 1; a++) {
+			for (int a = 0; list_size(trabajo) - 1; a++) {
 				sem_wait(&this->semaforoContadorColaDeTrabajo);
 			}
 
-			this->asignarTareas(this, tareas, entrenadoresDisponibles);
+			this->asignarTareas(this, trabajo, entrenadoresDisponibles); // TODO: transformar esto a una tareaPlanificable que este en el hilo, y pasamos el hilo a ready.
+
 		}
 		HiloEntrenadorPlanificable* aEjecutar = this->planificador.obtenerProximoAEjecutar(&this->planificador);
 		int ciclosAEjecutar = this->planificador.cantidadDeRafagas(&this->planificador, aEjecutar);
@@ -84,7 +92,7 @@ void asignarEquipoAPlanificar(ServicioDePlanificacion * this, Equipo equipo) {
 	list_destroy(unidadesPlanificables);
 }
 
-t_list* obtenerTareas(ServicioDePlanificacion* this, int cantidadAPopear) {
+t_list* obtenerTrabajo(ServicioDePlanificacion* this, int cantidadAPopear) {
 	// La idea es que tenemos una listaConEntrenadores y queremos popear hasta esa cantidad.
 	// Puede ser que popemos menos porque la cola tiene menor cantidad de elementos que los que pedimos, pero no pasa nada.
 	t_list* listaDeTareas = list_create();
@@ -127,7 +135,7 @@ static ServicioDePlanificacion * new(ServicioDeMetricas* servicioDeMetricas, Ser
 	servicio->servicioDeResolucionDeDeadlocks = servicioDeadlocks;
 	servicio->servicioDeMetricas = servicioDeMetricas;
 	servicio->trabajar = &trabajar;
-	servicio->obtenerTareas = &obtenerTareas;
+	servicio->obtenerTrabajo = &obtenerTrabajo;
 	servicio->asignarTareas = &asignarTareas;
 	servicio->destruir = &destruir;
 

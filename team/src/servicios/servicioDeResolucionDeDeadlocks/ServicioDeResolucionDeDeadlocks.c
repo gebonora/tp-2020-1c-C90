@@ -15,6 +15,8 @@ t_list* procesarDeadlock(ServicioDeResolucionDeDeadlocks * this, t_list* entrena
 	 *
 	 * 		Adentro de esta funcion llamo a resolverDeadlock, que retorna una serie de tareas para resolver los deadlocks.
 	 */
+
+
 	bool esProcesable(void* elem) {
 		Entrenador* entrenador = (Entrenador*) elem;
 		return !entrenador->estaEsperandoAlgo;

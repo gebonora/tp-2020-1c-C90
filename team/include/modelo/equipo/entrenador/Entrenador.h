@@ -39,6 +39,7 @@ typedef struct Entrenador {
     Posicion (*posicion)(struct Entrenador * this); // Le pregunta al mapa donde esta, pasandole su uuid.
     char * (*descripcion)(struct Entrenador * this);
     void (*registrarCaptura)(struct Entrenador * this, char * especie);
+    // TODO: metodos para intercambio
     void (*destruir)(struct Entrenador * this);
 } Entrenador;
 

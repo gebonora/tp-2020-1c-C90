@@ -32,6 +32,7 @@ UnidadPlanificable* obtenerProximoAEjecutar(Planificador * this) {
 
 int cantidadDeRafagas(Planificador * planificador, UnidadPlanificable * unidadPlanificable){
 	// segun algoritmo calcular numero
+	//planificador->algoritmoPlanificador->tipo;
 	return 0;
 }
 

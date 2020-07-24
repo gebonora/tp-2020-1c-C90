@@ -34,10 +34,12 @@ typedef struct Planificador {
 	TransicionadorDeEstados transicionadorDeEstados;
 	ColasDePlanificacion * colas;
 	ServicioDeMetricas* servicioDeMetricas;
+	// TODO: agregar ref a EstadoPlanificdor.
 	// Interfaz publica
 	void (*agregarUnidadesPlanificables)(struct Planificador * planificador, t_list * unidadesPlanificables); // Usada en el INIT del sistema.
 	void (*agregarUnidadPlanificable)(struct Planificador * planificador, UnidadPlanificable * unidadPlanificable); // Agrega una UP a la lista y le asigna el estado NEW
 
+	// TODO: moverAcOla(UP, exit);
 	t_list* (*armarListaEntrenadoresDisponibles)(struct Planificador * planificador); // retorna cola NEW y BLOCKED sin espera.
 	UnidadPlanificable* (*obtenerProximoAEjecutar)(struct Planificador * planificador);
 	int (*cantidadDeRafagas)(struct Planificador * planificador, UnidadPlanificable * unidadPlanificable); // Nos sirve para saber cuanta mecha darle. Es dato.

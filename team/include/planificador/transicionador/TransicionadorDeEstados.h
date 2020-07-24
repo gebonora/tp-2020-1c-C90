@@ -25,7 +25,7 @@ typedef enum {
 } ResultadoTransicion;
 
 typedef struct TransicionadorDeEstados {
-    t_log *logger;
+    t_log *logger; // TODO: agregarEstadoPlanificacion
     ResultadoTransicion (*transicionarA)(struct TransicionadorDeEstados *this, UnidadPlanificable * unidadPlanificable, EstadoPlanificador estadoDeseado);
     void (*destruir)(struct TransicionadorDeEstados *this);
 } TransicionadorDeEstados;
