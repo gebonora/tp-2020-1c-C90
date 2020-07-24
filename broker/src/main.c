@@ -14,8 +14,6 @@ int main(){
 	_init_context();
 	_init_memory();
 	_init_dump();
-	// TODO: esto borrarlo luego de los tests
-	//init_test();
 	init_server();
 	return EXIT_SUCCESS;
 }
@@ -23,8 +21,7 @@ int main(){
 /** PRIVATE FUNCTIONS **/
 
 static void _init_logger() {
-	// TODO: volver a level info
-    LOGGER = log_create(LOGGER_PATH, "Broker Server", 1, LOG_LEVEL_DEBUG);
+    LOGGER = log_create(LOGGER_PATH, "Broker Server", 0, LOG_LEVEL_INFO);
 }
 
 static void _init_config() {

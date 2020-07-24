@@ -217,18 +217,18 @@ static void* _transform_messages(Partition* partition, Operation operation, int 
 static void send_message_and_wait_for_ack(arg_struct* args) {
 	void* message = _transform_messages(args->partition, args->partition->message->operation_code, args->bytes);
 	log_debug(LOGGER, "Sending message to: %d, with size: %d", args->subscriber->socket_subscriber, args->bytes);
-
+	log_info(LOGGER, "Enviando el mensaje %d al suscriptor %d", args->partition->message->message_id, args->subscriber->socket_subscriber);
 	if (send(args->subscriber->socket_subscriber, message, args->bytes, MSG_NOSIGNAL) < 0) {
-		log_debug(LOGGER, "Se cayo el suscriptor");
+		log_info(LOGGER, "Se cayo el suscriptor %d", args->subscriber->socket_subscriber);
 	} else {
 		Result result;
 		log_debug(LOGGER, "Waiting for ack");
 		if(recv(args->subscriber->socket_subscriber, &result, sizeof(Result), MSG_WAITALL) > 0){
-			log_debug(LOGGER, "ACK received");
+			log_info(LOGGER, "ACK recibido del suscriptor %d", args->subscriber->socket_subscriber);
 			log_debug(LOGGER, "Adding subscriber to notified_subscribers in partition");
 			list_add(args->partition->notified_suscribers, args->subscriber);
 		} else {
-			log_debug(LOGGER, "Se cayo el suscriptor");
+			log_info(LOGGER, "Se cayo el suscriptor %d", args->subscriber->socket_subscriber);
 		}
 	}
 

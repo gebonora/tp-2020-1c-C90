@@ -25,6 +25,7 @@ Partition* save_to_cache_dynamic_partitions(void* data, Message* message){
 	partition->message = message;
 	log_debug(LOGGER, "Copying bytes to cache");
 	memcpy(partition->start, data, message->data_size);
+	log_info(LOGGER, "Mensaje %d guardado con exito en la particion que comienza en %d",partition->message->message_id, partition->position);
 	log_debug(LOGGER, "memcpy done");
 	sem_post(&MEMORY);
 	free(data);
@@ -69,7 +70,7 @@ static Partition* _zero_frecuency(uint32_t data_size){
 			log_debug(LOGGER, "Free partition not found");
 			log_debug(LOGGER, "Kill status: %s", kill ? "true" : "false");
 			if(kill){
-				log_debug(LOGGER, "Choosing victim");
+				log_info(LOGGER, "Choosing victim");
 				choose_victim();//que tambien la mata
 				log_debug(LOGGER, "Consolidating victim");
 				_consolidate();
@@ -77,7 +78,7 @@ static Partition* _zero_frecuency(uint32_t data_size){
 			} else {
 				kill = true;
 			}
-			log_debug(LOGGER, "Compacting");
+			log_info(LOGGER, "Compacting");
 			_compact();
 		}
 	}
@@ -173,7 +174,7 @@ static void _compact() {
 	list_destroy(occupied);
 	list_destroy(not_occupied);
 
-	log_debug(LOGGER, "Compact done");
+	log_info(LOGGER, "Compact done");
 }
 
 
@@ -213,14 +214,14 @@ static void _consolidate(){
 	}
 
 	if(left_partition != NULL){
-		log_debug(LOGGER, "Starting consolidation");
-		log_debug(LOGGER, "First free partition (position=%d, start=%x, size=%d)", left_partition->position, left_partition->start, left_partition->size);
-		log_debug(LOGGER, "Second free partition (position=%d, start=%x, size=%d)", middle_partition->position, middle_partition->start, middle_partition->size);
+		log_info(LOGGER, "Starting consolidation");
+		log_info(LOGGER, "First free partition (position=%d, start=%x, size=%d)", left_partition->position, left_partition->start, left_partition->size);
+		log_info(LOGGER, "Second free partition (position=%d, start=%x, size=%d)", middle_partition->position, middle_partition->start, middle_partition->size);
 
 		left_partition->size = left_partition->size + middle_partition->size;
 
 		if(right_partition != NULL){
-			log_debug(LOGGER, "Third free partition (position=%d, start=%x, size=%d)", right_partition->position, right_partition->start, right_partition->size);
+			log_info(LOGGER, "Third free partition (position=%d, start=%x, size=%d)", right_partition->position, right_partition->start, right_partition->size);
 
 			left_partition->size = left_partition->size + right_partition->size;
 
@@ -231,7 +232,7 @@ static void _consolidate(){
 		log_debug(LOGGER, "Removing second partition");
 		remove_partition_at(middle_partition->start);
 
-		log_debug(LOGGER, "Consolidated partition (position=%d, start=%x, size=%d)", left_partition->position, left_partition->start, left_partition->size);
+		log_info(LOGGER, "Consolidated partition (position=%d, start=%x, size=%d)", left_partition->position, left_partition->start, left_partition->size);
 	}
 }
 
