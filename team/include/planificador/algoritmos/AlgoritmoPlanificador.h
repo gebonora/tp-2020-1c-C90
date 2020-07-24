@@ -38,6 +38,9 @@ AlgoritmoPlanificador obtenerAlgoritmo(char * nombreAlgoritmo);
 // Al levantar la app necesitamos cargar la lista de algoritmos
 void inicializarAlgoritmosDePlanificacion();
 
+// Destruye los loggers de los algoritmos, se llama en App.c
+void destruirAlgoritmosDePlanificacion();
+
 // Lista de algoritmos
 AlgoritmoPlanificador firstInFirstOut;
 AlgoritmoPlanificador roundRobin;

@@ -19,10 +19,10 @@
 // Configuración de ambiente -> Acá definimos las de la entrega -> En el CMake se sobreescriben para desarrollo.
 #ifndef TEAM_DEVELOPMENT_MODE
 #define INTERNAL_LOG_LEVEL LOG_LEVEL_INFO
-#define SHOW_INTERNAL_CONSOLE 0 // 1 para mostrar la consola de uso interno, 0 para el caso contrario.
-#define CORRER_TESTS 0
-#define ESPERAR_OBJETIVO_GLOBAL 1
-#define ACTIVAR_RETARDO_CPU 1
+#define SHOW_INTERNAL_CONSOLE 1 // 1 para mostrar la consola de uso interno, 0 para el caso contrario.
+#define CORRER_TESTS 1
+#define ESPERAR_OBJETIVO_GLOBAL 0
+#define ACTIVAR_RETARDO_CPU 0
 #endif //TEAM_DEVELOPMENT_MODE
 
 // Paths a archivos
@@ -44,6 +44,7 @@
 #define LOG_FILE "LOG_FILE"
 #define IP_TEAM_GAMEBOY "IP_TEAM_GAMEBOY"
 #define PUERTO_TEAM_GAMEBOY "PUERTO_TEAM_GAMEBOY"
+#define ID_TEAM "ID_TEAM"
 
 // Mutex de los recursos compartidos
 pthread_mutex_t MTX_INTERNAL_LOG;

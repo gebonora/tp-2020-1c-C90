@@ -171,7 +171,7 @@ Si llegó CAUGHT SI:
         - Si ya no puede seguir atrapando pokemones por ya tener su capacidad maxima repleta,
             lo mandamos a **BLOCKED** a la espera de un **DEADLOCK**.
         - Sino,
-            - Si hay pokemones para atrapar, le digo al planificador que lo mueva a **READY**.
+            - Si hay pokemones para atrapar, hay que hacer que este entrenador pueda formar parte del grupo de seleccion.
             - Sino, pasa a **BLOCKED** a la espera del evento **LOCALIZED** (hay que registrarlo).
 
 Si llegó CAUGHT NO:

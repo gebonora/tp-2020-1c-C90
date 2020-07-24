@@ -12,25 +12,30 @@
 #include "modelo/pokemon/PokemonAtrapable.h"
 #include "modelo/pokemon/CapturaPokemon.h"
 #include "modelo/mapa/coordenadas/UtilidadesCoordenadas.h"
+#include "modelo/mapa/registro/RegistradorDePosiciones.h"
 
 typedef struct ServicioDeCaptura {
     t_log * logger;
     Mapa mapa;
-    Equipo equipo;
     ServicioDePlanificacion * servicioDePlanificacion;
+    t_list * pokemonesAtrapables;
     //Interfaz publica
     bool (*registrarCapturaExitosa)(struct ServicioDeCaptura * this, CapturaPokemon * capturaPokemon);
+    bool (*registrarCapturaFallida)(struct ServicioDeCaptura * this, CapturaPokemon * capturaPokemon);
     void (*procesarPokemonCapturable)(struct ServicioDeCaptura * this, char * especie, Coordinate posicion);
     //Metodos privados
-    void (*altaDePokemon)(struct ServicioDeCaptura * this, char * especie, Coordinate posicion);
+    PokemonAtrapable * (*obtenerPokemonAtrapable)(struct ServicioDeCaptura * this, char * especie, Coordinate posicion);
+    PokemonAtrapable * (*altaDePokemon)(struct ServicioDeCaptura * this, char * especie, Coordinate posicion);
     void (*encargarTrabajoDeCaptura)(struct ServicioDeCaptura * this, char * especie, Coordinate posicion);
     void (*destruir)(struct ServicioDeCaptura * this);
 } ServicioDeCaptura;
 
 extern const struct ServicioDeCapturaClass {
-    ServicioDeCaptura * (*new)(Mapa mapa, Equipo equipo, ServicioDePlanificacion * servicioDePlanificacion);
+    ServicioDeCaptura * (*new)(Mapa mapa, ServicioDePlanificacion * servicioDePlanificacion);
 } ServicioDeCapturaConstructor;
 
 ServicioDeCaptura * servicioDeCapturaProcesoTeam;
+
+void destruirPokemonAtrapable(PokemonAtrapable * pokemonAtrapable);
 
 #endif //TEAM_SERVICIODECAPTURA_H

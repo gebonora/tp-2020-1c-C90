@@ -31,6 +31,8 @@ static void trabajar(HiloEntrenadorPlanificable * this) {
 
         tareaEnEjecucion->notificarEjecucion(tareaEnEjecucion, instruccion->posicion);
 
+        servicioDeMetricasProcesoTeam->registrarCicloRealizadoPorEntrenador(servicioDeMetricasProcesoTeam, this->entrenador->id);
+
         log_debug(this->logger, "Finaliza un ciclo de trabajo muy duro");
 
         sem_post(&this->semaforoCicloCompletado);
@@ -59,7 +61,7 @@ static void ejecutarLimitado(HiloEntrenadorPlanificable * this, int cantInstrucc
         sem_post(&this->semaforoEjecucionHabilitada);
         sem_wait(&this->semaforoCicloCompletado);
     }
-    //TODO: informar cuanto le queda por ejecutar
+    this->infoUltimaEjecucion.real_raf_ant = cantInstrucciones;
     if (tarea->estado == FINALIZADA) {
         log_info(this->logger, "La tarea asignada se completó con exito. Se procede a destruirla.");
         tarea->destruir(tarea);
@@ -99,7 +101,7 @@ static HiloEntrenadorPlanificable *new(Entrenador * entrenador) {
     sem_init(&hiloEntrenadorPlanificable->semaforoCicloCompletado,1 ,0);
     sem_init(&hiloEntrenadorPlanificable->semaforoFinDeTrabajo,1 ,0);
     hiloEntrenadorPlanificable->tareaAsignada = NULL;
-    hiloEntrenadorPlanificable->infoUltimaEjecucion = (InfoUltimaEjecucion) {.rafagaAnterior=0, .estimadoAnterior=0};
+    hiloEntrenadorPlanificable->infoUltimaEjecucion = (InfoUltimaEjecucion) {.real_raf_ant=0, .est_raf_ant=0, .seEjecutoPrimeraEstimacion=false, .rafaga_parcial_ejecutada = 0, .rafaga_real_actual = 0};
     hiloEntrenadorPlanificable->asignarTarea = &asignarTarea;
     hiloEntrenadorPlanificable->trabajar = &trabajar;
     hiloEntrenadorPlanificable->ejecutarParcialmente = &ejecutarLimitado;

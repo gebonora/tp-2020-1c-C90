@@ -21,6 +21,10 @@
 #include "modelo/mapa/movimiento/Movimiento.h"
 #include "servicios/servicioDePlanificacion/ServicioDePlanificacion.h"
 #include "servicios/servicioDeCaptura/ServicioDeCaptura.h"
+#include "servicios/servicioDeMetricas/ServicioDeMetricas.h"
+#include "cliente/ClienteBrokerV2.h"
+#include "manejadorDeEventos/registro/RegistradorDeEventos.h"
+#include "servicios/servicioDeResolucionDeDeadlocks/ServicioDeResolucionDeDeadlocks.h"
 
 void testDeIntegracion();
 void testDeEntrenadores();
@@ -36,5 +40,9 @@ void testDePlanificador();
 void testDeTransicionadorDeEstados();
 void testServicioDeCaptura();
 void testLibs();
+void testDeAlgoritmosSJFsinDesalojo();
+void testDeServicioDeMetricas();
+void testClienteBroker();
+void testDeadlock();
 
 #endif //TEAM_TESTDEINTEGRACION_H

@@ -7,19 +7,22 @@
 
 #include "app/Global.h"
 #include "modelo/pokemon/PokemonAtrapable.h"
+#include "modelo/equipo/entrenador/Entrenador.h"
 
 typedef struct CapturaPokemon {
     t_log * logger;
-    char * idEntrenador;
-    char * idCorrelatividad;
+    Entrenador * entrenador;
+    uint32_t idCorrelatividad;
     PokemonAtrapable * pokemonAtrapable;
-    bool (*eliminarPokemonCapturadoDelMapa)(struct CapturaPokemon * this, Mapa mapa);
+    bool (*eliminarPokemonCapturadoDelMapa)(struct CapturaPokemon * this);
     char * (*posicion)(struct CapturaPokemon * this);
+    char * (*especie)(struct CapturaPokemon * this);
+    char * (*idEntrenador)(struct CapturaPokemon * this);
     void (*destruir)(struct CapturaPokemon * this);
 } CapturaPokemon;
 
 extern const struct CapturaPokemonClass {
-    CapturaPokemon * (*new)(char * idEntrenador, char * idCorrelatividad, PokemonAtrapable * pokemon);
+    CapturaPokemon * (*new)(Entrenador * entrenador, uint32_t idCorrelatividad, PokemonAtrapable * pokemon);
 } CapturaPokemonConstructor;
 
 #endif //TEAM_CAPTURAPOKEMON_H

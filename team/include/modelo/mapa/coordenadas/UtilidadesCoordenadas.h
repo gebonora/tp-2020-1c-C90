@@ -13,5 +13,8 @@ char * coordenadaPuntero(Coordinate * posicion);
 Coordinate convertirACoordenada(Coordinate * coordenadaPuntero);
 Coordinate convertirClaveACoordenada(char * coordenadaImprimible); // Toma '(1,2)' y devuelve Coordinate
 Coordinate parsearPosicion(char * coordenadaImprimible, char * separador);  // Toma '1|2' y separador => Coordinate
+Coordinate * convertirAPunteroDeCoordenada(Coordinate posicion);
+char * separarCoordenada(Coordinate posicion, char * separador);
+char * separarPunteroCoordenada(Coordinate * posicion, char * separador);
 
 #endif //TEAM_UTILIDADESCOORDENADAS_H
