@@ -1,4 +1,4 @@
-mkdir deploy
+mkdir -p deploy
 cd deploy
 cmake ..
 make
