@@ -26,21 +26,15 @@ double milisegundos(struct timeval tiempo) {
     return (tiempo.tv_sec * 1000) + (tiempo.tv_usec / 1000.0);
 }
 
-char* current_date_time_as_string() {
+char* date_time_to_string(time_t date) {
 	// variables to store date and time components
 	int hours, minutes, seconds, day, month, year;
 
-	// time_t is arithmetic time type
-	time_t now;
-
-	// Obtain current time
-	// time() returns the current time of the system as a time_t value
-	time(&now);
-
 	// localtime converts a time_t value to calendar time and
 	// returns a pointer to a tm structure with its members
-	// filled with the corresponding values
-	struct tm *local = localtime(&now);
+	// filled with the corresponding value
+
+	struct tm *local = localtime(&date);
 
 	hours = local->tm_hour;	  	// get hours since midnight (0-23)
 	minutes = local->tm_min;	 	// get minutes passed after the hour (0-59)
@@ -52,4 +46,15 @@ char* current_date_time_as_string() {
 
 	// return current date time with format dd/MM/YYYY HH:mm:ss
 	return string_from_format("%02d/%02d/%d %02d:%02d:%02d", day, month, year, hours, minutes, seconds);
+}
+
+char* current_date_time_as_string() {
+	// time_t is arithmetic time type
+	time_t now;
+
+	// Obtain current time
+	// time() returns the current time of the system as a time_t value
+	time(&now);
+
+	return date_time_to_string(now);
 }

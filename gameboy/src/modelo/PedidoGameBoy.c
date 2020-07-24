@@ -91,6 +91,8 @@ char * nombreTipoMensaje(TipoMensaje tipoMensaje) {
             return "CAUGHT_POKEMON";
         case GET_POKEMON:
             return "GET_POKEMON";
+        case LOCALIZED_POKEMON:
+            return "LOCALIZED_POKEMON";
         case SUBSCRIBE_POKEMON: ;
         	return "SUBSCRIBE_POKEMON";
         default:

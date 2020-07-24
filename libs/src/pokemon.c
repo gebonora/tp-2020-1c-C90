@@ -5,7 +5,6 @@ Pokemon* recv_pokemon(int socket_e, bool multiple_coordinates) { //changed
 	pokemon->name = recv_name(socket_e);
 
 	if (pokemon->name == NULL) {
-		return pokemon;
 		return NULL;
 	}
 

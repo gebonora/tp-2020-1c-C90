@@ -126,6 +126,31 @@ int create_connection(char *ip, char* puerto) {
 	return socket_cliente;
 }
 
+char* get_process_by_value(Process value) {
+	switch (value) {
+	case 1:
+		;
+		return "GAMEBOY";
+		break;
+	case 2:
+		;
+		return "TEAM";
+		break;
+	case 3:
+		;
+		return "GAMECARD";
+		break;
+	case 4:
+		;
+		return "BROKER";
+		break;
+	default:
+		;
+		return "SUSCRIPTOR";
+		break;
+	}
+}
+
 char* get_operation_by_value(int value) {
 	switch (value) {
 	case 1:
@@ -154,5 +179,16 @@ char* get_operation_by_value(int value) {
 		break;
 	default:
 		return "SUBSCRIBE";
+	}
+}
+
+char* get_result_by_value(uint32_t result) {
+	switch(result) {
+		case OK:
+			return "OK";
+		case FAIL:
+			return "FAIL";
+		default:
+			return "ACKNOWLEDGE";
 	}
 }
