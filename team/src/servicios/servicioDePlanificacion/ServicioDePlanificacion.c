@@ -100,8 +100,6 @@ void asignarTareasDeCaptura(ServicioDePlanificacion* this, t_list* tareas, t_lis
 }
 
 void asignarIntercambios(ServicioDePlanificacion* this, t_list* intercambios) {
-	// itero por intercambios armando y paso el activo a ready, flageo aa lso 2
-	// Notas: marcar a los 2 como enEspera.
 
 	for (int a = 0; a < list_size(intercambios); a++) {
 		Intercambio* intercambio = (Intercambio*) list_get(intercambios, a);
