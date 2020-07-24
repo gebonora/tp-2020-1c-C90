@@ -127,7 +127,7 @@ static void* _transform_messages(Partition* partition, Operation operation, int 
 		uint32_t new_name_size;
 		memcpy(&new_name_size, partition->start, sizeof(uint32_t));
 		log_debug(LOGGER, "New name size: %d", new_name_size);
-		uint32_t real_size = new_name_size +1;
+		real_size = new_name_size +1;
 
 		memcpy(message + displacement, &(real_size),sizeof(uint32_t));
 		displacement += sizeof(uint32_t);
@@ -147,20 +147,20 @@ static void* _transform_messages(Partition* partition, Operation operation, int 
 		memcpy(message, &operation, sizeof(Operation));
 		displacement += sizeof(Operation);
 
-		uint32_t new_name_size;
-		memcpy(&new_name_size, partition->start, sizeof(uint32_t));
-		log_debug(LOGGER, "New name size: %d", new_name_size);
-		uint32_t real_size = new_name_size +1;
+		uint32_t appeared_name_size;
+		memcpy(&appeared_name_size, partition->start, sizeof(uint32_t));
+		log_debug(LOGGER, "Appeared name size: %d", appeared_name_size);
+		real_size = appeared_name_size +1;
 
 		memcpy(message + displacement, &(real_size),sizeof(uint32_t));
 		displacement += sizeof(uint32_t);
 
-		memcpy(message + displacement, partition->start + sizeof(uint32_t), new_name_size);
-		displacement += new_name_size;
+		memcpy(message + displacement, partition->start + sizeof(uint32_t), appeared_name_size);
+		displacement += appeared_name_size;
 		memcpy(message + displacement, &end_of_string, 1);
 		displacement += 1;
-		memcpy(message + displacement, partition->start + sizeof(uint32_t) + new_name_size, partition->message->data_size - sizeof(uint32_t) - new_name_size);
-		displacement += partition->message->data_size - sizeof(uint32_t) - new_name_size;
+		memcpy(message + displacement, partition->start + sizeof(uint32_t) + appeared_name_size, partition->message->data_size - sizeof(uint32_t) - appeared_name_size);
+		displacement += partition->message->data_size - sizeof(uint32_t) - appeared_name_size;
 		memcpy(message + displacement, &(partition->message->correlational_id), sizeof(uint32_t));
 
 		log_debug(LOGGER, "Finishing memcpy");

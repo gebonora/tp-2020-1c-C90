@@ -64,9 +64,6 @@ Partition* save_to_cache_buddy_system(void* data, Message* message) {
 static void _consolidate_buddy(Partition* partition) {
 	Partition* buddy = _buddy_of(partition);
 
-	log_info(LOGGER, "Partition Position: %d, Size: %d, Free: %s", partition->position, partition->size, partition->free ? "true" : "false");
-	log_info(LOGGER, "Buddy Position: %d, Size: %d, Free: %s", buddy->position, buddy->size, buddy->free ? "true" : "false");
-
 	// si puedo consolidar, arranco, sino no hago nada
 	while(buddy->free && buddy->size == partition->size) {
 		log_info(LOGGER, "Partition Position: %d, Size: %d, Free: %s", partition->position, partition->size, partition->free ? "true" : "false");
