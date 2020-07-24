@@ -119,7 +119,6 @@ static void* _transform_messages(Partition* partition, Operation operation, int 
 	log_debug(LOGGER, "Transforming messages for operation=%s, to void* of size=%d", get_operation_by_value(operation), bytes);
 
 	switch(operation){
-	case APPEARED:
 	case NEW: ;
 		log_debug(LOGGER, "Copy from=%x, to=%x, size=%d", &operation, message, sizeof(Operation));
 		memcpy(message, &operation, sizeof(Operation));
@@ -140,6 +139,29 @@ static void* _transform_messages(Partition* partition, Operation operation, int 
 		memcpy(message + displacement, partition->start + sizeof(uint32_t) + new_name_size, partition->message->data_size - sizeof(uint32_t) - new_name_size);
 		displacement += partition->message->data_size - sizeof(uint32_t) - new_name_size;
 		memcpy(message + displacement, &(partition->message->message_id), sizeof(uint32_t));
+
+		log_debug(LOGGER, "Finishing memcpy");
+		break;
+	case APPEARED: ;
+		log_debug(LOGGER, "Copy from=%x, to=%x, size=%d", &operation, message, sizeof(Operation));
+		memcpy(message, &operation, sizeof(Operation));
+		displacement += sizeof(Operation);
+
+		uint32_t new_name_size;
+		memcpy(&new_name_size, partition->start, sizeof(uint32_t));
+		log_debug(LOGGER, "New name size: %d", new_name_size);
+		uint32_t real_size = new_name_size +1;
+
+		memcpy(message + displacement, &(real_size),sizeof(uint32_t));
+		displacement += sizeof(uint32_t);
+
+		memcpy(message + displacement, partition->start + sizeof(uint32_t), new_name_size);
+		displacement += new_name_size;
+		memcpy(message + displacement, &end_of_string, 1);
+		displacement += 1;
+		memcpy(message + displacement, partition->start + sizeof(uint32_t) + new_name_size, partition->message->data_size - sizeof(uint32_t) - new_name_size);
+		displacement += partition->message->data_size - sizeof(uint32_t) - new_name_size;
+		memcpy(message + displacement, &(partition->message->correlational_id), sizeof(uint32_t));
 
 		log_debug(LOGGER, "Finishing memcpy");
 		break;
