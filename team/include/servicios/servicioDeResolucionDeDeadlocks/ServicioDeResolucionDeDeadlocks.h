@@ -20,7 +20,6 @@
  *  Posibles soluciones.
  *
  *  	DETECCION: un entrenador está en deadlock cuando está lleno y no cumplió su objetivo personal.
- *  	Entonces apuntemos a correr el algoritmo de detección cuando un entrenador se llena.
  *
  *  	RESOLUCION: sera intercambiar pokemon entre entrenadores hasta que cada uno tenga los que necesite.
  *  	Cuando un entrenador esta lleno y no tiene los pokemon que necesita, va a quedar en estado bloqueado.
@@ -37,9 +36,9 @@ typedef t_list* ListaDeDependencias;
 typedef t_list* ListaDeListaDeString;
 typedef t_list* ListaDeStrings; // Para que Eclipse no chille.
 
-typedef struct Intercambio { // Esto puede definir tambien que pokemon dan / reciben, o lo dejamos que lo determine el que genera la tarea (me gusta mas esto)
-	HiloEntrenadorPlanificable* entrenadorQueSeMueve; // Si queremos tener la ref al entenador en vez del nombre, podemos cambiarlo facil con la función, recuperarReferencia.
-	HiloEntrenadorPlanificable* entrenadorQueEspera; // TODO: cambiar a que retorne referencia.
+typedef struct Intercambio {
+	HiloEntrenadorPlanificable* entrenadorQueSeMueve;
+	HiloEntrenadorPlanificable* entrenadorQueEspera;
 	char* pokemonQueObtieneElQueSeMueve;
 	char* pokemonQueObtieneElQueEspera;
 } Intercambio;
