@@ -39,7 +39,8 @@ int cantidadDeRafagas(Planificador * planificador, UnidadPlanificable * unidadPl
 		cantRafagas = unidadPlanificable->tareaAsignada->totalInstrucciones;
 		break;
 	case 1://RR
-		cantRafagas = minimo(quantum,unidadPlanificable->tareaAsignada->totalInstrucciones);
+		cantRafagas = minimo(quantum,(unidadPlanificable->tareaAsignada->totalInstrucciones
+									- unidadPlanificable->infoUltimaEjecucion.rafaga_parcial_ejecutada));
 		break;
 	case 2://SJF-CD
 		cantRafagas = 1;
