@@ -7,8 +7,8 @@
 
 #include "servicios/servicioDeResolucionDeDeadlocks/ServicioDeResolucionDeDeadlocks.h"
 
-t_list* procesarDeadlock(ServicioDeResolucionDeDeadlocks * this, t_list* entrenadoresBloqueados) {
-	/* Me llegan los entrenadores llenos y bloqueados desde el planificador.
+t_list* procesarDeadlock(ServicioDeResolucionDeDeadlocks * this, t_list* unidadesPlanificablesBloqueadas) {
+	/* Me llegan los hilos entrenadores llenos y bloqueados desde el planificador.
 	 * 		Va a haber uno o mas deadlocks.
 	 * 		Quiero llamar al servicio de metricas 1 vez cuando detecto el primer pantallazo de deadlocks, ya que corro el algorimo varias veces
 	 * 		pero el numero de deadlocks que hubo a nivel sistema es fijo.
@@ -16,6 +16,11 @@ t_list* procesarDeadlock(ServicioDeResolucionDeDeadlocks * this, t_list* entrena
 	 * 		Adentro de esta funcion llamo a resolverDeadlock, que retorna una serie de tareas para resolver los deadlocks.
 	 */
 
+	t_list* entrenadoresBloqueados = list_create();
+	for (int a = 0; a < list_size(unidadesPlanificablesBloqueadas); a++) {
+		HiloEntrenadorPlanificable* hilo = (HiloEntrenadorPlanificable*) list_get(unidadesPlanificablesBloqueadas, a);
+		list_add(entrenadoresBloqueados, hilo->entrenador);
+	}
 
 	bool esProcesable(void* elem) {
 		Entrenador* entrenador = (Entrenador*) elem;
@@ -31,10 +36,11 @@ t_list* procesarDeadlock(ServicioDeResolucionDeDeadlocks * this, t_list* entrena
 	}
 
 	// Resolución:
-	t_list* tareasADevolver = this->resolverDeadlock(this, listaDeDependencias);
+	t_list* tareasADevolver = this->resolverDeadlock(this, listaDeDependencias, unidadesPlanificablesBloqueadas);
 
 	list_destroy_and_destroy_elements(listaDeDependencias, destruirDependencia);
 	list_destroy(entrenadoresFiltrados);
+	list_destroy(entrenadoresBloqueados);
 
 	return tareasADevolver;
 }
@@ -123,7 +129,7 @@ void detectarEnDetalleYLogear(ServicioDeResolucionDeDeadlocks* this, ListaDeDepe
 	list_destroy(deadlocks);
 }
 
-t_list* resolverDeadlock(ServicioDeResolucionDeDeadlocks * this, ListaDeDependencias listaDeDependencias) {
+t_list* resolverDeadlock(ServicioDeResolucionDeDeadlocks * this, ListaDeDependencias listaDeDependencias, t_list* UnidadesPlanificables) {
 	ListaDeStrings listaInvolucrados = list_create();
 	t_list* listaDeIntercambios = list_create();
 
@@ -134,12 +140,17 @@ t_list* resolverDeadlock(ServicioDeResolucionDeDeadlocks * this, ListaDeDependen
 				char* nombreIterado = (char*) list_get(dependenciaActual->listaDependencias, b);
 				if (!perteneceALista(listaInvolucrados, nombreIterado) && !perteneceALista(listaInvolucrados, dependenciaActual->nombreEntrenador)) {
 					Intercambio* intercambio = malloc(sizeof(Intercambio));
-					intercambio->entrenadorQueSeMueve = string_duplicate(dependenciaActual->nombreEntrenador);
-					intercambio->entrenadorQueEspera = string_duplicate(nombreIterado);
+					intercambio->entrenadorQueSeMueve = recuperarReferencia(UnidadesPlanificables, dependenciaActual->nombreEntrenador);
+					intercambio->entrenadorQueEspera = recuperarReferencia(UnidadesPlanificables, nombreIterado);
+					intercambio->pokemonQueObtieneElQueSeMueve = buscarPokemonQueNecesitoEnElOtro(intercambio->entrenadorQueSeMueve, intercambio->entrenadorQueEspera);
+					intercambio->pokemonQueObtieneElQueEspera = buscarPokemonQueNecesitoEnElOtro(intercambio->entrenadorQueEspera, intercambio->entrenadorQueSeMueve);
+
 					list_add(listaInvolucrados, string_duplicate(dependenciaActual->nombreEntrenador));
 					list_add(listaInvolucrados, string_duplicate(nombreIterado));
 					list_add(listaDeIntercambios, intercambio);
-					log_debug(this->logger, "Se generó un intercambio entre '%s' y '%s'.", dependenciaActual->nombreEntrenador, nombreIterado);
+					log_debug(this->logger, "Se generó un intercambio entre '%s' que obtendrpa un '%s' y '%s' que obtendrá un '%s'.",
+							intercambio->entrenadorQueSeMueve->entrenador->id, intercambio->pokemonQueObtieneElQueSeMueve,
+							intercambio->entrenadorQueEspera->entrenador->id, intercambio->pokemonQueObtieneElQueEspera);
 				}
 			}
 		}
@@ -173,10 +184,52 @@ const struct ServicioDeResolucionDeDeadlocksClass ServicioDeResolucionDeDeadlock
 
 // Funciones estáticas.
 
-Entrenador* recuperarReferencia(t_list* listaEntrenadores, char* idEntrenador) {
-	for (int a = 0; a < list_size(listaEntrenadores); a++) {
-		Entrenador* entrenadorActual = (Entrenador*) list_get(listaEntrenadores, a);
-		if (string_equals_ignore_case(entrenadorActual->id, idEntrenador)) {
+char* buscarPokemonQueNecesitoEnElOtro(HiloEntrenadorPlanificable* unidadQueBusca, HiloEntrenadorPlanificable* unidadQueDa) {
+	// Voy a hacer una negrada:
+	char* pointer = NULL;
+
+	// buscar pokemon que necesito en el otro;
+	// Si no da lo que necesito, le agarro uno que no le joda dar.
+
+	ListaDeStrings misObjetivos = obtenerListaDePokemon(unidadQueBusca->entrenador->pokemonesObjetivo);
+	ListaDeStrings misCapturas = obtenerListaDePokemon(unidadQueBusca->entrenador->pokemonesCapturados);
+	ListaDeStrings loQueYoNecesito = restarPrimerListaASegunda(misObjetivos, misCapturas);
+
+	ListaDeStrings susObjetivos = obtenerListaDePokemon(unidadQueDa->entrenador->pokemonesObjetivo);
+	ListaDeStrings susCapturas = obtenerListaDePokemon(unidadQueDa->entrenador->pokemonesCapturados);
+	ListaDeStrings loQueElOtroMeDa = restarPrimerListaASegunda(susCapturas, susObjetivos);
+
+	for (int a = 0; a < list_size(loQueYoNecesito); a++) {
+		char* actual = (char*) list_get(loQueYoNecesito, a);
+		for (int b = 0; b < list_size(loQueElOtroMeDa); b++) {
+			char* iterado = (char*) list_get(loQueElOtroMeDa, b);
+			if (string_equals_ignore_case(actual, iterado)) {
+				pointer = actual;
+			}
+		}
+	}
+	char* retorno;
+	if (pointer != NULL) {
+		retorno = string_duplicate(pointer);
+	} else {
+		retorno = string_duplicate(list_get(loQueElOtroMeDa, 0));
+	}
+
+	list_destroy_and_destroy_elements(misObjetivos, free);
+	list_destroy_and_destroy_elements(misCapturas, free);
+	list_destroy_and_destroy_elements(loQueYoNecesito, free);
+
+	list_destroy_and_destroy_elements(susObjetivos, free);
+	list_destroy_and_destroy_elements(susCapturas, free);
+	list_destroy_and_destroy_elements(loQueElOtroMeDa, free);
+
+	return retorno;
+}
+
+HiloEntrenadorPlanificable* recuperarReferencia(t_list* listaHilosEntrenadores, char* idEntrenador) {
+	for (int a = 0; a < list_size(listaHilosEntrenadores); a++) {
+		HiloEntrenadorPlanificable* entrenadorActual = (HiloEntrenadorPlanificable*) list_get(listaHilosEntrenadores, a);
+		if (string_equals_ignore_case(entrenadorActual->entrenador->id, idEntrenador)) {
 			return entrenadorActual;
 		}
 	}
@@ -213,8 +266,8 @@ void destruirDependencia(void * aDestruir) {
 
 void destruirIntercambio(void* aDestruir) {
 	Intercambio* intercambio = (Intercambio*) aDestruir;
-	free(intercambio->entrenadorQueEspera);
-	free(intercambio->entrenadorQueSeMueve);
+	free(intercambio->pokemonQueObtieneElQueEspera);
+	free(intercambio->pokemonQueObtieneElQueSeMueve);
 	free(intercambio);
 }
 
