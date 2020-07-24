@@ -25,25 +25,13 @@ int main(int argc, char* argv[]) {
 	if (iniciarFileSystem(argc, argv) < 0) {
 		cerrarLoggers();
 		cerrarVariablesConfig();
+		exit(-1);
 	}
 
 	//testing
 
-	//testCreacionCoordenadasMultiplesPokemon("pikachu", 30);
+	//correrTests();
 
-	//testCreacionCoordenadaPokemon("charmander", 1, 1, 2);
-
-	//testRemocionCoordenadaPokemon("charmander", 1, 1, 2);
-	/*
-	 testRemocionCoordenadaPokemon("pikachu", 1, 0, 2);
-	 testRemocionCoordenadaPokemon("pikachu", 1, 1, 2);
-	 testRemocionCoordenadaPokemon("pikachu", 1, 2, 2);
-	 testRemocionCoordenadaPokemon("pikachu", 1, 3, 2);
-	 testRemocionCoordenadaPokemon("pikachu", 1, 4, 2);
-	 testRemocionCoordenadaPokemon("pikachu", 1, 5, 2);
-	 */
-	//testGetPokemon("pikachu");
-	//testAbrirArchivo("charmander");
 	//end testing
 
 	atenderConexiones();

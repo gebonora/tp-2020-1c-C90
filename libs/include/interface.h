@@ -63,5 +63,7 @@ Caught* create_caught_pokemon(uint32_t);
 
 int create_connection(char*, char*);
 char* get_operation_by_value(int);
+char* get_result_by_value(uint32_t);
+char* get_process_by_value(Process);
 
 #endif /* BROKER_INCLUDE_INTERFACE_H_ */

@@ -11,7 +11,7 @@
 #include "app/Global.h"
 #include "servicios/servicioDeMetricas/ServicioDeMetricas.h"
 #include "modelo/mapa/Mapa.h"
-#include "modelo/equipo/Equipo.h"
+#include "modelo/planificable/HiloEntrenadorPlanificable.h"
 #include "delibird/utils/colecciones/ExtensionColecciones.h"
 
 /*
@@ -20,7 +20,6 @@
  *  Posibles soluciones.
  *
  *  	DETECCION: un entrenador está en deadlock cuando está lleno y no cumplió su objetivo personal.
- *  	Entonces apuntemos a correr el algoritmo de detección cuando un entrenador se llena.
  *
  *  	RESOLUCION: sera intercambiar pokemon entre entrenadores hasta que cada uno tenga los que necesite.
  *  	Cuando un entrenador esta lleno y no tiene los pokemon que necesita, va a quedar en estado bloqueado.
@@ -37,10 +36,11 @@ typedef t_list* ListaDeDependencias;
 typedef t_list* ListaDeListaDeString;
 typedef t_list* ListaDeStrings; // Para que Eclipse no chille.
 
-typedef struct Intercambio { // Esto puede definir tambien que pokemon dan / reciben, o lo dejamos que lo determine el que genera la tarea (me gusta mas esto)
-	char* entrenadorQueSeMueve; // Si queremos tener la ref al entenador en vez del nombre, podemos cambiarlo facil con la función, recuperarReferencia.
-	char* entrenadorQueEspera; // TODO: cambiar a que retorne referencia.
-	char* pokemonAIntercambiar; // TODO: agregar
+typedef struct Intercambio {
+	HiloEntrenadorPlanificable* entrenadorQueSeMueve;
+	HiloEntrenadorPlanificable* entrenadorQueEspera;
+	char* pokemonQueObtieneElQueSeMueve;
+	char* pokemonQueObtieneElQueEspera;
 } Intercambio;
 
 typedef struct Dependencias {
@@ -57,7 +57,7 @@ typedef struct ServicioDeResolucionDeDeadlocks {
 	//Metodos privados
 	t_list* (*crearListaDeDependencias)(struct ServicioDeResolucionDeDeadlocks* this, ListaDeEntrenadores entrenadoresFiltrados);
 	void (*detectarEnDetalleYLogear)(struct ServicioDeResolucionDeDeadlocks* this, ListaDeDependencias listaDeDependencias);
-	t_list* (*resolverDeadlock)(struct ServicioDeResolucionDeDeadlocks * this, ListaDeDependencias listaDeDependencias);
+	t_list* (*resolverDeadlock)(struct ServicioDeResolucionDeDeadlocks * this, ListaDeDependencias listaDeDependencias, t_list* UnidadesPlanificables);
 	void (*destruir)(struct ServicioDeResolucionDeDeadlocks * this);
 } ServicioDeResolucionDeDeadlocks;
 
@@ -82,6 +82,7 @@ void destruirDependencia(void * elem);
 void destruirIntercambio(void* aDestruir);
 char* obtenerReporteDeadlocks(t_list* deadlocks);
 ListaDeListaDeString sumarListasSiHayMatch(ListaDeListaDeString listaDeListas);
-Entrenador* recuperarReferencia(t_list* listaEntrenadores, char* idEntrenador);
+HiloEntrenadorPlanificable* recuperarReferencia(t_list* listaEntrenadores, char* idEntrenador);
+char* buscarPokemonQueNecesitoEnElOtro(HiloEntrenadorPlanificable* unidadQueBusca, HiloEntrenadorPlanificable* unidadQueDa);
 
 #endif /* INCLUDE_SERVICIOS_SERVICIODERESOLUCIONDEDEADLOCKS_SERVICIODERESOLUCIONDEDEADLOCKS_H_ */

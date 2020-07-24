@@ -42,14 +42,18 @@ int agregarCoordenadaPokemon(char* nombrePokemon, uint32_t posX, uint32_t posY, 
 	while (listaBloques->elements_count < cantidadBloquesRequeridos) {
 		int bloqueNuevo = asignarBloqueLibre();
 		if (bloqueNuevo >= 0) {
+			log_debug(loggerMain, "Se asignó el bloque: '%d' al archivo pokemón: '%s'.", bloqueNuevo, nombrePokemon);
 			list_add(listaBloques, string_itoa(bloqueNuevo));
 		}
 		//Si no tengo bloques para asignar, debería interrumpir este flujo y retornar -1. Liberar memoria interna de función.
 		//No se producirá efecto en el archivo.
 		else {
 			int cantidadBloquesOriginal = calcularNumeroDeBloquesNecesarios(size);
+			log_error(loggerMain, "Rutina de restoración por disco lleno, se volverá al estado inicial de bloques del archivo pokemón: '%s'.", nombrePokemon);
 			while (listaBloques->elements_count > cantidadBloquesOriginal) {
 				liberarBloque(atoi(list_get(listaBloques, listaBloques->elements_count - 1)));
+				log_error(loggerMain, "Rutina de restoración por disco lleno: se deasignó el bloque: '%s' al archivo pokemón: '%s'.",
+						list_get(listaBloques, listaBloques->elements_count - 1), nombrePokemon);
 				list_remove_and_destroy_element(listaBloques, listaBloques->elements_count - 1, freeElem);
 			}
 			free(rutaMetadata);
@@ -63,11 +67,15 @@ int agregarCoordenadaPokemon(char* nombrePokemon, uint32_t posX, uint32_t posY, 
 
 	char* blocksMetadata = stringDesdeLista(listaBloques);
 	setClaveValor(rutaMetadata, "BLOCKS", blocksMetadata);
-	free(blocksMetadata);
 
 	char* nuevoTamanioAsString = string_itoa(nuevoTamanio);
 	setClaveValor(rutaMetadata, "SIZE", nuevoTamanioAsString);
+
+	log_debug(loggerMain, "Se agregó una coordenada: '(%d,%d)' en el archivo pokemón: '%s'. Metadata actualizada a bloques: '%s', size: '%s'.", posX, posY, nombrePokemon,
+			blocksMetadata, nuevoTamanioAsString);
+
 	free(nuevoTamanioAsString);
+	free(blocksMetadata);
 
 	free(archivoMapeado);
 	free(rutaMetadata);
@@ -103,12 +111,16 @@ int quitarCoordenadaPokemon(char* nombrePokemon, uint32_t posX, uint32_t posY) {
 
 	int nuevoTamanio = string_length(archivoMapeado);
 	if (nuevoTamanio == 0) {
-		for (int a = 0; a < listaBloques->elements_count; a++) {
+		for (int a = listaBloques->elements_count - 1; a >= 0; a--) {
 			liberarBloque(atoi(list_get(listaBloques, a)));
+			log_debug(loggerMain, "Se deasignó el bloque: '%s' al archivo pokemón: '%s'.", list_get(listaBloques, a), nombrePokemon);
 		}
 
 		setClaveValor(rutaMetadata, "BLOCKS", "[]");
 		setClaveValor(rutaMetadata, "SIZE", "0");
+
+		log_debug(loggerMain, "Se eliminó una coordenada: '(%d,%d)' en el archivo pokemón: '%s'. Metadata actualizada a bloques: '[]', size: '0'.", posX, posY,
+				nombrePokemon);
 
 		free(archivoMapeado);
 		free(rutaMetadata);
@@ -120,6 +132,7 @@ int quitarCoordenadaPokemon(char* nombrePokemon, uint32_t posX, uint32_t posY) {
 
 	while (listaBloques->elements_count > cantidadBloquesRequeridos) {
 		liberarBloque(atoi(list_get(listaBloques, listaBloques->elements_count - 1)));
+		log_debug(loggerMain, "Se deasignó el bloque: '%s' al archivo pokemón: '%s'.", list_get(listaBloques, listaBloques->elements_count - 1), nombrePokemon);
 		list_remove_and_destroy_element(listaBloques, listaBloques->elements_count - 1, freeElem);
 	}
 
@@ -127,11 +140,15 @@ int quitarCoordenadaPokemon(char* nombrePokemon, uint32_t posX, uint32_t posY) {
 
 	char* blocksMetadata = stringDesdeLista(listaBloques);
 	setClaveValor(rutaMetadata, "BLOCKS", blocksMetadata);
-	free(blocksMetadata);
 
 	char* nuevoTamanioAsString = string_itoa(nuevoTamanio);
 	setClaveValor(rutaMetadata, "SIZE", nuevoTamanioAsString);
+
+	log_debug(loggerMain, "Se eliminó una coordenada: '(%d,%d)' en el archivo pokemón: '%s'. Metadata actualizada a bloques: '%s', size: '%s'.", posX, posY,
+			nombrePokemon, blocksMetadata, nuevoTamanioAsString);
+
 	free(nuevoTamanioAsString);
+	free(blocksMetadata);
 
 	free(archivoMapeado);
 	free(rutaMetadata);
@@ -150,6 +167,7 @@ Pokemon* obtenerCoordenadasPokemon(char* nombrePokemon) {
 	int size = leerClaveValorInt(rutaMetadata, "SIZE");
 	if (size == 0) { //SI SIZE ES 0 => NO TIENE COORDENADAS. SI SIZE !=0 => DEBE TENER ALGUNA COORDENADA.
 		pokemon->coordinates = listaCoor;
+		free(rutaMetadata);
 		return pokemon;
 	}
 

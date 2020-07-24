@@ -9,6 +9,7 @@
 #include "dynamic.h"
 #include "buddy.h"
 
-void save_message(void*, Operation, uint32_t, uint32_t);
+Partition* save_message(void*, Message*);
+t_list* messages_from_operation(Operation, Subscriber*);
 
 #endif /* BROKER_INCLUDE_MEM_H_ */

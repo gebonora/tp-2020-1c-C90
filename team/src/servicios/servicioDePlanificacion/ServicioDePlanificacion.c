@@ -16,23 +16,21 @@ void trabajar(ServicioDePlanificacion * this) {
 
 		// Cambiar desde acá.
 
-		if (0/*planificador->estanTodoEnExit*/) {
-			//ripeamos;
+		if (this->teamFinalizado(this)) {
+			this->finDeTrabajo = true;
 		}
 
-		if (0) { // el IF loco. // TODO: sacarlo a una funcion aparte.
+		if (this->evaluarEstadoPosibleDeadlock(this)) { // el IF loco. // TODO: sacarlo a una funcion aparte.
 			// SI HAY DEADLOCK PLANIFICAMOS INTERCAMBIOS
-			// servicioDePlanificaicon.resolverDeadlokcFinal.
-			// break;
-			t_list* listaDeadlock = this->planificador.colas->colaBlocked; // TODO: que el planificador nos devuelva los procesos de blocked,
-			// TODO: el servDeadlocks espera entrnadores, no hilos
-			t_list* listaIntercambios = this->servicioDeResolucionDeDeadlocks->procesarDeadlock(this->servicioDeResolucionDeDeadlocks, listaDeadlock);
-			// asignar los intercambios y pasar a planificar next y ejecutar.
+			log_debug(this->logger, "Se detectó un estado de posible deadlock.");
+			t_list* listaDeBloqueados = this->planificador.colas->colaBlocked; // TODO: que el planificador nos devuelva los procesos de blocked,
+			t_list* listaDeIntercambios = this->servicioDeResolucionDeDeadlocks->procesarDeadlock(this->servicioDeResolucionDeDeadlocks, listaDeBloqueados);
+			this->asignarIntercambios(this, listaDeIntercambios);
 		}
 
 		else {
 			// SI NO HAY DEADLOCK PLANIFICAMOS CAPTURAS
-
+			log_debug(this->logger, "Se planificarán capturas.");
 			// Me retorna los de New, y los de blocked que no estan en captura y no estan llenos
 			// Esto de llenos lo metí porque no queremos planificarles capturas, eventualmente todos van a estar llenos y vamos a entrar al IF de deadlock.
 
@@ -46,38 +44,15 @@ void trabajar(ServicioDePlanificacion * this) {
 			for (int a = 0; list_size(trabajo) - 1; a++) {
 				sem_wait(&this->semaforoContadorColaDeTrabajo);
 			}
-
-			this->asignarTareas(this, trabajo, entrenadoresDisponibles); // TODO: transformar esto a una tareaPlanificable que este en el hilo, y pasamos el hilo a ready.
-
+			this->asignarTareasDeCaptura(this, trabajo, entrenadoresDisponibles); // TODO: transformar esto a una tareaPlanificable que este en el hilo, y pasamos el hilo a ready.
 		}
 		HiloEntrenadorPlanificable* aEjecutar = this->planificador.obtenerProximoAEjecutar(&this->planificador);
 		int ciclosAEjecutar = this->planificador.cantidadDeRafagas(&this->planificador, aEjecutar);
 
-		// cambiarEstadoAExec(aEjecutar, EXEC); Formalidad
-		// ejecutar(aEjecutar, ciclosAEjecutar); Cambia el estado del hilo post ejecución con la info para sjf.
+		// this->planificador.cambiarEstadoAExec(aEjecutar, EXEC); Formalidad
+		aEjecutar->ejecutarParcialmente(aEjecutar, ciclosAEjecutar); // TODO: Cambiar el estado del hilo post ejecución con la info para sjf. Mediohecho.
 
-		// definirYCambiarEstado(aEjecutar) Lo pasa a Ready si no terminó su tarea, Blocked o Exit si terminó su tarea.
-
-		/*
-		 * ESTO QUEDO VIEJO
-		 if (!queue_is_empty(this->colaDeTrabajo)) {
-		 log_debug(this->logger, "Hay trabajo para hacer en la cola de trabajo");
-		 TrabajoPlanificador * trabajo = queue_pop(this->colaDeTrabajo);
-		 switch (trabajo->tipo) {
-		 case CAPTURA_POKEMON:
-		 log_debug(this->logger, "Se procede a procesar un trabajo de captura pokemon");
-		 break;
-		 case NOTIFY_CAUGHT_RESULT:
-		 log_debug(this->logger, "Se procede a dej");
-		 break;
-		 case DEADLOCK_RESOLUTION:
-		 log_debug(this->logger, "Hay trabajo para hacer en la cola de trabajo");
-		 break;
-		 default:
-		 log_warning(this->logger, "El trabajo asignado no puede resolverse");
-		 break;
-		 }
-		 }*/
+		this->definirYCambiarEstado(this, aEjecutar); // Lo pasa a Ready si no terminó su tarea, Blocked o Exit si terminó su tarea.
 
 		// Hasta acá.
 	}
@@ -105,8 +80,75 @@ t_list* obtenerTrabajo(ServicioDePlanificacion* this, int cantidadAPopear) {
 	return listaDeTareas;
 }
 
-void asignarTareas(ServicioDePlanificacion* this, t_list* tareas, t_list* entrenadoresDisponibles) {
+void asignarTareasDeCaptura(ServicioDePlanificacion* this, t_list* tareas, t_list* entrenadoresDisponibles) {
+	for (int a = 0; a < list_size(tareas); a++) {
+		void* algo = list_get(tareas, a);
+		Coordinate coor;
+		HiloEntrenadorPlanificable* hiloElegido = devolverEntrenadorMasCercano(coor, entrenadoresDisponibles);
+		// cargarle la captura al hilo.
+		// setear varaiables para sjf.
+		// cambiarEstadoHilo elegido a ready.
+	}
+	// Notas: marcarlos como enEspera. Setearle info para sjf.
 	return;
+}
+
+void asignarIntercambios(ServicioDePlanificacion* this, t_list* intercambios) {
+
+	// Notas: marcar a los 2 como enEspera.
+}
+
+void definirYCambiarEstado(ServicioDePlanificacion* this, UnidadPlanificable* hilo) {
+	// Primer approach:
+
+	// Caso no termino de ejecutar lo que tiene, pasa a reaady.
+	if (hilo->infoUltimaEjecucion.rafaga_parcial_ejecutada < hilo->tareaAsignada->totalInstrucciones) {
+		//this->planificador cambiar a estado ready;
+		return;
+	}
+	if (hilo->infoUltimaEjecucion.rafaga_parcial_ejecutada > hilo->tareaAsignada->totalInstrucciones) {
+		log_error(this->logger, "El entrenador '%s' ejecutó más de lo que debía", hilo->entrenador->id);
+		return;
+	}
+	if (hilo->entrenador->objetivoCompletado(hilo->entrenador)) {
+		// cola de exit
+		return;
+	}
+	if (hilo->entrenador->puedeAtraparPokemones(hilo->entrenador)) {
+		// cola blocked en espera de captura
+		return;
+	}
+	// pasar a blocked pero por deadlock
+
+}
+
+bool teamFinalizado(ServicioDePlanificacion* this) {
+	return !list_is_empty(this->planificador.colas->colaExit) && list_is_empty(this->planificador.colas->colaReady) && list_is_empty(this->planificador.colas->colaExec)
+			&& list_is_empty(this->planificador.colas->colaBlocked) && list_is_empty(this->planificador.colas->colaNew);
+}
+
+bool evaluarEstadoPosibleDeadlock(ServicioDePlanificacion* this) {
+	// el if loco. Buscamos un entrenador en blocked que no pueda capturar
+
+	// Cola NEW, y EXEC VACIO
+	if (!list_is_empty(this->planificador.colas->colaNew) || !list_is_empty(this->planificador.colas->colaExec)) {
+		return false;
+	}
+
+	bool entrenadorEnDeadlock(void* elem) {
+		HiloEntrenadorPlanificable* hilo = (HiloEntrenadorPlanificable*) elem;
+		return !hilo->entrenador->puedeAtraparPokemones(hilo->entrenador) && !hilo->entrenador->objetivoCompletado(hilo->entrenador);
+	}
+
+	// Cola Blocked con todos en deadlock
+	if (!list_all_satisfy(this->planificador.colas->colaBlocked, entrenadorEnDeadlock)) {
+		return false;
+	}
+	// Cola Ready con todos en deadlock
+	if (!list_all_satisfy(this->planificador.colas->colaReady, entrenadorEnDeadlock)) {
+		return false;
+	}
+	return true;
 }
 
 void destruir(ServicioDePlanificacion * this) {
@@ -132,11 +174,15 @@ static ServicioDePlanificacion * new(ServicioDeMetricas* servicioDeMetricas, Ser
 	pthread_mutex_init(&servicio->mutexColaDeTrabajo, NULL);
 	sem_init(&servicio->semaforoContadorColaDeTrabajo, 0, 0); // Arranca en 0, queremos que el productor meta algo para consumir.
 	servicio->asignarEquipoAPlanificar = &asignarEquipoAPlanificar;
+	servicio->asignarIntercambios = &asignarIntercambios;
 	servicio->servicioDeResolucionDeDeadlocks = servicioDeadlocks;
 	servicio->servicioDeMetricas = servicioDeMetricas;
 	servicio->trabajar = &trabajar;
 	servicio->obtenerTrabajo = &obtenerTrabajo;
-	servicio->asignarTareas = &asignarTareas;
+	servicio->asignarTareasDeCaptura = &asignarTareasDeCaptura;
+	servicio->definirYCambiarEstado = &definirYCambiarEstado;
+	servicio->teamFinalizado = &teamFinalizado;
+	servicio->evaluarEstadoPosibleDeadlock = &evaluarEstadoPosibleDeadlock;
 	servicio->destruir = &destruir;
 
 	crearHilo((void *(*)(void *)) servicio->trabajar, servicio);
@@ -153,3 +199,21 @@ t_list * convertirAUnidadesPlanificables(Equipo equipo) {
 void destruirUnidadPlanificable(UnidadPlanificable * unidadPlanificable) {
 	unidadPlanificable->destruir(unidadPlanificable);
 }
+
+HiloEntrenadorPlanificable* devolverEntrenadorMasCercano(Coordinate coor, t_list* hilos) {
+	int max = -1;
+	int posicionEnListaDelMaximo = 0;
+	HiloEntrenadorPlanificable* puntero;
+	for (int a = 0; a < list_size(hilos); a++) {
+		HiloEntrenadorPlanificable* hilo = (HiloEntrenadorPlanificable*) list_get(hilos, a);
+		int distancia = distanciaEntre(coor, hilo->entrenador->gps->posicionActual(hilo->entrenador->gps).coordenada);
+		if (distancia > max) {
+			puntero = hilo;
+			max = distancia;
+			posicionEnListaDelMaximo = a;
+		}
+	}
+	list_remove(hilos, posicionEnListaDelMaximo);
+	return puntero;
+}
+
