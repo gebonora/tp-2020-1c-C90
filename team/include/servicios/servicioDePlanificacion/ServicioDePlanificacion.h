@@ -84,6 +84,8 @@ typedef struct ServicioDePlanificacion {
 	void (*asignarIntercambios)(struct ServicioDePlanificacion * this, t_list* listaDeBloqueados);
 	t_list* (*obtenerTrabajo)(struct ServicioDePlanificacion* this, int cantidadAPopear);
 	void (*definirYCambiarEstado)(struct ServicioDePlanificacion* this, UnidadPlanificable* hilo);
+	bool (*teamFinalizado)(struct ServicioDePlanificacion* this);
+	bool (*evaluarEstadoPosibleDeadlock)(struct ServicioDePlanificacion* this);
 	void (*destruir)(struct ServicioDePlanificacion * this);
 
 

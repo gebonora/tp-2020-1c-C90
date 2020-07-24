@@ -16,12 +16,13 @@ void trabajar(ServicioDePlanificacion * this) {
 
 		// Cambiar desde acá.
 
-		if (0/*planificador->estanTodoEnExit*/) {
-			//ripeamos;
+		if (this->teamFinalizado(this)) {
+			this->finDeTrabajo = true;
 		}
 
-		if (0) { // el IF loco. // TODO: sacarlo a una funcion aparte.
+		if (this->evaluarEstadoPosibleDeadlock(this)) { // el IF loco. // TODO: sacarlo a una funcion aparte.
 			// SI HAY DEADLOCK PLANIFICAMOS INTERCAMBIOS
+			log_debug(this->logger, "Se detectó un estado de posible deadlock.");
 			t_list* listaDeBloqueados = this->planificador.colas->colaBlocked; // TODO: que el planificador nos devuelva los procesos de blocked,
 			t_list* listaDeIntercambios = this->servicioDeResolucionDeDeadlocks->procesarDeadlock(this->servicioDeResolucionDeDeadlocks, listaDeBloqueados);
 			this->asignarIntercambios(this, listaDeIntercambios);
@@ -29,7 +30,7 @@ void trabajar(ServicioDePlanificacion * this) {
 
 		else {
 			// SI NO HAY DEADLOCK PLANIFICAMOS CAPTURAS
-
+			log_debug(this->logger, "Se planificarán capturas.");
 			// Me retorna los de New, y los de blocked que no estan en captura y no estan llenos
 			// Esto de llenos lo metí porque no queremos planificarles capturas, eventualmente todos van a estar llenos y vamos a entrar al IF de deadlock.
 
@@ -115,6 +116,35 @@ void definirYCambiarEstado(ServicioDePlanificacion* this, UnidadPlanificable* hi
 
 }
 
+bool teamFinalizado(ServicioDePlanificacion* this) {
+	return !list_is_empty(this->planificador.colas->colaExit) && list_is_empty(this->planificador.colas->colaReady) && list_is_empty(this->planificador.colas->colaExec)
+			&& list_is_empty(this->planificador.colas->colaBlocked) && list_is_empty(this->planificador.colas->colaNew);
+}
+
+bool evaluarEstadoPosibleDeadlock(ServicioDePlanificacion* this) {
+	// el if loco. Buscamos un entrenador en blocked que no pueda capturar
+
+	// Cola NEW, y EXEC VACIO
+	if (!list_is_empty(this->planificador.colas->colaNew) || !list_is_empty(this->planificador.colas->colaExec)) {
+		return false;
+	}
+
+	bool entrenadorEnDeadlock(void* elem) {
+		HiloEntrenadorPlanificable* hilo = (HiloEntrenadorPlanificable*) elem;
+		return !hilo->entrenador->puedeAtraparPokemones(hilo->entrenador) && !hilo->entrenador->objetivoCompletado(hilo->entrenador);
+	}
+
+	// Cola Blocked con todos en deadlock
+	if (!list_all_satisfy(this->planificador.colas->colaBlocked, entrenadorEnDeadlock)) {
+		return false;
+	}
+	// Cola Ready con todos en deadlock
+	if (!list_all_satisfy(this->planificador.colas->colaReady, entrenadorEnDeadlock)) {
+		return false;
+	}
+	return true;
+}
+
 void destruir(ServicioDePlanificacion * this) {
 	this->finDeTrabajo = true;
 	sem_post(&this->semaforoEjecucionHabilitada);
@@ -145,6 +175,8 @@ static ServicioDePlanificacion * new(ServicioDeMetricas* servicioDeMetricas, Ser
 	servicio->obtenerTrabajo = &obtenerTrabajo;
 	servicio->asignarTareasDeCaptura = &asignarTareasDeCaptura;
 	servicio->definirYCambiarEstado = &definirYCambiarEstado;
+	servicio->teamFinalizado = &teamFinalizado;
+	servicio->evaluarEstadoPosibleDeadlock = &evaluarEstadoPosibleDeadlock;
 	servicio->destruir = &destruir;
 
 	crearHilo((void *(*)(void *)) servicio->trabajar, servicio);
