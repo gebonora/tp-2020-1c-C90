@@ -32,7 +32,8 @@ char* date_time_to_string(time_t date) {
 
 	// localtime converts a time_t value to calendar time and
 	// returns a pointer to a tm structure with its members
-	// filled with the corresponding values
+	// filled with the corresponding value
+
 	struct tm *local = localtime(&date);
 
 	hours = local->tm_hour;	  	// get hours since midnight (0-23)

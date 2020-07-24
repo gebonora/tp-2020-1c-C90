@@ -13,47 +13,49 @@ static uint32_t _buddy_position(Partition*);
 //   	   2.b.i) si no la encuentro, busco la particion libre mas cercana a la pot2 calculada
 //   	   2.b.ii) genero n buddys particionando hasta que me queda el tamanio del buddy = pot2 calculadass
 //   3) si no encontre ninguna particion, elijo una victima y vuelvo a lanzar la busqueda
-void save_to_cache_buddy_system(void* data, Message* message) {
+Partition* save_to_cache_buddy_system(void* data, Message* message) {
+	sem_wait(&MEMORY);
 	log_debug(LOGGER, "MAX between MIN_PARTITION_SIZE (%d) and next_power_of_2 of data_size (%d)", TAMANO_MINIMO_PARTICION, message->data_size);
 	int desired_size = MAX_PARTITION_SIZE(next_power_of_2(message->data_size));
 
-	if(desired_size > TAMANO_MEMORIA) {
-		log_error("Message's size (%d) is bigger than cache (%d)", desired_size, TAMANO_MEMORIA);
-	} else {
-		log_debug(LOGGER, "Desired size: %d", desired_size);
-		log_debug(LOGGER, "Finding free partition");
-		// busco una particion libre
-		Partition* partition = find_partition(desired_size);
+	log_debug(LOGGER, "Desired size: %d", desired_size);
+	log_debug(LOGGER, "Finding free partition");
+	// busco una particion libre
+	Partition* partition = find_partition(desired_size);
 
-		// busco una particion libre y sino elimino alguna ocupada y consolido
-		while(partition == NULL) {
-			log_debug(LOGGER, "Free partition not found");
-			log_debug(LOGGER, "Choosing victim");
-			Partition* victim = choose_victim();
-			log_debug(LOGGER, "Consolidating buddy");
-			_consolidate_buddy(victim);
-			log_debug(LOGGER, "Trying to find free partition again");
-			partition = find_partition(desired_size);
-		}
-
-		log_debug(LOGGER, "Free partition found. Check if needs to be broken");
-		if(partition->size != desired_size) {
-			// rompo la particion libre elegida, hasta la minima pot2 posible
-			Partition* choosed_partition = _break_buddys(partition, desired_size);
-		}
-
-		// marco la particion como ocupada, y completo el resto de los atributos
-		partition->message = message;
-		partition->creation_time = (int) ahoraEnTimeT();
-		partition->access_time = (int) ahoraEnTimeT();
-		partition->free = false;
-
-		log_debug(LOGGER, "Partition broken, doing memcpy");
-		// guardo el data con el memcpy
-		memcpy(partition->start, data, message->data_size);
-
-		log_debug(LOGGER, "Done memcpy");
+	// busco una particion libre y sino elimino alguna ocupada y consolido
+	while(partition == NULL) {
+		log_debug(LOGGER, "Free partition not found");
+		log_debug(LOGGER, "Choosing victim");
+		Partition* victim = choose_victim();
+		log_debug(LOGGER, "Consolidating buddy");
+		_consolidate_buddy(victim);
+		log_debug(LOGGER, "Trying to find free partition again");
+		partition = find_partition(desired_size);
 	}
+
+	log_debug(LOGGER, "Free partition found. Check if needs to be broken");
+	if(partition->size != desired_size) {
+		// rompo la particion libre elegida, hasta la minima pot2 posible
+		Partition* choosed_partition = _break_buddys(partition, desired_size);
+	}
+
+	// marco la particion como ocupada, y completo el resto de los atributos
+	partition->message = message;
+	partition->creation_time = get_time();
+	partition->access_time = get_time();
+	partition->free = false;
+
+
+	log_debug(LOGGER, "Partition broken, doing memcpy in start=%x, with data_size=%d", partition->start, message->data_size);
+	// guardo el data con el memcpy
+	memcpy(partition->start, data, message->data_size);
+
+	log_debug(LOGGER, "Done memcpy");
+	sem_post(&MEMORY);
+	free(data);
+	return partition;
+
 }
 
 /** PRIVATE FUNCTIONS **/
@@ -87,7 +89,7 @@ static void _consolidate_buddy(Partition* partition) {
 		log_debug(LOGGER, "Buddy Position: %d, Size: %d, Free: %s", buddy->position, buddy->size, buddy->free ? "true" : "false");
 	}
 
-	partition->creation_time = (int) ahoraEnTimeT();
+	partition->creation_time = get_time();
 
 	log_debug(LOGGER, "Buddy is not free or same size...done consolidating");
 }

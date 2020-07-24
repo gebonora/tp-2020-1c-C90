@@ -2,20 +2,16 @@
 
 static void _init_logger();
 static void _init_config();
-static void _init_queues();
 static void _init_semaphores();
 static void _init_context();
-static void _init_threads();
 static void _init_memory();
 static void _init_dump();
 
 int main(){
 	_init_logger();
 	_init_config();
-	_init_queues();
 	_init_semaphores();
 	_init_context();
-	_init_threads();
 	_init_memory();
 	_init_dump();
 	// TODO: esto borrarlo luego de los tests
@@ -48,39 +44,32 @@ static void _init_config() {
 		TAMANO_MINIMO_PARTICION = config_get_int_value(config, "TAMANO_MINIMO_PARTICION");
 		TAMANO_MEMORIA = config_get_int_value(config, "TAMANO_MEMORIA");
 	}
-}
 
-static void _init_queues() {
-	NEW_QUEUE = queue_create();
-	APPEARED_QUEUE = queue_create();
-	GET_QUEUE = queue_create();
-	LOCALIZED_QUEUE = queue_create();
-	CATCH_QUEUE = queue_create();
-	CAUGHT_QUEUE = queue_create();
+	log_debug(LOGGER, "IP: %d", IP);
+	log_debug(LOGGER, "PUERTO: %d", PUERTO);
+	log_debug(LOGGER, "ALGORITMO_MEMORIA: %s", ALGORITMO_MEMORIA);
+	log_debug(LOGGER, "ALGORITMO_REEMPLAZO: %s", ALGORITMO_REEMPLAZO);
+	log_debug(LOGGER, "ALGORITMO_PARTICION_LIBRE: %s", ALGORITMO_PARTICION_LIBRE);
+	log_debug(LOGGER, "FRECUENCIA_COMPACTACION: %d", FRECUENCIA_COMPACTACION);
+	log_debug(LOGGER, "TAMANO_MEMORIA: %d", TAMANO_MEMORIA);
+	log_debug(LOGGER, "TAMANO_MINIMO_PARTICION: %d", TAMANO_MINIMO_PARTICION);
+
+	config_destroy(config);
 }
 
 static void _init_semaphores() {
 	pthread_mutex_init(&MUTEX_MESSAGE_ID, NULL);
-	pthread_mutex_init(&MUTEX_NEW_QUEUE, NULL);
-	pthread_mutex_init(&MUTEX_APPEARED_QUEUE, NULL);
-	pthread_mutex_init(&MUTEX_GET_QUEUE, NULL);
-	pthread_mutex_init(&MUTEX_LOCALIZED_QUEUE, NULL);
-	pthread_mutex_init(&MUTEX_CATCH_QUEUE, NULL);
-	pthread_mutex_init(&MUTEX_CAUGHT_QUEUE, NULL);
 	pthread_mutex_init(&MUTEX_SUBSCRIBERS_BY_QUEUE, NULL);
-	pthread_mutex_init(&MUTEX_MEMORY, NULL);
+	pthread_mutex_init(&MUTEX_READERS, NULL);
+	pthread_mutex_init(&MUTEX_TIME, NULL);
+	sem_init(&MEMORY, 0, 1);
 
-	sem_init(&NEW_MESSAGES, 0, 0);
-	sem_init(&APPEARED_MESSAGES, 0, 0);
-	sem_init(&GET_MESSAGES, 0, 0);
-	sem_init(&LOCALIZED_MESSAGES, 0, 0);
-	sem_init(&CATCH_MESSAGES, 0, 0);
-	sem_init(&CAUGHT_MESSAGES, 0, 0);
-	sem_init(&SUBSCRIBERS, 0, 0);
 }
 
 static void _init_context() {
 	MESSAGE_ID = 0;
+	READERS = 0;
+	TIME = 0;
 	SUBSCRIBERS_BY_QUEUE = dictionary_create();
 	dictionary_put(SUBSCRIBERS_BY_QUEUE, "NEW", list_create());
 	dictionary_put(SUBSCRIBERS_BY_QUEUE, "APPEARED", list_create());
@@ -88,32 +77,6 @@ static void _init_context() {
 	dictionary_put(SUBSCRIBERS_BY_QUEUE, "LOCALIZED", list_create());
 	dictionary_put(SUBSCRIBERS_BY_QUEUE, "CATCH", list_create());
 	dictionary_put(SUBSCRIBERS_BY_QUEUE, "CAUGHT", list_create());
-}
-
-static void _init_threads() {
-	pthread_t thread_new;
-	pthread_create(&thread_new, NULL,(void*)consumer_new_queue, NULL);
-	pthread_detach(thread_new);
-
-	pthread_t thread_get;
-	pthread_create(&thread_get, NULL,(void*)consumer_get_queue, NULL);
-	pthread_detach(thread_get);
-
-	pthread_t thread_appeared;
-	pthread_create(&thread_appeared, NULL,(void*)consumer_appeared_queue, NULL);
-	pthread_detach(thread_appeared);
-
-	pthread_t thread_localized;
-	pthread_create(&thread_localized, NULL,(void*)consumer_localized_queue, NULL);
-	pthread_detach(thread_localized);
-
-	pthread_t thread_catch;
-	pthread_create(&thread_catch, NULL,(void*)consumer_catch_queue, NULL);
-	pthread_detach(thread_new);
-
-	pthread_t thread_caught;
-	pthread_create(&thread_caught, NULL,(void*)consumer_caught_queue, NULL);
-	pthread_detach(thread_caught);
 }
 
 static void _init_memory() {

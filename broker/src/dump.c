@@ -3,6 +3,7 @@
 static void _create_dump();
 static void _show_memory_status();
 static void _show_partition(Partition*, int);
+static void _show_subscriber(Subscriber*);
 static void _show_message(Message*);
 
 void dump_handler(int signum) {
@@ -36,9 +37,9 @@ static void _create_dump() {
 	for(int index = 0, number = 1; index < memory->partitions->elements_count; index++, number++) {
 		partition = list_get(memory->partitions, index);
 		if(partition->free) {
-			fprintf(dump_file, "Partición %d:	|	%x (%d)  -  %x (%d).	|	[%s]	|	Size: %d b	|	LRU: %s |\n", number, partition->start, partition->position, partition->start + partition->size, partition->position + partition->size, "L", partition->size, date_time_to_string(partition->access_time));
+			fprintf(dump_file, "Partición %d:	|	%x (%d)  -  %x (%d).	|	[%s]	|	Size: %d b	|	LRU: %d |\n", number, partition->start, partition->position, partition->start + partition->size, partition->position + partition->size, "L", partition->size, partition->access_time);
 		} else {
-			fprintf(dump_file, "Partición %d:	|	%x (%d)  -  %x (%d).	|	[%s]	|	Size: %d b	|	LRU: %s |	COLA: %s	|	ID: %d	|\n", number, partition->start, partition->position, partition->start + partition->size, partition->position + partition->size, "X", partition->size, date_time_to_string(partition->access_time), get_operation_by_value(partition->message->operation_code), partition->message->message_id);
+			fprintf(dump_file, "Partición %d:	|	%x (%d)  -  %x (%d).	|	[%s]	|	Size: %d b	|	LRU: %d |	COLA: %s	|	ID: %d	|\n", number, partition->start, partition->position, partition->start + partition->size, partition->position + partition->size, "X", partition->size, partition->access_time, get_operation_by_value(partition->message->operation_code), partition->message->message_id);
 		}
 	}
 
@@ -64,18 +65,27 @@ static void _show_partition(Partition* partition, int number) {
 	log_info(LOGGER, "Size: %d", partition->size);
 	log_info(LOGGER, "Position: %d - %d", partition->position, partition->position + partition->size -1);
 	log_info(LOGGER, "Start: %x (%d) - %x (%d)", partition->start, partition->start, partition->start + partition->size - 1, partition->start + partition->size - 1);
-	log_info(LOGGER, "Buddy: %d", xor_int_and_int(partition->position, partition->size));
-	log_info(LOGGER, "Creation time: %d - %s", partition->creation_time, date_time_to_string(partition->creation_time));
-	log_info(LOGGER, "Last access: %d - %s", partition->access_time, date_time_to_string(partition->access_time));
+	if (string_equals_ignore_case(ALGORITMO_MEMORIA, BUDDY_SYSTEM)) {
+		log_info(LOGGER, "Buddy: %d", xor_int_and_int(partition->position, partition->size));
+	}
+	log_info(LOGGER, "Creation time: %d", partition->creation_time);
+	log_info(LOGGER, "Last access: %d ", partition->access_time);
 	if(!partition->free) {
 		_show_message(partition->message);
 	}
+	list_iterate(partition->notified_suscribers, &_show_subscriber);
 	log_info(LOGGER, "--------------------------------");
+}
+
+static void _show_subscriber(Subscriber* subscriber) {
+	log_info(LOGGER, "Notified Subscriber (process=%s, id=%d, socket=%d)", get_process_by_value(subscriber->process), subscriber->id, subscriber->socket_subscriber);
 }
 
 static void _show_message(Message* message) {
 	log_info(LOGGER, "Message Queue: %s", get_operation_by_value(message->operation_code));
 	log_info(LOGGER, "Message ID: %d", message->message_id);
-	log_info(LOGGER, "Correlative ID: %d", message->correlational_id);
+	if (message->correlational_id != -1) {
+		log_info(LOGGER, "Correlative ID: %d", message->correlational_id);
+	}
 	log_info(LOGGER, "Message Size: %d", message->data_size);
 }

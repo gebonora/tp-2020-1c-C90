@@ -4,6 +4,7 @@ static Partition* _choose_victim(bool (*)(void*, void*));
 static bool _is_occupied(Partition*);
 static bool _less_access_time(Partition*, Partition*);
 static bool _less_creation_time(Partition*, Partition*);
+static bool _is_free(Partition*);
 static t_list* _get_occupied_partitions();
 static void _show_partition(Partition*, int);
 static void _show_message(Message*);
@@ -18,6 +19,13 @@ static int _list_find_index(uintptr_t);
 static bool _partition_with_start(uintptr_t, uintptr_t);
 
 /** PUBLIC FUNCTIONS **/
+
+uint32_t get_time() {
+	pthread_mutex_lock(&MUTEX_TIME);
+	uint32_t time = ++TIME;
+	pthread_mutex_unlock(&MUTEX_TIME);
+	return time;
+}
 
 Partition* find_partition(int size_to_fit) {
 	if(string_equals_ignore_case(ALGORITMO_PARTICION_LIBRE, FIRST_FIT)) {
@@ -38,7 +46,7 @@ Partition* choose_victim() {
 }
 
 Partition* create_partition(uint32_t position, uintptr_t start, uint32_t size) {
-	int now = (int) ahoraEnTimeT();
+	uint64_t now = get_time();
 	Partition* partition = malloc(sizeof(Partition));
 	partition->creation_time = now;
 	partition->access_time = now;
@@ -76,6 +84,15 @@ Partition* find_partition_at(uintptr_t start_to_find) {
 	return list_find(memory->partitions, &_inline_partition_with_start);
 }
 
+t_list* get_occupied_partitions() {
+	return list_filter(memory->partitions, &_is_occupied);
+}
+
+t_list* get_free_partitions() {
+	return list_filter(memory->partitions, &_is_free);
+}
+
+
 void show_partitions_with_index(t_list* partitions) {
 	log_info(LOGGER, "--------Partitions Size: %d-------", partitions->elements_count);
 
@@ -93,7 +110,9 @@ void show_partitions_with_index(t_list* partitions) {
 static Partition* _find_partition(int desired_size, bool best) {
 	t_list* potential_partitions = greater_equals_and_free(desired_size);
 	if(best) list_sort(potential_partitions, &_smaller_size);
-	return list_get(potential_partitions, 0);
+	Partition* partition = list_get(potential_partitions, 0);
+	list_destroy(potential_partitions);
+	return partition;
 }
 
 static int _list_find_index(uintptr_t start_to_find) {
@@ -113,6 +132,7 @@ static int _list_find_index(uintptr_t start_to_find) {
 
 	log_debug(LOGGER, "Partition index: %d", index);
 	return index;
+
 }
 
 static t_list* greater_equals_and_free(uint32_t size_to_compare) {
@@ -134,8 +154,8 @@ static void _show_partition(Partition* partition, int number) {
 	log_info(LOGGER, "Position: %d - %d", partition->position, partition->position + partition->size -1);
 	log_info(LOGGER, "Start: %x (%d) - %x (%d)", partition->start, partition->start, partition->start + partition->size - 1, partition->start + partition->size - 1);
 	log_info(LOGGER, "Buddy: %d", xor_int_and_int(partition->position, partition->size));
-	log_info(LOGGER, "Creation time: %d - %s", partition->creation_time, date_time_to_string(partition->creation_time));
-	log_info(LOGGER, "Last access: %d - %s", partition->access_time, date_time_to_string(partition->access_time));
+	log_info(LOGGER, "Creation time: %d", partition->creation_time);
+	log_info(LOGGER, "Last access: %d", partition->access_time);
 	if(!partition->free) {
 		_show_message(partition->message);
 	}
@@ -161,16 +181,21 @@ static Partition* _choose_victim(bool (*comparator)(void*, void*)) {
 	log_debug(LOGGER, "Getting first partition");
 	Partition* victim = list_get(occupied_partitions, 0);
 	list_destroy(occupied_partitions);
-	log_debug(LOGGER, "Victim Start: %x (%d), Position %d, Size: %d, Creation: %s, Access: %s", victim->start, victim->start, victim->position, victim->size, date_time_to_string(victim->creation_time), date_time_to_string(victim->access_time));
+	log_debug(LOGGER, "Victim Start: %x (%d), Position %d, Size: %d, Creation: %d, Access: %d", victim->start, victim->start, victim->position, victim->size, victim->creation_time, victim->access_time);
 	log_debug(LOGGER, "Setting victim free to true");;
 	victim->free = true;
 	log_debug(LOGGER, "Free partition attributes");
 	_free_partition_attributes(victim);
+	list_destroy(occupied_partitions);
 	return victim;
 }
 
 static bool _is_occupied(Partition* partition) {
 	return !partition->free;
+}
+
+static bool _is_free(Partition* partition) {
+	return partition->free;
 }
 
 static bool _less_access_time(Partition* partition_a, Partition* partition_b) {
