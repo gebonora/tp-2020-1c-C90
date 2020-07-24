@@ -75,6 +75,7 @@ void consumer_queue(Operation operation, Subscriber* subscriber) {
 	READERS --;
 	if(READERS == 0) sem_post(&MEMORY);
 	pthread_mutex_unlock(&MUTEX_READERS);
+	list_destroy(partitions);
 }
 
 /*PRIVATE FUNCTIONS*/
@@ -268,6 +269,7 @@ static void send_messages_to_subscribers(Partition* partition) {
 	}
 
 	list_iterate(filtered_subscribers, &_inline_send_messages);
+	list_destroy(filtered_subscribers);
 }
 
 static Message* _create_message(Operation operation, uint32_t message_id, uint32_t correlational_id, uint32_t data_size) {

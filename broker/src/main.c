@@ -53,6 +53,8 @@ static void _init_config() {
 	log_debug(LOGGER, "FRECUENCIA_COMPACTACION: %d", FRECUENCIA_COMPACTACION);
 	log_debug(LOGGER, "TAMANO_MEMORIA: %d", TAMANO_MEMORIA);
 	log_debug(LOGGER, "TAMANO_MINIMO_PARTICION: %d", TAMANO_MINIMO_PARTICION);
+
+	config_destroy(config);
 }
 
 static void _init_semaphores() {
