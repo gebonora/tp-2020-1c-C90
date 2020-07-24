@@ -37,9 +37,11 @@ static void _create_dump() {
 	for(int index = 0, number = 1; index < memory->partitions->elements_count; index++, number++) {
 		partition = list_get(memory->partitions, index);
 		if(partition->free) {
-			fprintf(dump_file, "Partición %d:	|	%x (%d)  -  %x (%d).	|	[%s]	|	Size: %d b	|	LRU: %s |\n", number, partition->start, partition->position, partition->start + partition->size, partition->position + partition->size, "L", partition->size, date_time_to_string((time_t)partition->access_time));
+			//fprintf(dump_file, "Partición %d: | %x (%d) - %x (%d) | [%s] | Size: %d b | LRU: %d |\n", number, partition->start, partition->position, partition->start + partition->size, partition->position + partition->size, "L", partition->size, partition->access_time);
+			fprintf(dump_file, "Partición %d: | %d - %d | [%s] | Size: %d b | LRU: %d |\n", number, partition->position, partition->position + partition->size, "L", partition->size, partition->access_time);
 		} else {
-			fprintf(dump_file, "Partición %d:	|	%x (%d)  -  %x (%d).	|	[%s]	|	Size: %d b	|	LRU: %s |	COLA: %s	|	ID: %d	|\n", number, partition->start, partition->position, partition->start + partition->size, partition->position + partition->size, "X", partition->size, date_time_to_string((time_t)partition->access_time), get_operation_by_value(partition->message->operation_code), partition->message->message_id);
+			//fprintf(dump_file, "Partición %d: | %x (%d) - %x (%d) | [%s] | Size: %d b | LRU: %d | COLA: %s | ID: %d |\n", number, partition->start, partition->position, partition->start + partition->size, partition->position + partition->size, "X", partition->size, partition->access_time, get_operation_by_value(partition->message->operation_code), partition->message->message_id);
+			fprintf(dump_file, "Partición %d: | %d - %d | [%s] | Size: %d b | LRU: %d | COLA: %s | ID: %d |\n", number, partition->position, partition->position + partition->size, "X", partition->size, partition->access_time, get_operation_by_value(partition->message->operation_code), partition->message->message_id);
 		}
 	}
 
