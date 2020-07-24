@@ -1,6 +1,6 @@
-Partición 1: | 0 - 4 | [X] | Size: 4 b | LRU: 17 | COLA: CAUGHT | ID: 1 |
-Partición 2: | 4 - 8 | [X] | Size: 4 b | LRU: 18 | COLA: CAUGHT | ID: 2 |
-Partición 3: | 8 - 30 | [X] | Size: 22 b | LRU: 21 | COLA: CATCH | ID: 7 |
-Partición 4: | 30 - 47 | [L] | Size: 17 b | LRU: 20 |
-Partición 5: | 47 - 63 | [X] | Size: 16 b | LRU: 16 | COLA: CATCH | ID: 5 |
-Partición 6: | 63 - 64 | [L] | Size: 1 b | LRU: 15 |
+Partición 1: | 0 - 3 | [X] | Size: 4 b | LRU: 17 | COLA: CAUGHT | ID: 1 |
+Partición 2: | 4 - 7 | [X] | Size: 4 b | LRU: 18 | COLA: CAUGHT | ID: 2 |
+Partición 3: | 8 - 29 | [X] | Size: 22 b | LRU: 21 | COLA: CATCH | ID: 7 |
+Partición 4: | 30 - 46 | [L] | Size: 17 b | LRU: 20 |
+Partición 5: | 47 - 62 | [X] | Size: 16 b | LRU: 16 | COLA: CATCH | ID: 5 |
+Partición 6: | 63 - 63 | [L] | Size: 1 b | LRU: 15 |
