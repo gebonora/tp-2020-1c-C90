@@ -13,7 +13,7 @@ function process() {
 
     SCRIPT_TO_EXECUTE=${SCRIPTS_PATH}/${SCRIPT_NAME}
     TEST_DUMP=${DUMPS_PATH}/${TEST_NAME}_dump.log
-    TEST_LOG=${LOGS_PATH}/${TEST_NAME}.log
+    TEST_LOG=${LOGS_PATH}/${TEST_NAME}.txt
     TEST_CONFIG=${CONFIGS_PATH}/${TEST_NAME}.config
 
     echo -e "TEST_NAME: ${YELLOW} ${TEST_NAME} ${NC}"
@@ -51,7 +51,7 @@ function process() {
 
     > ${TEST_DUMP}
 
-    echo -e "\nCopying dump file ${YELLOW} ${DUMP_FILE} ${NC} to test folder ${YELLOW} ${TEST_DUMP} ${NC} "
+    echo -e "\nCopying dump file ${YELLOW} ${DUMP_FILE} ${NC} to test folder ${YELLOW} ${TEST_DUMP} ${NC}\n"
 
     cat ${DUMP_FILE}
 
@@ -104,11 +104,15 @@ declare -a tests=(
                 )
 
 
+echo -e "\nCreating dumps directory if it does not exist"
+
+mkdir -p ${DUMPS_PATH}
+
 echo -e "\nCleaning dump directory"
 
 rm ${DUMPS_PATH}/*
 
-echo -e "\nBacking up broker current config file: ${BROKER_CONFIG_FILE}"
+echo -e "\nBacking up broker current config file: ${YELLOW} ${BROKER_CONFIG_FILE} ${NC}"
 
 cp ${BROKER_CONFIG_FILE} ${BROKER_BACKUP_FILE}
 
