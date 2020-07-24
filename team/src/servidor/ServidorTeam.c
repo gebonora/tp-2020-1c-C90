@@ -89,10 +89,14 @@ void atenderAppeared() {
 void esperarBrokerAppeared(int socketDeEscucha) {
 	while (1) {
 
-		uint32_t idMensaje;
-		Pokemon* unPokemon = recv_pokemon(socketDeEscucha, 0);
 		int flagError = 0;
+		uint32_t idMensaje;
+		Operation operacion;
 
+		if (recv(socketDeEscucha, &operacion, sizeof(Operation), 0) <= 0) {
+			flagError = 1;
+		}
+		Pokemon* unPokemon = recv_pokemon(socketDeEscucha, 0);
 		if (unPokemon == NULL) {
 			flagError = 1;
 		}
@@ -134,9 +138,14 @@ void atenderCaught() {
 
 void esperarBrokerCaught(int socketDeEscucha) {
 	while (1) {
-		uint32_t idMensaje;
-		Caught* unCaught = recv_caught(socketDeEscucha);
 		int flagError = 0;
+		uint32_t idMensaje;
+		Operation operacion;
+
+		if (recv(socketDeEscucha, &operacion, sizeof(Operation), 0) <= 0) {
+			flagError = 1;
+		}
+		Caught* unCaught = recv_caught(socketDeEscucha);
 		if (unCaught == NULL) {
 			flagError = 1;
 		}
@@ -181,10 +190,14 @@ void atenderLocalized() {
 
 void esperarBrokerLocalized(int socketDeEscucha) {
 	while (1) {
-
-		uint32_t idMensaje;
-		Localized* unLocalized = recv_localized(socketDeEscucha);
 		int flagError = 0;
+		uint32_t idMensaje;
+		Operation operacion;
+
+		if (recv(socketDeEscucha, &operacion, sizeof(Operation), 0) <= 0) {
+			flagError = 1;
+		}
+		Localized* unLocalized = recv_localized(socketDeEscucha);
 
 		if (unLocalized == NULL) {
 			flagError = 1;
@@ -209,6 +222,9 @@ void esperarBrokerLocalized(int socketDeEscucha) {
 			argumentosHilo->mensaje = unLocalized;
 			argumentosHilo->idMensaje = idMensaje;
 
+			printf("DEBUG RANCIO LOCALIZED: pokemon: %s, idMensaje: %d, cantidadCoodenadas: %d\n", unLocalized->pokemon->name->value, idMensaje,
+					unLocalized->coordinates_quantity);
+
 			pthread_t thread;
 			pthread_create(&thread, NULL, (void*) procesarHiloLocalized, argumentosHilo);
 			pthread_detach(thread);
@@ -218,7 +234,10 @@ void esperarBrokerLocalized(int socketDeEscucha) {
 
 void procesarHiloLocalized(ArgumentosHilo* argumentosHilo) {
 	Localized* unLocalized = (Localized*) argumentosHilo->mensaje;
-	uint32_t idMensaje;
+	uint32_t idMensaje = argumentosHilo->idMensaje;
+
+	printf("DEBUG RANCIO LOCALIZED2: pokemon: %s, idMensaje: %d, cantidadCoodenadas: %d\n\n", unLocalized->pokemon->name->value, idMensaje,
+						unLocalized->coordinates_quantity);
 
 	manejadorDeEventosProcesoTeam->procesarLocalizedRecibido(manejadorDeEventosProcesoTeam, unLocalized, idMensaje);
 }
@@ -332,5 +351,4 @@ char* traducirOperacion(Operation operacion) {
 		return "OPERACIÓN DESCONICDA. ALGO ANDA MAL!";
 	}
 }
-
 

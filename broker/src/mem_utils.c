@@ -186,7 +186,7 @@ static Partition* _choose_victim(bool (*comparator)(void*, void*)) {
 	victim->free = true;
 	log_debug(LOGGER, "Free partition attributes");
 	_free_partition_attributes(victim);
-	list_destroy(occupied_partitions);
+	//list_destroy(occupied_partitions); Se está liberando 2 veces -> explota. Volar esta línea.
 	return victim;
 }
 

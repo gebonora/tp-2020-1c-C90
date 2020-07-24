@@ -30,11 +30,11 @@ static void _init_logger() {
 static void _init_config() {
 	t_config* config = config_create("/home/utnso/tp-2020-1c-C90/broker/config/broker.config");
 
-	IP = config_get_string_value(config, "IP_BROKER");
-	PUERTO = config_get_string_value(config, "PUERTO_BROKER");
-	ALGORITMO_MEMORIA = config_get_string_value(config, "ALGORITMO_MEMORIA");
-	ALGORITMO_REEMPLAZO = config_get_string_value(config, "ALGORITMO_REEMPLAZO");
-	ALGORITMO_PARTICION_LIBRE = config_get_string_value(config, "ALGORITMO_PARTICION_LIBRE");
+	IP = string_duplicate(config_get_string_value(config, "IP_BROKER"));
+	PUERTO = string_duplicate(config_get_string_value(config, "PUERTO_BROKER"));
+	ALGORITMO_MEMORIA = string_duplicate(config_get_string_value(config, "ALGORITMO_MEMORIA"));
+	ALGORITMO_REEMPLAZO = string_duplicate(config_get_string_value(config, "ALGORITMO_REEMPLAZO"));
+	ALGORITMO_PARTICION_LIBRE = string_duplicate(config_get_string_value(config, "ALGORITMO_PARTICION_LIBRE"));
 	FRECUENCIA_COMPACTACION = config_get_int_value(config, "FRECUENCIA_COMPACTACION");
 
 	if(string_equals_ignore_case(ALGORITMO_MEMORIA, BUDDY_SYSTEM)) {
@@ -45,8 +45,8 @@ static void _init_config() {
 		TAMANO_MEMORIA = config_get_int_value(config, "TAMANO_MEMORIA");
 	}
 
-	log_debug(LOGGER, "IP: %d", IP);
-	log_debug(LOGGER, "PUERTO: %d", PUERTO);
+	log_debug(LOGGER, "IP: %s", IP);
+	log_debug(LOGGER, "PUERTO: %s", PUERTO);
 	log_debug(LOGGER, "ALGORITMO_MEMORIA: %s", ALGORITMO_MEMORIA);
 	log_debug(LOGGER, "ALGORITMO_REEMPLAZO: %s", ALGORITMO_REEMPLAZO);
 	log_debug(LOGGER, "ALGORITMO_PARTICION_LIBRE: %s", ALGORITMO_PARTICION_LIBRE);
