@@ -27,6 +27,7 @@ Partition* save_to_cache_dynamic_partitions(void* data, Message* message){
 	memcpy(partition->start, data, message->data_size);
 	log_debug(LOGGER, "memcpy done");
 	sem_post(&MEMORY);
+	free(data);
 	return partition;
 }
 
@@ -169,6 +170,8 @@ static void _compact() {
 
 	log_debug(LOGGER, "Adding new free big partition at the end");
 	add_partition_next_to(last_occupied->start, new_free_partition);
+	list_destroy(occupied);
+	list_destroy(not_occupied);
 
 	log_debug(LOGGER, "Compact done");
 }

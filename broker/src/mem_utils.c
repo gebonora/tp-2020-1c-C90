@@ -110,7 +110,9 @@ void show_partitions_with_index(t_list* partitions) {
 static Partition* _find_partition(int desired_size, bool best) {
 	t_list* potential_partitions = greater_equals_and_free(desired_size);
 	if(best) list_sort(potential_partitions, &_smaller_size);
-	return list_get(potential_partitions, 0);
+	Partition* partition = list_get(potential_partitions, 0);
+	list_destroy(potential_partitions);
+	return partition;
 }
 
 static int _list_find_index(uintptr_t start_to_find) {
@@ -184,6 +186,7 @@ static Partition* _choose_victim(bool (*comparator)(void*, void*)) {
 	victim->free = true;
 	log_debug(LOGGER, "Free partition attributes");
 	_free_partition_attributes(victim);
+	list_destroy(occupied_partitions);
 	return victim;
 }
 
