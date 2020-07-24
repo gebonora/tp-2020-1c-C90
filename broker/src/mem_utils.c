@@ -181,7 +181,7 @@ static Partition* _choose_victim(bool (*comparator)(void*, void*)) {
 	log_debug(LOGGER, "Getting first partition");
 	Partition* victim = list_get(occupied_partitions, 0);
 	list_destroy(occupied_partitions);
-	log_info(LOGGER, "Victim Start: %x (%d), Position %d, Size: %d, Creation: %d, Access: %d", victim->start, victim->start, victim->position, victim->size, victim->creation_time, victim->access_time);
+	log_info(LOGGER, "Victim Position %d (%x), Size: %d, Creation: %d, Access: %d", victim->position, victim->start, victim->size, victim->creation_time, victim->access_time);
 	log_debug(LOGGER, "Setting victim free to true");;
 	victim->free = true;
 	log_debug(LOGGER, "Free partition attributes");

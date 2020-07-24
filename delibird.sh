@@ -24,7 +24,7 @@ NC='\033[0m'
 cd ${DELIBIRD_PATH}/libs && ./install.sh $1
 cd ${DELIBIRD_PATH}/gameboy && ./deploy.sh $1
 cd ${DELIBIRD_PATH}/broker && make
-#cd ${DELIBIRD_PATH}/gamecard && make
-#cd ${DELIBIRD_PATH}/team && make
+cd ${DELIBIRD_PATH}/gamecard && make
+cd ${DELIBIRD_PATH}/team &&  ./deploy.sh $1
 
 echo -e "${GREEN}Todos los modulos compilados!${NC}"
