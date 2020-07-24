@@ -80,9 +80,13 @@ typedef struct ServicioDePlanificacion {
 	// Interfaz publica
 	void (*trabajar)(struct ServicioDePlanificacion * this);
 	void (*asignarEquipoAPlanificar)(struct ServicioDePlanificacion * this, Equipo equipo);
-	void (*destruir)(struct ServicioDePlanificacion * this);
+	void (*asignarTareasDeCaptura)(struct ServicioDePlanificacion * this, t_list* listaDeTrabajo, t_list* entrenadoresDisponibles);
+	void (*asignarIntercambios)(struct ServicioDePlanificacion * this, t_list* listaDeBloqueados);
 	t_list* (*obtenerTrabajo)(struct ServicioDePlanificacion* this, int cantidadAPopear);
-	void (*asignarTareas)(struct ServicioDePlanificacion * this, t_list* listaDeTrabajo, t_list* entrenadoresDisponibles);
+	void (*definirYCambiarEstado)(struct ServicioDePlanificacion* this, UnidadPlanificable* hilo);
+	void (*destruir)(struct ServicioDePlanificacion * this);
+
+
 } ServicioDePlanificacion;
 
 extern const struct ServicioDePlanificacionClass {
