@@ -10,7 +10,14 @@
 #include "modelo/planificable/tarea/TareaPlanificable.h"
 #include "modelo/mapa/movimiento/Movimiento.h"
 #include "modelo/mapa/Mapa.h"
+#include "modelo/pokemon/CapturaPokemon.h"
+#include "modelo/pokemon/PokemonAtrapable.h"
+#include "cliente/ClienteBrokerV2.h"
+#include "manejadorDeEventos/registro/RegistradorDeEventos.h"
+#include "servicios/servicioDeCaptura/ServicioDeCaptura.h"
 
 TareaPlanificable * generarTareaDeCaptura(Entrenador * entrenador, char * pokemon, Coordinate posicionPokemon);
+
+void iniciarCaptura(Entrenador * entrenador,char * especie, Coordinate * posicionPokemon);
 
 #endif //TEAM_TAREADECAPTURA_H

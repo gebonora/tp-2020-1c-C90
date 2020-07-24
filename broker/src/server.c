@@ -212,6 +212,8 @@ static void _process_request(uint32_t cod_op, int socket) {
 			close(socket);
 			break;
 		}
+		Result ok = OK;
+		send(socket, &ok, sizeof(Result), 0);
 
 		log_info(LOGGER, "Suscripcion (process=%s, id=%d, queue=%s, socket=%d)", get_process_by_value(cod_process), process_id, get_operation_by_value(cod_cola), socket);
 

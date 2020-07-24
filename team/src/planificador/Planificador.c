@@ -12,13 +12,28 @@ void agregarUnidadPlanificable(Planificador * this, UnidadPlanificable * unidadP
     list_add(this->colas->colaNew, unidadPlanificable);
 }
 
+t_list* armarListaEntrenadoresDisponibles (Planificador * this){
+	// retorna NEW y BLOCKED activo
+	return NULL;
+}
+
+UnidadPlanificable* obtenerProximoAEjecutar(Planificador * this){
+	// correr algoritmo
+	return NULL;
+}
+
+int cantidadDeRafagas(Planificador * planificador, UnidadPlanificable * unidadPlanificable){
+	// segun algoritmo calcular numero
+	return 0;
+}
+
 void destruirPlanificador(Planificador * this, void (*destructorUnidadPlanificable)(UnidadPlanificable *)) {
     log_destroy(this->logger);
     this->transicionadorDeEstados.destruir(&this->transicionadorDeEstados);
     destruirColasDePlanificacion(this->colas, destructorUnidadPlanificable);
 }
 
-static Planificador new() {
+static Planificador new(ServicioDeMetricas* servicio) { // TODO: asignar servicioDeMetricas que tiene que llegar por parametro.
     t_log * logger = log_create(TEAM_INTERNAL_LOG_FILE, "Planificador", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_INFO);
 
     char * nombreAlgoritmo = servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, ALGORITMO_PLANIFICACION);
@@ -29,8 +44,14 @@ static Planificador new() {
             .algoritmoPlanificador = obtenerAlgoritmo(nombreAlgoritmo),
             .transicionadorDeEstados = TransicionadorDeEstadosConstructor.new(),
             .colas = crearColasDePlanificacion(),
+			.servicioDeMetricas = servicio,
             &agregarUnidadesPlanificables,
             &agregarUnidadPlanificable,
+
+			&armarListaEntrenadoresDisponibles,
+			&obtenerProximoAEjecutar,
+			&cantidadDeRafagas,
+
             &destruirPlanificador,
     };
 

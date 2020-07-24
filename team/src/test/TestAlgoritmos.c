@@ -23,7 +23,6 @@ void testDeAlgoritmos() {
     AlgoritmoPlanificador miAlgoritmo = obtenerAlgoritmo("FIFO");
     HiloEntrenadorPlanificable * planificableSeleccioado = miAlgoritmo.proximoAEjecutar(&miAlgoritmo, listaReady);
     assert(string_equals(idEntrenadorQueDeberiaSerSeleccionado, planificableSeleccioado->entrenador->id));
-    miAlgoritmo.destruir(&miAlgoritmo);
 
     list_destroy_and_destroy_elements(listaReady, (void (*)(void *)) hiloEntrenadorPlanificable->destruir);
     entrenador->destruir(entrenador);

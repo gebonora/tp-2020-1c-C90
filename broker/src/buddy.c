@@ -53,6 +53,7 @@ Partition* save_to_cache_buddy_system(void* data, Message* message) {
 
 	log_debug(LOGGER, "Done memcpy");
 	sem_post(&MEMORY);
+	free(data);
 	return partition;
 
 }

@@ -10,6 +10,7 @@
 #include "modelo/equipo/entrenador/Entrenador.h"
 #include "delibird/utils/hilos/HiloFacil.h"
 #include "modelo/planificable/tarea/TareaPlanificable.h"
+#include "servicios/servicioDeMetricas/ServicioDeMetricas.h"
 #include "delibird/servicios/servicioDeConfiguracion/ServicioDeConfiguracion.h"
 
 /**
@@ -29,13 +30,20 @@
  */
 
 typedef struct InfoUltimaEjecucion {
-    int rafagaAnterior;
-    int estimadoAnterior;
+    double est_raf_ant;
+    double real_raf_ant;
+    double est_raf_actual;
+    bool seEjecutoPrimeraEstimacion;
+
+    // parametros para sjf con desalojo
+    double rafaga_real_actual;
+    double rafaga_parcial_ejecutada; // lo que ejecuto para restarselo a la rafaga
+
 } InfoUltimaEjecucion;
 
 typedef struct HiloEntrenadorPlanificable {
     t_log * logger;
-    Entrenador *entrenador;
+    Entrenador * entrenador;
     int retardoInstruccion;
     bool finDeTrabajo;
     sem_t semaforoEjecucionHabilitada;

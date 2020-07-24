@@ -4,14 +4,10 @@
 
 #include "modelo/pokemon/PokemonAtrapable.h"
 
-static bool capturar(PokemonAtrapable * this) {
-  //TODO
-}
-
 static bool borrarPosicion(PokemonAtrapable * this) {
     Gps * gps = this->gps;
     if (gps == NULL) {
-        return true;
+        return false;
     }
     bool sePudoBorrar = gps->borrarPosicionDelMapa(gps);
     if (sePudoBorrar) {
@@ -28,6 +24,10 @@ static Posicion posicion(PokemonAtrapable * this) {
         return (Posicion) {.valida = false};
     }
     return gps->posicionActual(gps);
+}
+
+static char * descripcion(PokemonAtrapable * this) {
+    return this->especie;
 }
 
 static bool esAtrapable(PokemonAtrapable * this) {
@@ -83,6 +83,7 @@ static PokemonAtrapable * new(char * especie, char * posicionInicial) {
     pokemonAtrapable->marcarComoObjetivo = &marcarComoObjetivo;
     pokemonAtrapable->esAtrapable = &esAtrapable;
     pokemonAtrapable->borrarPosicion = &borrarPosicion;
+    pokemonAtrapable->descripcion = &descripcion;
     pokemonAtrapable->destruir = &destruirPokemonAtrapable;
 
     return pokemonAtrapable;
