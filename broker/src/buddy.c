@@ -26,7 +26,7 @@ Partition* save_to_cache_buddy_system(void* data, Message* message) {
 	// busco una particion libre y sino elimino alguna ocupada y consolido
 	while(partition == NULL) {
 		log_debug(LOGGER, "Free partition not found");
-		log_debug(LOGGER, "Choosing victim");
+		log_info(LOGGER, "Choosing victim");
 		Partition* victim = choose_victim();
 		log_debug(LOGGER, "Consolidating buddy");
 		_consolidate_buddy(victim);
@@ -42,8 +42,9 @@ Partition* save_to_cache_buddy_system(void* data, Message* message) {
 
 	// marco la particion como ocupada, y completo el resto de los atributos
 	partition->message = message;
-	partition->creation_time = get_time();
-	partition->access_time = get_time();
+	uint32_t now = get_time();
+	partition->creation_time = now;
+	partition->access_time = now;
 	partition->free = false;
 
 
@@ -88,8 +89,6 @@ static void _consolidate_buddy(Partition* partition) {
 		log_debug(LOGGER, "Partition Position: %d, Size: %d, Free: %s", partition->position, partition->size, partition->free ? "true" : "false");
 		log_debug(LOGGER, "Buddy Position: %d, Size: %d, Free: %s", buddy->position, buddy->size, buddy->free ? "true" : "false");
 	}
-
-	partition->creation_time = get_time();
 
 	log_info(LOGGER, "Buddy is not free or same size...done consolidating");
 }

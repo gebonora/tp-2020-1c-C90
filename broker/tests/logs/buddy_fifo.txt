@@ -1,3 +1,3 @@
-Partición 1: | 0 - 15 | [L] | Size: 16 b | LRU: 9 |
-Partición 2: | 16 - 31 | [X] | Size: 16 b | LRU: 13 | COLA: CATCH | ID: 4 |
-Partición 3: | 32 - 63 | [X] | Size: 32 b | LRU: 19 | COLA: CATCH | ID: 6 |
+Partición 1: | 0 - 15 | [L] | Size: 16 b | LRU: 7 |
+Partición 2: | 16 - 31 | [X] | Size: 16 b | LRU: 9 | COLA: CATCH | ID: 4 |
+Partición 3: | 32 - 63 | [X] | Size: 32 b | LRU: 11 | COLA: CATCH | ID: 6 |

@@ -46,7 +46,7 @@ Partition* choose_victim() {
 }
 
 Partition* create_partition(uint32_t position, uintptr_t start, uint32_t size) {
-	uint64_t now = get_time();
+	uint32_t now = get_time();
 	Partition* partition = malloc(sizeof(Partition));
 	partition->creation_time = now;
 	partition->access_time = now;

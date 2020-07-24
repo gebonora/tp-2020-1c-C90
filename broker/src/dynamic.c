@@ -23,6 +23,9 @@ Partition* save_to_cache_dynamic_partitions(void* data, Message* message){
 
 	log_debug(LOGGER, "Saving message to partition");
 	partition->message = message;
+	uint32_t now = get_time();
+	partition->access_time = now;
+	partition->creation_time = now;
 	log_debug(LOGGER, "Copying bytes to cache");
 	memcpy(partition->start, data, message->data_size);
 	log_info(LOGGER, "Mensaje %d guardado con exito en la particion que comienza en %d",partition->message->message_id, partition->position);
@@ -261,15 +264,13 @@ static Partition* find_partition_dynamic(uint32_t size_of_data) {
 		int old_size = partition->size;
 
 		log_debug(LOGGER, "Partition new size: %d, old size: %d", new_size, old_size);
+		uint32_t now = get_time();
 
 		if(old_size != new_size){
 			log_debug(LOGGER, "New size is different than old_size. Breaking partition");
 
 			partition->size = new_size;
 			partition->free = false;
-			uint64_t now = get_time();
-			partition->access_time = now;
-			partition->creation_time = now;
 
 			log_debug(LOGGER, "Updated partition (position=%d, start=%x, size=%d)", partition->position, partition->start, partition->size);
 
@@ -283,9 +284,6 @@ static Partition* find_partition_dynamic(uint32_t size_of_data) {
 
 		log_debug(LOGGER, "Updating partition attributes (free, creation_time, access_time)");
 		partition->free = false;
-		uint64_t now = get_time();
-		partition->access_time = now;
-		partition->creation_time = now;
 
 		// tamanio particion encontrada >  tamanioAGuardar -> trunco particion encontrada y genero una nueva con el excedente
 		return partition;
