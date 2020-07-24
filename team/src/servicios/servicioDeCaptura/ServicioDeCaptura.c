@@ -35,6 +35,7 @@ static void procesarPokemonCapturable(ServicioDeCaptura * this, char * especie, 
 		this->encargarTrabajoDeCaptura(this, especie, posicion);
 	} else {
 		log_warning(this->logger, "No hay nadie disponible que pueda capturar a %s", especie);
+		free(especie);
 	}
 }
 
@@ -52,15 +53,17 @@ static void encargarTrabajoDeCaptura(ServicioDeCaptura * this, char * especie, C
 	char * ubicacionPokemonACapturar = coordenadaClave(posicion);
 	log_info(this->logger, "Se le encarga al servicio de planificacion que mande a un entrenador a capturar a %s en %s", especie, ubicacionPokemonACapturar);
 
-	// TODO: Acá enganchamos con el serv planificacion.
-
-	TrabajoPlanificador* trabajo= NULL; // TODO: definir esto. Va a ser lo que consume el ServPlanificacion para generar las tareas.
+	TrabajoPlanificador* trabajo = malloc(sizeof(TrabajoPlanificador));
+	trabajo->coordenadaObjetivo = posicion;
+	trabajo->objetivo = string_duplicate(especie);
+	trabajo->tipo = CAPTURA_POKEMON;
 
 	pthread_mutex_lock(&this->servicioDePlanificacion->mutexColaDeTrabajo);
 	queue_push(this->servicioDePlanificacion->colaDeTrabajo, trabajo);
 	pthread_mutex_unlock(&this->servicioDePlanificacion->mutexColaDeTrabajo);
 	sem_post(&this->servicioDePlanificacion->semaforoContadorColaDeTrabajo);
 
+	free(especie);
 	free(ubicacionPokemonACapturar);
 }
 
@@ -76,14 +79,15 @@ static bool registrarCapturaExitosa(ServicioDeCaptura * this, CapturaPokemon * c
 
 	if (sePudoEliminarDelMapa) {
 		entrenador->registrarCaptura(entrenador, capturaPokemon->especie(capturaPokemon));
-		// TODO: Asegurarse de que cuando se genera la tarea se ponga este flag en true. En ServicioDePlanificacion.
-		capturaPokemon->entrenador->estaEsperandoAlgo = false;
 
 		igualdadPokemonAtrapable(capturaPokemon->especie(capturaPokemon), capturaPokemon->pokemonAtrapable->posicionInicial);
 		list_remove_by_condition(this->pokemonesAtrapables, mismaEspecieMismaPosicion);
 		sePudoRegistrar = true;
 		char * posicion = capturaPokemon->posicion(capturaPokemon);
 		log_info(this->logger, "%s capturó con exito un %s en %s", capturaPokemon->idEntrenador(capturaPokemon), capturaPokemon->pokemonAtrapable->especie, posicion);
+
+		capturaPokemon->entrenador->estaEsperandoAlgo = false;
+
 		free(posicion);
 	} else {
 		log_error(this->logger, "No se puede capturar un pokemon que no figure en el mapa");

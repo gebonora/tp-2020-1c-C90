@@ -82,20 +82,45 @@ t_list* obtenerTrabajo(ServicioDePlanificacion* this, int cantidadAPopear) {
 
 void asignarTareasDeCaptura(ServicioDePlanificacion* this, t_list* tareas, t_list* entrenadoresDisponibles) {
 	for (int a = 0; a < list_size(tareas); a++) {
-		TrabajoPlanificador* trabajo = (TrabajoPlanificador*)list_get(tareas, a);
-		Coordinate coor;
-		HiloEntrenadorPlanificable* hiloElegido = devolverEntrenadorMasCercano(coor, entrenadoresDisponibles);
-		// cargarle la captura al hilo.
-		// setear varaiables para sjf.
+		TrabajoPlanificador* trabajo = (TrabajoPlanificador*) list_get(tareas, a);
+
+		HiloEntrenadorPlanificable* hiloElegido = devolverEntrenadorMasCercano(trabajo->coordenadaObjetivo, entrenadoresDisponibles);
+
+		TareaPlanificable* tarea = generarTareaDeCaptura(hiloElegido->entrenador, trabajo->objetivo, trabajo->coordenadaObjetivo);
+		hiloElegido->asignarTarea(hiloElegido, tarea);
+		hiloElegido->entrenador->estaEsperandoAlgo = true;
+		hiloElegido->infoUltimaEjecucion.seNecesitaNuevaEstimacion = true;
+		hiloElegido->infoUltimaEjecucion.rafaga_real_actual = hiloElegido->tareaAsignada->totalInstrucciones;
+
 		// cambiarEstadoHilo elegido a ready.
+		free(trabajo->objetivo);
+		free(trabajo);
 	}
-	// Notas: marcarlos como enEspera. Setearle info para sjf.
 	return;
 }
 
 void asignarIntercambios(ServicioDePlanificacion* this, t_list* intercambios) {
-
+	// itero por intercambios armando y paso el activo a ready, flageo aa lso 2
 	// Notas: marcar a los 2 como enEspera.
+
+	for (int a = 0; a < list_size(intercambios); a++) {
+		Intercambio* intercambio = (Intercambio*) list_get(intercambios, a);
+
+		TareaPlanificable* tarea = generarTareaDeIntercambio(intercambio->entrenadorQueSeMueve, intercambio->entrenadorQueEspera,
+				intercambio->pokemonQueObtieneElQueSeMueve, intercambio->pokemonQueObtieneElQueEspera);
+		intercambio->entrenadorQueSeMueve->asignarTarea(intercambio->entrenadorQueSeMueve, tarea);
+		intercambio->entrenadorQueSeMueve->entrenador->estaEsperandoAlgo=true;
+		intercambio->entrenadorQueEspera->entrenador->estaEsperandoAlgo=true;
+
+		intercambio->entrenadorQueSeMueve->infoUltimaEjecucion.seNecesitaNuevaEstimacion=true;
+		intercambio->entrenadorQueSeMueve->infoUltimaEjecucion.rafaga_real_actual=intercambio->entrenadorQueSeMueve->tareaAsignada->totalInstrucciones;
+
+		// pasar seMueve a cola ready
+
+		free(intercambio->pokemonQueObtieneElQueEspera);
+		free(intercambio->pokemonQueObtieneElQueSeMueve);
+		free(intercambio);
+	}
 }
 
 void definirYCambiarEstado(ServicioDePlanificacion* this, UnidadPlanificable* hilo) {
