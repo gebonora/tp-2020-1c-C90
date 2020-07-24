@@ -222,9 +222,6 @@ void esperarBrokerLocalized(int socketDeEscucha) {
 			argumentosHilo->mensaje = unLocalized;
 			argumentosHilo->idMensaje = idMensaje;
 
-			printf("DEBUG RANCIO LOCALIZED: pokemon: %s, idMensaje: %d, cantidadCoodenadas: %d\n", unLocalized->pokemon->name->value, idMensaje,
-					unLocalized->coordinates_quantity);
-
 			pthread_t thread;
 			pthread_create(&thread, NULL, (void*) procesarHiloLocalized, argumentosHilo);
 			pthread_detach(thread);
@@ -235,9 +232,6 @@ void esperarBrokerLocalized(int socketDeEscucha) {
 void procesarHiloLocalized(ArgumentosHilo* argumentosHilo) {
 	Localized* unLocalized = (Localized*) argumentosHilo->mensaje;
 	uint32_t idMensaje = argumentosHilo->idMensaje;
-
-	printf("DEBUG RANCIO LOCALIZED2: pokemon: %s, idMensaje: %d, cantidadCoodenadas: %d\n\n", unLocalized->pokemon->name->value, idMensaje,
-						unLocalized->coordinates_quantity);
 
 	manejadorDeEventosProcesoTeam->procesarLocalizedRecibido(manejadorDeEventosProcesoTeam, unLocalized, idMensaje);
 }
