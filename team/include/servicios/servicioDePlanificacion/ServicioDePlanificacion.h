@@ -88,7 +88,6 @@ typedef struct ServicioDePlanificacion {
 	bool (*evaluarEstadoPosibleDeadlock)(struct ServicioDePlanificacion* this);
 	void (*destruir)(struct ServicioDePlanificacion * this);
 
-
 } ServicioDePlanificacion;
 
 extern const struct ServicioDePlanificacionClass {
@@ -99,5 +98,6 @@ ServicioDePlanificacion * servicioDePlanificacionProcesoTeam;
 
 t_list * convertirAUnidadesPlanificables(Equipo equipo);
 void destruirUnidadPlanificable(UnidadPlanificable * unidadPlanificable);
+HiloEntrenadorPlanificable* devolverEntrenadorMasCercano(Coordinate coor, t_list* hilos);
 
 #endif //TEAM_SERVICIODEPLANIFICACION_H

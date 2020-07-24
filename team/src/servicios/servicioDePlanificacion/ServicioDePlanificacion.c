@@ -51,7 +51,6 @@ void trabajar(ServicioDePlanificacion * this) {
 
 		// this->planificador.cambiarEstadoAExec(aEjecutar, EXEC); Formalidad
 		aEjecutar->ejecutarParcialmente(aEjecutar, ciclosAEjecutar); // TODO: Cambiar el estado del hilo post ejecución con la info para sjf. Mediohecho.
-		// ejecutar(aEjecutar, ciclosAEjecutar);
 
 		this->definirYCambiarEstado(this, aEjecutar); // Lo pasa a Ready si no terminó su tarea, Blocked o Exit si terminó su tarea.
 
@@ -83,13 +82,20 @@ t_list* obtenerTrabajo(ServicioDePlanificacion* this, int cantidadAPopear) {
 
 void asignarTareasDeCaptura(ServicioDePlanificacion* this, t_list* tareas, t_list* entrenadoresDisponibles) {
 	for (int a = 0; a < list_size(tareas); a++) {
-		// do something
+		void* algo = list_get(tareas, a);
+		Coordinate coor;
+		HiloEntrenadorPlanificable* hiloElegido = devolverEntrenadorMasCercano(coor, entrenadoresDisponibles);
+		// cargarle la captura al hilo.
+		// setear varaiables para sjf.
+		// cambiarEstadoHilo elegido a ready.
 	}
+	// Notas: marcarlos como enEspera. Setearle info para sjf.
 	return;
 }
 
 void asignarIntercambios(ServicioDePlanificacion* this, t_list* intercambios) {
 
+	// Notas: marcar a los 2 como enEspera.
 }
 
 void definirYCambiarEstado(ServicioDePlanificacion* this, UnidadPlanificable* hilo) {
@@ -193,3 +199,21 @@ t_list * convertirAUnidadesPlanificables(Equipo equipo) {
 void destruirUnidadPlanificable(UnidadPlanificable * unidadPlanificable) {
 	unidadPlanificable->destruir(unidadPlanificable);
 }
+
+HiloEntrenadorPlanificable* devolverEntrenadorMasCercano(Coordinate coor, t_list* hilos) {
+	int max = -1;
+	int posicionEnListaDelMaximo = 0;
+	HiloEntrenadorPlanificable* puntero;
+	for (int a = 0; a < list_size(hilos); a++) {
+		HiloEntrenadorPlanificable* hilo = (HiloEntrenadorPlanificable*) list_get(hilos, a);
+		int distancia = distanciaEntre(coor, hilo->entrenador->gps->posicionActual(hilo->entrenador->gps).coordenada);
+		if (distancia > max) {
+			puntero = hilo;
+			max = distancia;
+			posicionEnListaDelMaximo = a;
+		}
+	}
+	list_remove(hilos, posicionEnListaDelMaximo);
+	return puntero;
+}
+
