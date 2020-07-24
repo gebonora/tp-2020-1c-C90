@@ -13,20 +13,13 @@ static UnidadPlanificable * proximoAEjecutar(AlgoritmoPlanificador * this, t_lis
     }
 }// es igual que en fifo ya que los saca de la lista con el mismo criterio
 
-void obtenerConfiguracionesRR() {
-	t_config* configRR = config_create(TEAM_CONFIG_FILE);
 
-	quantum = config_get_int_value(configRR, "QUANTUM");
-
-	config_destroy(configRR);
-}
 
 static void destruir(AlgoritmoPlanificador * this) {
     log_destroy(this->logger);
 }
 
 static AlgoritmoPlanificador new() {
-	obtenerConfiguracionesRR();
     return (AlgoritmoPlanificador) {
             .logger = log_create(TEAM_INTERNAL_LOG_FILE, "AlgoritmoRR", SHOW_INTERNAL_CONSOLE, INTERNAL_LOG_LEVEL),
             .tipo = RR,

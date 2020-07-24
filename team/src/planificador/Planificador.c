@@ -24,6 +24,7 @@ t_list* armarListaEntrenadoresDisponibles(Planificador * this) {
 	}
 	list_destroy(auxiliarBlocked);
 	return entrenadoresDisponibles;
+
 }
 
 UnidadPlanificable* obtenerProximoAEjecutar(Planificador * this) {
@@ -34,18 +35,20 @@ int cantidadDeRafagas(Planificador * planificador, UnidadPlanificable * unidadPl
 	// segun algoritmo calcular numero
 	int cantRafagas;
 
-	switch(planificador->algoritmoPlanificador->tipo){
-	case 0://FIFO
+	switch(planificador->algoritmoPlanificador.tipo){
+	case FIFO://FIFO
 		cantRafagas = unidadPlanificable->tareaAsignada->totalInstrucciones;
 		break;
-	case 1://RR
-		cantRafagas = minimo(quantum,(unidadPlanificable->tareaAsignada->totalInstrucciones
-									- unidadPlanificable->infoUltimaEjecucion.rafaga_parcial_ejecutada));
+	case RR://RR
+		;
+		int quantum = servicioDeConfiguracion.obtenerEntero(&servicioDeConfiguracion,QUANTUM);
+		cantRafagas = minimo(quantum,(unidadPlanificable->tareaAsignada->
+				cantidadInstruccionesRestantes(unidadPlanificable->tareaAsignada)));
 		break;
-	case 2://SJF-CD
+	case SJF_CD://SJF-CD
 		cantRafagas = 1;
 		break;
-	case 3://SJF-SD
+	case SJF_SD://SJF-SD
 		cantRafagas = unidadPlanificable->tareaAsignada->totalInstrucciones;
 		break;
 	default:
@@ -63,6 +66,64 @@ int minimo(int nro1,int nro2){
 		min = nro2;
 	}
 	return min;
+}
+
+void moverACola(Planificador * this,UnidadPlanificable * uPlanificable,EstadoPlanificador * estado,char* motivoCambio){
+	t_list* colaDestino, colaOrigen;
+	colaDestino = colaSegunEstado(this->colas,estado);
+	colaOrigen = colaEnLaQueSeEncuentraLaUnidadPlanificable(this,uPlanificable);
+
+
+	log_info(MANDATORY_LOGGER,"Se movio al entrenador con ID %s, a la cola %s. Motivo: %s",
+			uPlanificable->entrenador->id,estado,motivoCambio);
+}
+
+bool entrenadorEstaEnLista(UnidadPlanificable * unidadParametro, void* elem){
+	UnidadPlanificable unidadDeLista = (UnidadPlanificable*) elem;
+	return unidadParametro->entrenador->id == unidadDeLista->entrenador->id;
+}
+
+t_list* colaEnLaQueSeEncuentraLaUnidadPlanificable(Planificador * planificador, UnidadPlanificable * uPlanif){
+	t_list * cola;
+
+	if(list_any_satisfy(planificador->colas->colaNew,entrenadorEstaEnLista(uPlanif))){
+			cola = planificador->colas->colaNew;
+		}
+	if(list_any_satisfy(planificador->colas->colaReady,entrenadorEstaEnLista(uPlanif))){
+		cola = planificador->colas->colaReady;
+		}
+	if(list_any_satisfy(planificador->colas->colaExec,entrenadorEstaEnLista(uPlanif))){
+		cola = planificador->colas->colaExec;
+		}
+	if(list_any_satisfy(planificador->colas->colaBlocked,entrenadorEstaEnLista(uPlanif))){
+		cola = planificador->colas->colaBlocked;
+		}
+	if(list_any_satisfy(planificador->colas->colaExit,entrenadorEstaEnLista(uPlanif))){
+		cola = planificador->colas->colaExit;
+		}
+	return cola;
+}
+
+t_list* colaSegunEstado(ColasDePlanificacion colas,EstadoPlanificador estado){
+	t_list* cola;
+	switch(estado){
+	case NEW_:
+		cola = colas.colaNew;
+		break;
+	case 1:
+		cola = colas.colaReady;
+		break;
+	case 2:
+		cola = colas.colaExec;
+		break;
+	case 3:
+		cola = colas.colaBlocked;
+		break;
+	case 4:
+		cola = colas.colaExit;
+		break;
+	}
+	return cola;
 }
 
 
@@ -91,6 +152,7 @@ static Planificador new(ServicioDeMetricas* servicio) { // TODO: asignar servici
 			&obtenerProximoAEjecutar,
 			&cantidadDeRafagas,
 
+			&moverACola,
             &destruirPlanificador,
     };
 
