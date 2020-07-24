@@ -16,12 +16,12 @@ function process() {
     TEST_LOG=${LOGS_PATH}/${TEST_NAME}.log
     TEST_CONFIG=${CONFIGS_PATH}/${TEST_NAME}.config
 
-    echo "TEST_NAME: ${TEST_NAME}"
-    echo "SCRIPT_NAME: ${SCRIPT_NAME}"
-    echo "SCRIPT_TO_EXCUTE: ${SCRIPT_TO_EXECUTE}"
-    echo "TEST_DUMP: ${TEST_DUMP}"
-    echo "TEST_LOG: ${TEST_LOG}"
-    echo "TEST_CONFIG: ${TEST_CONFIG}"
+    echo -e "TEST_NAME: ${YELLOW} ${TEST_NAME} ${NC}"
+    echo -e "SCRIPT_NAME: ${YELLOW} ${SCRIPT_NAME} ${NC}"
+    echo -e "SCRIPT_TO_EXCUTE: ${YELLOW} ${SCRIPT_TO_EXECUTE} ${NC}"
+    echo -e "TEST_DUMP: ${YELLOW} ${TEST_DUMP} ${NC}"
+    echo -e "TEST_LOG: ${YELLOW} ${TEST_LOG} ${NC}"
+    echo -e "TEST_CONFIG: ${YELLOW} ${TEST_CONFIG} ${NC}"
 
     echo "======================================================================" 
 
