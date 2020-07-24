@@ -34,19 +34,16 @@ typedef struct Planificador {
 	TransicionadorDeEstados transicionadorDeEstados;
 	ColasDePlanificacion * colas;
 	ServicioDeMetricas* servicioDeMetricas;
-	// TODO: agregar ref a EstadoPlanificdor.
 	// Interfaz publica
 	void (*agregarUnidadesPlanificables)(struct Planificador * planificador, t_list * unidadesPlanificables); // Usada en el INIT del sistema.
 	void (*agregarUnidadPlanificable)(struct Planificador * planificador, UnidadPlanificable * unidadPlanificable); // Agrega una UP a la lista y le asigna el estado NEW
 
-	// TODO: moverACola(UP, exit);
 	t_list* (*armarListaEntrenadoresDisponibles)(struct Planificador * planificador); // retorna cola NEW y BLOCKED sin espera.
 	UnidadPlanificable* (*obtenerProximoAEjecutar)(struct Planificador * planificador);
 	int (*cantidadDeRafagas)(struct Planificador * planificador, UnidadPlanificable * unidadPlanificable); // Nos sirve para saber cuanta mecha darle. Es dato.
-	// TODO: interfaz para cambiar estados.
-	// planificar(UP) - Manda una UP a EXEC.
-	// finalizar(UP) - Manda la UP a EXIT, si no hay mas UP activas, logre el objetivo global.
-	void (*moverACola)(struct Planificador * this,UnidadPlanificable * uPlanificable,EstadoPlanificador * estado,char* motivoCambio);
+	void (*moverACola)(struct Planificador * this, UnidadPlanificable * uPlanificable, EstadoPlanificador estado, char* motivoCambio);
+	EstadoPlanificador (*obtenerEstadoDeUnidadPlanificable)(struct Planificador* this, UnidadPlanificable* unidadPlanificable);
+	t_list* (*colaSegunEstado)(struct Planificador* this, EstadoPlanificador estado);
 	void (*destruir)(struct Planificador *this, void (*destructorUnidadPlanificable)(UnidadPlanificable *));
 } Planificador;
 
@@ -54,9 +51,6 @@ extern const struct PlanificadorClass {
 	Planificador (*new)(ServicioDeMetricas* servicio);
 } PlanificadorConstructor;
 
-int minimo(int nro1,int nro2);
-bool entrenadorEstaEnLista(UnidadPlanificable * unidadParametro, void* elem);
-t_list* colaEnLaQueSeEncuentraLaUnidadPlanificable(Planificador * planificador, UnidadPlanificable * uPlanif);
-t_list* colaSegunEstado(ColasDePlanificacion colas,EstadoPlanificador estado);
+int minimo(int nro1, int nro2);
 
 #endif //TEAM_PLANIFICADOR_H
