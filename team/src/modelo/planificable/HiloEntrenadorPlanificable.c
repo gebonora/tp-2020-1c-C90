@@ -59,7 +59,7 @@ static void ejecutarLimitado(HiloEntrenadorPlanificable * this, int cantInstrucc
 		sem_wait(&this->semaforoCicloCompletado);
 	}
 	// this->infoUltimaEjecucion.real_raf_ant = cantInstrucciones;
-	this->infoUltimaEjecucion.rafaga_parcial_ejecutada += cantInstrucciones; // TODO: chequear si hace falta algo mas con Gaston.
+	this->infoUltimaEjecucion.rafaga_parcial_ejecutada = tarea->cantidadInstruccionesEjecutadas(tarea); // TODO: chequear si hace falta algo mas con Gaston.
 	if (tarea->estado == FINALIZADA) {
 		log_info(this->logger, "La tarea asignada se completó con exito. Se procede a destruirla.");
 		tarea->destruir(tarea);

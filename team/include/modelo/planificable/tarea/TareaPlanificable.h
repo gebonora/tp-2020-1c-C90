@@ -34,6 +34,7 @@ typedef struct TareaPlanificable {
     void (*notificarEjecucion)(struct TareaPlanificable * this, int numeroInstruccion);
     int (*cantidadInstruccionesRestantes)(struct TareaPlanificable * this);
     void (*abortar)(struct TareaPlanificable * this);
+    int (*cantidadInstruccionesEjecutadas)(struct TareaPlanificable* this);
     void (*destruir)(struct TareaPlanificable * this);
     //Metodos privados
     void (*actualizarEstado)(struct TareaPlanificable * this, int ultimaInstruccionEjecutada);
