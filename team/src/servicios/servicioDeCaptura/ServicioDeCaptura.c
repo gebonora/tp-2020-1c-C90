@@ -54,10 +54,10 @@ static void encargarTrabajoDeCaptura(ServicioDeCaptura * this, char * especie, C
 
 	// TODO: Acá enganchamos con el serv planificacion.
 
-	void* algo = NULL; // TODO: definir esto. Va a ser lo que consume el ServPlanificacion para generar las tareas.
+	TrabajoPlanificador* trabajo= NULL; // TODO: definir esto. Va a ser lo que consume el ServPlanificacion para generar las tareas.
 
 	pthread_mutex_lock(&this->servicioDePlanificacion->mutexColaDeTrabajo);
-	queue_push(this->servicioDePlanificacion->colaDeTrabajo, algo);
+	queue_push(this->servicioDePlanificacion->colaDeTrabajo, trabajo);
 	pthread_mutex_unlock(&this->servicioDePlanificacion->mutexColaDeTrabajo);
 	sem_post(&this->servicioDePlanificacion->semaforoContadorColaDeTrabajo);
 

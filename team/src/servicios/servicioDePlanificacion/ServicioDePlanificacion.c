@@ -82,7 +82,7 @@ t_list* obtenerTrabajo(ServicioDePlanificacion* this, int cantidadAPopear) {
 
 void asignarTareasDeCaptura(ServicioDePlanificacion* this, t_list* tareas, t_list* entrenadoresDisponibles) {
 	for (int a = 0; a < list_size(tareas); a++) {
-		void* algo = list_get(tareas, a);
+		TrabajoPlanificador* trabajo = (TrabajoPlanificador*)list_get(tareas, a);
 		Coordinate coor;
 		HiloEntrenadorPlanificable* hiloElegido = devolverEntrenadorMasCercano(coor, entrenadoresDisponibles);
 		// cargarle la captura al hilo.
