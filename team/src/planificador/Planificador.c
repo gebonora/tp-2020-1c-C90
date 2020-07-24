@@ -32,9 +32,38 @@ UnidadPlanificable* obtenerProximoAEjecutar(Planificador * this) {
 
 int cantidadDeRafagas(Planificador * planificador, UnidadPlanificable * unidadPlanificable){
 	// segun algoritmo calcular numero
-	//planificador->algoritmoPlanificador->tipo;
-	return 0;
+	int cantRafagas;
+
+	switch(planificador->algoritmoPlanificador->tipo){
+	case 0://FIFO
+		cantRafagas = unidadPlanificable->tareaAsignada->totalInstrucciones;
+		break;
+	case 1://RR
+		cantRafagas = minimo(quantum,unidadPlanificable->tareaAsignada->totalInstrucciones);
+		break;
+	case 2://SJF-CD
+		cantRafagas = 1;
+		break;
+	case 3://SJF-SD
+		cantRafagas = unidadPlanificable->tareaAsignada->totalInstrucciones;
+		break;
+	default:
+		cantRafagas = 0;
+		log_error(INTERNAL_LOGGER,"algoritmo planificador invalido");
+	}
+	return cantRafagas;
 }
+
+int minimo(int nro1,int nro2){
+	int min;
+	if(nro1 <= nro2){
+		min = nro1;
+	}else{
+		min = nro2;
+	}
+	return min;
+}
+
 
 void destruirPlanificador(Planificador * this, void (*destructorUnidadPlanificable)(UnidadPlanificable *)) {
     log_destroy(this->logger);

@@ -53,4 +53,6 @@ extern const struct PlanificadorClass {
 	Planificador (*new)(ServicioDeMetricas* servicio);
 } PlanificadorConstructor;
 
+int minimo(int nro1,int nro2);
+
 #endif //TEAM_PLANIFICADOR_H
