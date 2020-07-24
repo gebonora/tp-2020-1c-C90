@@ -20,9 +20,9 @@ int main() {
 
     // Reservado a pruebas de integracion. Si logica de negocio rompe, explota el programa aca.
     if (CORRER_TESTS) {
-        log_info(INTERNAL_LOGGER, "@@@@@@@@@@@@@@@@@@@@@ Realizando pruebas de integracion... @@@@@@@@@@@@@@@@@@@@@");
+        log_info(INTERNAL_LOGGER, "--------------------- Realizando pruebas de integracion... ---------------------");
         testDeIntegracion();
-        log_info(INTERNAL_LOGGER, "@@@@@@@@@@@@@@@@@@@@@ Pruebas de integracion finalizadas con exito @@@@@@@@@@@@@");
+        log_info(INTERNAL_LOGGER, "--------------------- Pruebas de integracion finalizadas con exito -------------");
     }
 
     // Estado inicial del proceso Team

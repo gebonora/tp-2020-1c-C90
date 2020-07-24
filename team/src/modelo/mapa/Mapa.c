@@ -14,7 +14,7 @@ int cantidadPosicionables(Mapa * this) {
     int cantidad = 0;
 
     void sumarPosicionables(char * coordenadaClave, void * casilla_) {
-        Casilla * casilla = (Casilla *) casilla_;
+        Casilla casilla = (Casilla) casilla_;
         cantidad += list_size(casilla);
     }
 

@@ -124,7 +124,7 @@ static bool registrarCapturaFallida(ServicioDeCaptura * this, CapturaPokemon * c
 void destruirServicioDeCaptura(ServicioDeCaptura * this) {
 	log_debug(this->logger, "Se procede a destruir al servicio de captura");
 	log_destroy(this->logger);
-	list_destroy_and_destroy_elements(this->pokemonesAtrapables, destruirPokemonAtrapable);
+	list_destroy_and_destroy_elements(this->pokemonesAtrapables, (void (*)(void *)) destruirPokemonAtrapable);
 	free(this);
 }
 
