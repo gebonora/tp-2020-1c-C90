@@ -26,16 +26,15 @@ double milisegundos(struct timeval tiempo) {
     return (tiempo.tv_sec * 1000) + (tiempo.tv_usec / 1000.0);
 }
 
-char* date_time_to_string(uint64_t date) {
+char* date_time_to_string(time_t date) {
 	// variables to store date and time components
 	int hours, minutes, seconds, day, month, year;
 
 	// localtime converts a time_t value to calendar time and
 	// returns a pointer to a tm structure with its members
-	// filled with the corresponding values
-	time_t d = date / 1000;
+	// filled with the corresponding value
 
-	struct tm *local = localtime(&d);
+	struct tm *local = localtime(&date);
 
 	hours = local->tm_hour;	  	// get hours since midnight (0-23)
 	minutes = local->tm_min;	 	// get minutes passed after the hour (0-59)

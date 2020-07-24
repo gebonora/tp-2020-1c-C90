@@ -154,8 +154,8 @@ static void _show_partition(Partition* partition, int number) {
 	log_info(LOGGER, "Position: %d - %d", partition->position, partition->position + partition->size -1);
 	log_info(LOGGER, "Start: %x (%d) - %x (%d)", partition->start, partition->start, partition->start + partition->size - 1, partition->start + partition->size - 1);
 	log_info(LOGGER, "Buddy: %d", xor_int_and_int(partition->position, partition->size));
-	log_info(LOGGER, "Creation time: %d - %s", partition->creation_time, date_time_to_string((time_t)partition->creation_time));
-	log_info(LOGGER, "Last access: %d - %s", partition->access_time, date_time_to_string((time_t)partition->access_time));
+	log_info(LOGGER, "Creation time: %d", partition->creation_time);
+	log_info(LOGGER, "Last access: %d", partition->access_time);
 	if(!partition->free) {
 		_show_message(partition->message);
 	}
@@ -181,7 +181,7 @@ static Partition* _choose_victim(bool (*comparator)(void*, void*)) {
 	log_debug(LOGGER, "Getting first partition");
 	Partition* victim = list_get(occupied_partitions, 0);
 	list_destroy(occupied_partitions);
-	log_debug(LOGGER, "Victim Start: %x (%d), Position %d, Size: %d, Creation: %s, Access: %s", victim->start, victim->start, victim->position, victim->size, date_time_to_string((time_t)victim->creation_time), date_time_to_string((time_t)victim->access_time));
+	log_debug(LOGGER, "Victim Start: %x (%d), Position %d, Size: %d, Creation: %d, Access: %d", victim->start, victim->start, victim->position, victim->size, victim->creation_time, victim->access_time);
 	log_debug(LOGGER, "Setting victim free to true");;
 	victim->free = true;
 	log_debug(LOGGER, "Free partition attributes");
