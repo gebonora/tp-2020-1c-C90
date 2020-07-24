@@ -1,4 +1,4 @@
-#/!usr/bin/env bash
+#/!usr/bin/env sh
 
 function get_pid() {
     PID=""
@@ -41,15 +41,29 @@ elif [ -z "${PID}" ]; then
     case $1 in
         -v)
             echo -e "${YELLOW}Starting broker in valgrind mode${NC}"
-            valgrind --show-leak-kinds=all --leak-check=full --log-file="broker.log" -v ./../broker.app
+            if [ "-d" == "$1" ]; then
+                valgrind --show-leak-kinds=all --leak-check=full --log-file="../logs/broker.log" -v ./../broker.app &
+            else
+                valgrind --show-leak-kinds=all --leak-check=full --log-file="../logs/broker.log" -v ./../broker.app
+            fi
             ;;
         -h)
             echo -e "${YELLOW}Starting broker in helgrind mode${NC}"
-            valgrind --tool="helgrind" --log-file="broker.log" -v ./../broker.app
+        
+            if [ "-d" == "$1" ]; then
+                valgrind --tool="helgrind" --log-file="../logs/broker.log" -v ./../broker.app &
+            else
+                valgrind --tool="helgrind" --log-file="../logs/broker.log" -v ./../broker.app
+            fi
             ;;
         *)
             echo -e "${YELLOW}Starting broker${NC}"
-            ./../broker.app
+
+            if [ "-d" == "$1" ]; then
+                ./../broker.app &
+            else
+                ./../broker.app
+            fi
             ;;
     esac
 
