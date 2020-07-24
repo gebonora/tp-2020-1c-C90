@@ -1,2 +1,2 @@
-Partición 1: | 0 - 32 | [X] | Size: 32 b | LRU: 19 | COLA: CATCH | ID: 6 |
-Partición 2: | 32 - 64 | [X] | Size: 32 b | LRU: 14 | COLA: NEW | ID: 3 |
+Partición 1: | 0 - 31 | [X] | Size: 32 b | LRU: 19 | COLA: CATCH | ID: 6 |
+Partición 2: | 32 - 63 | [X] | Size: 32 b | LRU: 14 | COLA: NEW | ID: 3 |
