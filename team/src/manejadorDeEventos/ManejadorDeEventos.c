@@ -131,6 +131,7 @@ static void procesarCaughtRecibido(ManejadorDeEventos* this, Caught* unCaught, u
 static void destruir(ManejadorDeEventos * this) {
 	log_destroy(this->logger);
 	list_destroy_and_destroy_elements(this->listaLocalizedAppearedsRecibidos, free);
+	list_destroy(this->listaPokemonsNecesarios);
 	free(this);
 }
 
