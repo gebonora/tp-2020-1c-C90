@@ -207,7 +207,7 @@ void asignarTareasDeCaptura(ServicioDePlanificacion* this, t_list* listaPokemon,
 	log_info(this->logger, "Asignando tareas de captura");
 	bool asigne = false;
 
-	while (list_size(entrenadoresDisponibles) > 0) {
+    for (int i = 0; i < list_size(entrenadoresDisponibles); i++) {
 		EntrenadorConPokemon* ganador = entrenador_optimo(this, listaPokemon, entrenadoresDisponibles);
 
 		if(ganador != NULL) {
@@ -418,6 +418,12 @@ void destruir(ServicioDePlanificacion * this) {
 	this->finDeTrabajo = true;
 	sem_post(&this->semaforoEjecucionHabilitada);
 	sem_wait(&this->semaforoFinDeTrabajo);
+
+    /*this->finDeTrabajo2 = true;
+    sem_post(&this->semaforoEjecucionHabilitada2);
+    sem_wait(&this->semaforoFinDeTrabajo2);
+     */
+
 	log_debug(this->logger, "Se procede a destruir al servicio de planificacion");
 	log_destroy(this->logger);
 	this->planificador.destruir(&this->planificador, destruirUnidadPlanificable);
