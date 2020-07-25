@@ -82,6 +82,7 @@ static bool registrarCapturaExitosa(ServicioDeCaptura * this, CapturaPokemon * c
 		log_info(this->logger, "%s capturó con exito un %s en %s", capturaPokemon->idEntrenador(capturaPokemon), capturaPokemon->pokemonAtrapable->especie, posicion);
 
 		capturaPokemon->entrenador->estaEsperandoAlgo = false;
+		sem_post(&semaforoDeadlock);
 
 		free(posicion);
 	} else {
@@ -110,6 +111,7 @@ static bool registrarCapturaFallida(ServicioDeCaptura * this, CapturaPokemon * c
 		char * posicion = capturaPokemon->posicion(capturaPokemon);
 		log_info(this->logger, "%s eliminó las coordenadas de un %s en %s porque falló su captura.", capturaPokemon->idEntrenador(capturaPokemon),
 				capturaPokemon->pokemonAtrapable->especie, posicion);
+		sem_post(&semaforoDeadlock);
 		free(posicion);
 	} else {
 		log_error(this->logger, "No se puede eliminar un pokemon que no figure en el mapa");
