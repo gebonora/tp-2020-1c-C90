@@ -98,30 +98,47 @@ t_list* obtenerTrabajo(ServicioDePlanificacion* this, int cantidadAPopear) {
 	return listaDeTareas;
 }
 
-void asignarTareasDeCaptura(ServicioDePlanificacion* this, t_list* tareas, t_list* entrenadoresDisponibles) {
-
+void asignarTareasDeCaptura(ServicioDePlanificacion* this, t_list* listaPokemon, t_list* entrenadoresDisponibles) {
 	// buscasr el mas cercano en el mapa -> si objetivo.puedeCapturarse -> si y le resto al objetivo
 	// else sigo iterando.
 	// Mapa me da pokemon de libs. lo sorteo por distancia desde mi entrenador.
 	// itero sobre esta lista con objetivo.puedeCapturarse. hasta encontrar un match.
 
 	// manejador de eventos
+	for (int a = 0; a < list_size(entrenadoresDisponibles); a++) {
+		HiloEntrenadorPlanificable* hiloElegido = (HiloEntrenadorPlanificable*) list_get(entrenadoresDisponibles, a);
+		Coordinate posicionEntrenador = hiloElegido->entrenador->gps->posicionActual(hiloElegido->entrenador->gps).coordenada;
+		bool masCercano(void* elem1, void* elem2) {
+			Pokemon* pokemon1 = (Pokemon*) elem1;
+			Coordinate* aux1 = list_get(pokemon1->coordinates, 0);
+			Coordinate coor1 = convertirACoordenada(aux1);
 
+			Pokemon* pokemon2 = (Pokemon*) elem2;
+			Coordinate* aux2 = list_get(pokemon2->coordinates, 0);
+			Coordinate coor2 = convertirACoordenada(aux2);
 
-	for (int a = 0; a < list_size(tareas); a++) { //TODO: objetivoGlobal puedeCapturarse.
-		TrabajoPlanificador* trabajo = (TrabajoPlanificador*) list_get(tareas, a);
-		HiloEntrenadorPlanificable* hiloElegido = devolverEntrenadorMasCercano(trabajo->coordenadaObjetivo, entrenadoresDisponibles);
-		TareaPlanificable* tarea = generarTareaDeCaptura(hiloElegido->entrenador, trabajo->objetivo, trabajo->coordenadaObjetivo);
-		hiloElegido->asignarTarea(hiloElegido, tarea);
-		hiloElegido->entrenador->estaEsperandoAlgo = true;
-		hiloElegido->infoUltimaEjecucion.seNecesitaNuevaEstimacion = true;
-		hiloElegido->infoUltimaEjecucion.rafaga_real_actual = hiloElegido->tareaAsignada->totalInstrucciones;
-
-		this->planificador.moverACola(&this->planificador, hiloElegido, READY, "Se le asignó una tarea de captura.");
-		free(trabajo->objetivo);
-		free(trabajo);
+			return distanciaEntre(posicionEntrenador, coor1) <= distanciaEntre(posicionEntrenador, coor2);
+		}
+		list_sort(listaPokemon, masCercano);
+		for (int b = 0; b < list_size(listaPokemon); b++) {
+			Pokemon* pokemon = (Pokemon*) list_get(listaPokemon, b);
+			if (0) {	// objetivo.puedeCapturarse.
+				Coordinate* auxPokemonElegido = list_get(pokemon->coordinates, b);
+				Coordinate coordenadaPokemon = convertirACoordenada(auxPokemonElegido);
+				TareaPlanificable* tarea = generarTareaDeCaptura(hiloElegido->entrenador, pokemon->name->value, coordenadaPokemon);
+				hiloElegido->asignarTarea(hiloElegido, tarea);
+				hiloElegido->entrenador->estaEsperandoAlgo = true;
+				hiloElegido->infoUltimaEjecucion.seNecesitaNuevaEstimacion = true;
+				hiloElegido->infoUltimaEjecucion.rafaga_real_actual = hiloElegido->tareaAsignada->totalInstrucciones;
+				//marcarlo como taken en el mapa
+				//restarle 1 al objetivo.
+				this->planificador.moverACola(&this->planificador, hiloElegido, READY, "Se le asignó una tarea de captura.");
+				list_remove_and_destroy_element(listaPokemon, b, (void (*)(void*)) free_pokemon);
+				break;
+			}
+		}
 	}
-	return;
+	list_destroy_and_destroy_elements(listaPokemon, (void (*)(void*)) free_pokemon);
 }
 
 void asignarIntercambios(ServicioDePlanificacion* this, t_list* intercambios) {
