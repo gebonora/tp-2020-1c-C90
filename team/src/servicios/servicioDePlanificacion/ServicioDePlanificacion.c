@@ -239,7 +239,7 @@ void asignarTareasDeCaptura(ServicioDePlanificacion* this, t_list* listaPokemon,
 	}
 	if (!asigne) {
 		log_warning(this->logger, "Quedé clavado esperando");
-		sem_wait(&semaforoPokemone);
+		
 	}
 	list_destroy(listaPokemon);
 
