@@ -78,5 +78,7 @@ void iniciarCaptura(Entrenador * entrenador, char * especie, Coordinate * posici
         servicioDeCapturaProcesoTeam->registrarCapturaExitosa(servicioDeCapturaProcesoTeam, capturaPokemon);
     }
 
+    entrenador->estaEsperandoAlgo = false;
+
     free(posicionInicial);
 }
