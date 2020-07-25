@@ -25,7 +25,7 @@ else
     cd ${DELIBIRD_PATH}/gameboy && ./deploy.sh $1 && rm -f ${DELIBIRD_PATH}/gameboy/deploy/logs/*
     cd ${DELIBIRD_PATH}/broker && make && rm -f ${DELIBIRD_PATH}/broker/logs/*
     cd ${DELIBIRD_PATH}/gamecard && make && rm -f ${DELIBIRD_PATH}/gamecard/logs/*
-    cd ${DELIBIRD_PATH}/team &&  ./deploy.sh && rm -f ${DELIBIRD_PATH}/gameboy/deploy/logs/*
+    cd ${DELIBIRD_PATH}/team && ./deploy.sh $1 && rm -f ${DELIBIRD_PATH}/gameboy/deploy/logs/*
 
     echo -e "${GREEN}Todos los modulos compilados!${NC}"
 fi
