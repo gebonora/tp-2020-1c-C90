@@ -223,6 +223,7 @@ void definirYCambiarEstado(ServicioDePlanificacion* this, UnidadPlanificable* hi
 			pthread_mutex_lock(&mtxBlock);
 			this->planificador.moverACola(&this->planificador, hilo, BLOCK, "Está en espera de un evento.");
 			pthread_mutex_unlock(&mtxBlock);
+			sem_post(&semaforoPokemone);
 			return;
 		}
 		if (!hilo->entrenador->objetivoCompletado(hilo->entrenador) && !hilo->entrenador->puedeAtraparPokemones(hilo->entrenador)) {
