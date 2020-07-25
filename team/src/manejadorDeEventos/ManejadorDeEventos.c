@@ -66,7 +66,6 @@ static void procesarLocalizedRecibido(ManejadorDeEventos* this, Localized* unLoc
 }
 
 static void procesarAppearedRecibido(ManejadorDeEventos* this, Pokemon* unPokemon, uint32_t idMensaje) {
-	// Llega desde Server. TODO: No se llama en ningun lado
 	t_list* ptrLista = this->listaLocalizedAppearedsRecibidos;
 	// Guardamos el nombre del pokemon en la lista de recibidos, para saber de que pokemon tenemos info e ignorar sus localizeds.
 	list_add(ptrLista, string_duplicate(unPokemon->name->value));
@@ -90,7 +89,6 @@ static void procesarAppearedRecibido(ManejadorDeEventos* this, Pokemon* unPokemo
 }
 
 static void procesarCaughtRecibido(ManejadorDeEventos* this, Caught* unCaught, uint32_t idMensaje) {
-	// Llega desde Server. TODO: No se llama en ningun lado.
 	t_list* ptrLista = this->registradorDeEventos->listaCatchEnEspera->lista;
 	CapturaPokemon* capturaPokemon = NULL;
 

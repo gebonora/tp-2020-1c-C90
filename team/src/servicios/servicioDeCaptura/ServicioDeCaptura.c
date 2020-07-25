@@ -12,6 +12,14 @@ bool mismaEspecieMismaPosicion(void * pokemon_) { \
            pokemon->posicionInicial.pos_y == posicion.pos_y; \
 }
 
+static t_list * pokemonesDisponibles(ServicioDeCaptura * this) {
+    bool estaLibre(void * pokemonAtrapable) {
+        return ((PokemonAtrapable *) pokemonAtrapable)->disponible;
+    }
+    t_list * pokemones_disponibles = list_filter(this->pokemonesAtrapables, estaLibre);
+    return pokemones_disponibles;
+}
+
 static PokemonAtrapable * obtenerPokemonAtrapable(ServicioDeCaptura * this, char * especie, Coordinate posicion) {
 	bool mismaEspecieMismaPosicion(void * pokemon_) {
 		PokemonAtrapable * pokemon = (PokemonAtrapable *) pokemon_;
@@ -135,6 +143,7 @@ static ServicioDeCaptura * new(Mapa mapa, ServicioDePlanificacion * servicioDePl
 	servicio->encargarTrabajoDeCaptura = &encargarTrabajoDeCaptura;
 	servicio->altaDePokemon = &altaDePokemon;
 	servicio->obtenerPokemonAtrapable = &obtenerPokemonAtrapable;
+	servicio->pokemonesDisponibles = &pokemonesDisponibles;
 	servicio->destruir = &destruirServicioDeCaptura;
 
 	return servicio;
