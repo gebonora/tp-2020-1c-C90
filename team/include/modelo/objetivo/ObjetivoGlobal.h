@@ -23,7 +23,8 @@ typedef struct ContabilidadEspecie {
 
 typedef struct ObjetivoGlobal {
     t_log *logger;
-    t_dictionary * contabilidadEspecies; // La key es el nombre del pokemon, el value seria CotabilidadEspecie
+    t_dictionary * contabilidadEspeciesInicial; // La key es el nombre del pokemon, el value seria CotabilidadEspecie
+    t_dictionary * contabilidadEspeciesActualizable;
     ClienteBrokerV2 * clienteBroker;
     RegistradorDeEventos * registradorDeEventos;
     //Interfaz publica

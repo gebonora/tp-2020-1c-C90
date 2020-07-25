@@ -10,6 +10,26 @@ bool mismoUUID(void * _posiblePresencia) { \
     return string_equals(posiblePresencia->uuid, uuid); \
 }
 
+t_list * pokemonesDisponibles(Mapa * this) {
+    t_list * pokemones = list_create();
+
+    void agregarPokemones(char * coordenadaClave, void * casilla_) {
+        Casilla casilla = (Casilla) casilla_;
+        for (int i = 0; i < list_size(casilla); i++) {
+            Presencia * presencia = list_get(casilla, i);
+            if (presencia->tipoPosicionable == POKEMON) {
+                Coordinate posicion = convertirClaveACoordenada(coordenadaClave);
+                Pokemon * pokemon = create_pokemon(presencia->descripcion, posicion.pos_x, posicion.pos_y);
+                list_add(pokemones, pokemon);
+            }
+        }
+    }
+
+    dictionary_iterator(this->plano, agregarPokemones);
+
+    return pokemones;
+}
+
 int cantidadPosicionables(Mapa * this) {
     int cantidad = 0;
 
@@ -212,6 +232,7 @@ static Mapa new() {
             &borrarPosicion,
             &obtenerPosicion,
             &dibujarMapa,
+            &pokemonesDisponibles,
             &destruir
     };
 }

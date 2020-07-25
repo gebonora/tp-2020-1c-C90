@@ -53,6 +53,7 @@ typedef struct Mapa {
     bool (*borrarPosicion)(struct Mapa * this, char * uuid);
     Posicion (*obtenerPosicion)(struct Mapa * this, char * uuid); // Si le paso un uuid me dice en que (x,y) se encuentra.
     void (*dibujarMapa)(struct Mapa * this);
+    t_list * (*pokemonesDisponibles)(struct Mapa * this);
     void (*destruir)(struct Mapa * this);
 } Mapa;
 
