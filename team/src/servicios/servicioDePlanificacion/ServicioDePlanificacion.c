@@ -114,14 +114,31 @@ void asignarTareasDeCaptura(ServicioDePlanificacion* this, t_list* listaPokemon,
 	for (int a = 0; a < list_size(entrenadoresDisponibles); a++) {
 		HiloEntrenadorPlanificable* hiloElegido = (HiloEntrenadorPlanificable*) list_get(entrenadoresDisponibles, a);
 		Coordinate posicionEntrenador = hiloElegido->entrenador->gps->posicionActual(hiloElegido->entrenador->gps).coordenada;
+        log_info(this->logger, "Antes de ordenar");
+		for (int i = 0; i < list_size(listaPokemon); i++){
+		    PokemonAtrapable * poke =  list_get(listaPokemon, i);
+		    int distanciaA = distanciaEntre(posicionEntrenador, poke->posicion(poke).coordenada);
+		    log_info(this->logger, "Pokemon: %s, distancia: %d", poke->especie, distanciaA);
+		}
+
 		bool masCercano(void* elem1, void* elem2) {
 			PokemonAtrapable* pokemon1 = (PokemonAtrapable*) elem1;
 			Coordinate coor1 = pokemon1->gps->posicionActual(pokemon1->gps).coordenada;
 			PokemonAtrapable* pokemon2 = (PokemonAtrapable*) elem2;
 			Coordinate coor2 = pokemon2->gps->posicionActual(pokemon2->gps).coordenada;
+			log_debug(this->logger, "La distancia del entrenador %s al %s es de %d, y al %s es de %d",
+			        hiloElegido->entrenador->id, pokemon1->especie, distanciaEntre(posicionEntrenador, coor1),
+			        pokemon2->especie, distanciaEntre(posicionEntrenador, coor2));
 			return distanciaEntre(posicionEntrenador, coor1) <= distanciaEntre(posicionEntrenador, coor2);
 		}
 		list_sort(listaPokemon, masCercano);
+        log_info(this->logger, "Despues de ordenar");
+        for (int i = 0; i < list_size(listaPokemon); i++){
+            PokemonAtrapable * poke =  list_get(listaPokemon, i);
+            int distanciaA = distanciaEntre(posicionEntrenador, poke->posicion(poke).coordenada);
+            log_info(this->logger, "Pokemon: %s, distancia: %d", poke->especie, distanciaA);
+        }
+
 		for (int b = 0; b < list_size(listaPokemon); b++) {
 			PokemonAtrapable* pokemon = (PokemonAtrapable*) list_get(listaPokemon, b);
 			if (this->objetivoGlobal.puedeCapturarse(&this->objetivoGlobal, pokemon->especie)) {	// objetivo.puedeCapturarse.
