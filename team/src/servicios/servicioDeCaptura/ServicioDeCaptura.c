@@ -12,6 +12,15 @@ bool mismaEspecieMismaPosicion(void * pokemon_) { \
            pokemon->posicionInicial.pos_y == posicion.pos_y; \
 }
 
+static t_list * pokemonesDisponibles(ServicioDeCaptura * this) {
+    bool estaLibre(void * pokemonAtrapable_) {
+        PokemonAtrapable * pokemonAtrapable = pokemonAtrapable_;
+        return pokemonAtrapable->esAtrapable(pokemonAtrapable);
+    }
+    t_list * pokemones_disponibles = list_filter(this->pokemonesAtrapables, estaLibre);
+    return pokemones_disponibles;
+}
+
 static PokemonAtrapable * obtenerPokemonAtrapable(ServicioDeCaptura * this, char * especie, Coordinate posicion) {
 	bool mismaEspecieMismaPosicion(void * pokemon_) {
 		PokemonAtrapable * pokemon = (PokemonAtrapable *) pokemon_;
@@ -29,13 +38,8 @@ static PokemonAtrapable * obtenerPokemonAtrapable(ServicioDeCaptura * this, char
 
 static void procesarPokemonCapturable(ServicioDeCaptura * this, char * especie, Coordinate posicion) {
 	this->altaDePokemon(this, especie, posicion);
-	bool sePuedeCapturar = false;
-	if (sePuedeCapturar) {
-		log_debug(this->logger, "Se determinó que es posible la captura de %s", especie);
-		this->encargarTrabajoDeCaptura(this, especie, posicion);
-	} else {
-		log_warning(this->logger, "No hay nadie disponible que pueda capturar a %s", especie);
-	}
+	log_debug(this->logger, "Procesando pokemon : %s.", especie);
+	free(especie);
 }
 
 static PokemonAtrapable * altaDePokemon(ServicioDeCaptura * this, char * especie, Coordinate posicion) {
@@ -45,12 +49,16 @@ static PokemonAtrapable * altaDePokemon(ServicioDeCaptura * this, char * especie
 	log_info(this->logger, "Agregamos un %s en la posición %s", especie, ubicacionPokemonACapturar);
 	list_add(this->pokemonesAtrapables, pokemonAtrapable);
 	free(ubicacionPokemonACapturar);
+	sem_post(&semaforoPokemone);
 	return pokemonAtrapable;
 }
 
 static void encargarTrabajoDeCaptura(ServicioDeCaptura * this, char * especie, Coordinate posicion) {
 	char * ubicacionPokemonACapturar = coordenadaClave(posicion);
 	log_info(this->logger, "Se le encarga al servicio de planificacion que mande a un entrenador a capturar a %s en %s", especie, ubicacionPokemonACapturar);
+
+
+	free(especie);
 	free(ubicacionPokemonACapturar);
 }
 
@@ -66,14 +74,16 @@ static bool registrarCapturaExitosa(ServicioDeCaptura * this, CapturaPokemon * c
 
 	if (sePudoEliminarDelMapa) {
 		entrenador->registrarCaptura(entrenador, capturaPokemon->especie(capturaPokemon));
-		// TODO: Asegurarse de que cuando se genera la tarea se ponga este flag en true. En ServicioDePlanificacion.
-		capturaPokemon->entrenador->estaEsperandoAlgo = false;
 
 		igualdadPokemonAtrapable(capturaPokemon->especie(capturaPokemon), capturaPokemon->pokemonAtrapable->posicionInicial);
 		list_remove_by_condition(this->pokemonesAtrapables, mismaEspecieMismaPosicion);
 		sePudoRegistrar = true;
 		char * posicion = capturaPokemon->posicion(capturaPokemon);
 		log_info(this->logger, "%s capturó con exito un %s en %s", capturaPokemon->idEntrenador(capturaPokemon), capturaPokemon->pokemonAtrapable->especie, posicion);
+
+		capturaPokemon->entrenador->estaEsperandoAlgo = false;
+		sem_post(&semaforoDeadlock);
+
 		free(posicion);
 	} else {
 		log_error(this->logger, "No se puede capturar un pokemon que no figure en el mapa");
@@ -101,6 +111,7 @@ static bool registrarCapturaFallida(ServicioDeCaptura * this, CapturaPokemon * c
 		char * posicion = capturaPokemon->posicion(capturaPokemon);
 		log_info(this->logger, "%s eliminó las coordenadas de un %s en %s porque falló su captura.", capturaPokemon->idEntrenador(capturaPokemon),
 				capturaPokemon->pokemonAtrapable->especie, posicion);
+		sem_post(&semaforoDeadlock);
 		free(posicion);
 	} else {
 		log_error(this->logger, "No se puede eliminar un pokemon que no figure en el mapa");
@@ -114,23 +125,23 @@ static bool registrarCapturaFallida(ServicioDeCaptura * this, CapturaPokemon * c
 void destruirServicioDeCaptura(ServicioDeCaptura * this) {
 	log_debug(this->logger, "Se procede a destruir al servicio de captura");
 	log_destroy(this->logger);
-	list_destroy_and_destroy_elements(this->pokemonesAtrapables, destruirPokemonAtrapable);
+	list_destroy_and_destroy_elements(this->pokemonesAtrapables, (void (*)(void *)) destruirPokemonAtrapable);
 	free(this);
 }
 
-static ServicioDeCaptura * new(Mapa mapa, ServicioDePlanificacion * servicioDePlanificacion) {
+static ServicioDeCaptura * new(Mapa mapa) {
 	ServicioDeCaptura * servicio = malloc(sizeof(ServicioDeCaptura));
 
 	servicio->logger = log_create(TEAM_INTERNAL_LOG_FILE, "ServicioDeCaptura", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_INFO);
 	servicio->mapa = mapa;
 	servicio->pokemonesAtrapables = list_create();
-	servicio->servicioDePlanificacion = servicioDePlanificacion;
 	servicio->registrarCapturaExitosa = &registrarCapturaExitosa;
 	servicio->registrarCapturaFallida = &registrarCapturaFallida;
 	servicio->procesarPokemonCapturable = &procesarPokemonCapturable;
 	servicio->encargarTrabajoDeCaptura = &encargarTrabajoDeCaptura;
 	servicio->altaDePokemon = &altaDePokemon;
 	servicio->obtenerPokemonAtrapable = &obtenerPokemonAtrapable;
+	servicio->pokemonesDisponibles = &pokemonesDisponibles;
 	servicio->destruir = &destruirServicioDeCaptura;
 
 	return servicio;

@@ -4,6 +4,50 @@
 
 #include "modelo/equipo/entrenador/Entrenador.h"
 
+static bool reemplazarPokemonCapturadoPor(Entrenador * this, char * especiePreviamenteCapturada, char * especieNueva) {
+    if (this->tieneEspecieCapturada(this, especiePreviamenteCapturada)) {
+        this->quitarPokemon(this, especiePreviamenteCapturada);
+        this->registrarCaptura(this, especieNueva);
+        return true;
+    } else {
+        log_error(this->logger, "Se solicitó reemplazar un pokemon que no existe en el entrenador");
+        return false;
+    }
+}
+
+static void quitarPokemon(Entrenador * this, char * especie) {
+    if (this->tieneEspecieCapturada(this, especie)) {
+        int * ejemplares = dictionary_get(this->pokemonesCapturados, especie);
+        (*ejemplares)--;
+    }
+}
+
+static bool tieneEspecieCapturada(Entrenador * this, char * especie) {
+    return dictionary_has_key(this->pokemonesCapturados, especie) && *(int *) dictionary_get(this->pokemonesCapturados, especie) > 0;
+}
+
+static bool intercambiarPokemon(Entrenador * this, Entrenador * entrenadorInteresado, char * pokemonAEntregar, char * pokemonARecibir) {
+    log_info(this->logger, "Iniciando el intercambio de un %s propio por un %s ajeno con %s", pokemonAEntregar, pokemonARecibir, entrenadorInteresado->id);
+    bool seCumplenLosRequisitosParaElIntercambio = true;
+
+    if (!this->tieneEspecieCapturada(this, pokemonAEntregar)) {
+        log_error(this->logger, "No se pudo realizar el intercambio porque no se dispone de un %s para entregar", pokemonAEntregar);
+        seCumplenLosRequisitosParaElIntercambio = false;
+    } else if (!entrenadorInteresado->tieneEspecieCapturada(entrenadorInteresado, pokemonARecibir)) {
+        log_error(this->logger, "No se pudo realizar el intercambio porque %s no tiene un %s", entrenadorInteresado->id, pokemonARecibir);
+        seCumplenLosRequisitosParaElIntercambio = false;
+    }
+
+    if (seCumplenLosRequisitosParaElIntercambio) {
+        log_debug(this->logger, "Se procede a eliminar a %s del inventario y agregarlo a %s", pokemonAEntregar, entrenadorInteresado->id);
+        this->reemplazarPokemonCapturadoPor(this, pokemonAEntregar, pokemonARecibir);
+        log_debug(this->logger, "Se procede a eliminar a %s del inventario y agregarlo a %s", pokemonAEntregar, entrenadorInteresado->id);
+        entrenadorInteresado->reemplazarPokemonCapturadoPor(entrenadorInteresado, pokemonARecibir, pokemonAEntregar);
+        log_info(MANDATORY_LOGGER, "Intercambio exitoso. %s le dio un %s a %s y a cambio recibió un %s. ", this->id, pokemonAEntregar, entrenadorInteresado->id, pokemonARecibir);
+    }
+    return seCumplenLosRequisitosParaElIntercambio;
+}
+
 static void registrarCaptura(Entrenador * this, char * especie){
     log_info(this->logger, "Se agrega un %s a los pokemons capturados", especie);
     if (dictionary_has_key(this->pokemonesCapturados, especie)) {
@@ -31,7 +75,7 @@ void mover(Entrenador * this, Coordinate * posicionObjetivo) {
 
         Gps * gps = this->gps;
         gps->irA(gps, convertirACoordenada(posicionObjetivo));
-        log_debug(this->logger,"El entrenador se movió de %s a %s", coordActualImprimible, coordObjetivoImprimible);
+        log_info(MANDATORY_LOGGER,"El entrenador %s se movió de %s a %s", this->id, coordActualImprimible, coordObjetivoImprimible);
         free(coordActualImprimible);
         free(coordObjetivoImprimible);
     } else {
@@ -53,6 +97,7 @@ bool objetivoCompletado(Entrenador * this) {
             cantidadCapturada = *(int *) dictionary_get(this->pokemonesCapturados, pokemon);
         }
         if (cantidadCapturada != cantidadRequerida) {
+            log_debug(this->logger, "No se cumplio el objetivo porque se tiene %d/%d %s", cantidadCapturada, cantidadRequerida, pokemon);
             fueCompletado = false;
         }
         i++;
@@ -110,6 +155,10 @@ static Entrenador *new(char * posicionInicial, char * pokemonesIniciales, char *
     entrenador->posicion = &posicion;
     entrenador->descripcion = &descripcion;
     entrenador->registrarCaptura = &registrarCaptura;
+    entrenador->intercambiarPokemon = &intercambiarPokemon;
+    entrenador->tieneEspecieCapturada = &tieneEspecieCapturada;
+    entrenador->quitarPokemon = &quitarPokemon;
+    entrenador->reemplazarPokemonCapturadoPor = &reemplazarPokemonCapturadoPor;
     entrenador->destruir = &destruir;
 
     log_debug(entrenador->logger, "Se instanció al entrenador con pokemones iniciales: %s, y objetivos: %s", pokemonesIniciales, pokemonesObjetivos);

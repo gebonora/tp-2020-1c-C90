@@ -2,6 +2,7 @@
 // Created by Alan Zhao on 09/07/2020.
 //
 
+#include "modelo/planificable/tarea/captura/TareaDeCaptura.h"
 #include "test/TestDeIntegracion.h"
 
 void testDeTareas() {
@@ -21,7 +22,7 @@ void testDeTareas() {
 
 	ServicioDePlanificacion * servicioDePlanificacion = ServicioDePlanificacionConstructor.new(metricasTest, deadlocksTest);
 	Mapa mapita = MapaConstructor.new();
-	servicioDeCapturaProcesoTeam = ServicioDeCapturaConstructor.new(mapita, servicioDePlanificacion);
+	servicioDeCapturaProcesoTeam = ServicioDeCapturaConstructor.new(mapita);
 	Entrenador * entrenador = EntrenadorConstructor.new("4|1", "A", "B");
 	registrarEnMapaPosicionEntrenador(&mapita, entrenador);
 	Coordinate posicionPokemon = (Coordinate ) { .pos_x = 5, .pos_y = 1 };
@@ -29,6 +30,7 @@ void testDeTareas() {
 
 	assert(list_size(tareaCaptura->instrucciones) == 2);
 	assert(tareaCaptura->totalInstrucciones == 2);
+	assert(tareaCaptura->cantidadInstruccionesEjecutadas(tareaCaptura)==0);
 	assert(tareaCaptura->estado == PENDIENTE_DE_EJECUCION);
 
 	Instruccion * instruccion1 = tareaCaptura->proximaInstruccion(tareaCaptura);
@@ -36,12 +38,14 @@ void testDeTareas() {
 
 	tareaCaptura->notificarEjecucion(tareaCaptura, 0);
 	assert(tareaCaptura->estado == PENDIENTE_DE_EJECUCION);
+	assert(tareaCaptura->cantidadInstruccionesEjecutadas(tareaCaptura)==1);
 
 	Instruccion * instruccion2 = tareaCaptura->proximaInstruccion(tareaCaptura);
 	assert(tareaCaptura->estado == EJECUTANDO);
 
 	tareaCaptura->notificarEjecucion(tareaCaptura, 1);
 	assert(tareaCaptura->estado == FINALIZADA);
+	assert(tareaCaptura->cantidadInstruccionesEjecutadas(tareaCaptura)==2);
 	assert(tareaCaptura->contadorDeInstrucciones + 1 == tareaCaptura->totalInstrucciones);
 
 	assert(tareaCaptura->proximaInstruccion(tareaCaptura) == NULL);

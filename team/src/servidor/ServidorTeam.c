@@ -5,27 +5,6 @@
 #include "servidor/ServidorTeam.h"
 
 void configurarServer() {
-
-	/*	t_config* configServer = config_create(TEAM_CONFIG_FILE);
-
-	 IP_Broker = string_new();
-	 string_append(&IP_Broker, config_get_string_value(configServer, "IP_BROKER"));
-
-	 Puerto_Broker = string_new();
-	 string_append(&Puerto_Broker, config_get_string_value(configServer, "PUERTO_BROKER"));
-
-	 IP_Team_Gameboy = string_new();
-	 string_append(&IP_Team_Gameboy, config_get_string_value(configServer, "IP_TEAM_GAMEBOY"));
-
-	 Puerto_Team_Gameboy = string_new();
-	 string_append(&Puerto_Team_Gameboy, config_get_string_value(configServer, "PUERTO_TEAM_GAMEBOY"));
-
-	 Tiempo_Reconexion = config_get_int_value(configServer, "TIEMPO_RECONEXION");
-
-	 Id_Team = config_get_int_value(configServer, "ID_TEAM");
-
-	 config_destroy(configServer);*/
-
 	IP_Broker = string_new();
 	string_append(&IP_Broker, servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, IP_BROKER));
 

@@ -47,7 +47,7 @@ void testDeEntrenadores() {
 
 	ServicioDePlanificacion* servicioDePlanificacionTest = ServicioDePlanificacionConstructor.new(metricasTest, deadlocksTest);
 	Mapa mapaTest = MapaConstructor.new();
-	ServicioDeCaptura* servicioDeCapturaTest = ServicioDeCapturaConstructor.new(mapaTest, servicioDePlanificacionTest);
+	ServicioDeCaptura* servicioDeCapturaTest = ServicioDeCapturaConstructor.new(mapaTest);
 	RegistradorDeEventos * registrador = RegistradorDeEventosConstructor.new();
 
 	ClienteBrokerV2 * clienteTest = ClienteBrokerV2Constructor.new();
@@ -55,14 +55,12 @@ void testDeEntrenadores() {
 
 	t_list * especiesNecesarias = objetivo.especiesNecesarias(&objetivo);
 
-	ContabilidadEspecie * contabilidadEspecieA = dictionary_get(objetivo.contabilidadEspecies, "A");
-	ContabilidadEspecie * contabilidadEspecieB = dictionary_get(objetivo.contabilidadEspecies, "B");
-	ContabilidadEspecie * contabilidadEspecieC = dictionary_get(objetivo.contabilidadEspecies, "C");
+	ContabilidadEspecie * contabilidadEspecieA = dictionary_get(objetivo.contabilidadEspeciesInicial, "A");
+	ContabilidadEspecie * contabilidadEspecieB = dictionary_get(objetivo.contabilidadEspeciesInicial, "B");
+	ContabilidadEspecie * contabilidadEspecieC = dictionary_get(objetivo.contabilidadEspeciesInicial, "C");
 
-	assert(list_size(especiesNecesarias) == 3);
-	assert(string_equals(list_get(especiesNecesarias, 0), "A"));
-	assert(string_equals(list_get(especiesNecesarias, 1), "B"));
-	assert(string_equals(list_get(especiesNecesarias, 2), "C"));
+	assert(list_size(especiesNecesarias) == 1);
+	assert(string_equals(list_get(especiesNecesarias, 0), "C"));
 	assert(objetivo.puedeCapturarse(&objetivo, "A") == false);
 	assert(objetivo.puedeCapturarse(&objetivo, "B") == false);
 	assert(objetivo.puedeCapturarse(&objetivo, "C") == true);

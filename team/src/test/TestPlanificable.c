@@ -1,7 +1,7 @@
 //
 // Created by Alan Zhao on 09/07/2020.
 //
-
+#include "modelo/planificable/tarea/captura/TareaDeCaptura.h"
 #include "test/TestDeIntegracion.h"
 
 void testDePlanificable() {
@@ -20,7 +20,7 @@ void testDePlanificable() {
 	ServicioDeResolucionDeDeadlocks* deadlocksTest = ServicioDeResolucionDeDeadlocksConstructor.new(metricasTest);
 	ServicioDePlanificacion * servicioDePlanificacion = ServicioDePlanificacionConstructor.new(metricasTest, deadlocksTest);
 	Mapa mapita = MapaConstructor.new();
-	servicioDeCapturaProcesoTeam = ServicioDeCapturaConstructor.new(mapita, servicioDePlanificacion);
+	servicioDeCapturaProcesoTeam = ServicioDeCapturaConstructor.new(mapita);
 
 	log_info(testLogger, "Testeando la ejecucion total de una tarea de captura");
 	Entrenador * entrenador = EntrenadorConstructor.new("1|2", "A", "A|A|A");

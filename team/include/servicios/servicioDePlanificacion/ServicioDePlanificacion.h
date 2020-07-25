@@ -5,13 +5,17 @@
 #ifndef TEAM_SERVICIODEPLANIFICACION_H
 #define TEAM_SERVICIODEPLANIFICACION_H
 
-#include "semaphore.h"
+#include <semaphore.h>
 #include "app/Global.h"
 #include "delibird/utils/hilos/HiloFacil.h"
 #include "modelo/equipo/Equipo.h"
 #include "planificador/Planificador.h"
 #include "servicios/servicioDeResolucionDeDeadlocks/ServicioDeResolucionDeDeadlocks.h"
 #include "servicios/servicioDeMetricas/ServicioDeMetricas.h"
+#include "modelo/planificable/tarea/intercambio/TareaDeIntercambio.h"
+#include "modelo/planificable/tarea/captura/TareaDeCaptura.h"
+#include "modelo/objetivo/ObjetivoGlobal.h"
+#include "servicios/servicioDeCaptura/ServicioDeCaptura.h"
 
 /**
  * Esta clase es conocedora de que implicancias a nivel planificacion tienen los eventos del sistema.
@@ -68,21 +72,36 @@ typedef struct TrabajoPlanificador {
 
 typedef struct ServicioDePlanificacion {
 	t_log * logger;
-	t_queue * colaDeTrabajo; // Posee TrabajoPlanificador TODO: Sincronizarla con los semaforos del notepad++
 	bool finDeTrabajo;
 	sem_t semaforoFinDeTrabajo;
 	sem_t semaforoEjecucionHabilitada;
 	Planificador planificador;
-	pthread_mutex_t mutexColaDeTrabajo;
-	sem_t semaforoContadorColaDeTrabajo;
+	bool finDeTrabajo2;
+	sem_t semaforoEjecucionHabilitada2;
+	sem_t semaforoFinDeTrabajo2;
+
+	bool finDeTrabajo3;
+	sem_t semaforoEjecucionHabilitada3;
+	sem_t semaforoFinDeTrabajo3;
+
+
+	ServicioDeCaptura* servicioDeCaptura;
+	ObjetivoGlobal objetivoGlobal;
 	ServicioDeResolucionDeDeadlocks* servicioDeResolucionDeDeadlocks;
 	ServicioDeMetricas* servicioDeMetricas;
+	HiloEntrenadorPlanificable* ultimoHiloEjecutado;
 	// Interfaz publica
 	void (*trabajar)(struct ServicioDePlanificacion * this);
+	void (*trabajar2)(struct ServicioDePlanificacion * this);
+	void (*trabajar3)(struct ServicioDePlanificacion * this);
 	void (*asignarEquipoAPlanificar)(struct ServicioDePlanificacion * this, Equipo equipo);
+	void (*asignarTareasDeCaptura)(struct ServicioDePlanificacion * this, t_list* listaPokemon, t_list* entrenadoresDisponibles);
+	void (*asignarIntercambios)(struct ServicioDePlanificacion * this, t_list* listaDeBloqueados);
+	void (*definirYCambiarEstado)(struct ServicioDePlanificacion* this, UnidadPlanificable* hilo);
+	bool (*teamFinalizado)(struct ServicioDePlanificacion* this);
+	bool (*evaluarEstadoPosibleDeadlock)(struct ServicioDePlanificacion* this);
 	void (*destruir)(struct ServicioDePlanificacion * this);
-	t_list* (*obtenerTareas)(struct ServicioDePlanificacion* this);
-	void (*asignarTareas)(struct ServicioDePlanificacion * this, t_list* listaDeTrabajo, t_list* entrenadoresDisponibles);
+
 } ServicioDePlanificacion;
 
 extern const struct ServicioDePlanificacionClass {
@@ -93,5 +112,6 @@ ServicioDePlanificacion * servicioDePlanificacionProcesoTeam;
 
 t_list * convertirAUnidadesPlanificables(Equipo equipo);
 void destruirUnidadPlanificable(UnidadPlanificable * unidadPlanificable);
+HiloEntrenadorPlanificable* devolverEntrenadorMasCercano(Coordinate coor, t_list* hilos);
 
 #endif //TEAM_SERVICIODEPLANIFICACION_H

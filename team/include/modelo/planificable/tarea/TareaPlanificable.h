@@ -6,6 +6,9 @@
 #define TEAM_TAREAPLANIFICABLE_H
 
 #include "app/Global.h"
+#include "modelo/equipo/entrenador/Entrenador.h"
+#include "modelo/mapa/movimiento/Movimiento.h"
+#include "modelo/mapa/Mapa.h"
 
 typedef enum EstadoTareaPlanificable {
     PENDIENTE_DE_EJECUCION,
@@ -34,6 +37,7 @@ typedef struct TareaPlanificable {
     void (*notificarEjecucion)(struct TareaPlanificable * this, int numeroInstruccion);
     int (*cantidadInstruccionesRestantes)(struct TareaPlanificable * this);
     void (*abortar)(struct TareaPlanificable * this);
+    int (*cantidadInstruccionesEjecutadas)(struct TareaPlanificable* this);
     void (*destruir)(struct TareaPlanificable * this);
     //Metodos privados
     void (*actualizarEstado)(struct TareaPlanificable * this, int ultimaInstruccionEjecutada);

@@ -30,6 +30,7 @@
 
 typedef struct Planificador {
 	t_log *logger;
+	int quantum;
 	AlgoritmoPlanificador algoritmoPlanificador;
 	TransicionadorDeEstados transicionadorDeEstados;
 	ColasDePlanificacion * colas;
@@ -41,14 +42,17 @@ typedef struct Planificador {
 	t_list* (*armarListaEntrenadoresDisponibles)(struct Planificador * planificador); // retorna cola NEW y BLOCKED sin espera.
 	UnidadPlanificable* (*obtenerProximoAEjecutar)(struct Planificador * planificador);
 	int (*cantidadDeRafagas)(struct Planificador * planificador, UnidadPlanificable * unidadPlanificable); // Nos sirve para saber cuanta mecha darle. Es dato.
-	// TODO: interfaz para cambiar estados.
-	// planificar(UP) - Manda una UP a EXEC.
-	// finalizar(UP) - Manda la UP a EXIT, si no hay mas UP activas, logre el objetivo global.
+	t_list* (*colaSegunEstado)(struct Planificador* this, EstadoPlanificador estado);
+	void (*moverACola)(struct Planificador * this, UnidadPlanificable * uPlanificable, EstadoPlanificador estado, char* motivoCambio);
+	EstadoPlanificador (*obtenerEstadoDeUnidadPlanificable)(struct Planificador* this, UnidadPlanificable* unidadPlanificable);
 	void (*destruir)(struct Planificador *this, void (*destructorUnidadPlanificable)(UnidadPlanificable *));
 } Planificador;
 
 extern const struct PlanificadorClass {
 	Planificador (*new)(ServicioDeMetricas* servicio);
 } PlanificadorConstructor;
+
+int minimo(int nro1, int nro2);
+char* nombreDeLaCola(EstadoPlanificador estado);
 
 #endif //TEAM_PLANIFICADOR_H

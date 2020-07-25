@@ -39,6 +39,10 @@ typedef struct Entrenador {
     Posicion (*posicion)(struct Entrenador * this); // Le pregunta al mapa donde esta, pasandole su uuid.
     char * (*descripcion)(struct Entrenador * this);
     void (*registrarCaptura)(struct Entrenador * this, char * especie);
+    bool (*intercambiarPokemon)(struct Entrenador * this, struct Entrenador * entrenadorInteresado, char * pokemonAEntregar, char * pokemonARecibir);
+    bool (*tieneEspecieCapturada)(struct Entrenador * this, char * especie);
+    void (*quitarPokemon)(struct Entrenador * this, char * especie);
+    bool (*reemplazarPokemonCapturadoPor)(struct Entrenador * this, char * especiePreviamenteCapturada, char * especieNueva);
     void (*destruir)(struct Entrenador * this);
 } Entrenador;
 

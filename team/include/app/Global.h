@@ -15,14 +15,15 @@
 #include <commons/collections/queue.h>
 #include "delibird/protocol.h"
 #include "delibird/interface.h"
+#include <semaphore.h>
 
 // Configuración de ambiente -> Acá definimos las de la entrega -> En el CMake se sobreescriben para desarrollo.
 #ifndef TEAM_DEVELOPMENT_MODE
-#define INTERNAL_LOG_LEVEL LOG_LEVEL_INFO
-#define SHOW_INTERNAL_CONSOLE 1 // 1 para mostrar la consola de uso interno, 0 para el caso contrario.
+#define INTERNAL_LOG_LEVEL LOG_LEVEL_DEBUG
+#define SHOW_INTERNAL_CONSOLE 0 // 1 para mostrar la consola de uso interno, 0 para el caso contrario.
 #define CORRER_TESTS 0
 #define ESPERAR_OBJETIVO_GLOBAL 1
-#define ACTIVAR_RETARDO_CPU 0
+#define ACTIVAR_RETARDO_CPU 1
 #endif //TEAM_DEVELOPMENT_MODE
 
 // Paths a archivos
@@ -48,6 +49,20 @@
 
 // Mutex de los recursos compartidos
 pthread_mutex_t MTX_INTERNAL_LOG;
+
+sem_t semaforoPokemone;
+sem_t semaforoReady;
+sem_t semaforoTrabajar2;
+
+pthread_mutex_t messi;
+sem_t semaforoDeadlock;
+sem_t semaforoCaptura;
+
+pthread_mutex_t mtxNew;
+pthread_mutex_t mtxReady;
+pthread_mutex_t mtxExec;
+pthread_mutex_t mtxExit;
+pthread_mutex_t mtxBlock;
 
 // Variables globales
 t_log * MANDATORY_LOGGER;

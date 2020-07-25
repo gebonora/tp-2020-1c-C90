@@ -17,12 +17,12 @@ void testServicioDeCaptura() {
     ServicioDeMetricas* metricasTest = ServicioDeMetricasConstructor.new();
     ServicioDeResolucionDeDeadlocks* deadlocksTest = ServicioDeResolucionDeDeadlocksConstructor.new(metricasTest);
     ServicioDePlanificacion * servicioPlanificacion = ServicioDePlanificacionConstructor.new(metricasTest, deadlocksTest);
-    ServicioDeCaptura * servicioDeCaptura = ServicioDeCapturaConstructor.new(mapa, servicioPlanificacion);
+    ServicioDeCaptura * servicioDeCaptura = ServicioDeCapturaConstructor.new(mapa);
 
     log_info(testLogger, "Testeando la aparicion de un pokemon");
     Coordinate posicion = {.pos_x = 1, .pos_y = 2};
     log_info(testLogger, "No deberia poder encargarse la captura porque el unico entrenador no tiene espacio");
-    servicioDeCaptura->procesarPokemonCapturable(servicioDeCaptura, "MissigNO", posicion);
+    servicioDeCaptura->procesarPokemonCapturable(servicioDeCaptura, string_duplicate("MissigNO"), posicion);
 
     log_info(testLogger, "Testeando que en el mapa exista 1 entrenador y 1 pokemon");
     assert(mapa.cantidadPosicionables(&mapa) == 2);
@@ -42,6 +42,28 @@ void testServicioDeCaptura() {
 
     assert(posicionPokemon.valida == false);
     //assert(mapa.cantidadPosicionables(&mapa) == 1);
+
+    log_info(testLogger, "Testeando que cuando nos pidan los pokemones disponible, los devolvamos");
+    servicioDeCaptura->destruir(servicioDeCaptura);
+    servicioDeCaptura = ServicioDeCapturaConstructor.new(mapa);
+    Coordinate posicionSaidoc = {.pos_x = 1, .pos_y = 2};
+    Coordinate posicionMiutu = {.pos_x = 2, .pos_y = 2};
+    servicioDeCaptura->procesarPokemonCapturable(servicioDeCaptura, string_duplicate("Saidoc"), posicionSaidoc);
+    servicioDeCaptura->procesarPokemonCapturable(servicioDeCaptura, string_duplicate("Miutu"), posicionMiutu);
+
+    t_list * primeraTandaAntesDeMarcarASaidoc = servicioDeCaptura->pokemonesDisponibles(servicioDeCaptura);
+    assert(list_size(primeraTandaAntesDeMarcarASaidoc) == 2);
+
+    PokemonAtrapable * saidoc = (PokemonAtrapable *) list_get(servicioDeCaptura->pokemonesAtrapables, 0);
+    saidoc->marcarComoObjetivo(saidoc, "EntrenadorPiola");
+
+    t_list * segundaTandaAntesDespuesDeMarcarAMiutu = servicioDeCaptura->pokemonesDisponibles(servicioDeCaptura);
+    assert(list_size(segundaTandaAntesDespuesDeMarcarAMiutu) == 1);
+    PokemonAtrapable * deberiaSerMiutu = (PokemonAtrapable *) list_get(segundaTandaAntesDespuesDeMarcarAMiutu, 0);
+    assert(string_equals(deberiaSerMiutu->especie, "Miutu"));
+
+    list_destroy(primeraTandaAntesDeMarcarASaidoc);
+    list_destroy(segundaTandaAntesDespuesDeMarcarAMiutu);
 
     servicioDeCaptura->destruir(servicioDeCaptura);
     servicioPlanificacion->destruir(servicioPlanificacion);

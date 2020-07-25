@@ -23,15 +23,20 @@ typedef struct ContabilidadEspecie {
 
 typedef struct ObjetivoGlobal {
     t_log *logger;
-    t_dictionary * contabilidadEspecies; // La key es el nombre del pokemon, el value seria CotabilidadEspecie
+    t_dictionary * contabilidadEspeciesInicial; // La key es el nombre del pokemon, el value seria CotabilidadEspecie
+    t_dictionary * contabilidadEspeciesActualizable;
     ClienteBrokerV2 * clienteBroker;
     RegistradorDeEventos * registradorDeEventos;
+    pthread_mutex_t mutexContabilidadActualizable;
     //Interfaz publica
     t_list * (*especiesNecesarias)(struct ObjetivoGlobal * this); //Nos dice los unique de los pokemones necesarios. (ver GET)
     bool (*puedeCapturarse)(struct ObjetivoGlobal * this, char * especiePokemon); // Nos dice si todavia necesitamos el pokemon para cumplir el objetivo. (ver LOCALIZED)
     void (*imprimirObjetivoGlobal)(struct ObjetivoGlobal * this);
     void (*solicitarUbicacionPokemonesNecesitados)(struct ObjetivoGlobal * this);
     void (*destruirObjetivoGlobal)(struct ObjetivoGlobal * this);
+    //t_list* (*especiesPokemonNecesarias)(struct ObjetivoGlobal * this, t_dictionary* diccionarioPokemon);
+    void (*sumarUnCapturado)(struct ObjetivoGlobal * this, char * especie);
+    void (*restarUnCapturado)(struct ObjetivoGlobal * this, char * especie);
 } ObjetivoGlobal;
 
 extern const struct ObjetivoGlobalClass {
