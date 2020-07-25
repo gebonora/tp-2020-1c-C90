@@ -91,24 +91,6 @@ EstadoPlanificador obtenerEstadoDeUnidadPlanificable(Planificador* this, UnidadP
 	return -1;
 }
 
-void moverACola(Planificador * this, UnidadPlanificable * uPlanificable, EstadoPlanificador estado, char* motivoCambio) {
-	t_list* colaDestino, colaOrigen;
-	EstadoPlanificador estadoOrigen = this->obtenerEstadoDeUnidadPlanificable(this, uPlanificable);
-	colaDestino = colaSegunEstado(this, estado);
-	colaOrigen = colaSegunEstado(this, estadoOrigen );
-
-	for (int a = 0; a < list_size(colaOrigen); a++) {
-		UnidadPlanificable* unidadActual = (UnidadPlanificable*) list_get(colaOrigen, a);
-		if (string_equals_ignore_case(unidadActual->entrenador->id, uPlanificable->entrenador->id)) {
-			list_remove(colaOrigen, a);
-			break;
-		}
-	}
-	list_add(colaDestino,uPlanificable);
-
-	log_info(MANDATORY_LOGGER, "Se movio al entrenador con ID %s de la cola: a la cola: %s. Motivo: %s", uPlanificable->entrenador->id, estado, motivoCambio);
-}
-
 t_list* colaSegunEstado(Planificador* this, EstadoPlanificador estado) {
 	switch (estado) {
 	case NEW_:
@@ -131,6 +113,26 @@ t_list* colaSegunEstado(Planificador* this, EstadoPlanificador estado) {
 	return NULL;
 }
 
+void moverACola(Planificador * this, UnidadPlanificable * uPlanificable, EstadoPlanificador estadoDestino, char* motivoCambio) {
+	t_list* colaDestino;
+	t_list* colaOrigen;
+	EstadoPlanificador estadoOrigen = this->obtenerEstadoDeUnidadPlanificable(this, uPlanificable);
+	colaDestino = colaSegunEstado(this, estadoDestino);
+	colaOrigen = colaSegunEstado(this, estadoOrigen);
+
+	for (int a = 0; a < list_size(colaOrigen); a++) {
+		UnidadPlanificable* unidadActual = (UnidadPlanificable*) list_get(colaOrigen, a);
+		if (string_equals_ignore_case(unidadActual->entrenador->id, uPlanificable->entrenador->id)) {
+			list_remove(colaOrigen, a);
+			break;
+		}
+	}
+	list_add(colaDestino,uPlanificable);
+
+	log_info(MANDATORY_LOGGER, "Se movio al entrenador %s de la cola:%s a la cola: %s. Motivo: %s",
+			uPlanificable->entrenador->id,nombreDeLaCola(estadoOrigen),nombreDeLaCola(estadoDestino), motivoCambio);
+}
+
 void destruirPlanificador(Planificador * this, void (*destructorUnidadPlanificable)(UnidadPlanificable *)) {
 	log_destroy(this->logger);
 	this->transicionadorDeEstados.destruir(&this->transicionadorDeEstados);
@@ -149,7 +151,7 @@ static Planificador new(ServicioDeMetricas* servicio) { // TODO: asignar servici
 
 			&armarListaEntrenadoresDisponibles, &obtenerProximoAEjecutar, &cantidadDeRafagas,
 
-			&moverACola, &obtenerEstadoDeUnidadPlanificable, &colaSegunEstado, &destruirPlanificador, };
+			&colaSegunEstado, &moverACola, &obtenerEstadoDeUnidadPlanificable, &destruirPlanificador, };
 
 	return planificador;
 }
@@ -166,3 +168,23 @@ int minimo(int nro1, int nro2) {
 	return min;
 }
 
+char* nombreDeLaCola(EstadoPlanificador estado){
+	switch(estado){
+	case NEW_:
+		return "NEW";
+		break;
+	case READY:
+		return "READY";
+		break;
+	case EXEC:
+		return "EXEC";
+		break;
+	case BLOCK:
+		return "BLOCKED";
+		break;
+	case EXIT:
+		return "EXIT";
+		break;
+	}
+	return "ERROR";
+}
