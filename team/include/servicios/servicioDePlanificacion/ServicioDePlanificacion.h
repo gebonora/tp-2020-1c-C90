@@ -15,6 +15,7 @@
 #include "modelo/planificable/tarea/intercambio/TareaDeIntercambio.h"
 #include "modelo/planificable/tarea/captura/TareaDeCaptura.h"
 #include "modelo/objetivo/ObjetivoGlobal.h"
+#include "servicios/servicioDeCaptura/ServicioDeCaptura.h"
 
 /**
  * Esta clase es conocedora de que implicancias a nivel planificacion tienen los eventos del sistema.
@@ -76,7 +77,7 @@ typedef struct ServicioDePlanificacion {
 	sem_t semaforoEjecucionHabilitada;
 	Planificador planificador;
 	sem_t semaforoContadorColaDeTrabajo;
-	Mapa mapa;
+	ServicioDeCaptura* servicioDeCaptura;
 	ObjetivoGlobal objetivoGlobal;
 	ServicioDeResolucionDeDeadlocks* servicioDeResolucionDeDeadlocks;
 	ServicioDeMetricas* servicioDeMetricas;

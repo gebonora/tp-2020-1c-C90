@@ -112,7 +112,7 @@ void inicializarComponentesDelSistema() {
 	servicioDePlanificacionProcesoTeam = ServicioDePlanificacionConstructor.new(servicioDeMetricasProcesoTeam, servicioDeResolucionDeDeadlocksProcesoTeam);
 
 	log_debug(INTERNAL_LOGGER, "Creando el servicio de captura...");
-	servicioDeCapturaProcesoTeam = ServicioDeCapturaConstructor.new(mapaProcesoTeam, servicioDePlanificacionProcesoTeam);
+	servicioDeCapturaProcesoTeam = ServicioDeCapturaConstructor.new(mapaProcesoTeam);
 
 	log_debug(INTERNAL_LOGGER, "Creando estructuras para eventos...");
 	registradorDeEventosProcesoTeam = RegistradorDeEventosConstructor.new();
@@ -137,6 +137,11 @@ void configurarEstadoInicialProcesoTeam() {
     manejadorDeEventosProcesoTeam->setObjetivoGlobal(manejadorDeEventosProcesoTeam,objetivoGlobalProcesoTeam);
     // TODO: manejadorEventosprocesoTeam.registarpokemonsNecesarios.
     manejadorDeEventosProcesoTeam->registrarpokemonsNecesarios(manejadorDeEventosProcesoTeam);
+
+    servicioDePlanificacionProcesoTeam->servicioDeCaptura = servicioDeCapturaProcesoTeam;
+    servicioDePlanificacionProcesoTeam->objetivoGlobal = objetivoGlobalProcesoTeam;
+
+
 	log_debug(INTERNAL_LOGGER, "Registrando al equipo en el mapa...");
 	void registrarEquipo(Entrenador * entrenador) {
 		registrarEnMapaPosicionEntrenador(&mapaProcesoTeam, entrenador);

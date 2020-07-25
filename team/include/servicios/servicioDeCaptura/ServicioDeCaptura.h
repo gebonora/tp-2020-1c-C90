@@ -6,7 +6,6 @@
 #define TEAM_SERVICIODECAPTURA_H
 
 #include "app/Global.h"
-#include "servicios/servicioDePlanificacion/ServicioDePlanificacion.h"
 #include "modelo/mapa/Mapa.h"
 #include "modelo/equipo/Equipo.h"
 #include "modelo/pokemon/PokemonAtrapable.h"
@@ -18,7 +17,6 @@
 typedef struct ServicioDeCaptura {
     t_log * logger;
     Mapa mapa;
-    ServicioDePlanificacion * servicioDePlanificacion;
     t_list * pokemonesAtrapables;
     //Interfaz publica
     bool (*registrarCapturaExitosa)(struct ServicioDeCaptura * this, CapturaPokemon * capturaPokemon);
@@ -33,7 +31,7 @@ typedef struct ServicioDeCaptura {
 } ServicioDeCaptura;
 
 extern const struct ServicioDeCapturaClass {
-    ServicioDeCaptura * (*new)(Mapa mapa, ServicioDePlanificacion * servicioDePlanificacion);
+    ServicioDeCaptura * (*new)(Mapa mapa);
 } ServicioDeCapturaConstructor;
 
 ServicioDeCaptura * servicioDeCapturaProcesoTeam;
