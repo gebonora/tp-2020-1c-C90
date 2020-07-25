@@ -23,8 +23,12 @@ Partition* save_to_cache_dynamic_partitions(void* data, Message* message){
 
 	log_debug(LOGGER, "Saving message to partition");
 	partition->message = message;
+	uint32_t now = get_time();
+	partition->access_time = now;
+	partition->creation_time = now;
 	log_debug(LOGGER, "Copying bytes to cache");
 	memcpy(partition->start, data, message->data_size);
+	log_info(LOGGER, "Mensaje %d guardado con exito en la particion que comienza en %d",partition->message->message_id, partition->position);
 	log_debug(LOGGER, "memcpy done");
 	sem_post(&MEMORY);
 	free(data);
@@ -69,7 +73,7 @@ static Partition* _zero_frecuency(uint32_t data_size){
 			log_debug(LOGGER, "Free partition not found");
 			log_debug(LOGGER, "Kill status: %s", kill ? "true" : "false");
 			if(kill){
-				log_debug(LOGGER, "Choosing victim");
+				log_info(LOGGER, "Choosing victim");
 				choose_victim();//que tambien la mata
 				log_debug(LOGGER, "Consolidating victim");
 				_consolidate();
@@ -77,7 +81,7 @@ static Partition* _zero_frecuency(uint32_t data_size){
 			} else {
 				kill = true;
 			}
-			log_debug(LOGGER, "Compacting");
+			log_info(LOGGER, "Compacting");
 			_compact();
 		}
 	}
@@ -119,8 +123,14 @@ static void _compact() {
 
 	log_debug(LOGGER, "Getting ocuppied partitions");
 	t_list* occupied = get_occupied_partitions();
+	bool minor_position(Partition* p1, Partition* p2){
+		return p1->position < p2->position;
+	}
+
+	list_sort(occupied, &minor_position);
 	uintptr_t start = memory->cache;
 	uint32_t position = 0;
+	t_list* data_occupied = list_create();
 
 	for(int index = 0; index < occupied->elements_count; index++) {
 		Partition* partition = list_get(occupied, index);
@@ -128,11 +138,23 @@ static void _compact() {
 		log_debug(LOGGER, "Modifying partition (position=%d, start=%x, size=%d", partition->position, partition->start, partition->size);
 
 		log_debug(LOGGER, "New values for start=%x, position=%d", start, position);
+		void* data = malloc(partition->message->data_size);
+		memcpy(data, partition->start, partition->message->data_size);
+		list_add(data_occupied, data);
+
 		partition->start = start;
 		partition->position = position;
 
 		start = SUM(start, partition->size);
 		position = SUM(position, partition->size);
+	}
+
+	for(int a = 0; a < occupied->elements_count; a++){
+		void* d = list_get(data_occupied, a);
+		Partition* part = list_get(occupied, a);
+
+		memcpy(part->start, d, part->message->data_size);
+		free(d);
 	}
 
 	log_debug(LOGGER, "Getting free partitions");
@@ -172,8 +194,9 @@ static void _compact() {
 	add_partition_next_to(last_occupied->start, new_free_partition);
 	list_destroy(occupied);
 	list_destroy(not_occupied);
+	list_destroy(data_occupied);
 
-	log_debug(LOGGER, "Compact done");
+	log_info(LOGGER, "Compact done");
 }
 
 
@@ -213,14 +236,14 @@ static void _consolidate(){
 	}
 
 	if(left_partition != NULL){
-		log_debug(LOGGER, "Starting consolidation");
-		log_debug(LOGGER, "First free partition (position=%d, start=%x, size=%d)", left_partition->position, left_partition->start, left_partition->size);
-		log_debug(LOGGER, "Second free partition (position=%d, start=%x, size=%d)", middle_partition->position, middle_partition->start, middle_partition->size);
+		log_info(LOGGER, "Starting consolidation");
+		log_info(LOGGER, "First free partition (position=%d, start=%x, size=%d)", left_partition->position, left_partition->start, left_partition->size);
+		log_info(LOGGER, "Second free partition (position=%d, start=%x, size=%d)", middle_partition->position, middle_partition->start, middle_partition->size);
 
 		left_partition->size = left_partition->size + middle_partition->size;
 
 		if(right_partition != NULL){
-			log_debug(LOGGER, "Third free partition (position=%d, start=%x, size=%d)", right_partition->position, right_partition->start, right_partition->size);
+			log_info(LOGGER, "Third free partition (position=%d, start=%x, size=%d)", right_partition->position, right_partition->start, right_partition->size);
 
 			left_partition->size = left_partition->size + right_partition->size;
 
@@ -231,7 +254,7 @@ static void _consolidate(){
 		log_debug(LOGGER, "Removing second partition");
 		remove_partition_at(middle_partition->start);
 
-		log_debug(LOGGER, "Consolidated partition (position=%d, start=%x, size=%d)", left_partition->position, left_partition->start, left_partition->size);
+		log_info(LOGGER, "Consolidated partition (position=%d, start=%x, size=%d)", left_partition->position, left_partition->start, left_partition->size);
 	}
 }
 
@@ -260,15 +283,13 @@ static Partition* find_partition_dynamic(uint32_t size_of_data) {
 		int old_size = partition->size;
 
 		log_debug(LOGGER, "Partition new size: %d, old size: %d", new_size, old_size);
+		uint32_t now = get_time();
 
 		if(old_size != new_size){
 			log_debug(LOGGER, "New size is different than old_size. Breaking partition");
 
 			partition->size = new_size;
 			partition->free = false;
-			uint64_t now = get_time();
-			partition->access_time = now;
-			partition->creation_time = now;
 
 			log_debug(LOGGER, "Updated partition (position=%d, start=%x, size=%d)", partition->position, partition->start, partition->size);
 
@@ -282,9 +303,6 @@ static Partition* find_partition_dynamic(uint32_t size_of_data) {
 
 		log_debug(LOGGER, "Updating partition attributes (free, creation_time, access_time)");
 		partition->free = false;
-		uint64_t now = get_time();
-		partition->access_time = now;
-		partition->creation_time = now;
 
 		// tamanio particion encontrada >  tamanioAGuardar -> trunco particion encontrada y genero una nueva con el excedente
 		return partition;

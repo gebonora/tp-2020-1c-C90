@@ -46,7 +46,7 @@ Partition* choose_victim() {
 }
 
 Partition* create_partition(uint32_t position, uintptr_t start, uint32_t size) {
-	uint64_t now = get_time();
+	uint32_t now = get_time();
 	Partition* partition = malloc(sizeof(Partition));
 	partition->creation_time = now;
 	partition->access_time = now;
@@ -181,7 +181,7 @@ static Partition* _choose_victim(bool (*comparator)(void*, void*)) {
 	log_debug(LOGGER, "Getting first partition");
 	Partition* victim = list_get(occupied_partitions, 0);
 	list_destroy(occupied_partitions);
-	log_debug(LOGGER, "Victim Start: %x (%d), Position %d, Size: %d, Creation: %d, Access: %d", victim->start, victim->start, victim->position, victim->size, victim->creation_time, victim->access_time);
+	log_info(LOGGER, "Victim Position %d (%x), Size: %d, Creation: %d, Access: %d", victim->position, victim->start, victim->size, victim->creation_time, victim->access_time);
 	log_debug(LOGGER, "Setting victim free to true");;
 	victim->free = true;
 	log_debug(LOGGER, "Free partition attributes");
