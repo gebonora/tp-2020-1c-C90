@@ -29,14 +29,7 @@ static PokemonAtrapable * obtenerPokemonAtrapable(ServicioDeCaptura * this, char
 
 static void procesarPokemonCapturable(ServicioDeCaptura * this, char * especie, Coordinate posicion) {
 	this->altaDePokemon(this, especie, posicion);
-	bool sePuedeCapturar = false;
-	if (sePuedeCapturar) {
-		log_debug(this->logger, "Se determinó que es posible la captura de %s", especie);
-		this->encargarTrabajoDeCaptura(this, especie, posicion);
-	} else {
-		log_warning(this->logger, "No hay nadie disponible que pueda capturar a %s", especie);
-		free(especie);
-	}
+	free(especie);
 }
 
 static PokemonAtrapable * altaDePokemon(ServicioDeCaptura * this, char * especie, Coordinate posicion) {
