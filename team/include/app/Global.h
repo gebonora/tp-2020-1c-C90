@@ -53,6 +53,8 @@ pthread_mutex_t MTX_INTERNAL_LOG;
 sem_t semaforoPokemone;
 sem_t semaforoReady;
 sem_t semaforoTrabajar2;
+
+pthread_mutex_t messi;
 sem_t semaforoDeadlock;
 
 pthread_mutex_t mtxNew;
