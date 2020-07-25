@@ -64,5 +64,6 @@ ManejadorDeEventos * manejadorDeEventosProcesoTeam;
 
 char* logCoordenadas(t_list* listaCoor);
 char* traducirResult(Result result);
+bool pokemonEstaEnLista(ManejadorDeEventos* this, Pokemon* unPokemon);
 
 #endif //TEAM_MANEJADORDEEVENTOS_H
