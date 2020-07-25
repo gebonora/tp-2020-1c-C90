@@ -112,12 +112,12 @@ void asignarTareasDeCaptura(ServicioDePlanificacion* this, t_list* listaPokemon,
 				//marcarlo como taken en el mapa
 				this->objetivoGlobal.restarUnCapturado(&this->objetivoGlobal, pokemon->especie);
 				this->planificador.moverACola(&this->planificador, hiloElegido, READY, "Se le asignó una tarea de captura.");
-				list_remove_and_destroy_element(listaPokemon, b, (void (*)(void*)) free_pokemon);
+				list_remove(listaPokemon, b);
 				break;
 			}
 		}
 	}
-	list_destroy_and_destroy_elements(listaPokemon, (void (*)(void*)) free_pokemon);
+	list_destroy(listaPokemon);
 }
 
 void asignarIntercambios(ServicioDePlanificacion* this, t_list* intercambios) {
@@ -134,6 +134,7 @@ void asignarIntercambios(ServicioDePlanificacion* this, t_list* intercambios) {
 		intercambio->entrenadorQueSeMueve->infoUltimaEjecucion.rafaga_real_actual = intercambio->entrenadorQueSeMueve->tareaAsignada->totalInstrucciones;
 
 		this->planificador.moverACola(&this->planificador, intercambio->entrenadorQueSeMueve, READY, "Se le asignó una tarea de intercambio.");
+		this->servicioDeMetricas->registrarIntercambio(this->servicioDeMetricas, intercambio->entrenadorQueSeMueve->entrenador->id);
 
 		free(intercambio->pokemonQueObtieneElQueEspera);
 		free(intercambio->pokemonQueObtieneElQueSeMueve);

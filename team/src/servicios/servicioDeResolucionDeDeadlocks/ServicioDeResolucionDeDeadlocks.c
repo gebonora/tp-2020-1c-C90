@@ -125,6 +125,7 @@ void detectarEnDetalleYLogear(ServicioDeResolucionDeDeadlocks* this, ListaDeDepe
 		this->servicioDeMetricas->registrarDeadlockProducido(this->servicioDeMetricas);
 		this->servicioDeMetricas->registrarDeadlockResuelto(this->servicioDeMetricas); // Con nuestro diseño metricas informa al final, entonces los deadlocks se resolvieron.
 	}
+	this->servicioDeMetricas->registrarDeadlocks(this->servicioDeMetricas, deadlocks);
 	list_destroy_and_destroy_elements(aux, destruirListaDeStrings);
 	list_destroy(deadlocks);
 }

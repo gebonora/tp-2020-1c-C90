@@ -65,9 +65,9 @@ static void procesarLocalizedRecibido(ManejadorDeEventos* this, Localized* unLoc
 	destruirMensajeGet(mensajeGet);
 }
 
-bool pokemonEstaEnLista(ManejadorDeEventos* this, Pokemon* unPokemon){
-	for(int a = 0; a < list_size(this->listaPokemonsNecesarios); a++){
-		if(string_equals_ignore_case(unPokemon->name->value,*(char*) list_get(this->listaPokemonsNecesarios,a))){
+bool pokemonEstaEnLista(ManejadorDeEventos* this, Pokemon* unPokemon) {
+	for (int a = 0; a < list_size(this->listaPokemonsNecesarios); a++) {
+		if (string_equals_ignore_case(unPokemon->name->value, (char*) list_get(this->listaPokemonsNecesarios, a))) {
 			return true;
 		}
 	}
@@ -76,23 +76,23 @@ bool pokemonEstaEnLista(ManejadorDeEventos* this, Pokemon* unPokemon){
 
 static void procesarAppearedRecibido(ManejadorDeEventos* this, Pokemon* unPokemon, uint32_t idMensaje) {
 	t_list* ptrLista = this->listaLocalizedAppearedsRecibidos;
-	if(pokemonEstaEnLista(this,unPokemon) == false){
+	if (pokemonEstaEnLista(this, unPokemon) == false) {
 
-	char* auxi;
-	if (idMensaje == UINT32_MAX) {
-		auxi = string_from_format("gameboy");
-	} else {
-		auxi = string_from_format("%d", idMensaje);
-	}
-	char* coord = logCoordenadas(unPokemon->coordinates);
+		char* auxi;
+		if (idMensaje == UINT32_MAX) {
+			auxi = string_from_format("gameboy");
+		} else {
+			auxi = string_from_format("%d", idMensaje);
+		}
+		char* coord = logCoordenadas(unPokemon->coordinates);
 
-	log_info(MANDATORY_LOGGER, "Llegó un APPEARED idMensaje: %s, pokemon: %s%s. Al no ser necesario para el team se procede a destruirlo...",
-			auxi,unPokemon->name->value,coord);
+		log_info(MANDATORY_LOGGER, "Llegó un APPEARED idMensaje: %s, pokemon: %s%s. Al no ser necesario para el team se procede a destruirlo...", auxi,
+				unPokemon->name->value, coord);
 
-	free(auxi);
-	free(coord);
-	free_pokemon(unPokemon);
-	return;
+		free(auxi);
+		free(coord);
+		free_pokemon(unPokemon);
+		return;
 	}
 	// Guardamos el nombre del pokemon en la lista de recibidos, para saber de que pokemon tenemos info e ignorar sus localizeds.
 	list_add(ptrLista, string_duplicate(unPokemon->name->value));
@@ -157,16 +157,16 @@ static void destruir(ManejadorDeEventos * this) {
 	log_destroy(this->logger);
 	list_destroy_and_destroy_elements(this->listaLocalizedAppearedsRecibidos, free);
 	if (this->listaPokemonsNecesarios != NULL) {
-        list_destroy(this->listaPokemonsNecesarios);
-    }
+		list_destroy(this->listaPokemonsNecesarios);
+	}
 	free(this);
 }
 
-static void registrarpokemonsNecesarios(ManejadorDeEventos * this){
+static void registrarpokemonsNecesarios(ManejadorDeEventos * this) {
 	this->listaPokemonsNecesarios = this->objetivoGlobalTeam.especiesNecesarias(&this->objetivoGlobalTeam);
 }
 
-static void setObjetivoGlobal(ManejadorDeEventos* this, ObjetivoGlobal unObjetivo){
+static void setObjetivoGlobal(ManejadorDeEventos* this, ObjetivoGlobal unObjetivo) {
 	this->objetivoGlobalTeam = unObjetivo;
 }
 
@@ -178,7 +178,7 @@ static ManejadorDeEventos* new(ServicioDeCaptura* servicioDeCaptura, Registrador
 	manejador->listaLocalizedAppearedsRecibidos = list_create();
 	manejador->servicioDeCaptura = servicioDeCaptura;
 	manejador->listaPokemonsNecesarios = NULL;
-	manejador->registrarpokemonsNecesarios  = &registrarpokemonsNecesarios;
+	manejador->registrarpokemonsNecesarios = &registrarpokemonsNecesarios;
 	manejador->procesarLocalizedRecibido = &procesarLocalizedRecibido;
 	manejador->procesarAppearedRecibido = &procesarAppearedRecibido;
 	manejador->procesarCaughtRecibido = &procesarCaughtRecibido;
