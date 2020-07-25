@@ -12,8 +12,8 @@
 #include "planificador/Planificador.h"
 #include "servicios/servicioDeResolucionDeDeadlocks/ServicioDeResolucionDeDeadlocks.h"
 #include "servicios/servicioDeMetricas/ServicioDeMetricas.h"
-#include "modelo/planificable/tarea/captura/TareaDeCaptura.h"
-#include "modelo/planificable/tarea/intercambio/TareaDeIntercambio.h"
+//#include "modelo/planificable/tarea/captura/TareaDeCaptura.h"
+//#include "modelo/planificable/tarea/intercambio/TareaDeIntercambio.h"
 
 /**
  * Esta clase es conocedora de que implicancias a nivel planificacion tienen los eventos del sistema.
