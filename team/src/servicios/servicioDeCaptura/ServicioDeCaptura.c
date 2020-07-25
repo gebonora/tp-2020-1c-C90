@@ -58,10 +58,7 @@ static void encargarTrabajoDeCaptura(ServicioDeCaptura * this, char * especie, C
 	trabajo->objetivo = string_duplicate(especie);
 	trabajo->tipo = CAPTURA_POKEMON;
 
-	pthread_mutex_lock(&this->servicioDePlanificacion->mutexColaDeTrabajo);
-	queue_push(this->servicioDePlanificacion->colaDeTrabajo, trabajo);
-	pthread_mutex_unlock(&this->servicioDePlanificacion->mutexColaDeTrabajo);
-	sem_post(&this->servicioDePlanificacion->semaforoContadorColaDeTrabajo);
+	//sem_post(&this->servicioDePlanificacion->semaforoContadorColaDeTrabajo);
 
 	free(especie);
 	free(ubicacionPokemonACapturar);
