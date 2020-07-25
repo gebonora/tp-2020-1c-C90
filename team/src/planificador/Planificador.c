@@ -95,20 +95,14 @@ t_list* colaSegunEstado(Planificador* this, EstadoPlanificador estado) {
 	switch (estado) {
 	case NEW_:
 		return this->colas->colaNew;
-		break;
 	case BLOCK:
 		return this->colas->colaBlocked;
-		break;
 	case READY:
 		return this->colas->colaReady;
-		break;
 	case EXEC:
 		return this->colas->colaExec;
-		;
-		break;
 	case EXIT:
 		return this->colas->colaExit;
-		break;
 	}
 	return NULL;
 }
@@ -169,22 +163,18 @@ int minimo(int nro1, int nro2) {
 }
 
 char* nombreDeLaCola(EstadoPlanificador estado){
+
 	switch(estado){
 	case NEW_:
 		return "NEW";
-		break;
 	case READY:
 		return "READY";
-		break;
 	case EXEC:
 		return "EXEC";
-		break;
 	case BLOCK:
 		return "BLOCKED";
-		break;
 	case EXIT:
 		return "EXIT";
-		break;
 	}
 	return "ERROR";
 }
