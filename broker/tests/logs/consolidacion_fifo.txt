@@ -1,0 +1,5 @@
+Partición 1: | 0 - 21 | [X] | Size: 22 b | LRU: 21 | COLA: CATCH | ID: 7 |
+Partición 2: | 22 - 26 | [L] | Size: 5 b | LRU: 20 |
+Partición 3: | 27 - 46 | [X] | Size: 20 b | LRU: 13 | COLA: CATCH | ID: 4 |
+Partición 4: | 47 - 62 | [X] | Size: 16 b | LRU: 16 | COLA: CATCH | ID: 5 |
+Partición 5: | 63 - 63 | [L] | Size: 1 b | LRU: 15 |

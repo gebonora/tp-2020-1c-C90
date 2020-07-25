@@ -192,3 +192,4 @@ char* get_result_by_value(uint32_t result) {
 			return "ACKNOWLEDGE";
 	}
 }
+

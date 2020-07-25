@@ -26,7 +26,7 @@ Partition* save_to_cache_buddy_system(void* data, Message* message) {
 	// busco una particion libre y sino elimino alguna ocupada y consolido
 	while(partition == NULL) {
 		log_debug(LOGGER, "Free partition not found");
-		log_debug(LOGGER, "Choosing victim");
+		log_info(LOGGER, "Choosing victim");
 		Partition* victim = choose_victim();
 		log_debug(LOGGER, "Consolidating buddy");
 		_consolidate_buddy(victim);
@@ -42,14 +42,16 @@ Partition* save_to_cache_buddy_system(void* data, Message* message) {
 
 	// marco la particion como ocupada, y completo el resto de los atributos
 	partition->message = message;
-	partition->creation_time = get_time();
-	partition->access_time = get_time();
+	uint32_t now = get_time();
+	partition->creation_time = now;
+	partition->access_time = now;
 	partition->free = false;
 
 
 	log_debug(LOGGER, "Partition broken, doing memcpy in start=%x, with data_size=%d", partition->start, message->data_size);
 	// guardo el data con el memcpy
 	memcpy(partition->start, data, message->data_size);
+	log_info(LOGGER, "Mensaje %d guardado con exito en la particion que comienza en %d",partition->message->message_id, partition->position);
 
 	log_debug(LOGGER, "Done memcpy");
 	sem_post(&MEMORY);
@@ -63,13 +65,12 @@ Partition* save_to_cache_buddy_system(void* data, Message* message) {
 static void _consolidate_buddy(Partition* partition) {
 	Partition* buddy = _buddy_of(partition);
 
-	log_debug(LOGGER, "Partition Position: %d, Size: %d, Free: %s", partition->position, partition->size, partition->free ? "true" : "false");
-	log_debug(LOGGER, "Buddy Position: %d, Size: %d, Free: %s", buddy->position, buddy->size, buddy->free ? "true" : "false");
-
 	// si puedo consolidar, arranco, sino no hago nada
 	while(buddy->free && buddy->size == partition->size) {
+		log_info(LOGGER, "Partition Position: %d, Size: %d, Free: %s", partition->position, partition->size, partition->free ? "true" : "false");
+		log_info(LOGGER, "Buddy Position: %d, Size: %d, Free: %s", buddy->position, buddy->size, buddy->free ? "true" : "false");
 
-		log_debug(LOGGER, "Buddy is free and same size...consolidating");
+		log_info(LOGGER, "Buddy is free and same size...consolidating");
 
 		log_debug(LOGGER, "Merging partition with buddy in new partition");
 		// cambio la particion, sumando los tamanios y utilizando los minimos start y position
@@ -89,9 +90,7 @@ static void _consolidate_buddy(Partition* partition) {
 		log_debug(LOGGER, "Buddy Position: %d, Size: %d, Free: %s", buddy->position, buddy->size, buddy->free ? "true" : "false");
 	}
 
-	partition->creation_time = get_time();
-
-	log_debug(LOGGER, "Buddy is not free or same size...done consolidating");
+	log_info(LOGGER, "Buddy is not free or same size...done consolidating");
 }
 
 static Partition* _break_buddys(Partition* partition_to_break, uint32_t data_size) {
