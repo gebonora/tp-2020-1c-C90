@@ -4,15 +4,15 @@
 #include "servicios/servicioDePlanificacion/ServicioDePlanificacion.h"
 
 void trabajar(ServicioDePlanificacion * this) {
+	log_debug(this->logger, "Hilo de planificación creado.");
 	while (!this->finDeTrabajo) {
-
 		sem_wait(&this->semaforoEjecucionHabilitada);
 
 		if (this->finDeTrabajo) {
 			log_debug(this->logger, "Se interrumpió el ciclo de trabajo por fin de trabajo");
 			break;
 		}
-
+		log_debug(this->logger, "Iniciando planificación.");
 		// Cambiar desde acá.
 		// Puede pasar que justo les queda un catch para terminar y les llega -> exit
 		// O hacen pasivamente un intercambio y terminan -> exit
@@ -22,40 +22,59 @@ void trabajar(ServicioDePlanificacion * this) {
 				this->planificador.moverACola(&this->planificador, hilo, EXIT, "Estaba en espera de un evento para finalizar, y llegó.");
 			}
 		}
-
 		if (this->teamFinalizado(this)) {
+			log_debug(this->logger, "Finalizando planificacion");
 			this->finDeTrabajo = true;
+			sem_post(&semaforoObjetivoGlobalCompletado);
+			continue;
 		}
-
 		if (this->evaluarEstadoPosibleDeadlock(this)) {
 			// SI HAY DEADLOCK PLANIFICAMOS INTERCAMBIOS
 			log_debug(this->logger, "Se detectó un estado de posible deadlock.");
 			t_list* listaDeBloqueados = this->planificador.colas->colaBlocked;
 			t_list* listaDeIntercambios = this->servicioDeResolucionDeDeadlocks->procesarDeadlock(this->servicioDeResolucionDeDeadlocks, listaDeBloqueados);
 			this->asignarIntercambios(this, listaDeIntercambios);
-		}
-
-		else {
+		} else {
+			sem_wait(&semaforoPokemone);
+			sem_post(&semaforoPokemone);
 			// SI NO HAY DEADLOCK PLANIFICAMOS CAPTURAS
 			log_debug(this->logger, "Se planificarán capturas.");
 			// Me retorna los de New, y los de blocked que no estan en captura y no estan llenos
 			// Esto de llenos lo metí porque no queremos planificarles capturas, eventualmente todos van a estar llenos y vamos a entrar al IF de deadlock.
-
 			t_list* entrenadoresDisponibles = this->planificador.armarListaEntrenadoresDisponibles(&this->planificador);
 
-			sem_wait(&this->semaforoHayPokemones);
 			t_list* trabajo = this->servicioDeCaptura->pokemonesDisponibles(this->servicioDeCaptura);
-
-			for (int a = 0; list_size(trabajo) - 1; a++) {
-				sem_wait(&this->semaforoHayPokemones);
-			}
 			this->asignarTareasDeCaptura(this, trabajo, entrenadoresDisponibles);
 
 		}
+		sem_post(&this->semaforoEjecucionHabilitada);
+	}
+	sem_post(&this->semaforoFinDeTrabajo);
+}
+
+void trabajar2(ServicioDePlanificacion* this) {
+	puts("DJHFASDOJFNDJGNASDLBVNASDBKSMADLBKFSNBAFSJNBAOP");
+	while (!this->finDeTrabajo2) {
+		puts("ENTRO A LA CACACACAA");
+		log_info(this->logger, "Iniciando planificacion de cola reaady");
+
+		sem_wait(&semaforoTrabajar2);
+
+		puts("PASOAMOS ESTE SEMAFOFOR EDL OJETE");
+
+		if (this->finDeTrabajo2) {
+			log_debug(this->logger, "Se interrumpió el ciclo de trabajo por fin de trabajo");
+			break;
+		}
+
+		sem_wait(&semaforoReady);
+
 		HiloEntrenadorPlanificable* aEjecutar = this->planificador.obtenerProximoAEjecutar(&this->planificador);
 		int ciclosAEjecutar = this->planificador.cantidadDeRafagas(&this->planificador, aEjecutar);
 
-		if (this->ultimoHiloEjecutado->entrenador->id == NULL || string_equals(this->ultimoHiloEjecutado->entrenador->id, aEjecutar->entrenador->id)) {
+		log_info(this->logger, "va a ejecutar %s por %d.", aEjecutar->entrenador->id, ciclosAEjecutar);
+
+		if (this->ultimoHiloEjecutado == NULL || string_equals(this->ultimoHiloEjecutado->entrenador->id, aEjecutar->entrenador->id)) {
 			this->servicioDeMetricas->registrarCambioDeContexto(this->servicioDeMetricas);
 			this->ultimoHiloEjecutado = aEjecutar;
 		}
@@ -68,15 +87,17 @@ void trabajar(ServicioDePlanificacion * this) {
 		}
 
 		this->definirYCambiarEstado(this, aEjecutar); // Lo pasa a Ready si no terminó su tarea, Blocked o Exit si terminó su tarea.
-
-		// Hasta acá.
+		sem_post(&semaforoTrabajar2);
 	}
-	sem_post(&this->semaforoFinDeTrabajo);
+	sem_post(&this->semaforoFinDeTrabajo2);
 }
 
 void asignarEquipoAPlanificar(ServicioDePlanificacion * this, Equipo equipo) {
 	log_debug(this->logger, "Convirtiendo a los entrenadores en unidades planificables...");
 	t_list * unidadesPlanificables = convertirAUnidadesPlanificables(equipo);
+
+	printf("asginar equipo a  planif:%d \n\n", list_size(unidadesPlanificables));
+
 	this->planificador.agregarUnidadesPlanificables(&this->planificador, unidadesPlanificables);
 	log_info(this->logger, "Los entrenadores fueron enviados a la cola de NEW");
 	list_destroy(unidadesPlanificables);
@@ -89,6 +110,8 @@ void asignarTareasDeCaptura(ServicioDePlanificacion* this, t_list* listaPokemon,
 	// itero sobre esta lista con objetivo.puedeCapturarse. hasta encontrar un match.
 
 	// manejador de eventos
+	log_info(this->logger, "Asignando tareas de captura");
+	bool asigne = false;
 	for (int a = 0; a < list_size(entrenadoresDisponibles); a++) {
 		HiloEntrenadorPlanificable* hiloElegido = (HiloEntrenadorPlanificable*) list_get(entrenadoresDisponibles, a);
 		Coordinate posicionEntrenador = hiloElegido->entrenador->gps->posicionActual(hiloElegido->entrenador->gps).coordenada;
@@ -111,11 +134,19 @@ void asignarTareasDeCaptura(ServicioDePlanificacion* this, t_list* listaPokemon,
 				hiloElegido->infoUltimaEjecucion.rafaga_real_actual = hiloElegido->tareaAsignada->totalInstrucciones;
 				pokemon->marcarComoObjetivo(pokemon, hiloElegido->entrenador->id);
 				this->objetivoGlobal.restarUnCapturado(&this->objetivoGlobal, pokemon->especie);
+				pthread_mutex_lock(&mtxReady);
 				this->planificador.moverACola(&this->planificador, hiloElegido, READY, "Se le asignó una tarea de captura.");
+				pthread_mutex_unlock(&mtxReady);
 				list_remove(listaPokemon, b);
+				sem_wait(&semaforoPokemone);
+				sem_post(&semaforoReady);
+				asigne = true;
 				break;
 			}
 		}
+	}
+	if (!asigne){
+		sem_wait(&semaforoPokemone);
 	}
 	list_destroy(listaPokemon);
 }
@@ -133,9 +164,12 @@ void asignarIntercambios(ServicioDePlanificacion* this, t_list* intercambios) {
 		intercambio->entrenadorQueSeMueve->infoUltimaEjecucion.seNecesitaNuevaEstimacion = true;
 		intercambio->entrenadorQueSeMueve->infoUltimaEjecucion.rafaga_real_actual = intercambio->entrenadorQueSeMueve->tareaAsignada->totalInstrucciones;
 
+		pthread_mutex_lock(&mtxReady);
 		this->planificador.moverACola(&this->planificador, intercambio->entrenadorQueSeMueve, READY, "Se le asignó una tarea de intercambio.");
-		this->servicioDeMetricas->registrarIntercambio(this->servicioDeMetricas, intercambio->entrenadorQueSeMueve->entrenador->id);
+		pthread_mutex_unlock(&mtxReady);
 
+		this->servicioDeMetricas->registrarIntercambio(this->servicioDeMetricas, intercambio->entrenadorQueSeMueve->entrenador->id);
+		sem_post(&semaforoReady);
 		free(intercambio->pokemonQueObtieneElQueEspera);
 		free(intercambio->pokemonQueObtieneElQueSeMueve);
 		free(intercambio);
@@ -143,23 +177,37 @@ void asignarIntercambios(ServicioDePlanificacion* this, t_list* intercambios) {
 }
 
 void definirYCambiarEstado(ServicioDePlanificacion* this, UnidadPlanificable* hilo) {
+
+	if(hilo->tareaAsignada == NULL){
+		pthread_mutex_lock(&mtxBlock);
+		this->planificador.moverACola(&this->planificador, hilo, BLOCK, "Está en espera de un intercambio para poder terminar su objetivo personal.");
+		pthread_mutex_unlock(&mtxBlock);
+		return;
+	}
+	if (hilo->entrenador->objetivoCompletado(hilo->entrenador)) {
+		pthread_mutex_lock(&mtxExit);
+		this->planificador.moverACola(&this->planificador, hilo, EXIT, "Completó su objetivo personal.");
+		pthread_mutex_unlock(&mtxExit);
+		return;
+	}
+	if (hilo->entrenador->puedeAtraparPokemones(hilo->entrenador)) {
+		pthread_mutex_lock(&mtxBlock);
+		this->planificador.moverACola(&this->planificador, hilo, BLOCK, "Está en espera del resultado de una captura.");
+		pthread_mutex_unlock(&mtxBlock);
+		return;
+	}
+
 	if (hilo->tareaAsignada->cantidadInstruccionesEjecutadas(hilo->tareaAsignada) < hilo->tareaAsignada->totalInstrucciones) {
+		pthread_mutex_lock(&mtxReady);
 		this->planificador.moverACola(&this->planificador, hilo, READY, "Terminó una ráfaga y aún le quedan ciclos pendientes.");
+		pthread_mutex_unlock(&mtxReady);
+		sem_post(&semaforoReady);
 		return;
 	}
 	if (hilo->tareaAsignada->cantidadInstruccionesEjecutadas(hilo->tareaAsignada) > hilo->tareaAsignada->totalInstrucciones) {
 		log_error(this->logger, "El entrenador '%s' ejecutó más de lo que debía", hilo->entrenador->id);
 		return;
 	}
-	if (hilo->entrenador->objetivoCompletado(hilo->entrenador)) {
-		this->planificador.moverACola(&this->planificador, hilo, EXIT, "Completó su objetivo personal.");
-		return;
-	}
-	if (hilo->entrenador->puedeAtraparPokemones(hilo->entrenador)) {
-		this->planificador.moverACola(&this->planificador, hilo, BLOCK, "Está en espera del resultado de una captura.");
-		return;
-	}
-	this->planificador.moverACola(&this->planificador, hilo, BLOCK, "Está en espera de un intercambio para poder terminar su objetivo personal.");
 }
 
 bool teamFinalizado(ServicioDePlanificacion* this) {
@@ -170,6 +218,7 @@ bool teamFinalizado(ServicioDePlanificacion* this) {
 bool evaluarEstadoPosibleDeadlock(ServicioDePlanificacion* this) {
 // el if loco. Buscamos un entrenador en blocked que no pueda capturar
 
+	printf("EVALUAR ESTADO COLA NEW: %d\n\n", list_size(this->planificador.colas->colaNew));
 // Cola NEW, y EXEC VACIO
 	if (!list_is_empty(this->planificador.colas->colaNew) || !list_is_empty(this->planificador.colas->colaExec)) {
 		return false;
@@ -188,6 +237,7 @@ bool evaluarEstadoPosibleDeadlock(ServicioDePlanificacion* this) {
 	if (!list_all_satisfy(this->planificador.colas->colaReady, entrenadorEnDeadlock)) {
 		return false;
 	}
+
 	return true;
 }
 
@@ -204,25 +254,33 @@ void destruir(ServicioDePlanificacion * this) {
 static ServicioDePlanificacion * new(ServicioDeMetricas* servicioDeMetricas, ServicioDeResolucionDeDeadlocks* servicioDeadlocks) { // TODO arreglar esto para que planificador tenga servicio de metricas
 	ServicioDePlanificacion * servicio = malloc(sizeof(ServicioDePlanificacion));
 
-	servicio->logger = log_create(TEAM_INTERNAL_LOG_FILE, "ServicioDePlanificacion", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_INFO);
+	servicio->logger = log_create(TEAM_INTERNAL_LOG_FILE, "ServicioDePlanificacion", SHOW_INTERNAL_CONSOLE, INTERNAL_LOG_LEVEL);
 	servicio->finDeTrabajo = false;
+	servicio->finDeTrabajo2 = false;
 	sem_init(&servicio->semaforoFinDeTrabajo, 1, 0);
-	sem_init(&servicio->semaforoEjecucionHabilitada, 1, 0);
+	sem_init(&servicio->semaforoFinDeTrabajo2, 1, 0);
+	sem_init(&servicio->semaforoEjecucionHabilitada, 1, 0); // TODO: aca q onda
+	sem_init(&servicio->semaforoEjecucionHabilitada2, 1, 0); // TODO: aca q onda
 	servicio->planificador = PlanificadorConstructor.new(servicioDeMetricas);
-	sem_init(&servicio->semaforoHayPokemones, 0, 0); // Arranca en 0, queremos que el productor meta algo para consumir.
 	servicio->ultimoHiloEjecutado = NULL;
 	servicio->asignarEquipoAPlanificar = &asignarEquipoAPlanificar;
 	servicio->asignarIntercambios = &asignarIntercambios;
 	servicio->servicioDeResolucionDeDeadlocks = servicioDeadlocks;
 	servicio->servicioDeMetricas = servicioDeMetricas;
 	servicio->trabajar = &trabajar;
+	servicio->trabajar2 = &trabajar2;
 	servicio->asignarTareasDeCaptura = &asignarTareasDeCaptura;
 	servicio->definirYCambiarEstado = &definirYCambiarEstado;
 	servicio->teamFinalizado = &teamFinalizado;
 	servicio->evaluarEstadoPosibleDeadlock = &evaluarEstadoPosibleDeadlock;
 	servicio->destruir = &destruir;
 
+	/*pthread_t hilito;
+	 pthread_create(&hilito, NULL, (void *(*)(void*))servicio->trabajar2, servicio);
+	 pthread_detach(hilito);
+	 */
 	crearHilo((void *(*)(void *)) servicio->trabajar, servicio);
+	crearHilo((void *(*)(void *)) servicio->trabajar2, servicio);
 
 	return servicio;
 }

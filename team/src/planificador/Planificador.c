@@ -5,6 +5,8 @@
 #include "planificador/Planificador.h"
 
 void agregarUnidadesPlanificables(Planificador * this, t_list * unidadesPlanificables) {
+	puts("ENTRE");
+	printf("unidDFGFDSGSDFGDSFGades planif:%d \n\n", list_size(unidadesPlanificables));
 	list_add_all(this->colas->colaNew, unidadesPlanificables);
 }
 
@@ -119,10 +121,10 @@ void moverACola(Planificador * this, UnidadPlanificable * uPlanificable, EstadoP
 			break;
 		}
 	}
-	list_add(colaDestino,uPlanificable);
+	list_add(colaDestino, uPlanificable);
 
-	log_info(MANDATORY_LOGGER, "Se movio al entrenador %s de la cola:%s a la cola: %s. Motivo: %s",
-			uPlanificable->entrenador->id,nombreDeLaCola(estadoOrigen),nombreDeLaCola(estadoDestino), motivoCambio);
+	log_info(MANDATORY_LOGGER, "Se movio al entrenador %s de la cola:%s a la cola: %s. Motivo: %s", uPlanificable->entrenador->id, nombreDeLaCola(estadoOrigen),
+			nombreDeLaCola(estadoDestino), motivoCambio);
 }
 
 void destruirPlanificador(Planificador * this, void (*destructorUnidadPlanificable)(UnidadPlanificable *)) {
@@ -137,10 +139,9 @@ static Planificador new(ServicioDeMetricas* servicio) { // TODO: asignar servici
 	char * nombreAlgoritmo = servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, ALGORITMO_PLANIFICACION);
 	log_info(logger, "El planificador se inicializará con el algoritmo %s", nombreAlgoritmoCompleto(nombreAlgoritmo));
 
-
-	Planificador planificador = { .logger = logger,.quantum = servicioDeConfiguracion.obtenerEntero(&servicioDeConfiguracion, QUANTUM),.algoritmoPlanificador = obtenerAlgoritmo(nombreAlgoritmo),
-			.transicionadorDeEstados = TransicionadorDeEstadosConstructor.new(), .colas = crearColasDePlanificacion(), .servicioDeMetricas = servicio, &agregarUnidadesPlanificables,
-			&agregarUnidadPlanificable,
+	Planificador planificador = { .logger = logger, .quantum = servicioDeConfiguracion.obtenerEntero(&servicioDeConfiguracion, QUANTUM), .algoritmoPlanificador =
+			obtenerAlgoritmo(nombreAlgoritmo), .transicionadorDeEstados = TransicionadorDeEstadosConstructor.new(), .colas = crearColasDePlanificacion(),
+			.servicioDeMetricas = servicio, &agregarUnidadesPlanificables, &agregarUnidadPlanificable,
 
 			&armarListaEntrenadoresDisponibles, &obtenerProximoAEjecutar, &cantidadDeRafagas,
 
@@ -161,9 +162,9 @@ int minimo(int nro1, int nro2) {
 	return min;
 }
 
-char* nombreDeLaCola(EstadoPlanificador estado){
+char* nombreDeLaCola(EstadoPlanificador estado) {
 
-	switch(estado){
+	switch (estado) {
 	case NEW_:
 		return "NEW";
 	case READY:

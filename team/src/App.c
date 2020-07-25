@@ -73,6 +73,14 @@ void warmUp() {
 	if (!ACTIVAR_RETARDO_CPU) {
 		log_warning(INTERNAL_LOGGER, "Retardo de CPU: DESACTIVADO");
 	}
+	sem_init(&semaforoPokemone, 0, 0);
+	sem_init(&semaforoReady, 0, 0);
+	sem_init(&semaforoTrabajar2, 0, 0);
+	pthread_mutex_init(&mtxBlock,NULL);
+	pthread_mutex_init(&mtxExec,NULL);
+	pthread_mutex_init(&mtxExit,NULL);
+	pthread_mutex_init(&mtxReady,NULL);
+	pthread_mutex_init(&mtxNew,NULL);
 }
 
 void mostrarTitulo(t_log * logger) {
@@ -130,16 +138,16 @@ void inicializarComponentesDelSistema() {
  * Finalmente, con el cliente broker a mano: Por cada pokemon del objetivo global, enviar un GET \[POKEMON\] - OK
  */
 void configurarEstadoInicialProcesoTeam() {
+	printf("entre a configurar\n");
 	log_debug(INTERNAL_LOGGER, "Instanciando entrenadores y armando el equipo...");
 	equipoProcesoTeam = crearEquipoPorConfiguracion();
 	log_debug(INTERNAL_LOGGER, "Calculando el objetivo global...");
-    objetivoGlobalProcesoTeam = ObjetivoGlobalConstructor.new(equipoProcesoTeam, clienteBrokerV2ProcesoTeam, registradorDeEventosProcesoTeam);
-    manejadorDeEventosProcesoTeam->setObjetivoGlobal(manejadorDeEventosProcesoTeam,objetivoGlobalProcesoTeam);
-    manejadorDeEventosProcesoTeam->registrarpokemonsNecesarios(manejadorDeEventosProcesoTeam);
+	objetivoGlobalProcesoTeam = ObjetivoGlobalConstructor.new(equipoProcesoTeam, clienteBrokerV2ProcesoTeam, registradorDeEventosProcesoTeam);
+	manejadorDeEventosProcesoTeam->setObjetivoGlobal(manejadorDeEventosProcesoTeam, objetivoGlobalProcesoTeam);
+	manejadorDeEventosProcesoTeam->registrarpokemonsNecesarios(manejadorDeEventosProcesoTeam);
 
-    servicioDePlanificacionProcesoTeam->servicioDeCaptura = servicioDeCapturaProcesoTeam;
-    servicioDePlanificacionProcesoTeam->objetivoGlobal = objetivoGlobalProcesoTeam;
-
+	servicioDePlanificacionProcesoTeam->servicioDeCaptura = servicioDeCapturaProcesoTeam;
+	servicioDePlanificacionProcesoTeam->objetivoGlobal = objetivoGlobalProcesoTeam;
 
 	log_debug(INTERNAL_LOGGER, "Registrando al equipo en el mapa...");
 	void registrarEquipo(Entrenador * entrenador) {
@@ -148,6 +156,8 @@ void configurarEstadoInicialProcesoTeam() {
 	list_iterate(equipoProcesoTeam, (void (*)(void *)) registrarEquipo);
 	log_debug(INTERNAL_LOGGER, "Agregando equipo a la planificacion...");
 	servicioDePlanificacionProcesoTeam->asignarEquipoAPlanificar(servicioDePlanificacionProcesoTeam, equipoProcesoTeam);
+	sem_post(&servicioDePlanificacionProcesoTeam->semaforoEjecucionHabilitada);
+	sem_post(&semaforoTrabajar2);
 }
 
 void liberarRecursos() {

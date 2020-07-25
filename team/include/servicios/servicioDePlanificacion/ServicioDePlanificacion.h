@@ -76,7 +76,11 @@ typedef struct ServicioDePlanificacion {
 	sem_t semaforoFinDeTrabajo;
 	sem_t semaforoEjecucionHabilitada;
 	Planificador planificador;
-	sem_t semaforoHayPokemones;
+	bool finDeTrabajo2;
+	sem_t semaforoEjecucionHabilitada2;
+	sem_t semaforoFinDeTrabajo2;
+
+
 	ServicioDeCaptura* servicioDeCaptura;
 	ObjetivoGlobal objetivoGlobal;
 	ServicioDeResolucionDeDeadlocks* servicioDeResolucionDeDeadlocks;
@@ -84,6 +88,7 @@ typedef struct ServicioDePlanificacion {
 	HiloEntrenadorPlanificable* ultimoHiloEjecutado;
 	// Interfaz publica
 	void (*trabajar)(struct ServicioDePlanificacion * this);
+	void (*trabajar2)(struct ServicioDePlanificacion * this);
 	void (*asignarEquipoAPlanificar)(struct ServicioDePlanificacion * this, Equipo equipo);
 	void (*asignarTareasDeCaptura)(struct ServicioDePlanificacion * this, t_list* listaPokemon, t_list* entrenadoresDisponibles);
 	void (*asignarIntercambios)(struct ServicioDePlanificacion * this, t_list* listaDeBloqueados);

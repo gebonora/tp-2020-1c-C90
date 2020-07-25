@@ -49,6 +49,7 @@ static PokemonAtrapable * altaDePokemon(ServicioDeCaptura * this, char * especie
 	log_info(this->logger, "Agregamos un %s en la posición %s", especie, ubicacionPokemonACapturar);
 	list_add(this->pokemonesAtrapables, pokemonAtrapable);
 	free(ubicacionPokemonACapturar);
+	sem_post(&semaforoPokemone);
 	return pokemonAtrapable;
 }
 
