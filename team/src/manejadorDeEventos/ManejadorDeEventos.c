@@ -65,12 +65,39 @@ static void procesarLocalizedRecibido(ManejadorDeEventos* this, Localized* unLoc
 	destruirMensajeGet(mensajeGet);
 }
 
+bool pokemonEstaEnLista(ManejadorDeEventos* this, Pokemon* unPokemon){
+	for(int a = 0; a < list_size(this->listaPokemonsNecesarios); a++){
+		if(string_equals_ignore_case(unPokemon->name->value,*(char*) list_get(this->listaPokemonsNecesarios,a))){
+			return true;
+		}
+	}
+	return false;
+}
+
 static void procesarAppearedRecibido(ManejadorDeEventos* this, Pokemon* unPokemon, uint32_t idMensaje) {
 	// Llega desde Server. TODO: No se llama en ningun lado
 	t_list* ptrLista = this->listaLocalizedAppearedsRecibidos;
+	if(pokemonEstaEnLista(this,unPokemon) == false){
+
+	char* auxi;
+	if (idMensaje == UINT32_MAX) {
+		auxi = string_from_format("gameboy");
+	} else {
+		auxi = string_from_format("%d", idMensaje);
+	}
+	char* coord = logCoordenadas(unPokemon->coordinates);
+
+	log_info(MANDATORY_LOGGER, "Llegó un APPEARED idMensaje: %s, pokemon: %s%s. Al no ser necesario para el team se procede a destruirlo...",
+			auxi,unPokemon->name->value,coord);
+
+	free(auxi);
+	free(coord);
+	free_pokemon(unPokemon);
+	return;
+	}
 	// Guardamos el nombre del pokemon en la lista de recibidos, para saber de que pokemon tenemos info e ignorar sus localizeds.
 	list_add(ptrLista, string_duplicate(unPokemon->name->value));
-
+	//filtrar si el nombre del pokemon esta en la lista creada
 	char* aux;
 	if (idMensaje == UINT32_MAX) {
 		aux = string_from_format("gameboy");
