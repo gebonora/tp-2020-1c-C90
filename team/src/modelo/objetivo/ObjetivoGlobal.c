@@ -4,8 +4,28 @@
 
 #include "modelo/objetivo/ObjetivoGlobal.h"
 
+void restarUnCapturado(ObjetivoGlobal * this, char * especie) {
+    if (dictionary_has_key(this->contabilidadEspeciesActualizable, especie)) {
+        pthread_mutex_lock(&this->mutexContabilidadActualizable);
+        int * capturados = dictionary_get(this->contabilidadEspeciesActualizable, especie);
+        (*capturados)--;
+        pthread_mutex_unlock(&this->mutexContabilidadActualizable);
+    }
+}
+
+void sumarUnCapturado(ObjetivoGlobal * this, char * especie) {
+    if (dictionary_has_key(this->contabilidadEspeciesActualizable, especie)) {
+        pthread_mutex_lock(&this->mutexContabilidadActualizable);
+        int * capturados = dictionary_get(this->contabilidadEspeciesActualizable, especie);
+        (*capturados)++;
+        pthread_mutex_unlock(&this->mutexContabilidadActualizable);
+    }
+}
+
 t_list * especiesNecesarias(ObjetivoGlobal * this) {
+    pthread_mutex_lock(&this->mutexContabilidadActualizable);
     t_list * especies = (t_list *) dictionary_keys(this->contabilidadEspeciesActualizable);
+    pthread_mutex_unlock(&this->mutexContabilidadActualizable);
     bool esCapturable(void * nombrePokemon) {
         return this->puedeCapturarse(this, (char *) nombrePokemon);
     }
@@ -16,8 +36,10 @@ t_list * especiesNecesarias(ObjetivoGlobal * this) {
 
 bool puedeCapturarse(ObjetivoGlobal * this, char * especiePokemon) { // TODO actualizar para contablidadModificable.
     if (dictionary_has_key(this->contabilidadEspeciesActualizable, especiePokemon)) {
+        pthread_mutex_lock(&this->mutexContabilidadActualizable);
         ContabilidadEspecie * contabilidadEspecie = dictionary_get(this->contabilidadEspeciesActualizable, especiePokemon);
         bool sePuede = contabilidadEspecie->necesarios > contabilidadEspecie->capturados;
+        pthread_mutex_unlock(&this->mutexContabilidadActualizable);
         if (!sePuede) {
             log_debug(this->logger, "No se puede capturar a %s porque tenemos %d/%d", especiePokemon, contabilidadEspecie->capturados, contabilidadEspecie->necesarios);
         }
@@ -61,20 +83,28 @@ void destruirObjetivoGlobal(ObjetivoGlobal * this) {
     log_destroy(this->logger);
     dictionary_destroy_and_destroy_elements(this->contabilidadEspeciesInicial, free);
     dictionary_destroy_and_destroy_elements(this->contabilidadEspeciesActualizable, free);
+    pthread_mutex_destroy(&this->mutexContabilidadActualizable);
 }
 
 static ObjetivoGlobal new(Equipo unEquipo, ClienteBrokerV2 * clienteBroker, RegistradorDeEventos * registradorDeEventos) {
+    pthread_mutex_t mutexContabilidadActualizable;
+    pthread_mutex_init(&mutexContabilidadActualizable, NULL);
+
     ObjetivoGlobal objetivo = {
             .logger = log_create(TEAM_INTERNAL_LOG_FILE, "ObjetivoGlobal", SHOW_INTERNAL_CONSOLE, INTERNAL_LOG_LEVEL),
             .contabilidadEspeciesInicial = calcularObjetivoEspecies(unEquipo),
             .contabilidadEspeciesActualizable = calcularObjetivoEspecies(unEquipo),
 			.clienteBroker = clienteBroker,
 			.registradorDeEventos = registradorDeEventos,
+			.mutexContabilidadActualizable = mutexContabilidadActualizable,
             &especiesNecesarias,
             &puedeCapturarse,
             &imprimirObjetivoGlobal,
             &solicitarPokemones,
-            &destruirObjetivoGlobal
+            &destruirObjetivoGlobal,
+            //&especiesPokemonNecesarias,
+            &sumarUnCapturado,
+            &restarUnCapturado,
     };
     objetivo.imprimirObjetivoGlobal(&objetivo);
     return objetivo;
@@ -82,6 +112,7 @@ static ObjetivoGlobal new(Equipo unEquipo, ClienteBrokerV2 * clienteBroker, Regi
 
 const struct ObjetivoGlobalClass ObjetivoGlobalConstructor = {.new=&new};
 
+//Deprecado
 t_list* especiesPokemonNecesarias(ObjetivoGlobal * this,t_dictionary* diccionarioPokemon){
 	t_list* especiesPokemon;
 
