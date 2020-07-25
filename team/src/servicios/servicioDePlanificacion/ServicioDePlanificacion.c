@@ -38,13 +38,6 @@ void trabajar2(ServicioDePlanificacion* this) {
 	while (!this->finDeTrabajo2) {
 		log_info(this->logger, "Iniciando planificacion de cola reaady");
 
-		if (this->teamFinalizado(this)) {
-			log_debug(this->logger, "Finalizando planificacion");
-			this->finDeTrabajo = true;
-			sem_post(&semaforoObjetivoGlobalCompletado);
-			continue;
-		}
-
 		log_info(this->logger, "Clavado antes del foro trabajar2");
 		sem_wait(&semaforoTrabajar2);
 
@@ -86,6 +79,13 @@ void trabajar3(ServicioDePlanificacion* this) {
 		sem_wait(&semaforoDeadlock);
 
 		puts("entre a aca");
+
+		if (this->teamFinalizado(this)) {
+			log_debug(this->logger, "Finalizando planificacion");
+			this->finDeTrabajo = true;
+			sem_post(&semaforoObjetivoGlobalCompletado);
+			continue;
+		}
 
 		if (this->finDeTrabajo3) {
 			log_debug(this->logger, "Se interrumpió el ciclo de trabajo por fin de trabajo");
@@ -135,12 +135,20 @@ void asignarTareasDeCaptura(ServicioDePlanificacion* this, t_list* listaPokemon,
 	for (int a = 0; a < list_size(entrenadoresDisponibles); a++) {
 		HiloEntrenadorPlanificable* hiloElegido = (HiloEntrenadorPlanificable*) list_get(entrenadoresDisponibles, a);
 		Coordinate posicionEntrenador = hiloElegido->entrenador->gps->posicionActual(hiloElegido->entrenador->gps).coordenada;
+		log_info(this->logger, "Antes de ordenar");
+		for (int i = 0; i < list_size(listaPokemon); i++) {
+			PokemonAtrapable * poke = list_get(listaPokemon, i);
+			int distanciaA = distanciaEntre(posicionEntrenador, poke->posicion(poke).coordenada);
+			log_info(this->logger, "Pokemon: %s, distancia: %d", poke->especie, distanciaA);
+		}
+
 		bool masCercano(void* elem1, void* elem2) {
 			PokemonAtrapable* pokemon1 = (PokemonAtrapable*) elem1;
-			Coordinate coor1 = pokemon1->gps->posicionActual(pokemon1->gps).coordenada;
+			Coordinate coor1 = pokemon1->posicion(pokemon1).coordenada;
 
 			PokemonAtrapable* pokemon2 = (PokemonAtrapable*) elem2;
-			Coordinate coor2 = pokemon2->gps->posicionActual(pokemon2->gps).coordenada;
+			Coordinate coor2 = pokemon2->posicion(pokemon2).coordenada;
+
 			int a = distanciaEntre(posicionEntrenador, coor1);
 			int b = distanciaEntre(posicionEntrenador, coor2);
 
@@ -148,6 +156,13 @@ void asignarTareasDeCaptura(ServicioDePlanificacion* this, t_list* listaPokemon,
 			return a < b;
 		}
 		list_sort(listaPokemon, &masCercano);
+		log_info(this->logger, "Despues de ordenar");
+		for (int i = 0; i < list_size(listaPokemon); i++) {
+			PokemonAtrapable * poke = list_get(listaPokemon, i);
+			int distanciaA = distanciaEntre(posicionEntrenador, poke->posicion(poke).coordenada);
+			log_info(this->logger, "Pokemon: %s, distancia: %d", poke->especie, distanciaA);
+		}
+
 		for (int b = 0; b < list_size(listaPokemon); b++) {
 			PokemonAtrapable* pokemon = (PokemonAtrapable*) list_get(listaPokemon, b);
 			if (this->objetivoGlobal.puedeCapturarse(&this->objetivoGlobal, pokemon->especie)) {	// objetivo.puedeCapturarse.
@@ -182,7 +197,7 @@ void asignarIntercambios(ServicioDePlanificacion* this, t_list* intercambios) {
 		Intercambio* intercambio = (Intercambio*) list_get(intercambios, a);
 
 		TareaPlanificable* tarea = generarTareaDeIntercambio(intercambio->entrenadorQueSeMueve->entrenador, intercambio->entrenadorQueEspera->entrenador,
-				intercambio->pokemonQueObtieneElQueSeMueve, intercambio->pokemonQueObtieneElQueEspera);
+				intercambio->pokemonQueObtieneElQueEspera, intercambio->pokemonQueObtieneElQueSeMueve);
 		intercambio->entrenadorQueSeMueve->asignarTarea(intercambio->entrenadorQueSeMueve, tarea);
 		intercambio->entrenadorQueSeMueve->entrenador->estaEsperandoAlgo = true;
 		intercambio->entrenadorQueEspera->entrenador->estaEsperandoAlgo = true;
