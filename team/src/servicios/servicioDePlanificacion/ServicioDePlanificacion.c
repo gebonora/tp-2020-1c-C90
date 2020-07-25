@@ -227,7 +227,7 @@ void asignarTareasDeCaptura(ServicioDePlanificacion* this, t_list* listaPokemon,
 			sem_wait(&semaforoPokemone);
 			sem_post(&semaforoReady);
 			asigne = true;
-			log_info(this->logger, "Gol de Messi");
+			//log_info(this->logger, "Gol de Messi");
 
 			bool entrenador_by_id(HiloEntrenadorPlanificable* entrenador_actual) {
 				return string_equals_ignore_case(entrenador_actual->entrenador->id, hiloElegido->entrenador->id);
@@ -238,8 +238,8 @@ void asignarTareasDeCaptura(ServicioDePlanificacion* this, t_list* listaPokemon,
 		free(ganador);
 	}
 	if (!asigne) {
-		log_warning(this->logger, "Quedé clavado esperando");
-		sem_wait(&semaforoPokemone);
+		//log_warning(this->logger, "Quedé clavado esperando");
+		//sem_wait(&semaforoPokemone);
 	}
 	list_destroy(listaPokemon);
 
