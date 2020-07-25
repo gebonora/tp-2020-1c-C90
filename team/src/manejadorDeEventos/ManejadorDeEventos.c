@@ -82,6 +82,8 @@ static void procesarAppearedRecibido(ManejadorDeEventos* this, Pokemon* unPokemo
 	free(aux);
 	free(coor);
 
+	// TODO: filtrar pokemon que no me sirven.
+
 	Coordinate* auxCoor = list_get(unPokemon->coordinates, 0);
 	this->servicioDeCaptura->procesarPokemonCapturable(this->servicioDeCaptura, string_duplicate(unPokemon->name->value), convertirACoordenada(auxCoor));
 	free_pokemon(unPokemon);

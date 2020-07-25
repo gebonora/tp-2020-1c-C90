@@ -134,6 +134,7 @@ void configurarEstadoInicialProcesoTeam() {
 	equipoProcesoTeam = crearEquipoPorConfiguracion();
 	log_debug(INTERNAL_LOGGER, "Calculando el objetivo global...");
     objetivoGlobalProcesoTeam = ObjetivoGlobalConstructor.new(equipoProcesoTeam, clienteBrokerV2ProcesoTeam, registradorDeEventosProcesoTeam);
+    // TODO: manejadorEventosprocesoTeam.registarpokemonsNecesarios.
 	log_debug(INTERNAL_LOGGER, "Registrando al equipo en el mapa...");
 	void registrarEquipo(Entrenador * entrenador) {
 		registrarEnMapaPosicionEntrenador(&mapaProcesoTeam, entrenador);

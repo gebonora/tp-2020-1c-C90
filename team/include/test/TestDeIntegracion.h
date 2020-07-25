@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include "app/Global.h"
 #include "modelo/planificable/tarea/intercambio/TareaDeIntercambio.h"
+#include "modelo/planificable/tarea/captura/TareaDeCaptura.h"
 #include "manejadorDeEventos/ManejadorDeEventos.h"
 #include "planificador/algoritmos/AlgoritmoPlanificador.h"
 #include "planificador/algoritmos/fifo/FirstInFirstOut.h"
@@ -16,7 +17,6 @@
 #include "modelo/mapa/registro/RegistradorDePosiciones.h"
 #include "modelo/equipo/Equipo.h"
 #include "modelo/objetivo/ObjetivoGlobal.h"
-#include "modelo/planificable/tarea/captura/TareaDeCaptura.h"
 #include "delibird/utils/strings/ExtensionStrings.h"
 #include "delibird/utils/programadorDeTareas/ProgramadorDeTareas.h"
 #include "modelo/mapa/movimiento/Movimiento.h"
@@ -26,7 +26,6 @@
 #include "cliente/ClienteBrokerV2.h"
 #include "manejadorDeEventos/registro/RegistradorDeEventos.h"
 #include "servicios/servicioDeResolucionDeDeadlocks/ServicioDeResolucionDeDeadlocks.h"
-#include "modelo/planificable/tarea/intercambio/TareaDeIntercambio.h"
 
 void testDeIntegracion();
 void testDeEntrenadores();

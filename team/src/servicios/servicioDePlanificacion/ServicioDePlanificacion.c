@@ -99,7 +99,7 @@ t_list* obtenerTrabajo(ServicioDePlanificacion* this, int cantidadAPopear) {
 }
 
 void asignarTareasDeCaptura(ServicioDePlanificacion* this, t_list* tareas, t_list* entrenadoresDisponibles) {
-	/*for (int a = 0; a < list_size(tareas); a++) {
+	for (int a = 0; a < list_size(tareas); a++) { //TODO: objetivoGlobal puedeCapturarse.
 		TrabajoPlanificador* trabajo = (TrabajoPlanificador*) list_get(tareas, a);
 		HiloEntrenadorPlanificable* hiloElegido = devolverEntrenadorMasCercano(trabajo->coordenadaObjetivo, entrenadoresDisponibles);
 		TareaPlanificable* tarea = generarTareaDeCaptura(hiloElegido->entrenador, trabajo->objetivo, trabajo->coordenadaObjetivo);
@@ -112,11 +112,11 @@ void asignarTareasDeCaptura(ServicioDePlanificacion* this, t_list* tareas, t_lis
 		free(trabajo->objetivo);
 		free(trabajo);
 	}
-	return;*/
+	return;
 }
 
 void asignarIntercambios(ServicioDePlanificacion* this, t_list* intercambios) {
-	/*for (int a = 0; a < list_size(intercambios); a++) {
+	for (int a = 0; a < list_size(intercambios); a++) {
 		Intercambio* intercambio = (Intercambio*) list_get(intercambios, a);
 
 		TareaPlanificable* tarea = generarTareaDeIntercambio(intercambio->entrenadorQueSeMueve->entrenador, intercambio->entrenadorQueEspera->entrenador,
@@ -133,7 +133,7 @@ void asignarIntercambios(ServicioDePlanificacion* this, t_list* intercambios) {
 		free(intercambio->pokemonQueObtieneElQueEspera);
 		free(intercambio->pokemonQueObtieneElQueSeMueve);
 		free(intercambio);
-	}*/
+	}
 }
 
 void definirYCambiarEstado(ServicioDePlanificacion* this, UnidadPlanificable* hilo) {
