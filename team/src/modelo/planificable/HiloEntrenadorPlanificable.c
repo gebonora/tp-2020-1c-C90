@@ -53,7 +53,9 @@ static void ejecutarLimitado(HiloEntrenadorPlanificable * this, int cantInstrucc
 		log_error(this->logger, "Se esta intentando ejecutar una tarea con estado %s", nombreEstadoTareaPlanificable(tarea->estado));
 		return;
 	}
-	log_debug(this->logger, "Ejecutando tarea. Instrucciones a correr: %d/%d restantes.", cantInstrucciones, tarea->cantidadInstruccionesRestantes(tarea));
+
+    log_debug(this->logger, "Ejecutando tarea. Instrucciones a correr: %d/%d restantes. Total: %d.",
+              cantInstrucciones, tarea->cantidadInstruccionesRestantes(tarea), tarea->totalInstrucciones);
 	for (int i = 0; i < cantInstrucciones; i++) {
 		sem_post(&this->semaforoEjecucionHabilitada);
 		sem_wait(&this->semaforoCicloCompletado);
