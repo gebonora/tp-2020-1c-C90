@@ -76,13 +76,14 @@ void warmUp() {
 	sem_init(&semaforoPokemone, 0, 0);
 	sem_init(&semaforoReady, 0, 0);
 	sem_init(&semaforoTrabajar2, 0, 0);
-
+	sem_init(&semaforoDeadlock, 0, 0);
+	sem_init(&semaforoCaptura, 0, 1);
+	pthread_mutex_init(&mtxBlock, NULL);
+	pthread_mutex_init(&mtxExec, NULL);
+	pthread_mutex_init(&mtxExit, NULL);
+	pthread_mutex_init(&mtxReady, NULL);
+	pthread_mutex_init(&mtxNew, NULL);
 	pthread_mutex_init(&messi,NULL);
-	pthread_mutex_init(&mtxBlock,NULL);
-	pthread_mutex_init(&mtxExec,NULL);
-	pthread_mutex_init(&mtxExit,NULL);
-	pthread_mutex_init(&mtxReady,NULL);
-	pthread_mutex_init(&mtxNew,NULL);
 }
 
 void mostrarTitulo(t_log * logger) {
@@ -172,18 +173,18 @@ void liberarRecursos() {
 	log_debug(INTERNAL_LOGGER, "Liberando logger obligatorio...");
 	log_destroy(MANDATORY_LOGGER);
 
-    // Servicios
-    log_debug(INTERNAL_LOGGER, "Liberando servicios...");
-    servicioDeConfiguracion.destruir(&servicioDeConfiguracion);
-    servicioDeCapturaProcesoTeam->destruir(servicioDeCapturaProcesoTeam);
-    servicioDePlanificacionProcesoTeam->destruir(servicioDePlanificacionProcesoTeam);
-    servicioDeResolucionDeDeadlocksProcesoTeam->destruir(servicioDeResolucionDeDeadlocksProcesoTeam);
-	servicioDeMetricasProcesoTeam->destruir(servicioDeMetricasProcesoTeam);
+	// Proceso Team
+	log_debug(INTERNAL_LOGGER, "Liberando participantes del proceso Team...");
+	destruirEquipo(equipoProcesoTeam);
+	objetivoGlobalProcesoTeam.destruirObjetivoGlobal(&objetivoGlobalProcesoTeam);
 
-    // Proceso Team
-    log_debug(INTERNAL_LOGGER, "Liberando participantes del proceso Team...");
-    destruirEquipo(equipoProcesoTeam);
-    objetivoGlobalProcesoTeam.destruirObjetivoGlobal(&objetivoGlobalProcesoTeam);
+	// Servicios
+	log_debug(INTERNAL_LOGGER, "Liberando servicios...");
+	servicioDeConfiguracion.destruir(&servicioDeConfiguracion);
+	servicioDeCapturaProcesoTeam->destruir(servicioDeCapturaProcesoTeam);
+	servicioDePlanificacionProcesoTeam->destruir(servicioDePlanificacionProcesoTeam);
+	servicioDeResolucionDeDeadlocksProcesoTeam->destruir(servicioDeResolucionDeDeadlocksProcesoTeam);
+	servicioDeMetricasProcesoTeam->destruir(servicioDeMetricasProcesoTeam);
 
 	// Componentes
 	log_debug(INTERNAL_LOGGER, "Liberando componentes del sistema...");
@@ -194,4 +195,7 @@ void liberarRecursos() {
 	destruirAlgoritmosDePlanificacion();
 	mapaProcesoTeam.destruir(&mapaProcesoTeam);
 	clienteBrokerV2ProcesoTeam->destruir(clienteBrokerV2ProcesoTeam);
+
+	exit(0);
+	servicioDePlanificacionProcesoTeam->destruir(servicioDePlanificacionProcesoTeam);
 }
