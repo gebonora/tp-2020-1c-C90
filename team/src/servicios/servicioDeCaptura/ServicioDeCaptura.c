@@ -53,12 +53,6 @@ static void encargarTrabajoDeCaptura(ServicioDeCaptura * this, char * especie, C
 	char * ubicacionPokemonACapturar = coordenadaClave(posicion);
 	log_info(this->logger, "Se le encarga al servicio de planificacion que mande a un entrenador a capturar a %s en %s", especie, ubicacionPokemonACapturar);
 
-	TrabajoPlanificador* trabajo = malloc(sizeof(TrabajoPlanificador));
-	trabajo->coordenadaObjetivo = posicion;
-	trabajo->objetivo = string_duplicate(especie);
-	trabajo->tipo = CAPTURA_POKEMON;
-
-	//sem_post(&this->servicioDePlanificacion->semaforoContadorColaDeTrabajo);
 
 	free(especie);
 	free(ubicacionPokemonACapturar);
@@ -129,13 +123,12 @@ void destruirServicioDeCaptura(ServicioDeCaptura * this) {
 	free(this);
 }
 
-static ServicioDeCaptura * new(Mapa mapa, ServicioDePlanificacion * servicioDePlanificacion) {
+static ServicioDeCaptura * new(Mapa mapa) {
 	ServicioDeCaptura * servicio = malloc(sizeof(ServicioDeCaptura));
 
 	servicio->logger = log_create(TEAM_INTERNAL_LOG_FILE, "ServicioDeCaptura", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_INFO);
 	servicio->mapa = mapa;
 	servicio->pokemonesAtrapables = list_create();
-	servicio->servicioDePlanificacion = servicioDePlanificacion;
 	servicio->registrarCapturaExitosa = &registrarCapturaExitosa;
 	servicio->registrarCapturaFallida = &registrarCapturaFallida;
 	servicio->procesarPokemonCapturable = &procesarPokemonCapturable;

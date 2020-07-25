@@ -17,7 +17,7 @@ void testServicioDeCaptura() {
     ServicioDeMetricas* metricasTest = ServicioDeMetricasConstructor.new();
     ServicioDeResolucionDeDeadlocks* deadlocksTest = ServicioDeResolucionDeDeadlocksConstructor.new(metricasTest);
     ServicioDePlanificacion * servicioPlanificacion = ServicioDePlanificacionConstructor.new(metricasTest, deadlocksTest);
-    ServicioDeCaptura * servicioDeCaptura = ServicioDeCapturaConstructor.new(mapa, servicioPlanificacion);
+    ServicioDeCaptura * servicioDeCaptura = ServicioDeCapturaConstructor.new(mapa);
 
     log_info(testLogger, "Testeando la aparicion de un pokemon");
     Coordinate posicion = {.pos_x = 1, .pos_y = 2};

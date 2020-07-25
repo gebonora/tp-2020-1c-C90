@@ -93,29 +93,24 @@ void asignarTareasDeCaptura(ServicioDePlanificacion* this, t_list* listaPokemon,
 		HiloEntrenadorPlanificable* hiloElegido = (HiloEntrenadorPlanificable*) list_get(entrenadoresDisponibles, a);
 		Coordinate posicionEntrenador = hiloElegido->entrenador->gps->posicionActual(hiloElegido->entrenador->gps).coordenada;
 		bool masCercano(void* elem1, void* elem2) {
-			Pokemon* pokemon1 = (Pokemon*) elem1;
-			Coordinate* aux1 = list_get(pokemon1->coordinates, 0);
-			Coordinate coor1 = convertirACoordenada(aux1);
-
-			Pokemon* pokemon2 = (Pokemon*) elem2;
-			Coordinate* aux2 = list_get(pokemon2->coordinates, 0);
-			Coordinate coor2 = convertirACoordenada(aux2);
-
+			PokemonAtrapable* pokemon1 = (PokemonAtrapable*) elem1;
+			Coordinate coor1 = pokemon1->gps->posicionActual(pokemon1->gps).coordenada;
+			PokemonAtrapable* pokemon2 = (PokemonAtrapable*) elem2;
+			Coordinate coor2 = pokemon2->gps->posicionActual(pokemon2->gps).coordenada;
 			return distanciaEntre(posicionEntrenador, coor1) <= distanciaEntre(posicionEntrenador, coor2);
 		}
 		list_sort(listaPokemon, masCercano);
 		for (int b = 0; b < list_size(listaPokemon); b++) {
-			Pokemon* pokemon = (Pokemon*) list_get(listaPokemon, b);
-			if (0) {	// objetivo.puedeCapturarse.
-				Coordinate* auxPokemonElegido = list_get(pokemon->coordinates, b);
-				Coordinate coordenadaPokemon = convertirACoordenada(auxPokemonElegido);
-				TareaPlanificable* tarea = generarTareaDeCaptura(hiloElegido->entrenador, pokemon->name->value, coordenadaPokemon);
+			PokemonAtrapable* pokemon = (PokemonAtrapable*) list_get(listaPokemon, b);
+			if (this->objetivoGlobal.puedeCapturarse(&this->objetivoGlobal, pokemon->especie)) {	// objetivo.puedeCapturarse.
+				Coordinate coordenadaPokemon = pokemon->gps->posicionActual(pokemon->gps).coordenada;
+				TareaPlanificable* tarea = generarTareaDeCaptura(hiloElegido->entrenador, pokemon->especie, coordenadaPokemon);
 				hiloElegido->asignarTarea(hiloElegido, tarea);
 				hiloElegido->entrenador->estaEsperandoAlgo = true;
 				hiloElegido->infoUltimaEjecucion.seNecesitaNuevaEstimacion = true;
 				hiloElegido->infoUltimaEjecucion.rafaga_real_actual = hiloElegido->tareaAsignada->totalInstrucciones;
 				//marcarlo como taken en el mapa
-				//restarle 1 al objetivo.
+				this->objetivoGlobal.restarUnCapturado(&this->objetivoGlobal, pokemon->especie);
 				this->planificador.moverACola(&this->planificador, hiloElegido, READY, "Se le asignó una tarea de captura.");
 				list_remove_and_destroy_element(listaPokemon, b, (void (*)(void*)) free_pokemon);
 				break;

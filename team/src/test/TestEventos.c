@@ -16,7 +16,7 @@ void testDeEventos() {
 	ServicioDeMetricas* metricasTest = ServicioDeMetricasConstructor.new();
 	ServicioDeResolucionDeDeadlocks* deadlocksTest = ServicioDeResolucionDeDeadlocksConstructor.new(metricasTest);
 	ServicioDePlanificacion * servicioPlanificacion = ServicioDePlanificacionConstructor.new(metricasTest, deadlocksTest);
-	ServicioDeCaptura * servicioDeCapturaTest = ServicioDeCapturaConstructor.new(mapa, servicioPlanificacion);
+	ServicioDeCaptura * servicioDeCapturaTest = ServicioDeCapturaConstructor.new(mapa);
 
 	RegistradorDeEventos * registrador = RegistradorDeEventosConstructor.new();
 	ManejadorDeEventos* manejadorDeEventosTest = ManejadorDeEventosConstructor.new(servicioDeCapturaTest, registrador);
