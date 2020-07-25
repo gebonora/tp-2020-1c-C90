@@ -13,8 +13,9 @@ bool mismaEspecieMismaPosicion(void * pokemon_) { \
 }
 
 static t_list * pokemonesDisponibles(ServicioDeCaptura * this) {
-    bool estaLibre(void * pokemonAtrapable) {
-        return ((PokemonAtrapable *) pokemonAtrapable)->disponible;
+    bool estaLibre(void * pokemonAtrapable_) {
+        PokemonAtrapable * pokemonAtrapable = pokemonAtrapable_;
+        return pokemonAtrapable->esAtrapable(pokemonAtrapable);
     }
     t_list * pokemones_disponibles = list_filter(this->pokemonesAtrapables, estaLibre);
     return pokemones_disponibles;
