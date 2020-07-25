@@ -69,6 +69,21 @@ static ObjetivoGlobal new(Equipo unEquipo, ClienteBrokerV2 * clienteBroker, Regi
 
 const struct ObjetivoGlobalClass ObjetivoGlobalConstructor = {.new=&new};
 
+t_list* especiesPokemonNecesarias(ObjetivoGlobal * this,t_dictionary* diccionarioPokemon){
+	t_list* especiesPokemon;
+
+	void agregarPokemonALista(char * nombreEspecie, void * cantidad){
+		if(*(int*) (dictionary_get(diccionarioPokemon,nombreEspecie))  > 0){
+			list_add(especiesPokemon, nombreEspecie);
+		}
+	}
+
+	dictionary_iterator(diccionarioPokemon,agregarPokemonALista);
+
+	return especiesPokemon;
+}
+
+
 t_dictionary * calcularObjetivoEspecies(Equipo entrenadores) {
     t_dictionary * contabilidadEspecies = dictionary_create();
 

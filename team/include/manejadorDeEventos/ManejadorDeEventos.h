@@ -9,7 +9,7 @@
 #include "app/Global.h"
 #include "servicios/servicioDeCaptura/ServicioDeCaptura.h"
 #include "manejadorDeEventos/registro/RegistradorDeEventos.h"
-
+#include "modelo/objetivo/ObjetivoGlobal.h"
 /**
  * El server va a llamar al manejador de eventos cuando recibamos los mensajes, y el cliente cuando enviemos mensajes.
  * Esta clase se va a encargar de hacer el preprocesamiento necesario para descartar mensajes por ID, y el caso especial del get, que se debe ignorar si llega
@@ -41,8 +41,9 @@ typedef struct ManejadorDeEventos {
 	//ListaSincronizada* listaGetEnEspera;
 	//ListaSincronizada* listaCatchEnEspera;
 	t_list* listaLocalizedAppearedsRecibidos;
+	t_list* listaPokemonsNecesarios;
 	ServicioDeCaptura* servicioDeCaptura;
-
+	ObjetivoGlobal objetivoGlobalTeam;
 	// Interfaz publica
 	//void (*registrarCatchEnEspera)(struct ManejadorDeEventos* this, CapturaPokemon* capturaPokemon);
 	//void (*registrarGetEnEspera)(struct ManejadorDeEventos* this, MensajeGet* mensajeGet);
@@ -50,7 +51,8 @@ typedef struct ManejadorDeEventos {
 	void (*procesarLocalizedRecibido)(struct ManejadorDeEventos* this, Localized* unLocalized, uint32_t idMensaje);
 	void (*procesarAppearedRecibido)(struct ManejadorDeEventos* this, Pokemon* unPokemon, uint32_t idMensaje);
 	void (*procesarCaughtRecibido)(struct ManejadorDeEventos* this, Caught* unCaught, uint32_t idMensaje);
-
+	void (*registrarpokemonsNecesarios)(struct ManejadorDeEventos* this);
+	void (*setObjetivoGlobal)(struct ManejadorDeEventos* this, ObjetivoGlobal  unObjetivo);
 	void (*destruir)(struct ManejadorDeEventos *this);
 } ManejadorDeEventos;
 

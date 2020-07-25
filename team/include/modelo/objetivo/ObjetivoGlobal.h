@@ -32,6 +32,7 @@ typedef struct ObjetivoGlobal {
     void (*imprimirObjetivoGlobal)(struct ObjetivoGlobal * this);
     void (*solicitarUbicacionPokemonesNecesitados)(struct ObjetivoGlobal * this);
     void (*destruirObjetivoGlobal)(struct ObjetivoGlobal * this);
+    t_list* (*especiesPokemonNecesarias)(struct ObjetivoGlobal * this, t_dictionary* diccionarioPokemon);
 } ObjetivoGlobal;
 
 extern const struct ObjetivoGlobalClass {
