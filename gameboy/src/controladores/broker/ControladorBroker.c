@@ -12,7 +12,7 @@
 bool is_alive = true;
 
 static void _listen_message(socket_with_logger*);
-static int _create_connection();
+static int _create_connection(t_log* logger);
 static Operation _get_operation(char*);
 
 void atenderPedidoBroker(PedidoGameBoy pedidoGameBoy, t_log * logger) {
@@ -31,7 +31,7 @@ void atenderPedidoBroker(PedidoGameBoy pedidoGameBoy, t_log * logger) {
 				atoi(list_get(pedidoGameBoy.argumentos, 3))
 				);
 
-    	socket_broker = _create_connection();
+    	socket_broker = _create_connection(logger);
 		send_new(new_pokemon, socket_broker);
     break;
     case APPEARED_POKEMON: ;
@@ -42,7 +42,7 @@ void atenderPedidoBroker(PedidoGameBoy pedidoGameBoy, t_log * logger) {
 				);
 		correlational_id = atoi(list_get(pedidoGameBoy.argumentos, 3));
 
-		socket_broker = _create_connection();
+		socket_broker = _create_connection(logger);
 		send_pokemon(appeared_pokemon, APPEARED, socket_broker);
 		send(socket_broker, &correlational_id, sizeof(uint32_t), 0);
 
@@ -54,7 +54,7 @@ void atenderPedidoBroker(PedidoGameBoy pedidoGameBoy, t_log * logger) {
     			list_get(pedidoGameBoy.argumentos, 0)
 				);
 
-    	socket_broker = _create_connection();
+    	socket_broker = _create_connection(logger);
     	send_get(get_pokemon, socket_broker);
 
     	recv(socket_broker, &id, sizeof(uint32_t), MSG_WAITALL);
@@ -80,7 +80,7 @@ void atenderPedidoBroker(PedidoGameBoy pedidoGameBoy, t_log * logger) {
     	pokemon->coordinates = coordinates;
     	localized_pokemon->pokemon = pokemon;
 
-    	socket_broker = _create_connection();
+    	socket_broker = _create_connection(logger);
     	send_localized(localized_pokemon, socket_broker);
 
     	correlational_id = atoi(list_get(pedidoGameBoy.argumentos, index_for_correlational));
@@ -96,7 +96,7 @@ void atenderPedidoBroker(PedidoGameBoy pedidoGameBoy, t_log * logger) {
     				 atoi(list_get(pedidoGameBoy.argumentos, 2))
     				);
 
-    	socket_broker = _create_connection();
+    	socket_broker = _create_connection(logger);
 		send_pokemon(catch_pokemon, CATCH, socket_broker);
 
 		recv(socket_broker, &id, sizeof(uint32_t), MSG_WAITALL);
@@ -118,7 +118,7 @@ void atenderPedidoBroker(PedidoGameBoy pedidoGameBoy, t_log * logger) {
     	log_debug(logger, "valor al que llego %d", res);
     	Caught* caught_pokemon = create_caught_pokemon(res);
 
-    	socket_broker = _create_connection();
+    	socket_broker = _create_connection(logger);
 		send_caught(caught_pokemon, socket_broker);
 		send(socket_broker, &correlational_id, sizeof(uint32_t), 0);
 
@@ -132,7 +132,7 @@ void atenderPedidoBroker(PedidoGameBoy pedidoGameBoy, t_log * logger) {
     	int suscription_time = atoi(list_get(pedidoGameBoy.argumentos, 1));
     	uint32_t id_gameboy = servicioDeConfiguracion.obtenerEntero(&servicioDeConfiguracion, ID_GAMEBOY);
 
-    	socket_broker = _create_connection();
+    	socket_broker = _create_connection(logger);
     	send(socket_broker, &operation, sizeof(uint32_t), 0);
     	send(socket_broker, &process_gameboy, sizeof(uint32_t), 0);
     	send(socket_broker, &destination_queue, sizeof(uint32_t), 0);
@@ -173,15 +173,15 @@ void atenderPedidoBroker(PedidoGameBoy pedidoGameBoy, t_log * logger) {
 
 /** PRIVATE FUNCTIONS **/
 
-static int _create_connection() {
+static int _create_connection(t_log* log) {
     char* ip = servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, IP_BROKER);
     char* puerto = servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, PUERTO_BROKER);
     int connection_socket = create_connection(ip, puerto);
     if (connection_socket == -1) {
-		log_error(INTERNAL_LOGGER, "No fue posible conectar con el broker");
+		log_error(log, "No fue posible conectar con el broker");
 		exit(EXIT_FAILURE);
     }
-    log_info(INTERNAL_LOGGER, "Conexion exitosa con BROKER. Socket: %d", connection_socket);
+    log_info(log, "Conexion exitosa con BROKER. Socket: %d", connection_socket);
     return connection_socket;
 }
 
