@@ -55,9 +55,9 @@ void testDeEntrenadores() {
 
 	t_list * especiesNecesarias = objetivo.especiesNecesarias(&objetivo);
 
-	ContabilidadEspecie * contabilidadEspecieA = dictionary_get(objetivo.contabilidadEspecies, "A");
-	ContabilidadEspecie * contabilidadEspecieB = dictionary_get(objetivo.contabilidadEspecies, "B");
-	ContabilidadEspecie * contabilidadEspecieC = dictionary_get(objetivo.contabilidadEspecies, "C");
+	ContabilidadEspecie * contabilidadEspecieA = dictionary_get(objetivo.contabilidadEspeciesInicial, "A");
+	ContabilidadEspecie * contabilidadEspecieB = dictionary_get(objetivo.contabilidadEspeciesInicial, "B");
+	ContabilidadEspecie * contabilidadEspecieC = dictionary_get(objetivo.contabilidadEspeciesInicial, "C");
 
 	assert(list_size(especiesNecesarias) == 1);
 	assert(string_equals(list_get(especiesNecesarias, 0), "C"));

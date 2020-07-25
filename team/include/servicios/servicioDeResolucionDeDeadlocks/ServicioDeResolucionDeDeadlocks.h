@@ -10,7 +10,6 @@
 
 #include "app/Global.h"
 #include "servicios/servicioDeMetricas/ServicioDeMetricas.h"
-#include "modelo/mapa/Mapa.h"
 #include "modelo/planificable/HiloEntrenadorPlanificable.h"
 #include "delibird/utils/colecciones/ExtensionColecciones.h"
 

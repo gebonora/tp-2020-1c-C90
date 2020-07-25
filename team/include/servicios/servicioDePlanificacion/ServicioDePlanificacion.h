@@ -5,14 +5,16 @@
 #ifndef TEAM_SERVICIODEPLANIFICACION_H
 #define TEAM_SERVICIODEPLANIFICACION_H
 
-#include "semaphore.h"
+#include <semaphore.h>
 #include "app/Global.h"
 #include "delibird/utils/hilos/HiloFacil.h"
 #include "modelo/equipo/Equipo.h"
 #include "planificador/Planificador.h"
 #include "servicios/servicioDeResolucionDeDeadlocks/ServicioDeResolucionDeDeadlocks.h"
 #include "servicios/servicioDeMetricas/ServicioDeMetricas.h"
+#include "modelo/planificable/tarea/intercambio/TareaDeIntercambio.h"
 #include "modelo/planificable/tarea/captura/TareaDeCaptura.h"
+
 
 /**
  * Esta clase es conocedora de que implicancias a nivel planificacion tienen los eventos del sistema.
@@ -78,6 +80,7 @@ typedef struct ServicioDePlanificacion {
 	sem_t semaforoContadorColaDeTrabajo;
 	ServicioDeResolucionDeDeadlocks* servicioDeResolucionDeDeadlocks;
 	ServicioDeMetricas* servicioDeMetricas;
+	HiloEntrenadorPlanificable* ultimoHiloEjecutado;
 	// Interfaz publica
 	void (*trabajar)(struct ServicioDePlanificacion * this);
 	void (*asignarEquipoAPlanificar)(struct ServicioDePlanificacion * this, Equipo equipo);
