@@ -97,14 +97,7 @@ static void _process_request(uint32_t cod_op, int socket) {
 		if(caught_pokemon != NULL){
 			int result = recv(socket,&correlational_id,sizeof(uint32_t),0);
 			if(result > 0){
-				char* _get_result(uint32_t re){
-					if(re == 0){
-						return "OK";
-					} else {
-						return "FAIL";
-					}
-				}
-				log_info(LOGGER, "Se recibio un nuevo mensaje en la cola %s. Resultado: %s, id correlacional: %d", get_operation_by_value(cod_op), _get_result(caught_pokemon->result), correlational_id);
+				log_info(LOGGER, "Se recibio un nuevo mensaje en la cola %s. Resultado: %s, id correlacional: %d", get_operation_by_value(cod_op), get_result_by_value(caught_pokemon->result), correlational_id);
 
 				log_debug(LOGGER, "Me llego un caught");
 				log_debug(LOGGER, "Resultado: %d", caught_pokemon->result);

@@ -21,7 +21,7 @@ int main(){
 /** PRIVATE FUNCTIONS **/
 
 static void _init_logger() {
-    LOGGER = log_create(LOGGER_PATH, "Broker Server", 1, LOG_LEVEL_INFO);
+    LOGGER = log_create(LOGGER_PATH, "Broker Server", 1, LOG_LEVEL_DEBUG);
 }
 
 static void _init_config() {

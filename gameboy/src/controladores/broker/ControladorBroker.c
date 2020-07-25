@@ -104,11 +104,19 @@ void atenderPedidoBroker(PedidoGameBoy pedidoGameBoy, t_log * logger) {
     break;
     case CAUGHT_POKEMON: ;
     	correlational_id = atoi(list_get(pedidoGameBoy.argumentos, 0));
+    	char* resu = list_get(pedidoGameBoy.argumentos, 1);
+    	Result res;
+    		if(string_equals_ignore_case(resu, "OK")){
+    			res = OK;
+    		} else if(string_equals_ignore_case(resu, "FAIL")){
+    			res = FAIL;
+    		} else{
+    			res = ACKNOWLEDGE;
+    		}
+
     	log_debug(logger, "valor que me llega %s", list_get(pedidoGameBoy.argumentos, 1));
-    	log_debug(logger, "valor al que llego %d", get_result_by_string(list_get(pedidoGameBoy.argumentos, 1)));
-    	Caught* caught_pokemon = create_caught_pokemon(
-				get_result_by_string(list_get(pedidoGameBoy.argumentos, 1))
-				);
+    	log_debug(logger, "valor al que llego %d", res);
+    	Caught* caught_pokemon = create_caught_pokemon(res);
 
     	socket_broker = _create_connection();
 		send_caught(caught_pokemon, socket_broker);

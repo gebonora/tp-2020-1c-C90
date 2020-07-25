@@ -193,12 +193,3 @@ char* get_result_by_value(uint32_t result) {
 	}
 }
 
-Result get_result_by_string(char* result){
-	if(string_equals_ignore_case(result, "OK")){
-		return OK;
-	} else if(string_equals_ignore_case(result, "FAIL")){
-		return FAIL;
-	} else{
-		return ACKNOWLEDGE;
-	}
-}
