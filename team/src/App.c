@@ -182,7 +182,7 @@ void liberarRecursos() {
 	log_debug(INTERNAL_LOGGER, "Liberando servicios...");
 	servicioDeConfiguracion.destruir(&servicioDeConfiguracion);
 	servicioDeCapturaProcesoTeam->destruir(servicioDeCapturaProcesoTeam);
-	servicioDePlanificacionProcesoTeam->destruir(servicioDePlanificacionProcesoTeam);
+	//servicioDePlanificacionProcesoTeam->destruir(servicioDePlanificacionProcesoTeam);
 	servicioDeResolucionDeDeadlocksProcesoTeam->destruir(servicioDeResolucionDeDeadlocksProcesoTeam);
 	servicioDeMetricasProcesoTeam->destruir(servicioDeMetricasProcesoTeam);
 
