@@ -36,22 +36,20 @@ int cantidadDeRafagas(Planificador * planificador, UnidadPlanificable * unidadPl
 	int cantRafagas;
 
 	switch (planificador->algoritmoPlanificador.tipo) {
-	case FIFO: //FIFO
+	case FIFO:
 		cantRafagas = unidadPlanificable->tareaAsignada->totalInstrucciones;
 		break;
-	case RR: //RR
-		;
-		int quantum = servicioDeConfiguracion.obtenerEntero(&servicioDeConfiguracion, QUANTUM);
-		cantRafagas = minimo(quantum, (unidadPlanificable->tareaAsignada->cantidadInstruccionesRestantes(unidadPlanificable->tareaAsignada)));
+	case RR:
+		cantRafagas = minimo(planificador->quantum, (unidadPlanificable->tareaAsignada->cantidadInstruccionesRestantes(unidadPlanificable->tareaAsignada)));
 		break;
-	case SJF_CD: //SJF-CD
+	case SJF_CD:
 		cantRafagas = 1;
 		break;
-	case SJF_SD: //SJF-SD
+	case SJF_SD:
 		cantRafagas = unidadPlanificable->tareaAsignada->totalInstrucciones;
 		break;
 	default:
-		cantRafagas = 0;
+		cantRafagas = 1;
 		log_error(INTERNAL_LOGGER, "algoritmo planificador invalido");
 	}
 	return cantRafagas;
@@ -139,8 +137,9 @@ static Planificador new(ServicioDeMetricas* servicio) { // TODO: asignar servici
 	char * nombreAlgoritmo = servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, ALGORITMO_PLANIFICACION);
 	log_info(logger, "El planificador se inicializará con el algoritmo %s", nombreAlgoritmoCompleto(nombreAlgoritmo));
 
-	Planificador planificador = { .logger = logger, .algoritmoPlanificador = obtenerAlgoritmo(nombreAlgoritmo), .transicionadorDeEstados =
-			TransicionadorDeEstadosConstructor.new(), .colas = crearColasDePlanificacion(), .servicioDeMetricas = servicio, &agregarUnidadesPlanificables,
+
+	Planificador planificador = { .logger = logger,.quantum = servicioDeConfiguracion.obtenerEntero(&servicioDeConfiguracion, QUANTUM),.algoritmoPlanificador = obtenerAlgoritmo(nombreAlgoritmo),
+			.transicionadorDeEstados = TransicionadorDeEstadosConstructor.new(), .colas = crearColasDePlanificacion(), .servicioDeMetricas = servicio, &agregarUnidadesPlanificables,
 			&agregarUnidadPlanificable,
 
 			&armarListaEntrenadoresDisponibles, &obtenerProximoAEjecutar, &cantidadDeRafagas,

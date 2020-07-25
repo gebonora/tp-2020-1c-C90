@@ -30,6 +30,7 @@
 
 typedef struct Planificador {
 	t_log *logger;
+	int quantum;
 	AlgoritmoPlanificador algoritmoPlanificador;
 	TransicionadorDeEstados transicionadorDeEstados;
 	ColasDePlanificacion * colas;
