@@ -17,13 +17,12 @@ static void trabajar(HiloEntrenadorPlanificable * this) {
 
         TareaPlanificable * tareaEnEjecucion = this->tareaAsignada;
         Instruccion * instruccion = tareaEnEjecucion->proximaInstruccion(tareaEnEjecucion);
-        log_info(this->logger, "Se procede a ejecutar la instruccion %d: %s.",
-                instruccion->posicion, instruccion->descripcion);
+        log_info(this->logger, "Se procede a ejecutar la instruccion %d: %s.", instruccion->posicion, instruccion->descripcion);
 
         ejecutarInstruccion(instruccion, this->entrenador);
 
         if (this->retardoInstruccion > 0) {
-            for (int r = this->retardoInstruccion; r > 0; r--){
+            for (int r = this->retardoInstruccion; r > 0; r--) {
                 log_debug(this->logger, "Fin de retardo en %d...", r);
                 sleep(1);
             }
@@ -44,25 +43,23 @@ static void asignarTarea(HiloEntrenadorPlanificable * this, TareaPlanificable * 
     if (tarea->estado == PENDIENTE_DE_EJECUCION) {
         this->tareaAsignada = tarea;
     } else {
-        log_error(this->logger, "No se puede asignar una tarea con estado %s",
-                nombreEstadoTareaPlanificable(tarea->estado));
+        log_error(this->logger, "No se puede asignar una tarea con estado %s", nombreEstadoTareaPlanificable(tarea->estado));
     }
 }
 
 static void ejecutarLimitado(HiloEntrenadorPlanificable * this, int cantInstrucciones) {
     TareaPlanificable * tarea = this->tareaAsignada;
     if (tarea->estado != PENDIENTE_DE_EJECUCION) {
-        log_error(this->logger, "Se esta intentando ejecutar una tarea con estado %s",
-                nombreEstadoTareaPlanificable(tarea->estado));
+        log_error(this->logger, "Se esta intentando ejecutar una tarea con estado %s", nombreEstadoTareaPlanificable(tarea->estado));
         return;
     }
-    log_debug(this->logger, "Ejecutando tarea. Instrucciones a correr: %d/%d restantes. Total: %d.",
-            cantInstrucciones, tarea->cantidadInstruccionesRestantes(tarea), tarea->totalInstrucciones);
-    for (int i=0; i < cantInstrucciones; i++) {
+    log_debug(this->logger, "Ejecutando tarea. Instrucciones a correr: %d/%d restantes.", cantInstrucciones, tarea->cantidadInstruccionesRestantes(tarea));
+    for (int i = 0; i < cantInstrucciones; i++) {
         sem_post(&this->semaforoEjecucionHabilitada);
         sem_wait(&this->semaforoCicloCompletado);
     }
-    this->infoUltimaEjecucion.real_raf_ant = cantInstrucciones;
+    // this->infoUltimaEjecucion.real_raf_ant = cantInstrucciones;
+    this->infoUltimaEjecucion.rafaga_parcial_ejecutada = tarea->cantidadInstruccionesEjecutadas(tarea); // TODO: chequear si hace falta algo mas con Gaston.
     if (tarea->estado == FINALIZADA) {
         log_info(this->logger, "La tarea asignada se completó con exito. Se procede a destruirla.");
         tarea->destruir(tarea);
@@ -98,13 +95,12 @@ static HiloEntrenadorPlanificable *new(Entrenador * entrenador) {
     hiloEntrenadorPlanificable->entrenador = entrenador;
     hiloEntrenadorPlanificable->retardoInstruccion = ACTIVAR_RETARDO_CPU ? servicioDeConfiguracion.obtenerEntero(&servicioDeConfiguracion, RETARDO_CICLO_CPU) : 0;
     hiloEntrenadorPlanificable->finDeTrabajo = false;
-    sem_init(&hiloEntrenadorPlanificable->semaforoEjecucionHabilitada,1 ,0);
-    sem_init(&hiloEntrenadorPlanificable->semaforoCicloCompletado,1 ,0);
-    sem_init(&hiloEntrenadorPlanificable->semaforoFinDeTrabajo,1 ,0);
+    sem_init(&hiloEntrenadorPlanificable->semaforoEjecucionHabilitada, 1, 0);
+    sem_init(&hiloEntrenadorPlanificable->semaforoCicloCompletado, 1, 0);
+    sem_init(&hiloEntrenadorPlanificable->semaforoFinDeTrabajo, 1, 0);
     hiloEntrenadorPlanificable->tareaAsignada = NULL;
-    hiloEntrenadorPlanificable->infoUltimaEjecucion = (InfoUltimaEjecucion) {.real_raf_ant=0, .est_raf_ant=0
-    	,.seEjecutoPrimeraEstimacion=false, .rafaga_parcial_ejecutada = 0, .rafaga_real_actual = 0,
-    .seNecesitaNuevaEstimacion = true};
+    hiloEntrenadorPlanificable->infoUltimaEjecucion = (InfoUltimaEjecucion ) { .real_raf_ant = 0, .est_raf_ant = 0, .seEjecutoPrimeraEstimacion = false,
+            .rafaga_parcial_ejecutada = 0, .rafaga_real_actual = 0, .seNecesitaNuevaEstimacion = true };
     hiloEntrenadorPlanificable->asignarTarea = &asignarTarea;
     hiloEntrenadorPlanificable->trabajar = &trabajar;
     hiloEntrenadorPlanificable->ejecutarParcialmente = &ejecutarLimitado;
@@ -112,7 +108,7 @@ static HiloEntrenadorPlanificable *new(Entrenador * entrenador) {
     hiloEntrenadorPlanificable->destruir = &destruir;
     free(nombreLog);
 
-    if(hiloEntrenadorPlanificable->retardoInstruccion <= 0) {
+    if (hiloEntrenadorPlanificable->retardoInstruccion <= 0) {
         log_warning(hiloEntrenadorPlanificable->logger, "No hay retardo artifical en los ciclos de CPU");
     }
 
@@ -121,4 +117,4 @@ static HiloEntrenadorPlanificable *new(Entrenador * entrenador) {
     return hiloEntrenadorPlanificable;
 }
 
-const struct HiloEntrenadorPlanificableClass HiloEntrenadorPlanificableConstructor = {.new=&new};
+const struct HiloEntrenadorPlanificableClass HiloEntrenadorPlanificableConstructor = { .new = &new };
