@@ -67,6 +67,8 @@ elif [ -z "${PID}" ]; then
             ;;
     esac
 
+    sleep 2
+
     get_pid
 
     if [ -z "${PID}" ]; then
