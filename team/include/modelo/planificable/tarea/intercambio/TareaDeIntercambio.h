@@ -5,14 +5,8 @@
 #ifndef TEAM_TAREADECAPTURA_H
 #define TEAM_TAREADECAPTURA_H
 
-#include "app/Global.h"
-#include "modelo/equipo/Equipo.h"
-#include "modelo/equipo/entrenador/Entrenador.h"
 #include "modelo/planificable/tarea/TareaPlanificable.h"
-#include "modelo/mapa/movimiento/Movimiento.h"
-#include "modelo/mapa/Mapa.h"
-#include "modelo/pokemon/CapturaPokemon.h"
-#include "modelo/pokemon/PokemonAtrapable.h"
+#include "modelo/equipo/Equipo.h"
 
 TareaPlanificable * generarTareaDeIntercambio(Entrenador * entrenadorMovil, Entrenador * entrenadorEstatico, char * pokemonAEntregar, char * pokemonARecibir);
 
