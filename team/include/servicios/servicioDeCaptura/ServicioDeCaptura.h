@@ -22,6 +22,7 @@ typedef struct ServicioDeCaptura {
     bool (*registrarCapturaExitosa)(struct ServicioDeCaptura * this, CapturaPokemon * capturaPokemon);
     bool (*registrarCapturaFallida)(struct ServicioDeCaptura * this, CapturaPokemon * capturaPokemon);
     void (*procesarPokemonCapturable)(struct ServicioDeCaptura * this, char * especie, Coordinate posicion);
+    t_list * (*pokemonesDisponibles)(struct ServicioDeCaptura * this);
     //Metodos privados
     PokemonAtrapable * (*obtenerPokemonAtrapable)(struct ServicioDeCaptura * this, char * especie, Coordinate posicion);
     PokemonAtrapable * (*altaDePokemon)(struct ServicioDeCaptura * this, char * especie, Coordinate posicion);
