@@ -134,6 +134,14 @@ static void destruir(ManejadorDeEventos * this) {
 	free(this);
 }
 
+static void registrarpokemonsNecesarios(ManejadorDeEventos * this){
+	this->listaPokemonsNecesarios = this->objetivoGlobalTeam.especiesNecesarias(&this->objetivoGlobalTeam);
+}
+
+static void setObjetivoGlobal(ManejadorDeEventos* this, ObjetivoGlobal unObjetivo){
+	this->objetivoGlobalTeam = unObjetivo;
+}
+
 static ManejadorDeEventos* new(ServicioDeCaptura* servicioDeCaptura, RegistradorDeEventos * registradorDeEventos) {
 	ManejadorDeEventos* manejador = malloc(sizeof(ManejadorDeEventos));
 
@@ -141,10 +149,13 @@ static ManejadorDeEventos* new(ServicioDeCaptura* servicioDeCaptura, Registrador
 	manejador->registradorDeEventos = registradorDeEventos;
 	manejador->listaLocalizedAppearedsRecibidos = list_create();
 	manejador->servicioDeCaptura = servicioDeCaptura;
+	manejador->listaPokemonsNecesarios = list_create();
+	manejador->registrarpokemonsNecesarios  = &registrarpokemonsNecesarios;
 	manejador->procesarLocalizedRecibido = &procesarLocalizedRecibido;
 	manejador->procesarAppearedRecibido = &procesarAppearedRecibido;
 	manejador->procesarCaughtRecibido = &procesarCaughtRecibido;
 	manejador->destruir = &destruir;
+	manejador->setObjetivoGlobal = &setObjetivoGlobal;
 
 	return manejador;
 }
