@@ -8,7 +8,7 @@ t_list * especiesNecesarias(ObjetivoGlobal * this) {
     return (t_list *) dictionary_keys(this->contabilidadEspecies);
 }
 
-bool puedeCapturarse(ObjetivoGlobal * this, char * especiePokemon) {
+bool puedeCapturarse(ObjetivoGlobal * this, char * especiePokemon) { // TODO actualizar para contablidadModificable.
     if (dictionary_has_key(this->contabilidadEspecies, especiePokemon)) {
         ContabilidadEspecie * contabilidadEspecie = dictionary_get(this->contabilidadEspecies, especiePokemon);
         return contabilidadEspecie->necesarios > contabilidadEspecie->capturados;

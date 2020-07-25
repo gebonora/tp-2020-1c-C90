@@ -98,6 +98,15 @@ t_list* obtenerTrabajo(ServicioDePlanificacion* this, int cantidadAPopear) {
 }
 
 void asignarTareasDeCaptura(ServicioDePlanificacion* this, t_list* tareas, t_list* entrenadoresDisponibles) {
+
+	// buscasr el mas cercano en el mapa -> si objetivo.puedeCapturarse -> si y le resto al objetivo
+	// else sigo iterando.
+	// Mapa me da pokemon de libs. lo sorteo por distancia desde mi entrenador.
+	// itero sobre esta lista con objetivo.puedeCapturarse. hasta encontrar un match.
+
+	// manejador de eventos
+
+
 	for (int a = 0; a < list_size(tareas); a++) { //TODO: objetivoGlobal puedeCapturarse.
 		TrabajoPlanificador* trabajo = (TrabajoPlanificador*) list_get(tareas, a);
 		HiloEntrenadorPlanificable* hiloElegido = devolverEntrenadorMasCercano(trabajo->coordenadaObjetivo, entrenadoresDisponibles);
