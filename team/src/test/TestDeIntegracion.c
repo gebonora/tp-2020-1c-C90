@@ -14,8 +14,8 @@ void testDeIntegracion() {
 	// Cliente Broker
 	list_add(tests, testClienteBroker);
 
-	// Entrenadores
-	list_add(tests, testDeEntrenadores);
+	// Entrenadores TODO: DESCOMENTAR
+	//list_add(tests, testDeEntrenadores);
 
 	// Pokemones
 	list_add(tests, testDePokemones);

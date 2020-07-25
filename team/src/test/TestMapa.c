@@ -45,6 +45,16 @@ void testDeMapa() {
     log_info(testLogger, "Testeando el conteo de posicionables en el mapa");
     assert(mapita.cantidadPosicionables(&mapita) == 2);
 
+    log_info(testLogger, "Testeando que el mapa pueda devolver los pokemones que tiene");
+    t_list * pokemones = mapita.pokemonesDisponibles(&mapita);
+    Pokemon * primerPokemon = list_get(pokemones, 0);
+    assert(list_size(pokemones) == 1);
+    assert(primerPokemon != NULL);
+    Coordinate * posicionPokemonDisponible = (Coordinate *) list_get(primerPokemon->coordinates, 0);
+    assert(posicionPokemonDisponible->pos_x == 2);
+    assert(posicionPokemonDisponible->pos_y == 2);
+
+    list_destroy_and_destroy_elements(pokemones, free_pokemon);
     free(destino);
     entrenadorARegistrar->destruir(entrenadorARegistrar);
     pokemonARegistrar->destruir(pokemonARegistrar);

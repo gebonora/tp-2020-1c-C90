@@ -5,14 +5,25 @@
 #include "modelo/objetivo/ObjetivoGlobal.h"
 
 t_list * especiesNecesarias(ObjetivoGlobal * this) {
-    return (t_list *) dictionary_keys(this->contabilidadEspecies);
+    t_list * especies = (t_list *) dictionary_keys(this->contabilidadEspeciesActualizable);
+    bool esCapturable(void * nombrePokemon) {
+        return this->puedeCapturarse(this, (char *) nombrePokemon);
+    }
+    t_list * especiesNecesarias = (t_list *) list_filter(especies, esCapturable);
+    list_destroy(especies);
+    return especiesNecesarias;
 }
 
 bool puedeCapturarse(ObjetivoGlobal * this, char * especiePokemon) { // TODO actualizar para contablidadModificable.
-    if (dictionary_has_key(this->contabilidadEspecies, especiePokemon)) {
-        ContabilidadEspecie * contabilidadEspecie = dictionary_get(this->contabilidadEspecies, especiePokemon);
-        return contabilidadEspecie->necesarios > contabilidadEspecie->capturados;
+    if (dictionary_has_key(this->contabilidadEspeciesActualizable, especiePokemon)) {
+        ContabilidadEspecie * contabilidadEspecie = dictionary_get(this->contabilidadEspeciesActualizable, especiePokemon);
+        bool sePuede = contabilidadEspecie->necesarios > contabilidadEspecie->capturados;
+        if (!sePuede) {
+            log_debug(this->logger, "No se puede capturar a %s porque tenemos %d/%d", especiePokemon, contabilidadEspecie->capturados, contabilidadEspecie->necesarios);
+        }
+        return sePuede;
     }
+    log_debug(this->logger, "No se puede capturar a %s por que no forma parte del universo de este proceso", especiePokemon);
     return false;
 }
 
@@ -26,7 +37,7 @@ void imprimirObjetivoGlobal(ObjetivoGlobal * this) {
     log_debug(this->logger, "------------------------------------------");
     log_debug(this->logger, "%-16s%-16s%-16s", "Especie", "Necesarios", "Capturados");
     log_debug(this->logger, "------------------------------------------");
-    dictionary_iterator(this->contabilidadEspecies, agregarEntradaAString);
+    dictionary_iterator(this->contabilidadEspeciesInicial, agregarEntradaAString);
     log_debug(this->logger, "------------------------------------------");
 }
 
@@ -48,13 +59,15 @@ void solicitarPokemones(ObjetivoGlobal * this) {
 void destruirObjetivoGlobal(ObjetivoGlobal * this) {
     log_debug(this->logger, "Se procede a destruir el objetivo global");
     log_destroy(this->logger);
-    dictionary_destroy_and_destroy_elements(this->contabilidadEspecies, free);
+    dictionary_destroy_and_destroy_elements(this->contabilidadEspeciesInicial, free);
+    dictionary_destroy_and_destroy_elements(this->contabilidadEspeciesActualizable, free);
 }
 
 static ObjetivoGlobal new(Equipo unEquipo, ClienteBrokerV2 * clienteBroker, RegistradorDeEventos * registradorDeEventos) {
     ObjetivoGlobal objetivo = {
             .logger = log_create(TEAM_INTERNAL_LOG_FILE, "ObjetivoGlobal", SHOW_INTERNAL_CONSOLE, INTERNAL_LOG_LEVEL),
-            .contabilidadEspecies = calcularObjetivoEspecies(unEquipo),
+            .contabilidadEspeciesInicial = calcularObjetivoEspecies(unEquipo),
+            .contabilidadEspeciesActualizable = calcularObjetivoEspecies(unEquipo),
 			.clienteBroker = clienteBroker,
 			.registradorDeEventos = registradorDeEventos,
             &especiesNecesarias,

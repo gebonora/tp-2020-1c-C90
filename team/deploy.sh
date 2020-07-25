@@ -1,16 +1,15 @@
 #!/usr/bin/env bash
 
 RELATIVE_MODE="-r"
-GAMEBOY_PATH=/home/utnso/tp-2020-1c-C90/team
+TEAM_PATH=/home/utnso/tp-2020-1c-C90/team
 
 if [ "${RELATIVE_MODE}" = "$1" ]; then
-  echo PATO
-    GAMEBOY_PATH=`pwd`
+    TEAM_PATH=`pwd`
 fi
 
-DEPLOY_PATH=${GAMEBOY_PATH}/deploy
+DEPLOY_PATH=${TEAM_PATH}/deploy
 
-echo "deploy.sh team path: " ${GAMEBOY_PATH}
+echo "deploy.sh team path: " ${TEAM_PATH}
 echo "deploy.sh deploy path: " ${DEPLOY_PATH}
 
 GREEN='\033[0;32m'
@@ -24,5 +23,5 @@ if [ $install_result -eq 0 ]
 then
   echo "${GREEN}Proceso Team deployado!${NC}"
 else
-  echo "${RED}Error al deployar Team${NC}"
+  echo "${RED}Error al deployar el proceso Team${NC}"
 fi
