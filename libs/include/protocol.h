@@ -15,7 +15,7 @@ typedef enum {
 } Operation;
 
 typedef enum {
-	OK, FAIL, ACKNOWLEDGE
+	OK = 1, FAIL = 2, ACKNOWLEDGE = 3
 } Result;
 
 typedef struct {

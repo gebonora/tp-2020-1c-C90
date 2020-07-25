@@ -104,8 +104,10 @@ void atenderPedidoBroker(PedidoGameBoy pedidoGameBoy, t_log * logger) {
     break;
     case CAUGHT_POKEMON: ;
     	correlational_id = atoi(list_get(pedidoGameBoy.argumentos, 0));
+    	log_debug(logger, "valor que me llega %s", list_get(pedidoGameBoy.argumentos, 1));
+    	log_debug(logger, "valor al que llego %d", get_result_by_string(list_get(pedidoGameBoy.argumentos, 1)));
     	Caught* caught_pokemon = create_caught_pokemon(
-				atoi(list_get(pedidoGameBoy.argumentos, 1))
+				get_result_by_string(list_get(pedidoGameBoy.argumentos, 1))
 				);
 
     	socket_broker = _create_connection();
@@ -221,7 +223,7 @@ static void _listen_message(socket_with_logger* swl) {
 			Pokemon* catch_pokemon = recv_pokemon(swl->socket, false);
 			Coordinate* catch_coordinate = list_get(catch_pokemon->coordinates, 0);
 			recv(swl->socket, &message_id, sizeof(uint32_t), 0);
-			log_info(swl->logger, "Mensaje recibido. Operation: CATCH, Pokemon: %s, pos_x: %d, pos_y: %d, id: %d,)", catch_pokemon->name->value, catch_coordinate->pos_x, catch_coordinate->pos_y, message_id);
+			log_info(swl->logger, "Mensaje recibido. Operation: CATCH, Pokemon: %s, pos_x: %d, pos_y: %d, id: %d)", catch_pokemon->name->value, catch_coordinate->pos_x, catch_coordinate->pos_y, message_id);
 			free(catch_coordinate);
 			break;
 		case CAUGHT: ;

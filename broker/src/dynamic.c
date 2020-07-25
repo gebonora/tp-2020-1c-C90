@@ -123,8 +123,14 @@ static void _compact() {
 
 	log_debug(LOGGER, "Getting ocuppied partitions");
 	t_list* occupied = get_occupied_partitions();
+	bool minor_position(Partition* p1, Partition* p2){
+		return p1->position < p2->position;
+	}
+
+	list_sort(occupied, &minor_position);
 	uintptr_t start = memory->cache;
 	uint32_t position = 0;
+	t_list* data_occupied = list_create();
 
 	for(int index = 0; index < occupied->elements_count; index++) {
 		Partition* partition = list_get(occupied, index);
@@ -132,11 +138,23 @@ static void _compact() {
 		log_debug(LOGGER, "Modifying partition (position=%d, start=%x, size=%d", partition->position, partition->start, partition->size);
 
 		log_debug(LOGGER, "New values for start=%x, position=%d", start, position);
+		void* data = malloc(partition->message->data_size);
+		memcpy(data, partition->start, partition->message->data_size);
+		list_add(data_occupied, data);
+
 		partition->start = start;
 		partition->position = position;
 
 		start = SUM(start, partition->size);
 		position = SUM(position, partition->size);
+	}
+
+	for(int a = 0; a < occupied->elements_count; a++){
+		void* d = list_get(data_occupied, a);
+		Partition* part = list_get(occupied, a);
+
+		memcpy(part->start, d, part->message->data_size);
+		free(d);
 	}
 
 	log_debug(LOGGER, "Getting free partitions");
@@ -176,6 +194,7 @@ static void _compact() {
 	add_partition_next_to(last_occupied->start, new_free_partition);
 	list_destroy(occupied);
 	list_destroy(not_occupied);
+	list_destroy(data_occupied);
 
 	log_info(LOGGER, "Compact done");
 }
