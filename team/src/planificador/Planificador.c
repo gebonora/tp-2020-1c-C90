@@ -5,8 +5,6 @@
 #include "planificador/Planificador.h"
 
 void agregarUnidadesPlanificables(Planificador * this, t_list * unidadesPlanificables) {
-	puts("ENTRE");
-	printf("unidDFGFDSGSDFGDSFGades planif:%d \n\n", list_size(unidadesPlanificables));
 	list_add_all(this->colas->colaNew, unidadesPlanificables);
 }
 
@@ -126,6 +124,7 @@ void moverACola(Planificador * this, UnidadPlanificable * uPlanificable, EstadoP
 	log_info(MANDATORY_LOGGER, "Se movio al entrenador %s de la cola:%s a la cola: %s. Motivo: %s", uPlanificable->entrenador->id, nombreDeLaCola(estadoOrigen),
 			nombreDeLaCola(estadoDestino), motivoCambio);
 	sem_post(&semaforoDeadlock);
+	sem_post(&semaforoCaptura);
 }
 
 void destruirPlanificador(Planificador * this, void (*destructorUnidadPlanificable)(UnidadPlanificable *)) {

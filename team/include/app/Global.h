@@ -23,7 +23,7 @@
 #define SHOW_INTERNAL_CONSOLE 1 // 1 para mostrar la consola de uso interno, 0 para el caso contrario.
 #define CORRER_TESTS 0
 #define ESPERAR_OBJETIVO_GLOBAL 1
-#define ACTIVAR_RETARDO_CPU 1
+#define ACTIVAR_RETARDO_CPU 0
 #endif //TEAM_DEVELOPMENT_MODE
 
 // Paths a archivos
@@ -54,6 +54,7 @@ sem_t semaforoPokemone;
 sem_t semaforoReady;
 sem_t semaforoTrabajar2;
 sem_t semaforoDeadlock;
+sem_t semaforoCaptura;
 
 pthread_mutex_t mtxNew;
 pthread_mutex_t mtxReady;
