@@ -1,60 +1,60 @@
 #include "app/App.h"
 
 int main() {
-    // Precalentamiento
-    warmUp();
-    log_info(INTERNAL_LOGGER, "========================= Inicio de ejecución ============================");
+	// Precalentamiento
+	warmUp();
+	log_info(INTERNAL_LOGGER, "========================= Inicio de ejecución ============================");
 
-    // Config
-    log_debug(INTERNAL_LOGGER, "Levantando configuracion...");
-    servicioDeConfiguracion = ServicioDeConfiguracionConstructor.new(TEAM_CONFIG_FILE, TEAM_INTERNAL_LOG_FILE);
+	// Config
+	log_debug(INTERNAL_LOGGER, "Levantando configuracion...");
+	servicioDeConfiguracion = ServicioDeConfiguracionConstructor.new(TEAM_CONFIG_FILE, TEAM_INTERNAL_LOG_FILE);
 
-    // Logger obligatorio
-    log_debug(INTERNAL_LOGGER, "Configurando logger obligatorio...");
-    char * mandatoryLogPath = servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, LOG_FILE);
-    MANDATORY_LOGGER = log_create(mandatoryLogPath, "LogObligatorio", 1, LOG_LEVEL_INFO);
+	// Logger obligatorio
+	log_debug(INTERNAL_LOGGER, "Configurando logger obligatorio...");
+	char * mandatoryLogPath = servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, LOG_FILE);
+	MANDATORY_LOGGER = log_create(mandatoryLogPath, "LogObligatorio", 1, LOG_LEVEL_INFO);
 
-    // Setup de los componentes del sistema
-    log_info(INTERNAL_LOGGER, "Inicializando componentes del sistema...");
-    inicializarComponentesDelSistema();
+	// Setup de los componentes del sistema
+	log_info(INTERNAL_LOGGER, "Inicializando componentes del sistema...");
+	inicializarComponentesDelSistema();
 
-    // Reservado a pruebas de integracion. Si logica de negocio rompe, explota el programa aca.
-    if (CORRER_TESTS) {
-        log_info(INTERNAL_LOGGER, "--------------------- Realizando pruebas de integracion... ---------------------");
-        testDeIntegracion();
-        log_info(INTERNAL_LOGGER, "--------------------- Pruebas de integracion finalizadas con exito -------------");
-    }
+	// Reservado a pruebas de integracion. Si logica de negocio rompe, explota el programa aca.
+	if (CORRER_TESTS) {
+		log_info(INTERNAL_LOGGER, "--------------------- Realizando pruebas de integracion... ---------------------");
+		testDeIntegracion();
+		log_info(INTERNAL_LOGGER, "--------------------- Pruebas de integracion finalizadas con exito -------------");
+	}
 
-    // Estado inicial del proceso Team
-    log_info(INTERNAL_LOGGER, "Configurando el estado inicial del proceso Team...");
-    configurarEstadoInicialProcesoTeam();
+	// Estado inicial del proceso Team
+	log_info(INTERNAL_LOGGER, "Configurando el estado inicial del proceso Team...");
+	configurarEstadoInicialProcesoTeam();
 
-    // Server
-    log_info(INTERNAL_LOGGER, "Levantando el server...");
-    configurarServer();
-    if (ESPERAR_OBJETIVO_GLOBAL) {
-        atenderConexiones(); //TODO: Hacer apagable por si logramos cumplir con el objetivo.
-    }
+	// Server
+	log_info(INTERNAL_LOGGER, "Levantando el server...");
+	configurarServer();
+	if (ESPERAR_OBJETIVO_GLOBAL) {
+		atenderConexiones(); //TODO: Hacer apagable por si logramos cumplir con el objetivo.
+	}
 
-    // Por cada pokemon del objetivo global, enviar un GET [POKEMON].
-    log_info(INTERNAL_LOGGER, "Solicitando la ubicacion de los pokemones objetivo para comenzar...");
-    objetivoGlobalProcesoTeam.solicitarUbicacionPokemonesNecesitados(&objetivoGlobalProcesoTeam);
+	// Por cada pokemon del objetivo global, enviar un GET [POKEMON].
+	log_info(INTERNAL_LOGGER, "Solicitando la ubicacion de los pokemones objetivo para comenzar...");
+	objetivoGlobalProcesoTeam.solicitarUbicacionPokemonesNecesitados(&objetivoGlobalProcesoTeam);
 
-    // Cuando se complete el objetivo global, podremos finalizar el proceso y liberar los recursos.
-    if (ESPERAR_OBJETIVO_GLOBAL) {
-        log_info(INTERNAL_LOGGER, "Esperando a que se complete el objetivo global...");
-        sem_wait(&semaforoObjetivoGlobalCompletado);
-    }
+	// Cuando se complete el objetivo global, podremos finalizar el proceso y liberar los recursos.
+	if (ESPERAR_OBJETIVO_GLOBAL) {
+		log_info(INTERNAL_LOGGER, "Esperando a que se complete el objetivo global...");
+		sem_wait(&semaforoObjetivoGlobalCompletado);
+	}
 
-    // Mostramos las metricas para comparar contra otros procesos team
-    servicioDeMetricasProcesoTeam->imprimirMetricas(servicioDeMetricasProcesoTeam);
+	// Mostramos las metricas para comparar contra otros procesos team
+	servicioDeMetricasProcesoTeam->imprimirMetricas(servicioDeMetricasProcesoTeam);
 
-    // Liberacion
-    log_info(INTERNAL_LOGGER, "Finalizando proceso Team...");
-    liberarRecursos();
-    log_info(INTERNAL_LOGGER, "============================ Fin de ejecución ============================");
-    log_destroy(INTERNAL_LOGGER);
-    return 0;
+	// Liberacion
+	log_info(INTERNAL_LOGGER, "Finalizando proceso Team...");
+	liberarRecursos();
+	log_info(INTERNAL_LOGGER, "============================ Fin de ejecución ============================");
+	log_destroy(INTERNAL_LOGGER);
+	return 0;
 }
 
 void warmUp() {
@@ -90,36 +90,36 @@ void mostrarTitulo(t_log * logger) {
 }
 
 void inicializarComponentesDelSistema() {
-    srandom(time(NULL));
-    pthread_mutex_init(&MTX_INTERNAL_LOG, NULL); //TODO: por ahi conviene moverlo a configurarServer()
+	srandom(time(NULL));
+	pthread_mutex_init(&MTX_INTERNAL_LOG, NULL); //TODO: por ahi conviene moverlo a configurarServer()
 
-    log_debug(INTERNAL_LOGGER, "Creando el cliente para comunicarse con el broker...");
-    clienteBrokerV2ProcesoTeam = ClienteBrokerV2Constructor.new();
+	log_debug(INTERNAL_LOGGER, "Creando el cliente para comunicarse con el broker...");
+	clienteBrokerV2ProcesoTeam = ClienteBrokerV2Constructor.new();
 
-    log_debug(INTERNAL_LOGGER, "Preparando los algoritmos de planificacion...");
-    inicializarAlgoritmosDePlanificacion();
+	log_debug(INTERNAL_LOGGER, "Preparando los algoritmos de planificacion...");
+	inicializarAlgoritmosDePlanificacion();
 
-    log_debug(INTERNAL_LOGGER, "Creando el mapa de coordenadas...");
-    mapaProcesoTeam = MapaConstructor.new();
+	log_debug(INTERNAL_LOGGER, "Creando el mapa de coordenadas...");
+	mapaProcesoTeam = MapaConstructor.new();
 
-    log_debug(INTERNAL_LOGGER, "Creando el servicio de métricas...");
-    servicioDeMetricasProcesoTeam = ServicioDeMetricasConstructor.new();
+	log_debug(INTERNAL_LOGGER, "Creando el servicio de métricas...");
+	servicioDeMetricasProcesoTeam = ServicioDeMetricasConstructor.new();
 
-    log_debug(INTERNAL_LOGGER, "Creando el servicio de resolucion de deadlocks...");
-    servicioDeResolucionDeDeadlocksProcesoTeam = ServicioDeResolucionDeDeadlocksConstructor.new(servicioDeMetricasProcesoTeam);
+	log_debug(INTERNAL_LOGGER, "Creando el servicio de resolucion de deadlocks...");
+	servicioDeResolucionDeDeadlocksProcesoTeam = ServicioDeResolucionDeDeadlocksConstructor.new(servicioDeMetricasProcesoTeam);
 
-    log_debug(INTERNAL_LOGGER, "Creando el servicio de planificacion...");
-    servicioDePlanificacionProcesoTeam = ServicioDePlanificacionConstructor.new(servicioDeMetricasProcesoTeam, servicioDeResolucionDeDeadlocksProcesoTeam);
+	log_debug(INTERNAL_LOGGER, "Creando el servicio de planificacion...");
+	servicioDePlanificacionProcesoTeam = ServicioDePlanificacionConstructor.new(servicioDeMetricasProcesoTeam, servicioDeResolucionDeDeadlocksProcesoTeam);
 
-    log_debug(INTERNAL_LOGGER, "Creando el servicio de captura...");
-    servicioDeCapturaProcesoTeam = ServicioDeCapturaConstructor.new(mapaProcesoTeam, servicioDePlanificacionProcesoTeam);
+	log_debug(INTERNAL_LOGGER, "Creando el servicio de captura...");
+	servicioDeCapturaProcesoTeam = ServicioDeCapturaConstructor.new(mapaProcesoTeam);
 
-    log_debug(INTERNAL_LOGGER, "Creando estructuras para eventos...");
-    registradorDeEventosProcesoTeam = RegistradorDeEventosConstructor.new();
-    manejadorDeEventosProcesoTeam = ManejadorDeEventosConstructor.new(servicioDeCapturaProcesoTeam, registradorDeEventosProcesoTeam);
+	log_debug(INTERNAL_LOGGER, "Creando estructuras para eventos...");
+	registradorDeEventosProcesoTeam = RegistradorDeEventosConstructor.new();
+	manejadorDeEventosProcesoTeam = ManejadorDeEventosConstructor.new(servicioDeCapturaProcesoTeam, registradorDeEventosProcesoTeam);
 
-    log_debug(INTERNAL_LOGGER, "Inicializando semanforo de fin de proceso...");
-    sem_init(&semaforoObjetivoGlobalCompletado, 0, 0);
+	log_debug(INTERNAL_LOGGER, "Inicializando semanforo de fin de proceso...");
+	sem_init(&semaforoObjetivoGlobalCompletado, 0, 0);
 }
 
 /**
@@ -137,6 +137,11 @@ void configurarEstadoInicialProcesoTeam() {
     manejadorDeEventosProcesoTeam->setObjetivoGlobal(manejadorDeEventosProcesoTeam,objetivoGlobalProcesoTeam);
     // TODO: manejadorEventosprocesoTeam.registarpokemonsNecesarios.
     manejadorDeEventosProcesoTeam->registrarpokemonsNecesarios(manejadorDeEventosProcesoTeam);
+
+    servicioDePlanificacionProcesoTeam->servicioDeCaptura = servicioDeCapturaProcesoTeam;
+    servicioDePlanificacionProcesoTeam->objetivoGlobal = objetivoGlobalProcesoTeam;
+
+
 	log_debug(INTERNAL_LOGGER, "Registrando al equipo en el mapa...");
 	void registrarEquipo(Entrenador * entrenador) {
 		registrarEnMapaPosicionEntrenador(&mapaProcesoTeam, entrenador);
@@ -155,26 +160,26 @@ void liberarRecursos() {
 	log_debug(INTERNAL_LOGGER, "Liberando logger obligatorio...");
 	log_destroy(MANDATORY_LOGGER);
 
-    // Proceso Team
-    log_debug(INTERNAL_LOGGER, "Liberando participantes del proceso Team...");
-    destruirEquipo(equipoProcesoTeam);
-    objetivoGlobalProcesoTeam.destruirObjetivoGlobal(&objetivoGlobalProcesoTeam);
+	// Proceso Team
+	log_debug(INTERNAL_LOGGER, "Liberando participantes del proceso Team...");
+	destruirEquipo(equipoProcesoTeam);
+	objetivoGlobalProcesoTeam.destruirObjetivoGlobal(&objetivoGlobalProcesoTeam);
 
-    // Servicios
-    log_debug(INTERNAL_LOGGER, "Liberando servicios...");
-    servicioDeConfiguracion.destruir(&servicioDeConfiguracion);
-    servicioDeCapturaProcesoTeam->destruir(servicioDeCapturaProcesoTeam);
-    servicioDePlanificacionProcesoTeam->destruir(servicioDePlanificacionProcesoTeam);
-    servicioDeResolucionDeDeadlocksProcesoTeam->destruir(servicioDeResolucionDeDeadlocksProcesoTeam);
-    servicioDeMetricasProcesoTeam->destruir(servicioDeMetricasProcesoTeam);
+	// Servicios
+	log_debug(INTERNAL_LOGGER, "Liberando servicios...");
+	servicioDeConfiguracion.destruir(&servicioDeConfiguracion);
+	servicioDeCapturaProcesoTeam->destruir(servicioDeCapturaProcesoTeam);
+	servicioDePlanificacionProcesoTeam->destruir(servicioDePlanificacionProcesoTeam);
+	servicioDeResolucionDeDeadlocksProcesoTeam->destruir(servicioDeResolucionDeDeadlocksProcesoTeam);
+	servicioDeMetricasProcesoTeam->destruir(servicioDeMetricasProcesoTeam);
 
-    // Componentes
-    log_debug(INTERNAL_LOGGER, "Liberando componentes del sistema...");
-    manejadorDeEventosProcesoTeam->destruir(manejadorDeEventosProcesoTeam);
-    pthread_mutex_destroy(&MTX_INTERNAL_LOG);
-    sem_destroy(&semaforoObjetivoGlobalCompletado);
-    registradorDeEventosProcesoTeam->destruir(registradorDeEventosProcesoTeam);
-    destruirAlgoritmosDePlanificacion();
-    mapaProcesoTeam.destruir(&mapaProcesoTeam);
-    clienteBrokerV2ProcesoTeam->destruir(clienteBrokerV2ProcesoTeam);
+	// Componentes
+	log_debug(INTERNAL_LOGGER, "Liberando componentes del sistema...");
+	manejadorDeEventosProcesoTeam->destruir(manejadorDeEventosProcesoTeam);
+	pthread_mutex_destroy(&MTX_INTERNAL_LOG);
+	sem_destroy(&semaforoObjetivoGlobalCompletado);
+	registradorDeEventosProcesoTeam->destruir(registradorDeEventosProcesoTeam);
+	destruirAlgoritmosDePlanificacion();
+	mapaProcesoTeam.destruir(&mapaProcesoTeam);
+	clienteBrokerV2ProcesoTeam->destruir(clienteBrokerV2ProcesoTeam);
 }

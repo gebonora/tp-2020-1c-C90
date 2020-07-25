@@ -14,7 +14,8 @@
 #include "servicios/servicioDeMetricas/ServicioDeMetricas.h"
 #include "modelo/planificable/tarea/intercambio/TareaDeIntercambio.h"
 #include "modelo/planificable/tarea/captura/TareaDeCaptura.h"
-
+#include "modelo/objetivo/ObjetivoGlobal.h"
+#include "servicios/servicioDeCaptura/ServicioDeCaptura.h"
 
 /**
  * Esta clase es conocedora de que implicancias a nivel planificacion tienen los eventos del sistema.
@@ -71,22 +72,21 @@ typedef struct TrabajoPlanificador {
 
 typedef struct ServicioDePlanificacion {
 	t_log * logger;
-	t_queue * colaDeTrabajo; // Posee TrabajoPlanificador TODO: Generar tarea de captura / intercambio.
 	bool finDeTrabajo;
 	sem_t semaforoFinDeTrabajo;
 	sem_t semaforoEjecucionHabilitada;
 	Planificador planificador;
-	pthread_mutex_t mutexColaDeTrabajo;
 	sem_t semaforoContadorColaDeTrabajo;
+	ServicioDeCaptura* servicioDeCaptura;
+	ObjetivoGlobal objetivoGlobal;
 	ServicioDeResolucionDeDeadlocks* servicioDeResolucionDeDeadlocks;
 	ServicioDeMetricas* servicioDeMetricas;
 	HiloEntrenadorPlanificable* ultimoHiloEjecutado;
 	// Interfaz publica
 	void (*trabajar)(struct ServicioDePlanificacion * this);
 	void (*asignarEquipoAPlanificar)(struct ServicioDePlanificacion * this, Equipo equipo);
-	void (*asignarTareasDeCaptura)(struct ServicioDePlanificacion * this, t_list* listaDeTrabajo, t_list* entrenadoresDisponibles);
+	void (*asignarTareasDeCaptura)(struct ServicioDePlanificacion * this, t_list* listaPokemon, t_list* entrenadoresDisponibles);
 	void (*asignarIntercambios)(struct ServicioDePlanificacion * this, t_list* listaDeBloqueados);
-	t_list* (*obtenerTrabajo)(struct ServicioDePlanificacion* this, int cantidadAPopear);
 	void (*definirYCambiarEstado)(struct ServicioDePlanificacion* this, UnidadPlanificable* hilo);
 	bool (*teamFinalizado)(struct ServicioDePlanificacion* this);
 	bool (*evaluarEstadoPosibleDeadlock)(struct ServicioDePlanificacion* this);

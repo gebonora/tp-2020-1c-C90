@@ -14,7 +14,6 @@ void trabajar(ServicioDePlanificacion * this) {
 		}
 
 		// Cambiar desde acá.
-		// TODO: Agarrar a los blocked y fijarnos si finalizaron.
 		// Puede pasar que justo les queda un catch para terminar y les llega -> exit
 		// O hacen pasivamente un intercambio y terminan -> exit
 		for (int a = 0; a < list_size(this->planificador.colas->colaBlocked); a++) {
@@ -45,9 +44,7 @@ void trabajar(ServicioDePlanificacion * this) {
 			t_list* entrenadoresDisponibles = this->planificador.armarListaEntrenadoresDisponibles(&this->planificador);
 
 			sem_wait(&this->semaforoContadorColaDeTrabajo);
-			pthread_mutex_lock(&this->mutexColaDeTrabajo);
-			t_list* trabajo = this->obtenerTrabajo(this, list_size(entrenadoresDisponibles));
-			pthread_mutex_unlock(&this->mutexColaDeTrabajo);
+			t_list* trabajo = list_create();
 
 			for (int a = 0; list_size(trabajo) - 1; a++) {
 				sem_wait(&this->semaforoContadorColaDeTrabajo);
@@ -85,42 +82,42 @@ void asignarEquipoAPlanificar(ServicioDePlanificacion * this, Equipo equipo) {
 	list_destroy(unidadesPlanificables);
 }
 
-t_list* obtenerTrabajo(ServicioDePlanificacion* this, int cantidadAPopear) {
-// La idea es que tenemos una listaConEntrenadores y queremos popear hasta esa cantidad.
-// Puede ser que popemos menos porque la cola tiene menor cantidad de elementos que los que pedimos, pero no pasa nada.
-	t_list* listaDeTareas = list_create();
-	int count = 0;
-	while (!queue_is_empty(this->colaDeTrabajo) && count < cantidadAPopear) {
-		list_add(listaDeTareas, queue_pop(this->colaDeTrabajo));
-		count++;
-	}
-	return listaDeTareas;
-}
-
-void asignarTareasDeCaptura(ServicioDePlanificacion* this, t_list* tareas, t_list* entrenadoresDisponibles) {
-
+void asignarTareasDeCaptura(ServicioDePlanificacion* this, t_list* listaPokemon, t_list* entrenadoresDisponibles) {
 	// buscasr el mas cercano en el mapa -> si objetivo.puedeCapturarse -> si y le resto al objetivo
 	// else sigo iterando.
 	// Mapa me da pokemon de libs. lo sorteo por distancia desde mi entrenador.
 	// itero sobre esta lista con objetivo.puedeCapturarse. hasta encontrar un match.
 
 	// manejador de eventos
-
-
-	for (int a = 0; a < list_size(tareas); a++) { //TODO: objetivoGlobal puedeCapturarse.
-		TrabajoPlanificador* trabajo = (TrabajoPlanificador*) list_get(tareas, a);
-		HiloEntrenadorPlanificable* hiloElegido = devolverEntrenadorMasCercano(trabajo->coordenadaObjetivo, entrenadoresDisponibles);
-		TareaPlanificable* tarea = generarTareaDeCaptura(hiloElegido->entrenador, trabajo->objetivo, trabajo->coordenadaObjetivo);
-		hiloElegido->asignarTarea(hiloElegido, tarea);
-		hiloElegido->entrenador->estaEsperandoAlgo = true;
-		hiloElegido->infoUltimaEjecucion.seNecesitaNuevaEstimacion = true;
-		hiloElegido->infoUltimaEjecucion.rafaga_real_actual = hiloElegido->tareaAsignada->totalInstrucciones;
-
-		this->planificador.moverACola(&this->planificador, hiloElegido, READY, "Se le asignó una tarea de captura.");
-		free(trabajo->objetivo);
-		free(trabajo);
+	for (int a = 0; a < list_size(entrenadoresDisponibles); a++) {
+		HiloEntrenadorPlanificable* hiloElegido = (HiloEntrenadorPlanificable*) list_get(entrenadoresDisponibles, a);
+		Coordinate posicionEntrenador = hiloElegido->entrenador->gps->posicionActual(hiloElegido->entrenador->gps).coordenada;
+		bool masCercano(void* elem1, void* elem2) {
+			PokemonAtrapable* pokemon1 = (PokemonAtrapable*) elem1;
+			Coordinate coor1 = pokemon1->gps->posicionActual(pokemon1->gps).coordenada;
+			PokemonAtrapable* pokemon2 = (PokemonAtrapable*) elem2;
+			Coordinate coor2 = pokemon2->gps->posicionActual(pokemon2->gps).coordenada;
+			return distanciaEntre(posicionEntrenador, coor1) <= distanciaEntre(posicionEntrenador, coor2);
+		}
+		list_sort(listaPokemon, masCercano);
+		for (int b = 0; b < list_size(listaPokemon); b++) {
+			PokemonAtrapable* pokemon = (PokemonAtrapable*) list_get(listaPokemon, b);
+			if (this->objetivoGlobal.puedeCapturarse(&this->objetivoGlobal, pokemon->especie)) {	// objetivo.puedeCapturarse.
+				Coordinate coordenadaPokemon = pokemon->gps->posicionActual(pokemon->gps).coordenada;
+				TareaPlanificable* tarea = generarTareaDeCaptura(hiloElegido->entrenador, pokemon->especie, coordenadaPokemon);
+				hiloElegido->asignarTarea(hiloElegido, tarea);
+				hiloElegido->entrenador->estaEsperandoAlgo = true;
+				hiloElegido->infoUltimaEjecucion.seNecesitaNuevaEstimacion = true;
+				hiloElegido->infoUltimaEjecucion.rafaga_real_actual = hiloElegido->tareaAsignada->totalInstrucciones;
+				//marcarlo como taken en el mapa
+				this->objetivoGlobal.restarUnCapturado(&this->objetivoGlobal, pokemon->especie);
+				this->planificador.moverACola(&this->planificador, hiloElegido, READY, "Se le asignó una tarea de captura.");
+				list_remove_and_destroy_element(listaPokemon, b, (void (*)(void*)) free_pokemon);
+				break;
+			}
+		}
 	}
-	return;
+	list_destroy_and_destroy_elements(listaPokemon, (void (*)(void*)) free_pokemon);
 }
 
 void asignarIntercambios(ServicioDePlanificacion* this, t_list* intercambios) {
@@ -198,7 +195,6 @@ void destruir(ServicioDePlanificacion * this) {
 	sem_post(&this->semaforoEjecucionHabilitada);
 	sem_wait(&this->semaforoFinDeTrabajo);
 	log_debug(this->logger, "Se procede a destruir al servicio de planificacion");
-	queue_destroy(this->colaDeTrabajo);
 	log_destroy(this->logger);
 	this->planificador.destruir(&this->planificador, destruirUnidadPlanificable);
 	free(this);
@@ -208,12 +204,10 @@ static ServicioDePlanificacion * new(ServicioDeMetricas* servicioDeMetricas, Ser
 	ServicioDePlanificacion * servicio = malloc(sizeof(ServicioDePlanificacion));
 
 	servicio->logger = log_create(TEAM_INTERNAL_LOG_FILE, "ServicioDePlanificacion", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_INFO);
-	servicio->colaDeTrabajo = queue_create();
 	servicio->finDeTrabajo = false;
 	sem_init(&servicio->semaforoFinDeTrabajo, 1, 0);
 	sem_init(&servicio->semaforoEjecucionHabilitada, 1, 0);
 	servicio->planificador = PlanificadorConstructor.new(servicioDeMetricas);
-	pthread_mutex_init(&servicio->mutexColaDeTrabajo, NULL);
 	sem_init(&servicio->semaforoContadorColaDeTrabajo, 0, 0); // Arranca en 0, queremos que el productor meta algo para consumir.
 	servicio->ultimoHiloEjecutado = NULL;
 	servicio->asignarEquipoAPlanificar = &asignarEquipoAPlanificar;
@@ -221,7 +215,6 @@ static ServicioDePlanificacion * new(ServicioDeMetricas* servicioDeMetricas, Ser
 	servicio->servicioDeResolucionDeDeadlocks = servicioDeadlocks;
 	servicio->servicioDeMetricas = servicioDeMetricas;
 	servicio->trabajar = &trabajar;
-	servicio->obtenerTrabajo = &obtenerTrabajo;
 	servicio->asignarTareasDeCaptura = &asignarTareasDeCaptura;
 	servicio->definirYCambiarEstado = &definirYCambiarEstado;
 	servicio->teamFinalizado = &teamFinalizado;

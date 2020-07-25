@@ -75,7 +75,6 @@ bool pokemonEstaEnLista(ManejadorDeEventos* this, Pokemon* unPokemon){
 }
 
 static void procesarAppearedRecibido(ManejadorDeEventos* this, Pokemon* unPokemon, uint32_t idMensaje) {
-	// Llega desde Server. TODO: No se llama en ningun lado
 	t_list* ptrLista = this->listaLocalizedAppearedsRecibidos;
 	if(pokemonEstaEnLista(this,unPokemon) == false){
 
@@ -117,7 +116,6 @@ static void procesarAppearedRecibido(ManejadorDeEventos* this, Pokemon* unPokemo
 }
 
 static void procesarCaughtRecibido(ManejadorDeEventos* this, Caught* unCaught, uint32_t idMensaje) {
-	// Llega desde Server. TODO: No se llama en ningun lado.
 	t_list* ptrLista = this->registradorDeEventos->listaCatchEnEspera->lista;
 	CapturaPokemon* capturaPokemon = NULL;
 
@@ -158,6 +156,9 @@ static void procesarCaughtRecibido(ManejadorDeEventos* this, Caught* unCaught, u
 static void destruir(ManejadorDeEventos * this) {
 	log_destroy(this->logger);
 	list_destroy_and_destroy_elements(this->listaLocalizedAppearedsRecibidos, free);
+	if (this->listaPokemonsNecesarios != NULL) {
+        list_destroy(this->listaPokemonsNecesarios);
+    }
 	free(this);
 }
 
@@ -176,7 +177,7 @@ static ManejadorDeEventos* new(ServicioDeCaptura* servicioDeCaptura, Registrador
 	manejador->registradorDeEventos = registradorDeEventos;
 	manejador->listaLocalizedAppearedsRecibidos = list_create();
 	manejador->servicioDeCaptura = servicioDeCaptura;
-	manejador->listaPokemonsNecesarios = list_create();
+	manejador->listaPokemonsNecesarios = NULL;
 	manejador->registrarpokemonsNecesarios  = &registrarpokemonsNecesarios;
 	manejador->procesarLocalizedRecibido = &procesarLocalizedRecibido;
 	manejador->procesarAppearedRecibido = &procesarAppearedRecibido;

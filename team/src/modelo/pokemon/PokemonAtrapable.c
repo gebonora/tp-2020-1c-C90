@@ -64,6 +64,7 @@ static void destruirPokemonAtrapable(PokemonAtrapable * this) {
         free(posicionInicial);
     }
     log_destroy(this->logger);
+    free(this->especie);
     pthread_mutex_destroy(&this->mutexAtrapable);
     free(this);
 }
@@ -72,7 +73,7 @@ static PokemonAtrapable * new(char * especie, char * posicionInicial) {
     PokemonAtrapable * pokemonAtrapable = malloc(sizeof(PokemonAtrapable));
 
     pokemonAtrapable->logger = log_create(TEAM_INTERNAL_LOG_FILE, "PokemonAtrapable", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_INFO);
-    pokemonAtrapable->especie = especie;
+    pokemonAtrapable->especie = string_duplicate(especie);
     pokemonAtrapable->gps = NULL;
     pokemonAtrapable->tipoPosicionable = POKEMON;
     pokemonAtrapable->disponible = true;

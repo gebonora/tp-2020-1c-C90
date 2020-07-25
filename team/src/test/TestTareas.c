@@ -22,7 +22,7 @@ void testDeTareas() {
 
 	ServicioDePlanificacion * servicioDePlanificacion = ServicioDePlanificacionConstructor.new(metricasTest, deadlocksTest);
 	Mapa mapita = MapaConstructor.new();
-	servicioDeCapturaProcesoTeam = ServicioDeCapturaConstructor.new(mapita, servicioDePlanificacion);
+	servicioDeCapturaProcesoTeam = ServicioDeCapturaConstructor.new(mapita);
 	Entrenador * entrenador = EntrenadorConstructor.new("4|1", "A", "B");
 	registrarEnMapaPosicionEntrenador(&mapita, entrenador);
 	Coordinate posicionPokemon = (Coordinate ) { .pos_x = 5, .pos_y = 1 };

@@ -47,7 +47,7 @@ void testDeEntrenadores() {
 
 	ServicioDePlanificacion* servicioDePlanificacionTest = ServicioDePlanificacionConstructor.new(metricasTest, deadlocksTest);
 	Mapa mapaTest = MapaConstructor.new();
-	ServicioDeCaptura* servicioDeCapturaTest = ServicioDeCapturaConstructor.new(mapaTest, servicioDePlanificacionTest);
+	ServicioDeCaptura* servicioDeCapturaTest = ServicioDeCapturaConstructor.new(mapaTest);
 	RegistradorDeEventos * registrador = RegistradorDeEventosConstructor.new();
 
 	ClienteBrokerV2 * clienteTest = ClienteBrokerV2Constructor.new();

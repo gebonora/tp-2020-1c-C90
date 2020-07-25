@@ -12,6 +12,14 @@ bool mismaEspecieMismaPosicion(void * pokemon_) { \
            pokemon->posicionInicial.pos_y == posicion.pos_y; \
 }
 
+static t_list * pokemonesDisponibles(ServicioDeCaptura * this) {
+    bool estaLibre(void * pokemonAtrapable) {
+        return ((PokemonAtrapable *) pokemonAtrapable)->disponible;
+    }
+    t_list * pokemones_disponibles = list_filter(this->pokemonesAtrapables, estaLibre);
+    return pokemones_disponibles;
+}
+
 static PokemonAtrapable * obtenerPokemonAtrapable(ServicioDeCaptura * this, char * especie, Coordinate posicion) {
 	bool mismaEspecieMismaPosicion(void * pokemon_) {
 		PokemonAtrapable * pokemon = (PokemonAtrapable *) pokemon_;
@@ -29,14 +37,7 @@ static PokemonAtrapable * obtenerPokemonAtrapable(ServicioDeCaptura * this, char
 
 static void procesarPokemonCapturable(ServicioDeCaptura * this, char * especie, Coordinate posicion) {
 	this->altaDePokemon(this, especie, posicion);
-	bool sePuedeCapturar = false;
-	if (sePuedeCapturar) {
-		log_debug(this->logger, "Se determinó que es posible la captura de %s", especie);
-		this->encargarTrabajoDeCaptura(this, especie, posicion);
-	} else {
-		log_warning(this->logger, "No hay nadie disponible que pueda capturar a %s", especie);
-		free(especie);
-	}
+	free(especie);
 }
 
 static PokemonAtrapable * altaDePokemon(ServicioDeCaptura * this, char * especie, Coordinate posicion) {
@@ -53,15 +54,6 @@ static void encargarTrabajoDeCaptura(ServicioDeCaptura * this, char * especie, C
 	char * ubicacionPokemonACapturar = coordenadaClave(posicion);
 	log_info(this->logger, "Se le encarga al servicio de planificacion que mande a un entrenador a capturar a %s en %s", especie, ubicacionPokemonACapturar);
 
-	TrabajoPlanificador* trabajo = malloc(sizeof(TrabajoPlanificador));
-	trabajo->coordenadaObjetivo = posicion;
-	trabajo->objetivo = string_duplicate(especie);
-	trabajo->tipo = CAPTURA_POKEMON;
-
-	pthread_mutex_lock(&this->servicioDePlanificacion->mutexColaDeTrabajo);
-	queue_push(this->servicioDePlanificacion->colaDeTrabajo, trabajo);
-	pthread_mutex_unlock(&this->servicioDePlanificacion->mutexColaDeTrabajo);
-	sem_post(&this->servicioDePlanificacion->semaforoContadorColaDeTrabajo);
 
 	free(especie);
 	free(ubicacionPokemonACapturar);
@@ -132,19 +124,19 @@ void destruirServicioDeCaptura(ServicioDeCaptura * this) {
 	free(this);
 }
 
-static ServicioDeCaptura * new(Mapa mapa, ServicioDePlanificacion * servicioDePlanificacion) {
+static ServicioDeCaptura * new(Mapa mapa) {
 	ServicioDeCaptura * servicio = malloc(sizeof(ServicioDeCaptura));
 
 	servicio->logger = log_create(TEAM_INTERNAL_LOG_FILE, "ServicioDeCaptura", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_INFO);
 	servicio->mapa = mapa;
 	servicio->pokemonesAtrapables = list_create();
-	servicio->servicioDePlanificacion = servicioDePlanificacion;
 	servicio->registrarCapturaExitosa = &registrarCapturaExitosa;
 	servicio->registrarCapturaFallida = &registrarCapturaFallida;
 	servicio->procesarPokemonCapturable = &procesarPokemonCapturable;
 	servicio->encargarTrabajoDeCaptura = &encargarTrabajoDeCaptura;
 	servicio->altaDePokemon = &altaDePokemon;
 	servicio->obtenerPokemonAtrapable = &obtenerPokemonAtrapable;
+	servicio->pokemonesDisponibles = &pokemonesDisponibles;
 	servicio->destruir = &destruirServicioDeCaptura;
 
 	return servicio;
