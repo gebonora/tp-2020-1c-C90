@@ -1,7 +1,7 @@
 //
 // Created by Alan Zhao on 09/07/2020.
 //
-#include "modelo/planificable/tarea/TareaPlanificable.h"
+#include "modelo/planificable/tarea/captura/TareaDeCaptura.h"
 #include "test/TestDeIntegracion.h"
 
 void testDePlanificable() {

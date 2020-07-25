@@ -1,7 +1,7 @@
 //
 // Created by Alan Zhao on 11/07/2020.
 //
-
+#include "modelo/planificable/tarea/intercambio/TareaDeIntercambio.h"
 #include "servicios/servicioDePlanificacion/ServicioDePlanificacion.h"
 
 void trabajar(ServicioDePlanificacion * this) {
