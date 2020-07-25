@@ -76,6 +76,7 @@ void warmUp() {
 	sem_init(&semaforoPokemone, 0, 0);
 	sem_init(&semaforoReady, 0, 0);
 	sem_init(&semaforoTrabajar2, 0, 0);
+	pthread_mutex_init(&messi,NULL);
 	pthread_mutex_init(&mtxBlock,NULL);
 	pthread_mutex_init(&mtxExec,NULL);
 	pthread_mutex_init(&mtxExit,NULL);
