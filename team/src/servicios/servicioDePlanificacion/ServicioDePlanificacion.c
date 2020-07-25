@@ -43,11 +43,11 @@ void trabajar(ServicioDePlanificacion * this) {
 
 			t_list* entrenadoresDisponibles = this->planificador.armarListaEntrenadoresDisponibles(&this->planificador);
 
-			sem_wait(&this->semaforoContadorColaDeTrabajo);
-			t_list* trabajo = list_create();
+			sem_wait(&this->semaforoHayPokemones);
+			t_list* trabajo = this->servicioDeCaptura->pokemonesDisponibles(this->servicioDeCaptura);
 
 			for (int a = 0; list_size(trabajo) - 1; a++) {
-				sem_wait(&this->semaforoContadorColaDeTrabajo);
+				sem_wait(&this->semaforoHayPokemones);
 			}
 			this->asignarTareasDeCaptura(this, trabajo, entrenadoresDisponibles);
 
@@ -109,7 +109,7 @@ void asignarTareasDeCaptura(ServicioDePlanificacion* this, t_list* listaPokemon,
 				hiloElegido->entrenador->estaEsperandoAlgo = true;
 				hiloElegido->infoUltimaEjecucion.seNecesitaNuevaEstimacion = true;
 				hiloElegido->infoUltimaEjecucion.rafaga_real_actual = hiloElegido->tareaAsignada->totalInstrucciones;
-				//marcarlo como taken en el mapa
+				pokemon->marcarComoObjetivo(pokemon, hiloElegido->entrenador->id);
 				this->objetivoGlobal.restarUnCapturado(&this->objetivoGlobal, pokemon->especie);
 				this->planificador.moverACola(&this->planificador, hiloElegido, READY, "Se le asignó una tarea de captura.");
 				list_remove(listaPokemon, b);
@@ -209,7 +209,7 @@ static ServicioDePlanificacion * new(ServicioDeMetricas* servicioDeMetricas, Ser
 	sem_init(&servicio->semaforoFinDeTrabajo, 1, 0);
 	sem_init(&servicio->semaforoEjecucionHabilitada, 1, 0);
 	servicio->planificador = PlanificadorConstructor.new(servicioDeMetricas);
-	sem_init(&servicio->semaforoContadorColaDeTrabajo, 0, 0); // Arranca en 0, queremos que el productor meta algo para consumir.
+	sem_init(&servicio->semaforoHayPokemones, 0, 0); // Arranca en 0, queremos que el productor meta algo para consumir.
 	servicio->ultimoHiloEjecutado = NULL;
 	servicio->asignarEquipoAPlanificar = &asignarEquipoAPlanificar;
 	servicio->asignarIntercambios = &asignarIntercambios;

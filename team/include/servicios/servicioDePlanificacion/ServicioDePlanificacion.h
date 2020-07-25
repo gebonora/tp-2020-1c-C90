@@ -76,7 +76,7 @@ typedef struct ServicioDePlanificacion {
 	sem_t semaforoFinDeTrabajo;
 	sem_t semaforoEjecucionHabilitada;
 	Planificador planificador;
-	sem_t semaforoContadorColaDeTrabajo;
+	sem_t semaforoHayPokemones;
 	ServicioDeCaptura* servicioDeCaptura;
 	ObjetivoGlobal objetivoGlobal;
 	ServicioDeResolucionDeDeadlocks* servicioDeResolucionDeDeadlocks;

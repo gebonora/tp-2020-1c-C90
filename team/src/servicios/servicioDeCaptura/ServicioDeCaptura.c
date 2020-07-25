@@ -37,6 +37,7 @@ static PokemonAtrapable * obtenerPokemonAtrapable(ServicioDeCaptura * this, char
 
 static void procesarPokemonCapturable(ServicioDeCaptura * this, char * especie, Coordinate posicion) {
 	this->altaDePokemon(this, especie, posicion);
+	log_debug(this->logger, "Procesando pokemon : %s.", especie);
 	free(especie);
 }
 
