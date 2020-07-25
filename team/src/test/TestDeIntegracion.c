@@ -35,6 +35,9 @@ void testDeIntegracion() {
 	// Tareas
 	list_add(tests, testDeTareas);
 
+	// Intercambio
+	list_add(tests, testDeIntercambio);
+
 	// Planificador
 	list_add(tests, testDePlanificador);
 

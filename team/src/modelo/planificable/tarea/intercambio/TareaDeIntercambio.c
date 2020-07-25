@@ -4,12 +4,7 @@
 
 #include "modelo/planificable/tarea/intercambio/TareaDeIntercambio.h"
 
-TareaPlanificable * generarTareaDeIntercambio(
-        Entrenador * entrenadorMovil,
-        Entrenador * entrenadorEstatico,
-        char * pokemonAEntregar,
-        char * pokemonARecibir
-        ) {
+TareaPlanificable * generarTareaDeIntercambio(Entrenador * entrenadorMovil, Entrenador * entrenadorEstatico, char * pokemonAEntregar, char * pokemonARecibir) {
     Posicion posicionOrigen = entrenadorMovil->posicion(entrenadorMovil);
     Posicion posicionDestino = entrenadorEstatico->posicion(entrenadorEstatico);
 
@@ -40,7 +35,7 @@ TareaPlanificable * generarTareaDeIntercambio(
         Instruccion * instruccionFinal = crearInstruccion(
                 list_size(instrucciones),
                 (void (*)(void *, ...)) intercambiarPokemones,
-                string_from_format("Intercambio - %s entrega un %s y recibe a cambio un %s de %s ", entrenadorMovil->id),
+                string_from_format("Intercambiar un %s de %s por un %s de %s", pokemonAEntregar, entrenadorMovil->id, pokemonARecibir, entrenadorEstatico),
                 argumentosCaptura
         );
         list_add(instrucciones, instruccionFinal);
@@ -57,5 +52,15 @@ TareaPlanificable * generarTareaDeIntercambio(
 }
 
 void intercambiarPokemones(Entrenador * entrenadorMovil, char * idEntrenadorEstatico, char * pokemonAEntrengar, char * pokemonARecibir) {
-    log_info(entrenadorMovil->logger, "Intercambio mi %s por un %s con %s", pokemonAEntrengar, pokemonARecibir, idEntrenadorEstatico);
+    bool matcheaId(Entrenador * entrenador) {
+        return string_equals(entrenador->id, idEntrenadorEstatico);
+    }
+    Entrenador * entrenadorEstatico = list_find(equipoProcesoTeam, (bool (*)(void *)) matcheaId);
+    if (entrenadorEstatico == NULL) {
+        log_error(entrenadorMovil->logger, "No se pudo iniciar el intercambio con %s porque no forma parte del equipo", idEntrenadorEstatico);
+        return;
+    }
+    entrenadorMovil->intercambiarPokemon(entrenadorMovil, entrenadorEstatico, pokemonAEntrengar, pokemonARecibir);
+    entrenadorMovil->estaEsperandoAlgo = false;
+    entrenadorEstatico->estaEsperandoAlgo = false;
 }

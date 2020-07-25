@@ -8,6 +8,7 @@
 #include <assert.h>
 #include <unistd.h>
 #include "app/Global.h"
+#include "modelo/planificable/tarea/intercambio/TareaDeIntercambio.h"
 #include "manejadorDeEventos/ManejadorDeEventos.h"
 #include "planificador/algoritmos/AlgoritmoPlanificador.h"
 #include "planificador/algoritmos/fifo/FirstInFirstOut.h"
@@ -25,6 +26,7 @@
 #include "cliente/ClienteBrokerV2.h"
 #include "manejadorDeEventos/registro/RegistradorDeEventos.h"
 #include "servicios/servicioDeResolucionDeDeadlocks/ServicioDeResolucionDeDeadlocks.h"
+#include "modelo/planificable/tarea/intercambio/TareaDeIntercambio.h"
 
 void testDeIntegracion();
 void testDeEntrenadores();
@@ -44,5 +46,6 @@ void testDeAlgoritmosSJFsinDesalojo();
 void testDeServicioDeMetricas();
 void testClienteBroker();
 void testDeadlock();
+void testDeIntercambio();
 
 #endif //TEAM_TESTDEINTEGRACION_H

@@ -6,6 +6,7 @@
 #define TEAM_TAREADECAPTURA_H
 
 #include "app/Global.h"
+#include "modelo/equipo/Equipo.h"
 #include "modelo/equipo/entrenador/Entrenador.h"
 #include "modelo/planificable/tarea/TareaPlanificable.h"
 #include "modelo/mapa/movimiento/Movimiento.h"
