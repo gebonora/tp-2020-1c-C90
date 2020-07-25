@@ -172,7 +172,6 @@ char* nombreDeLaCola(EstadoPlanificador estado){
 	switch(estado){
 	case NEW_:
 		return "NEW";
-		break;
 	case READY:
 		return "READY";
 		break;

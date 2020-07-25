@@ -15,15 +15,24 @@ void trabajar(ServicioDePlanificacion * this) {
 		}
 
 		// Cambiar desde acá.
+		// TODO: Agarrar a los blocked y fijarnos si finalizaron.
+		// Puede pasar que justo les queda un catch para terminar y les llega -> exit
+		// O hacen pasivamente un intercambio y terminan -> exit
+		for (int a = 0; a < list_size(this->planificador.colas->colaBlocked); a++) {
+			HiloEntrenadorPlanificable* hilo = (HiloEntrenadorPlanificable*) list_get(this->planificador.colas->colaBlocked, a);
+			if (hilo->entrenador->objetivoCompletado(hilo->entrenador)) {
+				this->planificador.moverACola(&this->planificador, hilo, EXIT, "Estaba en espera de un evento para finalizar, y llegó.");
+			}
+		}
 
 		if (this->teamFinalizado(this)) {
 			this->finDeTrabajo = true;
 		}
 
-		if (this->evaluarEstadoPosibleDeadlock(this)) { // el IF loco. // TODO: sacarlo a una funcion aparte.
+		if (this->evaluarEstadoPosibleDeadlock(this)) {
 			// SI HAY DEADLOCK PLANIFICAMOS INTERCAMBIOS
 			log_debug(this->logger, "Se detectó un estado de posible deadlock.");
-			t_list* listaDeBloqueados = this->planificador.colas->colaBlocked; // TODO: que el planificador nos devuelva los procesos de blocked,
+			t_list* listaDeBloqueados = this->planificador.colas->colaBlocked;
 			t_list* listaDeIntercambios = this->servicioDeResolucionDeDeadlocks->procesarDeadlock(this->servicioDeResolucionDeDeadlocks, listaDeBloqueados);
 			this->asignarIntercambios(this, listaDeIntercambios);
 		}
@@ -44,13 +53,23 @@ void trabajar(ServicioDePlanificacion * this) {
 			for (int a = 0; list_size(trabajo) - 1; a++) {
 				sem_wait(&this->semaforoContadorColaDeTrabajo);
 			}
-			this->asignarTareasDeCaptura(this, trabajo, entrenadoresDisponibles); // TODO: transformar esto a una tareaPlanificable que este en el hilo, y pasamos el hilo a ready.
+			this->asignarTareasDeCaptura(this, trabajo, entrenadoresDisponibles);
+
 		}
 		HiloEntrenadorPlanificable* aEjecutar = this->planificador.obtenerProximoAEjecutar(&this->planificador);
 		int ciclosAEjecutar = this->planificador.cantidadDeRafagas(&this->planificador, aEjecutar);
 
-		// this->planificador.cambiarEstadoAExec(aEjecutar, EXEC); Formalidad
-		aEjecutar->ejecutarParcialmente(aEjecutar, ciclosAEjecutar); // TODO: Cambiar el estado del hilo post ejecución con la info para sjf. Mediohecho.
+		if (this->ultimoHiloEjecutado->entrenador->id == NULL || string_equals(this->ultimoHiloEjecutado->entrenador->id, aEjecutar->entrenador->id)) {
+			this->servicioDeMetricas->registrarCambioDeContexto(this->servicioDeMetricas);
+			this->ultimoHiloEjecutado = aEjecutar;
+		}
+
+		this->planificador.moverACola(&this->planificador, aEjecutar, EXEC, "Ejecutará en el procesador.");
+		aEjecutar->ejecutarParcialmente(aEjecutar, ciclosAEjecutar);
+
+		for (int a = 0; a < ciclosAEjecutar; a++) {
+			this->servicioDeMetricas->registrarCicloRealizadoPorEntrenador(this->servicioDeMetricas, aEjecutar->entrenador->id);
+		}
 
 		this->definirYCambiarEstado(this, aEjecutar); // Lo pasa a Ready si no terminó su tarea, Blocked o Exit si terminó su tarea.
 
@@ -68,13 +87,12 @@ void asignarEquipoAPlanificar(ServicioDePlanificacion * this, Equipo equipo) {
 }
 
 t_list* obtenerTrabajo(ServicioDePlanificacion* this, int cantidadAPopear) {
-	// La idea es que tenemos una listaConEntrenadores y queremos popear hasta esa cantidad.
-	// Puede ser que popemos menos porque la cola tiene menor cantidad de elementos que los que pedimos, pero no pasa nada.
+// La idea es que tenemos una listaConEntrenadores y queremos popear hasta esa cantidad.
+// Puede ser que popemos menos porque la cola tiene menor cantidad de elementos que los que pedimos, pero no pasa nada.
 	t_list* listaDeTareas = list_create();
 	int count = 0;
 	while (!queue_is_empty(this->colaDeTrabajo) && count < cantidadAPopear) {
 		list_add(listaDeTareas, queue_pop(this->colaDeTrabajo));
-		// En teoría list_add me mantiene el orden de la queue, el primero de la queue. Iterar lista desde el 1ro y se mantiene el orden.
 		count++;
 	}
 	return listaDeTareas;
@@ -83,16 +101,14 @@ t_list* obtenerTrabajo(ServicioDePlanificacion* this, int cantidadAPopear) {
 void asignarTareasDeCaptura(ServicioDePlanificacion* this, t_list* tareas, t_list* entrenadoresDisponibles) {
 	for (int a = 0; a < list_size(tareas); a++) {
 		TrabajoPlanificador* trabajo = (TrabajoPlanificador*) list_get(tareas, a);
-
 		HiloEntrenadorPlanificable* hiloElegido = devolverEntrenadorMasCercano(trabajo->coordenadaObjetivo, entrenadoresDisponibles);
-
 		TareaPlanificable* tarea = generarTareaDeCaptura(hiloElegido->entrenador, trabajo->objetivo, trabajo->coordenadaObjetivo);
 		hiloElegido->asignarTarea(hiloElegido, tarea);
 		hiloElegido->entrenador->estaEsperandoAlgo = true;
 		hiloElegido->infoUltimaEjecucion.seNecesitaNuevaEstimacion = true;
 		hiloElegido->infoUltimaEjecucion.rafaga_real_actual = hiloElegido->tareaAsignada->totalInstrucciones;
 
-		// cambiarEstadoHilo elegido a ready.
+		this->planificador.moverACola(&this->planificador, hiloElegido, READY, "Se le asignó una tarea de captura.");
 		free(trabajo->objetivo);
 		free(trabajo);
 	}
@@ -100,22 +116,19 @@ void asignarTareasDeCaptura(ServicioDePlanificacion* this, t_list* tareas, t_lis
 }
 
 void asignarIntercambios(ServicioDePlanificacion* this, t_list* intercambios) {
-	// itero por intercambios armando y paso el activo a ready, flageo aa lso 2
-	// Notas: marcar a los 2 como enEspera.
-
 	for (int a = 0; a < list_size(intercambios); a++) {
 		Intercambio* intercambio = (Intercambio*) list_get(intercambios, a);
 
-		TareaPlanificable* tarea = generarTareaDeIntercambio(intercambio->entrenadorQueSeMueve, intercambio->entrenadorQueEspera,
+		TareaPlanificable* tarea = generarTareaDeIntercambio(intercambio->entrenadorQueSeMueve->entrenador, intercambio->entrenadorQueEspera->entrenador,
 				intercambio->pokemonQueObtieneElQueSeMueve, intercambio->pokemonQueObtieneElQueEspera);
 		intercambio->entrenadorQueSeMueve->asignarTarea(intercambio->entrenadorQueSeMueve, tarea);
-		intercambio->entrenadorQueSeMueve->entrenador->estaEsperandoAlgo=true;
-		intercambio->entrenadorQueEspera->entrenador->estaEsperandoAlgo=true;
+		intercambio->entrenadorQueSeMueve->entrenador->estaEsperandoAlgo = true;
+		intercambio->entrenadorQueEspera->entrenador->estaEsperandoAlgo = true;
 
-		intercambio->entrenadorQueSeMueve->infoUltimaEjecucion.seNecesitaNuevaEstimacion=true;
-		intercambio->entrenadorQueSeMueve->infoUltimaEjecucion.rafaga_real_actual=intercambio->entrenadorQueSeMueve->tareaAsignada->totalInstrucciones;
+		intercambio->entrenadorQueSeMueve->infoUltimaEjecucion.seNecesitaNuevaEstimacion = true;
+		intercambio->entrenadorQueSeMueve->infoUltimaEjecucion.rafaga_real_actual = intercambio->entrenadorQueSeMueve->tareaAsignada->totalInstrucciones;
 
-		// pasar seMueve a cola ready
+		this->planificador.moverACola(&this->planificador, intercambio->entrenadorQueSeMueve, READY, "Se le asignó una tarea de intercambio.");
 
 		free(intercambio->pokemonQueObtieneElQueEspera);
 		free(intercambio->pokemonQueObtieneElQueSeMueve);
@@ -124,27 +137,23 @@ void asignarIntercambios(ServicioDePlanificacion* this, t_list* intercambios) {
 }
 
 void definirYCambiarEstado(ServicioDePlanificacion* this, UnidadPlanificable* hilo) {
-	// Primer approach:
-
-	// Caso no termino de ejecutar lo que tiene, pasa a reaady.
-	if (hilo->infoUltimaEjecucion.rafaga_parcial_ejecutada < hilo->tareaAsignada->totalInstrucciones) {
-		//this->planificador cambiar a estado ready;
+	if (hilo->tareaAsignada->cantidadInstruccionesEjecutadas(hilo->tareaAsignada) < hilo->tareaAsignada->totalInstrucciones) {
+		this->planificador.moverACola(&this->planificador, hilo, READY, "Terminó una ráfaga y aún le quedan ciclos pendientes.");
 		return;
 	}
-	if (hilo->infoUltimaEjecucion.rafaga_parcial_ejecutada > hilo->tareaAsignada->totalInstrucciones) {
+	if (hilo->tareaAsignada->cantidadInstruccionesEjecutadas(hilo->tareaAsignada) > hilo->tareaAsignada->totalInstrucciones) {
 		log_error(this->logger, "El entrenador '%s' ejecutó más de lo que debía", hilo->entrenador->id);
 		return;
 	}
 	if (hilo->entrenador->objetivoCompletado(hilo->entrenador)) {
-		// cola de exit
+		this->planificador.moverACola(&this->planificador, hilo, EXIT, "Completó su objetivo personal.");
 		return;
 	}
 	if (hilo->entrenador->puedeAtraparPokemones(hilo->entrenador)) {
-		// cola blocked en espera de captura
+		this->planificador.moverACola(&this->planificador, hilo, BLOCK, "Está en espera del resultado de una captura.");
 		return;
 	}
-	// pasar a blocked pero por deadlock
-
+	this->planificador.moverACola(&this->planificador, hilo, BLOCK, "Está en espera de un intercambio para poder terminar su objetivo personal.");
 }
 
 bool teamFinalizado(ServicioDePlanificacion* this) {
@@ -153,9 +162,9 @@ bool teamFinalizado(ServicioDePlanificacion* this) {
 }
 
 bool evaluarEstadoPosibleDeadlock(ServicioDePlanificacion* this) {
-	// el if loco. Buscamos un entrenador en blocked que no pueda capturar
+// el if loco. Buscamos un entrenador en blocked que no pueda capturar
 
-	// Cola NEW, y EXEC VACIO
+// Cola NEW, y EXEC VACIO
 	if (!list_is_empty(this->planificador.colas->colaNew) || !list_is_empty(this->planificador.colas->colaExec)) {
 		return false;
 	}
@@ -165,11 +174,11 @@ bool evaluarEstadoPosibleDeadlock(ServicioDePlanificacion* this) {
 		return !hilo->entrenador->puedeAtraparPokemones(hilo->entrenador) && !hilo->entrenador->objetivoCompletado(hilo->entrenador);
 	}
 
-	// Cola Blocked con todos en deadlock
+// Cola Blocked con todos en deadlock
 	if (!list_all_satisfy(this->planificador.colas->colaBlocked, entrenadorEnDeadlock)) {
 		return false;
 	}
-	// Cola Ready con todos en deadlock
+// Cola Ready con todos en deadlock
 	if (!list_all_satisfy(this->planificador.colas->colaReady, entrenadorEnDeadlock)) {
 		return false;
 	}
@@ -195,9 +204,10 @@ static ServicioDePlanificacion * new(ServicioDeMetricas* servicioDeMetricas, Ser
 	servicio->finDeTrabajo = false;
 	sem_init(&servicio->semaforoFinDeTrabajo, 1, 0);
 	sem_init(&servicio->semaforoEjecucionHabilitada, 1, 0);
-	servicio->planificador = PlanificadorConstructor.new(servicioDeMetricas); // TODO que planificador tenga serv metricas.
+	servicio->planificador = PlanificadorConstructor.new(servicioDeMetricas);
 	pthread_mutex_init(&servicio->mutexColaDeTrabajo, NULL);
 	sem_init(&servicio->semaforoContadorColaDeTrabajo, 0, 0); // Arranca en 0, queremos que el productor meta algo para consumir.
+	servicio->ultimoHiloEjecutado = NULL;
 	servicio->asignarEquipoAPlanificar = &asignarEquipoAPlanificar;
 	servicio->asignarIntercambios = &asignarIntercambios;
 	servicio->servicioDeResolucionDeDeadlocks = servicioDeadlocks;

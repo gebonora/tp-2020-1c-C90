@@ -13,6 +13,7 @@
 #include "servicios/servicioDeResolucionDeDeadlocks/ServicioDeResolucionDeDeadlocks.h"
 #include "servicios/servicioDeMetricas/ServicioDeMetricas.h"
 #include "modelo/planificable/tarea/captura/TareaDeCaptura.h"
+#include "modelo/planificable/tarea/intercambio/TareaDeIntercambio.h"
 
 /**
  * Esta clase es conocedora de que implicancias a nivel planificacion tienen los eventos del sistema.
@@ -78,6 +79,7 @@ typedef struct ServicioDePlanificacion {
 	sem_t semaforoContadorColaDeTrabajo;
 	ServicioDeResolucionDeDeadlocks* servicioDeResolucionDeDeadlocks;
 	ServicioDeMetricas* servicioDeMetricas;
+	HiloEntrenadorPlanificable* ultimoHiloEjecutado;
 	// Interfaz publica
 	void (*trabajar)(struct ServicioDePlanificacion * this);
 	void (*asignarEquipoAPlanificar)(struct ServicioDePlanificacion * this, Equipo equipo);
