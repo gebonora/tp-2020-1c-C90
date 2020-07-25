@@ -125,6 +125,7 @@ void moverACola(Planificador * this, UnidadPlanificable * uPlanificable, EstadoP
 
 	log_info(MANDATORY_LOGGER, "Se movio al entrenador %s de la cola:%s a la cola: %s. Motivo: %s", uPlanificable->entrenador->id, nombreDeLaCola(estadoOrigen),
 			nombreDeLaCola(estadoDestino), motivoCambio);
+	sem_post(&semaforoDeadlock);
 }
 
 void destruirPlanificador(Planificador * this, void (*destructorUnidadPlanificable)(UnidadPlanificable *)) {

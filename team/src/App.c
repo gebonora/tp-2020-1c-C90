@@ -76,6 +76,7 @@ void warmUp() {
 	sem_init(&semaforoPokemone, 0, 0);
 	sem_init(&semaforoReady, 0, 0);
 	sem_init(&semaforoTrabajar2, 0, 0);
+
 	pthread_mutex_init(&messi,NULL);
 	pthread_mutex_init(&mtxBlock,NULL);
 	pthread_mutex_init(&mtxExec,NULL);
@@ -159,6 +160,7 @@ void configurarEstadoInicialProcesoTeam() {
 	servicioDePlanificacionProcesoTeam->asignarEquipoAPlanificar(servicioDePlanificacionProcesoTeam, equipoProcesoTeam);
 	sem_post(&servicioDePlanificacionProcesoTeam->semaforoEjecucionHabilitada);
 	sem_post(&semaforoTrabajar2);
+	sem_post(&servicioDePlanificacionProcesoTeam->semaforoEjecucionHabilitada3);
 }
 
 void liberarRecursos() {
