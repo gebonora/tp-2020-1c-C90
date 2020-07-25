@@ -119,7 +119,6 @@ static void* _transform_messages(Partition* partition, Operation operation, int 
 	log_debug(LOGGER, "Transforming messages for operation=%s, to void* of size=%d", get_operation_by_value(operation), bytes);
 
 	switch(operation){
-	case APPEARED:
 	case NEW: ;
 		log_debug(LOGGER, "Copy from=%x, to=%x, size=%d", &operation, message, sizeof(Operation));
 		memcpy(message, &operation, sizeof(Operation));
@@ -128,7 +127,7 @@ static void* _transform_messages(Partition* partition, Operation operation, int 
 		uint32_t new_name_size;
 		memcpy(&new_name_size, partition->start, sizeof(uint32_t));
 		log_debug(LOGGER, "New name size: %d", new_name_size);
-		uint32_t real_size = new_name_size +1;
+		real_size = new_name_size +1;
 
 		memcpy(message + displacement, &(real_size),sizeof(uint32_t));
 		displacement += sizeof(uint32_t);
@@ -140,6 +139,29 @@ static void* _transform_messages(Partition* partition, Operation operation, int 
 		memcpy(message + displacement, partition->start + sizeof(uint32_t) + new_name_size, partition->message->data_size - sizeof(uint32_t) - new_name_size);
 		displacement += partition->message->data_size - sizeof(uint32_t) - new_name_size;
 		memcpy(message + displacement, &(partition->message->message_id), sizeof(uint32_t));
+
+		log_debug(LOGGER, "Finishing memcpy");
+		break;
+	case APPEARED: ;
+		log_debug(LOGGER, "Copy from=%x, to=%x, size=%d", &operation, message, sizeof(Operation));
+		memcpy(message, &operation, sizeof(Operation));
+		displacement += sizeof(Operation);
+
+		uint32_t appeared_name_size;
+		memcpy(&appeared_name_size, partition->start, sizeof(uint32_t));
+		log_debug(LOGGER, "Appeared name size: %d", appeared_name_size);
+		real_size = appeared_name_size +1;
+
+		memcpy(message + displacement, &(real_size),sizeof(uint32_t));
+		displacement += sizeof(uint32_t);
+
+		memcpy(message + displacement, partition->start + sizeof(uint32_t), appeared_name_size);
+		displacement += appeared_name_size;
+		memcpy(message + displacement, &end_of_string, 1);
+		displacement += 1;
+		memcpy(message + displacement, partition->start + sizeof(uint32_t) + appeared_name_size, partition->message->data_size - sizeof(uint32_t) - appeared_name_size);
+		displacement += partition->message->data_size - sizeof(uint32_t) - appeared_name_size;
+		memcpy(message + displacement, &(partition->message->correlational_id), sizeof(uint32_t));
 
 		log_debug(LOGGER, "Finishing memcpy");
 		break;
@@ -217,18 +239,18 @@ static void* _transform_messages(Partition* partition, Operation operation, int 
 static void send_message_and_wait_for_ack(arg_struct* args) {
 	void* message = _transform_messages(args->partition, args->partition->message->operation_code, args->bytes);
 	log_debug(LOGGER, "Sending message to: %d, with size: %d", args->subscriber->socket_subscriber, args->bytes);
-
+	log_info(LOGGER, "Enviando el mensaje %d al suscriptor %d", args->partition->message->message_id, args->subscriber->socket_subscriber);
 	if (send(args->subscriber->socket_subscriber, message, args->bytes, MSG_NOSIGNAL) < 0) {
-		log_debug(LOGGER, "Se cayo el suscriptor");
+		log_info(LOGGER, "Se cayo el suscriptor %d", args->subscriber->socket_subscriber);
 	} else {
 		Result result;
 		log_debug(LOGGER, "Waiting for ack");
 		if(recv(args->subscriber->socket_subscriber, &result, sizeof(Result), MSG_WAITALL) > 0){
-			log_debug(LOGGER, "ACK received");
+			log_info(LOGGER, "ACK recibido del suscriptor %d", args->subscriber->socket_subscriber);
 			log_debug(LOGGER, "Adding subscriber to notified_subscribers in partition");
 			list_add(args->partition->notified_suscribers, args->subscriber);
 		} else {
-			log_debug(LOGGER, "Se cayo el suscriptor");
+			log_info(LOGGER, "Se cayo el suscriptor %d", args->subscriber->socket_subscriber);
 		}
 	}
 
