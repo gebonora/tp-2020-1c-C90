@@ -3,6 +3,14 @@
 //
 #include "servicios/servicioDePlanificacion/ServicioDePlanificacion.h"
 
+typedef struct EntrenadorConPokemon {
+	PokemonAtrapable* pokemon;
+	int distancia;
+	HiloEntrenadorPlanificable* entrenadore;
+} EntrenadorConPokemon;
+
+static EntrenadorConPokemon* entrenador_optimo(ServicioDePlanificacion* this, t_list* pokemones, t_list* entrenadores);
+
 void trabajar(ServicioDePlanificacion * this) {
 	log_debug(this->logger, "Hilo de planificación creado.");
 	while (!this->finDeTrabajo) {
@@ -116,6 +124,71 @@ void asignarEquipoAPlanificar(ServicioDePlanificacion * this, Equipo equipo) {
 	list_destroy(unidadesPlanificables);
 }
 
+static EntrenadorConPokemon* entrenador_optimo(ServicioDePlanificacion* this, t_list* pokemones, t_list* entrenadores) {
+	bool pokemon_capturable(PokemonAtrapable* poke) {
+		return this->objetivoGlobal.puedeCapturarse(&this->objetivoGlobal, poke->especie);
+	}
+
+	t_list* pokemones_capturables = list_filter(pokemones, pokemon_capturable);
+
+	if (list_size(pokemones_capturables) > 0) {
+		t_list* lista = list_create();
+		log_info(this->logger, "Tengo %d, pokemones capturables", list_size(pokemones_capturables));
+
+		log_info(this->logger, "Tengo %d entrenadores", list_size(entrenadores));
+
+		for (int index = 0; index < list_size(entrenadores); index++) {
+
+			HiloEntrenadorPlanificable* hiloElegido = (HiloEntrenadorPlanificable*) list_get(entrenadores, index);
+			Coordinate posicion_entrenador = hiloElegido->entrenador->gps->posicionActual(hiloElegido->entrenador->gps).coordenada;
+
+			bool masCercano(PokemonAtrapable* pokemon1, PokemonAtrapable* pokemon2) {
+				Coordinate coor1 = pokemon1->gps->posicionActual(pokemon1->gps).coordenada;
+				Coordinate coor2 = pokemon2->gps->posicionActual(pokemon2->gps).coordenada;
+				log_info(this->logger, "La distancia del entrenador %s al pokemon %s es de %d, y al %s es de %d", hiloElegido->entrenador->id, pokemon1->especie,
+						distanciaEntre(posicion_entrenador, coor1), pokemon2->especie, distanciaEntre(posicion_entrenador, coor2));
+				return distanciaEntre(posicion_entrenador, coor1) <= distanciaEntre(posicion_entrenador, coor2);
+			}
+
+			list_sort(pokemones, &masCercano);
+
+			PokemonAtrapable* pokemon = list_get(pokemones, 0);
+
+			EntrenadorConPokemon* competidor = malloc(sizeof(EntrenadorConPokemon));
+			competidor->pokemon = pokemon;
+			competidor->entrenadore = hiloElegido;
+			competidor->distancia = distanciaEntre(posicion_entrenador, pokemon->gps->posicionActual(pokemon->gps).coordenada);
+
+			list_add(lista, competidor);
+		}
+
+		bool mas_piola(EntrenadorConPokemon* e1, EntrenadorConPokemon* e2) {
+			return e1->distancia < e2->distancia;
+		}
+
+		list_sort(lista, mas_piola);
+
+		void print_entr(EntrenadorConPokemon* entrendaro) {
+			log_info(this->logger, "Paso a la final: Entrenador %s, Pokemon %s, Distancia %d", entrendaro->entrenadore->entrenador->id, entrendaro->pokemon->especie,
+					entrendaro->distancia);
+		}
+
+		list_iterate(lista, &print_entr);
+
+		EntrenadorConPokemon* ganador = list_get(lista, 0);
+
+		log_info(this->logger, "Trajo la copa: Entrenador %s, Pokemon %s, Distancia %d", ganador->entrenadore->entrenador->id, ganador->pokemon->especie,
+				ganador->distancia);
+
+		list_destroy(lista);
+		list_destroy(pokemones_capturables);
+
+		return ganador;
+	}
+
+	return NULL;
+}
+
 void asignarTareasDeCaptura(ServicioDePlanificacion* this, t_list* listaPokemon, t_list* entrenadoresDisponibles) {
 // buscasr el mas cercano en el mapa -> si objetivo.puedeCapturarse -> si y le resto al objetivo
 // else sigo iterando.
@@ -123,64 +196,55 @@ void asignarTareasDeCaptura(ServicioDePlanificacion* this, t_list* listaPokemon,
 // itero sobre esta lista con objetivo.puedeCapturarse. hasta encontrar un match.
 
 // manejador de eventos
+	pthread_mutex_lock(&messi);
 	log_info(this->logger, "Asignando tareas de captura");
 	bool asigne = false;
-	for (int a = 0; a < list_size(entrenadoresDisponibles); a++) {
-		HiloEntrenadorPlanificable* hiloElegido = (HiloEntrenadorPlanificable*) list_get(entrenadoresDisponibles, a);
-		Coordinate posicionEntrenador = hiloElegido->entrenador->gps->posicionActual(hiloElegido->entrenador->gps).coordenada;
-		for (int i = 0; i < list_size(listaPokemon); i++) {
-			PokemonAtrapable * poke = list_get(listaPokemon, i);
-			int distanciaA = distanciaEntre(posicionEntrenador, poke->posicion(poke).coordenada);
-		}
 
-		bool masCercano(void* elem1, void* elem2) {
-			PokemonAtrapable* pokemon1 = (PokemonAtrapable*) elem1;
-			Coordinate coor1 = pokemon1->posicion(pokemon1).coordenada;
+	while (list_size(entrenadoresDisponibles) > 0) {
+		EntrenadorConPokemon* ganador = entrenador_optimo(this, listaPokemon, entrenadoresDisponibles);
 
-			PokemonAtrapable* pokemon2 = (PokemonAtrapable*) elem2;
-			Coordinate coor2 = pokemon2->posicion(pokemon2).coordenada;
+		if (ganador != NULL) {
+			HiloEntrenadorPlanificable* hiloElegido = (HiloEntrenadorPlanificable*) ganador->entrenadore;
+			log_info(this->logger, "Ya tengo un entrenador optimo");
+			PokemonAtrapable* pokemon = ganador->pokemon;
+			Coordinate coordenadaPokemon = pokemon->gps->posicionActual(pokemon->gps).coordenada;
+			TareaPlanificable* tarea = generarTareaDeCaptura(hiloElegido->entrenador, pokemon->especie, coordenadaPokemon);
+			hiloElegido->asignarTarea(hiloElegido, tarea);
+			hiloElegido->entrenador->estaEsperandoAlgo = true;
+			hiloElegido->infoUltimaEjecucion.seNecesitaNuevaEstimacion = true;
+			hiloElegido->infoUltimaEjecucion.rafaga_real_actual = hiloElegido->tareaAsignada->totalInstrucciones;
+			pokemon->marcarComoObjetivo(pokemon, hiloElegido->entrenador->id);
+			this->objetivoGlobal.restarUnCapturado(&this->objetivoGlobal, pokemon->especie);
+			pthread_mutex_lock(&mtxReady);
+			this->planificador.moverACola(&this->planificador, hiloElegido, READY, "Se le asignó una tarea de captura.");
+			pthread_mutex_unlock(&mtxReady);
 
-			int a = distanciaEntre(posicionEntrenador, coor1);
-			int b = distanciaEntre(posicionEntrenador, coor2);
-
-			return a < b;
-		}
-		list_sort(listaPokemon, &masCercano);
-		//log_info(this->logger, "Despues de ordenar");
-		for (int i = 0; i < list_size(listaPokemon); i++) {
-			PokemonAtrapable * poke = list_get(listaPokemon, i);
-			int distanciaA = distanciaEntre(posicionEntrenador, poke->posicion(poke).coordenada);
-			//log_info(this->logger, "Pokemon: %s, distancia: %d", poke->especie, distanciaA);
-		}
-
-		for (int b = 0; b < list_size(listaPokemon); b++) {
-			PokemonAtrapable* pokemon = (PokemonAtrapable*) list_get(listaPokemon, b);
-			if (this->objetivoGlobal.puedeCapturarse(&this->objetivoGlobal, pokemon->especie)) {	// objetivo.puedeCapturarse.
-				Coordinate coordenadaPokemon = pokemon->gps->posicionActual(pokemon->gps).coordenada;
-				TareaPlanificable* tarea = generarTareaDeCaptura(hiloElegido->entrenador, pokemon->especie, coordenadaPokemon);
-				hiloElegido->asignarTarea(hiloElegido, tarea);
-				hiloElegido->entrenador->estaEsperandoAlgo = true;
-				hiloElegido->infoUltimaEjecucion.seNecesitaNuevaEstimacion = true;
-				hiloElegido->infoUltimaEjecucion.rafaga_real_actual = hiloElegido->tareaAsignada->totalInstrucciones;
-				hiloElegido->infoUltimaEjecucion.totalTarea = hiloElegido->tareaAsignada->totalInstrucciones;
-				pokemon->marcarComoObjetivo(pokemon, hiloElegido->entrenador->id);
-				this->objetivoGlobal.restarUnCapturado(&this->objetivoGlobal, pokemon->especie);
-				pthread_mutex_lock(&mtxReady);
-				this->planificador.moverACola(&this->planificador, hiloElegido, READY, "Se le asignó una tarea de captura.");
-				pthread_mutex_unlock(&mtxReady);
-				list_remove(listaPokemon, b);
-				sem_wait(&semaforoPokemone);
-				sem_post(&semaforoReady);
-				asigne = true;
-				break;
+			bool pokemon_igual_a(PokemonAtrapable* poke) {
+				return string_equals_ignore_case(poke->especie, pokemon->especie);
 			}
+
+			list_remove_by_condition(listaPokemon, pokemon_igual_a);
+			sem_wait(&semaforoPokemone);
+			sem_post(&semaforoReady);
+			asigne = true;
+			log_info(this->logger, "Gol de Messi");
+
+			bool entrenador_by_id(HiloEntrenadorPlanificable* entrenador_actual) {
+				return string_equals_ignore_case(entrenador_actual->entrenador->id, hiloElegido->entrenador->id);
+			}
+
+			list_remove_by_condition(entrenadoresDisponibles, entrenador_by_id);
 		}
+		free(ganador);
 	}
 	if (!asigne) {
-		//log_warning(this->logger, "Quedé clavado esperando");
-		//sem_wait(&semaforoPokemone);
+		log_warning(this->logger, "Quedé clavado esperando");
+		sem_wait(&semaforoPokemone);
 	}
 	list_destroy(listaPokemon);
+
+	pthread_mutex_unlock(&messi);
+
 }
 
 void asignarIntercambios(ServicioDePlanificacion* this, t_list* intercambios) {

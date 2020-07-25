@@ -83,6 +83,7 @@ void warmUp() {
 	pthread_mutex_init(&mtxExit, NULL);
 	pthread_mutex_init(&mtxReady, NULL);
 	pthread_mutex_init(&mtxNew, NULL);
+	pthread_mutex_init(&messi,NULL);
 }
 
 void mostrarTitulo(t_log * logger) {
