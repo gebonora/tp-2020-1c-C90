@@ -31,7 +31,7 @@ int main() {
 
     // Server
     log_info(INTERNAL_LOGGER, "Levantando el server...");
-    configurarServer(); //TODO: Usar como fuente de datos el servicio de config
+    configurarServer();
     if (ESPERAR_OBJETIVO_GLOBAL) {
         atenderConexiones(); //TODO: Hacer apagable por si logramos cumplir con el objetivo.
     }
