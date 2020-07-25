@@ -35,9 +35,14 @@ void esperarBrokerNew(int socketDeEscucha) {
 	while (1) {
 
 		//Tratamos de recibir el New, el idMensaje y enviar un ACK.
-		uint32_t idMensaje;
-		New* unNew = recv_new(socketDeEscucha);
 		int flagError = 0;
+		uint32_t idMensaje;
+		Operation operacion;
+
+		if (recv(socketDeEscucha, &operacion, sizeof(Operation), 0) <= 0) {
+			flagError = 1;
+		}
+		New* unNew = recv_new(socketDeEscucha);
 		if (unNew == NULL) {
 			flagError = 1;
 		}
@@ -129,9 +134,14 @@ void esperarBrokerCatch(int socketDeEscucha) {
 	while (1) {
 
 		//Tratamos de recibir el Catch, el idMensaje y enviar un ACK.
-		uint32_t idMensaje;
-		Pokemon* unCatch = recv_pokemon(socketDeEscucha, false);
 		int flagError = 0;
+		uint32_t idMensaje;
+		Operation operacion;
+
+		if (recv(socketDeEscucha, &operacion, sizeof(Operation), 0) <= 0) {
+			flagError = 1;
+		}
+		Pokemon* unCatch = recv_pokemon(socketDeEscucha, false);
 		if (unCatch == NULL) {
 			flagError = 1;
 		}
@@ -223,9 +233,15 @@ void esperarBrokerGet(int socketDeEscucha) {
 	while (1) {
 
 		//Tratamos de recibir el Get, el idMensaje y enviar un ACK.
-		uint32_t idMensaje;
-		Get* unGet = recv_get(socketDeEscucha);
 		int flagError = 0;
+		uint32_t idMensaje;
+		Operation operacion;
+
+		if (recv(socketDeEscucha, &operacion, sizeof(Operation), 0) <= 0) {
+			flagError = 1;
+		}
+		Get* unGet = recv_get(socketDeEscucha);
+
 		if (unGet == NULL) {
 			flagError = 1;
 		}

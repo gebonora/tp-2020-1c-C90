@@ -1,6 +1,10 @@
 #ifndef BROKER_INCLUDE_TEST_H_
 #define BROKER_INCLUDE_TEST_H_
 
-void create_partitions_test();
+#include "server.h"
+#include "arithmetic.h"
+#include "constants.h"
+
+void init_test();
 
 #endif

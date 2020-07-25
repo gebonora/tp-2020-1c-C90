@@ -1,9 +1,8 @@
 #include "server.h"
 
-// TODO: ver si las podemos pasar a static privaditas
-void esperar_cliente(int);
-void process_request(int, int);
-void serve_client(int);
+static void _esperar_cliente(int);
+static void _serve_client(int);
+static void _process_request(uint32_t, int);
 
 void init_server() {
 	int socket_servidor;
@@ -22,6 +21,9 @@ void init_server() {
         if ((socket_servidor = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1)
             continue;
 
+        if(setsockopt(socket_servidor, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int)) == -1)
+        	continue;
+
         if (bind(socket_servidor, p->ai_addr, p->ai_addrlen) == -1) {
             close(socket_servidor);
             continue;
@@ -33,10 +35,12 @@ void init_server() {
 
     freeaddrinfo(servinfo);
 
-    while(1) esperar_cliente(socket_servidor);
+    while(1) _esperar_cliente(socket_servidor);
 }
 
-void esperar_cliente(int socket_servidor)
+/** PRIVATE FUNCTIONS **/
+
+static void _esperar_cliente(int socket_servidor)
 {
 	struct sockaddr_in dir_cliente;
 
@@ -48,20 +52,25 @@ void esperar_cliente(int socket_servidor)
 
 	pthread_t thread;
 
-	pthread_create(&thread,NULL,(void*)serve_client, socket_cliente);
+	pthread_create(&thread,NULL,(void*)_serve_client, socket_cliente);
 	pthread_detach(thread);
 }
 
-void serve_client(int socket_e) {
-	int cod_op;
-	recv(socket_e, &cod_op, sizeof(int), MSG_WAITALL);
-	process_request(cod_op, socket_e);
+static void _serve_client(int socket_client) {
+	uint32_t cod_op;
+
+	int result = recv(socket_client,&cod_op, sizeof(uint32_t),0);
+	if(result > 0){
+		_process_request(cod_op, socket_client);
+	} else {
+		log_info(LOGGER, "Se cayo el cliente: %d", socket);
+	}
 }
 
-void process_request(int cod_op, int socket) {
+static void _process_request(uint32_t cod_op, int socket) {
 	uint32_t generated_id = get_id();
 	log_info(LOGGER, "Message id generated: %d", generated_id);
-	uint32_t id_correlational;
+	uint32_t correlational_id = -1;
 	switch (cod_op) {
 	case NEW: ;
 		New* new_pokemon = recv_new(socket);
@@ -70,12 +79,9 @@ void process_request(int cod_op, int socket) {
 			log_info(LOGGER, "Nombre pokemon: %s", new_pokemon->pokemon->name->value);
 			log_info(LOGGER, "Cantidad: %d", new_pokemon->quantity);
 
-			pthread_mutex_lock(&MUTEX_NEW_QUEUE);
-			queue_push(NEW_QUEUE, new_pokemon);
-			pthread_mutex_unlock(&MUTEX_NEW_QUEUE);
-			sem_post(&NEW_MESSAGES);
-
+			send_message(new_pokemon, NEW, generated_id, correlational_id);
 			send(socket, &generated_id, sizeof(uint32_t), 0);
+
 			free_new(new_pokemon);
 		} else {
 			log_info(LOGGER, "Se cayo el cliente: %d", socket);
@@ -87,18 +93,15 @@ void process_request(int cod_op, int socket) {
 		 //cambio por un recv solo.
 
 		if(caught_pokemon != NULL){
-			int result = recv(socket,&id_correlational,sizeof(uint32_t),0);
+			int result = recv(socket,&correlational_id,sizeof(uint32_t),0);
 			if(result > 0){
 				log_info(LOGGER, "Me llego un caught");
 				log_info(LOGGER, "Resultado: %d", caught_pokemon->result);
-				log_info(LOGGER, "Id correlational: %d", id_correlational);
+				log_info(LOGGER, "Id correlational: %d", correlational_id);
 
-				pthread_mutex_lock(&MUTEX_CAUGHT_QUEUE);
-				queue_push(CAUGHT_QUEUE, caught_pokemon);
-				pthread_mutex_unlock(&MUTEX_CAUGHT_QUEUE);
-				sem_post(&CAUGHT_MESSAGES);
-
+				send_message(caught_pokemon, CAUGHT, generated_id, correlational_id);
 				send(socket, &generated_id, sizeof(uint32_t), 0);
+
 				free(caught_pokemon);
 			}
 		} else {
@@ -112,12 +115,9 @@ void process_request(int cod_op, int socket) {
 			log_info(LOGGER, "Me llego un get");
 			log_info(LOGGER, "Nombre del pokemon: %s", get_pokemon->name->value);
 
-			pthread_mutex_lock(&MUTEX_GET_QUEUE);
-			queue_push(GET_QUEUE, get_pokemon);
-			pthread_mutex_unlock(&MUTEX_GET_QUEUE);
-			sem_post(&GET_MESSAGES);
-
+			send_message(get_pokemon, GET, generated_id, correlational_id);
 			send(socket, &generated_id, sizeof(uint32_t), 0);
+
 			free_get(get_pokemon);
 		} else {
 			log_info(LOGGER, "Se cayo el cliente: %d", socket);
@@ -128,23 +128,21 @@ void process_request(int cod_op, int socket) {
 		Localized* localized_pokemon = recv_localized(socket);
 
 		if(localized_pokemon != NULL){
-			int result = recv(socket,&id_correlational,sizeof(uint32_t),0);
+			log_info(LOGGER, "Me llego un localized (name=%s, coordinates_quantity=%d)", localized_pokemon->pokemon->name->value, localized_pokemon->coordinates_quantity);
+			for(int i = 0; i < localized_pokemon->coordinates_quantity; i++) {
+				Coordinate* loc_coordinate = list_get(localized_pokemon->pokemon->coordinates, i);
+				log_info(LOGGER, "Coordenada (x=%d, y=%d)", loc_coordinate->pos_x, loc_coordinate->pos_y);
+			}
+			int result = recv(socket,&correlational_id,sizeof(uint32_t),0);
 			if (result > 0) {
-				log_info(LOGGER, "Me llego un localized");
-				log_info(LOGGER, "Nombre del pokemon: %s", localized_pokemon->pokemon->name->value);
-				log_info(LOGGER, "Cantidad de coordenadas: %d", localized_pokemon->coordinates_quantity);
-				for(int i = 0; i < localized_pokemon->coordinates_quantity; i++) {
-					Coordinate* loc_coordinate = list_get(localized_pokemon->pokemon->coordinates, i);
-					log_info(LOGGER, "Coordenada: x=%d, y=%d", loc_coordinate->pos_x, loc_coordinate->pos_y);
-				}
+				log_info(LOGGER, "Correlative ID: %d", correlational_id);
 
-				pthread_mutex_lock(&MUTEX_LOCALIZED_QUEUE);
-				queue_push(LOCALIZED_QUEUE, localized_pokemon);
-				pthread_mutex_unlock(&MUTEX_LOCALIZED_QUEUE);
-				sem_post(&LOCALIZED_MESSAGES);
-
+				send_message(localized_pokemon, LOCALIZED, generated_id, correlational_id);
 				send(socket, &generated_id, sizeof(uint32_t), 0);
+
 				free_localized(localized_pokemon);
+			} else {
+				log_info(LOGGER, "Se cayo el cliente %d", socket);
 			}
 		} else {
 			log_info(LOGGER, "Se cayo el cliente: %d", socket);
@@ -155,20 +153,17 @@ void process_request(int cod_op, int socket) {
 		Pokemon* appeared_pokemon = recv_pokemon(socket, false);
 
 		if(appeared_pokemon != NULL){
-			int result = recv(socket,&id_correlational,sizeof(uint32_t),0);
+			int result = recv(socket,&correlational_id,sizeof(uint32_t),0);
 			if(result > 0){
 				log_info(LOGGER, "Me llego un appeared");
 				log_info(LOGGER, "Nombre del pokemon: %s", appeared_pokemon->name->value);
-				log_info(LOGGER, "Id correlational: %d", id_correlational);
+				log_info(LOGGER, "Id correlational: %d", correlational_id);
 				Coordinate* coordinate = list_get(appeared_pokemon->coordinates, 0);
 				log_info(LOGGER, "Coordenada: x=%d, y=%d", coordinate->pos_x, coordinate->pos_y);
 
-				pthread_mutex_lock(&MUTEX_APPEARED_QUEUE);
-				queue_push(APPEARED_QUEUE, appeared_pokemon);
-				pthread_mutex_unlock(&MUTEX_APPEARED_QUEUE);
-				sem_post(&APPEARED_MESSAGES);
-
+				send_message(appeared_pokemon, APPEARED, generated_id, correlational_id);
 				send(socket, &generated_id, sizeof(uint32_t), 0);
+
 				free_pokemon(appeared_pokemon);
 			}
 		} else {
@@ -184,12 +179,9 @@ void process_request(int cod_op, int socket) {
 			Coordinate* catch_coordinate = list_get(catch_pokemon->coordinates, 0);
 			log_info(LOGGER, "Coordenada: x=%d, y=%d", catch_coordinate->pos_x, catch_coordinate->pos_y);
 
-			pthread_mutex_lock(&MUTEX_CATCH_QUEUE);
-			queue_push(CATCH_QUEUE, catch_pokemon);
-			pthread_mutex_unlock(&MUTEX_CATCH_QUEUE);
-			sem_post(&CATCH_MESSAGES);
-
+			send_message(catch_pokemon, CATCH, generated_id, correlational_id);
 			send(socket, &generated_id, sizeof(uint32_t), 0);
+
 			free_pokemon(catch_pokemon);
 		} else {
 			log_info(LOGGER, "Se cayo el cliente: %d", socket);
@@ -219,30 +211,38 @@ void process_request(int cod_op, int socket) {
 		if(result <= 0) {
 			close(socket);
 			break;
-    }
+		}
+		Result ok = OK;
+		send(socket, &ok, sizeof(Result), 0);
 
-		char* op = get_operation_by_value(cod_cola);
-		pthread_mutex_lock(&MUTEX_SUBSCRIBERS_BY_QUEUE);
-		t_list* subscribers = dictionary_get(SUBSCRIBERS_BY_QUEUE, op);
-		list_add(subscribers, socket);
-		pthread_mutex_unlock(&MUTEX_SUBSCRIBERS_BY_QUEUE);
+		log_info(LOGGER, "Suscripcion (process=%s, id=%d, queue=%s, socket=%d)", get_process_by_value(cod_process), process_id, get_operation_by_value(cod_cola), socket);
 
-		log_info(LOGGER, "Suscripcion del proceso: %d, con id: %d", cod_process, process_id);
-		log_info(LOGGER, "Suscripcion en cola: %d", cod_cola);
-
-		// esto es de prueba nomas, cuando funcionen las queues y los envios hay que borrarlo
-		while(1) {
-			Result result =  OK;
-			if(send(socket, &result, sizeof(Result), MSG_NOSIGNAL) < 0) {
-				log_info(LOGGER, "Client is down, closing connection");
-				break;
-			}
-			log_info(LOGGER, "Message sent");
-			sleep(1);
+		bool _inline_find_subscriber(Subscriber* to_compare) {
+			return cod_process == to_compare->process && process_id == to_compare->id;
 		}
 
+		pthread_mutex_lock(&MUTEX_SUBSCRIBERS_BY_QUEUE);
+		t_list* subscribers = dictionary_get(SUBSCRIBERS_BY_QUEUE, get_operation_by_value(cod_cola));
+		Subscriber* subscriber = list_find(subscribers, &_inline_find_subscriber);
+
+		// si existe en la lista solo hay que actualizar el socket, sino lo agrego a la lista
+		if (subscriber != NULL) {
+			log_debug(LOGGER, "Subscriber already in list, updating socket from=%d, to=%d", subscriber->socket_subscriber, socket);
+			subscriber->socket_subscriber = socket;
+		} else {
+			log_debug(LOGGER, "Subscriber not present in list, creating new one");
+			subscriber = malloc(sizeof(Subscriber));
+			subscriber->id = process_id;
+			subscriber->process = (Process) cod_process;
+			subscriber->socket_subscriber = socket;
+			list_add(subscribers, subscriber);
+		}
+
+		consumer_queue(cod_cola, subscriber);
+
+		pthread_mutex_unlock(&MUTEX_SUBSCRIBERS_BY_QUEUE);
+
 		break;
-	case 0:
 	case -1:
 		close(socket);
 		break;

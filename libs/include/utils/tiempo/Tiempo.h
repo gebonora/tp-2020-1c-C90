@@ -6,6 +6,7 @@
 #define DELIBIRD_TIEMPO_H
 
 #include <time.h>
+#include <stdint.h>
 #include <sys/time.h>
 #include <commons/string.h>
 
@@ -18,6 +19,8 @@ struct timeval ahoraEnTimeval();
 double milisegundosHastaAhora(struct timeval tiempoInicio);
 
 double milisegundos(struct timeval tiempo);
+
+char* date_time_to_string(time_t date);
 
 char* current_date_time_as_string();
 

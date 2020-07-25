@@ -7,22 +7,22 @@
 #include "logger.h"
 
 void iniciarLoggers() {
-	loggerMain = log_create(PATH_LOGGER_MAIN, "Main", 1, LOG_LEVEL_DEBUG);
+	loggerMain = log_create(PATH_LOGGER_GAMECARD, "Main", 1, LOG_LEVEL_DEBUG);
 	log_debug(loggerMain, "Logger Main iniciado.");
 
-	loggerNew = log_create(PATH_LOGGER_NEW, "New", 1, LOG_LEVEL_DEBUG);
+	loggerNew = log_create(PATH_LOGGER_GAMECARD, "New", 1, LOG_LEVEL_DEBUG);
 	pthread_mutex_init(&m_loggerNew, NULL);
 	log_debug(loggerNew, "Logger New iniciado.");
 
-	loggerCatch = log_create(PATH_LOGGER_CATCH, "Catch", 1, LOG_LEVEL_DEBUG);
+	loggerCatch = log_create(PATH_LOGGER_GAMECARD, "Catch", 1, LOG_LEVEL_DEBUG);
 	pthread_mutex_init(&m_loggerCatch, NULL);
 	log_debug(loggerCatch, "Logger Catch iniciado.");
 
-	loggerGet = log_create(PATH_LOGGER_GET, "Get", 1, LOG_LEVEL_DEBUG);
+	loggerGet = log_create(PATH_LOGGER_GAMECARD, "Get", 1, LOG_LEVEL_DEBUG);
 	pthread_mutex_init(&m_loggerGet, NULL);
 	log_debug(loggerGet, "Logger Get iniciado.");
 
-	loggerGameboy = log_create(PATH_LOGGER_GAMEBOY, "Gameboy", 1, LOG_LEVEL_DEBUG);
+	loggerGameboy = log_create(PATH_LOGGER_GAMECARD, "Gameboy", 1, LOG_LEVEL_DEBUG);
 	log_debug(loggerGameboy, "Logger Gameboy iniciado.");
 	puts("\n");
 }

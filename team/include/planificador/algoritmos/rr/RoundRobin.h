@@ -4,9 +4,6 @@
 #include "planificador/algoritmos/AlgoritmoPlanificador.h"
 #include "modelo/planificable/HiloEntrenadorPlanificable.h"
 
-int quantum;
-
-void obtenerConfiguracionesRR();
 
 extern const struct RoundRobinClass {
     AlgoritmoPlanificador (*new)();

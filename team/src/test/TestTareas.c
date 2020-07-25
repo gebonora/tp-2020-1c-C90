@@ -29,6 +29,7 @@ void testDeTareas() {
 
 	assert(list_size(tareaCaptura->instrucciones) == 2);
 	assert(tareaCaptura->totalInstrucciones == 2);
+	assert(tareaCaptura->cantidadInstruccionesEjecutadas(tareaCaptura)==0);
 	assert(tareaCaptura->estado == PENDIENTE_DE_EJECUCION);
 
 	Instruccion * instruccion1 = tareaCaptura->proximaInstruccion(tareaCaptura);
@@ -36,12 +37,14 @@ void testDeTareas() {
 
 	tareaCaptura->notificarEjecucion(tareaCaptura, 0);
 	assert(tareaCaptura->estado == PENDIENTE_DE_EJECUCION);
+	assert(tareaCaptura->cantidadInstruccionesEjecutadas(tareaCaptura)==1);
 
 	Instruccion * instruccion2 = tareaCaptura->proximaInstruccion(tareaCaptura);
 	assert(tareaCaptura->estado == EJECUTANDO);
 
 	tareaCaptura->notificarEjecucion(tareaCaptura, 1);
 	assert(tareaCaptura->estado == FINALIZADA);
+	assert(tareaCaptura->cantidadInstruccionesEjecutadas(tareaCaptura)==2);
 	assert(tareaCaptura->contadorDeInstrucciones + 1 == tareaCaptura->totalInstrucciones);
 
 	assert(tareaCaptura->proximaInstruccion(tareaCaptura) == NULL);

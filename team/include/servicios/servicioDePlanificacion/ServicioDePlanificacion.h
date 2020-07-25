@@ -12,6 +12,7 @@
 #include "planificador/Planificador.h"
 #include "servicios/servicioDeResolucionDeDeadlocks/ServicioDeResolucionDeDeadlocks.h"
 #include "servicios/servicioDeMetricas/ServicioDeMetricas.h"
+#include "modelo/planificable/tarea/captura/TareaDeCaptura.h"
 
 /**
  * Esta clase es conocedora de que implicancias a nivel planificacion tienen los eventos del sistema.
@@ -80,9 +81,14 @@ typedef struct ServicioDePlanificacion {
 	// Interfaz publica
 	void (*trabajar)(struct ServicioDePlanificacion * this);
 	void (*asignarEquipoAPlanificar)(struct ServicioDePlanificacion * this, Equipo equipo);
-	void (*destruir)(struct ServicioDePlanificacion * this);
+	void (*asignarTareasDeCaptura)(struct ServicioDePlanificacion * this, t_list* listaDeTrabajo, t_list* entrenadoresDisponibles);
+	void (*asignarIntercambios)(struct ServicioDePlanificacion * this, t_list* listaDeBloqueados);
 	t_list* (*obtenerTrabajo)(struct ServicioDePlanificacion* this, int cantidadAPopear);
-	void (*asignarTareas)(struct ServicioDePlanificacion * this, t_list* listaDeTrabajo, t_list* entrenadoresDisponibles);
+	void (*definirYCambiarEstado)(struct ServicioDePlanificacion* this, UnidadPlanificable* hilo);
+	bool (*teamFinalizado)(struct ServicioDePlanificacion* this);
+	bool (*evaluarEstadoPosibleDeadlock)(struct ServicioDePlanificacion* this);
+	void (*destruir)(struct ServicioDePlanificacion * this);
+
 } ServicioDePlanificacion;
 
 extern const struct ServicioDePlanificacionClass {
@@ -93,5 +99,6 @@ ServicioDePlanificacion * servicioDePlanificacionProcesoTeam;
 
 t_list * convertirAUnidadesPlanificables(Equipo equipo);
 void destruirUnidadPlanificable(UnidadPlanificable * unidadPlanificable);
+HiloEntrenadorPlanificable* devolverEntrenadorMasCercano(Coordinate coor, t_list* hilos);
 
 #endif //TEAM_SERVICIODEPLANIFICACION_H

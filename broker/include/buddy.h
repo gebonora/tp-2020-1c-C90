@@ -7,6 +7,6 @@
 #include "constants.h"
 #include "mem_utils.h"
 
-void save_to_cache_buddy_system(void*, Message*);
+Partition* save_to_cache_buddy_system(void*, Message*);
 
 #endif /* BROKER_INCLUDE_BUDDY_H_ */
