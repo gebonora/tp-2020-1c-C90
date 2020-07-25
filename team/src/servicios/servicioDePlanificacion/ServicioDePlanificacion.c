@@ -14,7 +14,6 @@ void trabajar(ServicioDePlanificacion * this) {
 		}
 
 		// Cambiar desde acá.
-		// TODO: Agarrar a los blocked y fijarnos si finalizaron.
 		// Puede pasar que justo les queda un catch para terminar y les llega -> exit
 		// O hacen pasivamente un intercambio y terminan -> exit
 		for (int a = 0; a < list_size(this->planificador.colas->colaBlocked); a++) {
@@ -45,9 +44,7 @@ void trabajar(ServicioDePlanificacion * this) {
 			t_list* entrenadoresDisponibles = this->planificador.armarListaEntrenadoresDisponibles(&this->planificador);
 
 			sem_wait(&this->semaforoContadorColaDeTrabajo);
-			pthread_mutex_lock(&this->mutexColaDeTrabajo);
-			t_list* trabajo = this->obtenerTrabajo(this, list_size(entrenadoresDisponibles));
-			pthread_mutex_unlock(&this->mutexColaDeTrabajo);
+			t_list* trabajo = list_create();
 
 			for (int a = 0; list_size(trabajo) - 1; a++) {
 				sem_wait(&this->semaforoContadorColaDeTrabajo);
@@ -83,18 +80,6 @@ void asignarEquipoAPlanificar(ServicioDePlanificacion * this, Equipo equipo) {
 	this->planificador.agregarUnidadesPlanificables(&this->planificador, unidadesPlanificables);
 	log_info(this->logger, "Los entrenadores fueron enviados a la cola de NEW");
 	list_destroy(unidadesPlanificables);
-}
-
-t_list* obtenerTrabajo(ServicioDePlanificacion* this, int cantidadAPopear) {
-// La idea es que tenemos una listaConEntrenadores y queremos popear hasta esa cantidad.
-// Puede ser que popemos menos porque la cola tiene menor cantidad de elementos que los que pedimos, pero no pasa nada.
-	t_list* listaDeTareas = list_create();
-	int count = 0;
-	while (!queue_is_empty(this->colaDeTrabajo) && count < cantidadAPopear) {
-		list_add(listaDeTareas, queue_pop(this->colaDeTrabajo));
-		count++;
-	}
-	return listaDeTareas;
 }
 
 void asignarTareasDeCaptura(ServicioDePlanificacion* this, t_list* listaPokemon, t_list* entrenadoresDisponibles) {
@@ -215,7 +200,6 @@ void destruir(ServicioDePlanificacion * this) {
 	sem_post(&this->semaforoEjecucionHabilitada);
 	sem_wait(&this->semaforoFinDeTrabajo);
 	log_debug(this->logger, "Se procede a destruir al servicio de planificacion");
-	queue_destroy(this->colaDeTrabajo);
 	log_destroy(this->logger);
 	this->planificador.destruir(&this->planificador, destruirUnidadPlanificable);
 	free(this);
@@ -225,12 +209,10 @@ static ServicioDePlanificacion * new(ServicioDeMetricas* servicioDeMetricas, Ser
 	ServicioDePlanificacion * servicio = malloc(sizeof(ServicioDePlanificacion));
 
 	servicio->logger = log_create(TEAM_INTERNAL_LOG_FILE, "ServicioDePlanificacion", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_INFO);
-	servicio->colaDeTrabajo = queue_create();
 	servicio->finDeTrabajo = false;
 	sem_init(&servicio->semaforoFinDeTrabajo, 1, 0);
 	sem_init(&servicio->semaforoEjecucionHabilitada, 1, 0);
 	servicio->planificador = PlanificadorConstructor.new(servicioDeMetricas);
-	pthread_mutex_init(&servicio->mutexColaDeTrabajo, NULL);
 	sem_init(&servicio->semaforoContadorColaDeTrabajo, 0, 0); // Arranca en 0, queremos que el productor meta algo para consumir.
 	servicio->ultimoHiloEjecutado = NULL;
 	servicio->asignarEquipoAPlanificar = &asignarEquipoAPlanificar;
@@ -238,7 +220,6 @@ static ServicioDePlanificacion * new(ServicioDeMetricas* servicioDeMetricas, Ser
 	servicio->servicioDeResolucionDeDeadlocks = servicioDeadlocks;
 	servicio->servicioDeMetricas = servicioDeMetricas;
 	servicio->trabajar = &trabajar;
-	servicio->obtenerTrabajo = &obtenerTrabajo;
 	servicio->asignarTareasDeCaptura = &asignarTareasDeCaptura;
 	servicio->definirYCambiarEstado = &definirYCambiarEstado;
 	servicio->teamFinalizado = &teamFinalizado;

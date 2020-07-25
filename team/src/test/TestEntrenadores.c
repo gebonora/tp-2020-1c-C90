@@ -59,10 +59,8 @@ void testDeEntrenadores() {
 	ContabilidadEspecie * contabilidadEspecieB = dictionary_get(objetivo.contabilidadEspeciesInicial, "B");
 	ContabilidadEspecie * contabilidadEspecieC = dictionary_get(objetivo.contabilidadEspeciesInicial, "C");
 
-	assert(list_size(especiesNecesarias) == 3);
-	assert(string_equals(list_get(especiesNecesarias, 0), "A"));
-	assert(string_equals(list_get(especiesNecesarias, 1), "B"));
-	assert(string_equals(list_get(especiesNecesarias, 2), "C"));
+	assert(list_size(especiesNecesarias) == 1);
+	assert(string_equals(list_get(especiesNecesarias, 0), "C"));
 	assert(objetivo.puedeCapturarse(&objetivo, "A") == false);
 	assert(objetivo.puedeCapturarse(&objetivo, "B") == false);
 	assert(objetivo.puedeCapturarse(&objetivo, "C") == true);

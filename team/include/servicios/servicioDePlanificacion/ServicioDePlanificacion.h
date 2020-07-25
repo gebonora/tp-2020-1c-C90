@@ -71,12 +71,10 @@ typedef struct TrabajoPlanificador {
 
 typedef struct ServicioDePlanificacion {
 	t_log * logger;
-	t_queue * colaDeTrabajo; // Posee TrabajoPlanificador TODO: Generar tarea de captura / intercambio.
 	bool finDeTrabajo;
 	sem_t semaforoFinDeTrabajo;
 	sem_t semaforoEjecucionHabilitada;
 	Planificador planificador;
-	pthread_mutex_t mutexColaDeTrabajo;
 	sem_t semaforoContadorColaDeTrabajo;
 	Mapa mapa;
 	ObjetivoGlobal objetivoGlobal;
@@ -88,7 +86,6 @@ typedef struct ServicioDePlanificacion {
 	void (*asignarEquipoAPlanificar)(struct ServicioDePlanificacion * this, Equipo equipo);
 	void (*asignarTareasDeCaptura)(struct ServicioDePlanificacion * this, t_list* listaPokemon, t_list* entrenadoresDisponibles);
 	void (*asignarIntercambios)(struct ServicioDePlanificacion * this, t_list* listaDeBloqueados);
-	t_list* (*obtenerTrabajo)(struct ServicioDePlanificacion* this, int cantidadAPopear);
 	void (*definirYCambiarEstado)(struct ServicioDePlanificacion* this, UnidadPlanificable* hilo);
 	bool (*teamFinalizado)(struct ServicioDePlanificacion* this);
 	bool (*evaluarEstadoPosibleDeadlock)(struct ServicioDePlanificacion* this);
