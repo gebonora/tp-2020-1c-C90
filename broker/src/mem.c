@@ -24,6 +24,15 @@ t_list* messages_from_operation(Operation operation, Subscriber* subscriber){//t
 	t_list* occupied_partitions = get_occupied_partitions();
 
 	t_list* filtered_partitions = list_filter(occupied_partitions, &_find_for_operation);
+
+	bool _by_message_id(void* e1, void* e2){
+		Partition* partition_1 = e1;
+		Partition* partition_2 = e2;
+
+		return partition_1->message->message_id < partition_2->message->message_id;
+	}
+
+	list_sort(filtered_partitions, _by_message_id);
 	list_destroy(occupied_partitions);
 	return filtered_partitions;
 }

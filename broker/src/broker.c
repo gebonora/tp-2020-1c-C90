@@ -23,7 +23,7 @@ uint32_t get_id() {
 	return generated_id;
 }
 
-void send_message(void* data, Operation operation, uint32_t message_id, uint32_t correlational_id){
+void send_message_from_new_request(void* data, Operation operation, uint32_t message_id, uint32_t correlational_id){
 	log_debug(LOGGER, "Creating message");
 	Message* message = _create_message(operation, message_id, correlational_id, _calculate_data_size(data, operation));
 	void* serialized_data = _serialize_data(data, operation, message->data_size);
@@ -42,7 +42,7 @@ void send_message(void* data, Operation operation, uint32_t message_id, uint32_t
 	}
 }
 
-void consumer_queue(Operation operation, Subscriber* subscriber) {
+void send_message_from_suscription(Operation operation, Subscriber* subscriber) {
 	pthread_mutex_lock(&MUTEX_READERS);
 	READERS ++;
 	if(READERS == 1) sem_wait(&MEMORY);
