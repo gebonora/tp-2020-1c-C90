@@ -9,5 +9,6 @@
 uint32_t get_id();
 void send_message(void*, Operation, uint32_t, uint32_t);
 void consumer_queue(Operation, Subscriber*);
+uint32_t get_subscriber_identifier(Subscriber*);
 
 #endif

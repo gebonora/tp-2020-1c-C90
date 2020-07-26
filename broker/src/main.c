@@ -21,7 +21,7 @@ int main(){
 /** PRIVATE FUNCTIONS **/
 
 static void _init_logger() {
-    LOGGER = log_create(LOGGER_PATH, "Broker Server", 0, LOG_LEVEL_INFO);
+    LOGGER = log_create(LOGGER_PATH, "Broker Server", 1, LOG_LEVEL_INFO);
 }
 
 static void _init_config() {
@@ -60,7 +60,6 @@ static void _init_semaphores() {
 	pthread_mutex_init(&MUTEX_READERS, NULL);
 	pthread_mutex_init(&MUTEX_TIME, NULL);
 	sem_init(&MEMORY, 0, 1);
-
 }
 
 static void _init_context() {

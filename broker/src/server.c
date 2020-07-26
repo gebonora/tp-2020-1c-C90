@@ -68,14 +68,13 @@ static void _serve_client(int socket_client) {
 
 static void _process_request(uint32_t cod_op, int socket) {
 	uint32_t generated_id = get_id();
-	log_debug(LOGGER, "Message id generated: %d", generated_id);
 	uint32_t correlational_id = -1;
 	switch (cod_op) {
 	case NEW: ;
 		New* new_pokemon = recv_new(socket);
 		if(new_pokemon != NULL) {
 			Coordinate* new_coordinate = list_get(new_pokemon->pokemon->coordinates, 0);
-			log_info(LOGGER, "Se recibio un nuevo mensaje en la cola %s. Pokemon: %s, cantidad: %d, pos_x: %d, pos_y: %d", get_operation_by_value(cod_op),new_pokemon->pokemon->name->value, new_pokemon->quantity, new_coordinate->pos_x, new_coordinate->pos_y);
+			log_info(LOGGER, "Se recibio un nuevo mensaje en la cola %s. Pokemon: %s, cantidad: %d, pos_x: %d, pos_y: %d, id generado: %d", get_operation_by_value(cod_op),new_pokemon->pokemon->name->value, new_pokemon->quantity, new_coordinate->pos_x, new_coordinate->pos_y, generated_id);
 
 			log_debug(LOGGER, "Me llego un new");
 			log_debug(LOGGER, "Nombre pokemon: %s", new_pokemon->pokemon->name->value);
@@ -97,7 +96,7 @@ static void _process_request(uint32_t cod_op, int socket) {
 		if(caught_pokemon != NULL){
 			int result = recv(socket,&correlational_id,sizeof(uint32_t),0);
 			if(result > 0){
-				log_info(LOGGER, "Se recibio un nuevo mensaje en la cola %s. Resultado: %s, id correlacional: %d", get_operation_by_value(cod_op), get_result_by_value(caught_pokemon->result), correlational_id);
+				log_info(LOGGER, "Se recibio un nuevo mensaje en la cola %s. Resultado: %s, id correlacional: %d, id generado: %d", get_operation_by_value(cod_op), get_result_by_value(caught_pokemon->result), correlational_id, generated_id);
 
 				log_debug(LOGGER, "Me llego un caught");
 				log_debug(LOGGER, "Resultado: %d", caught_pokemon->result);
@@ -144,7 +143,7 @@ static void _process_request(uint32_t cod_op, int socket) {
 			int result = recv(socket,&correlational_id,sizeof(uint32_t),0);
 			if (result > 0) {
 				log_info(LOGGER, "Correlative ID: %d", correlational_id);
-				log_info(LOGGER, "Se recibio un nuevo mensaje en la cola %s. Pokemon: %s, cantidad de coordenadas: %d, id correlativo: %d", get_operation_by_value(cod_op), localized_pokemon->pokemon->name->value, localized_pokemon->coordinates_quantity, correlational_id);
+				log_info(LOGGER, "Se recibio un nuevo mensaje en la cola %s. Pokemon: %s, cantidad de coordenadas: %d, id correlacional: %d, id generado: %d", get_operation_by_value(cod_op), localized_pokemon->pokemon->name->value, localized_pokemon->coordinates_quantity, correlational_id, generated_id);
 
 				send_message(localized_pokemon, LOCALIZED, generated_id, correlational_id);
 				send(socket, &generated_id, sizeof(uint32_t), 0);
@@ -164,7 +163,7 @@ static void _process_request(uint32_t cod_op, int socket) {
 		if(appeared_pokemon != NULL){
 			int result = recv(socket,&correlational_id,sizeof(uint32_t),0);
 			if(result > 0){
-				log_info(LOGGER, "Se recibio un nuevo mensaje en la cola %s. Pokemon: %s, id correlacional: %d", get_operation_by_value(cod_op), appeared_pokemon->name->value, correlational_id);
+				log_info(LOGGER, "Se recibio un nuevo mensaje en la cola %s. Pokemon: %s, id correlacional: %d, id generado: %d", get_operation_by_value(cod_op), appeared_pokemon->name->value, correlational_id, generated_id);
 
 				log_debug(LOGGER, "Me llego un appeared");
 				log_debug(LOGGER, "Nombre del pokemon: %s", appeared_pokemon->name->value);
@@ -185,7 +184,7 @@ static void _process_request(uint32_t cod_op, int socket) {
 	case CATCH: ;
 		Pokemon* catch_pokemon = recv_pokemon(socket, false);
 		if(catch_pokemon != NULL) {
-			log_info(LOGGER, "Se recibio un nuevo mensaje en la cola %s. Pokemon: %s", get_operation_by_value(cod_op), catch_pokemon->name->value);
+			log_info(LOGGER, "Se recibio un nuevo mensaje en la cola %s. Pokemon: %s, id generado: %d", get_operation_by_value(cod_op), catch_pokemon->name->value, generated_id);
 
 			log_debug(LOGGER, "Me llego un catch");
 			log_debug(LOGGER, "Nombre del pokemon: %s", catch_pokemon->name->value);
@@ -227,7 +226,7 @@ static void _process_request(uint32_t cod_op, int socket) {
 		Result ok = OK;
 		send(socket, &ok, sizeof(Result), 0);
 
-		log_info(LOGGER, "Suscripcion (proceso=%s, id=%d, cola=%s, socket=%d)", get_process_by_value(cod_process), process_id, get_operation_by_value(cod_cola), socket);
+		log_info(LOGGER, "Suscripcion proceso=%s, id=%d, cola=%s, socket=%d, id generado: %d", get_process_by_value(cod_process), process_id, get_operation_by_value(cod_cola), socket, generated_id);
 
 		bool _inline_find_subscriber(Subscriber* to_compare) {
 			return cod_process == to_compare->process && process_id == to_compare->id;
@@ -248,6 +247,7 @@ static void _process_request(uint32_t cod_op, int socket) {
 			subscriber->process = (Process) cod_process;
 			subscriber->socket_subscriber = socket;
 			list_add(subscribers, subscriber);
+			sem_init(&SUBSCRIBERS_IDENTIFIERS[get_subscriber_identifier(subscriber)], 0, 1);
 		}
 
 		consumer_queue(cod_cola, subscriber);

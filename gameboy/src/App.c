@@ -1,7 +1,7 @@
 #include "app/App.h"
 
 int main(int argc, char **argv) {
-    INTERNAL_LOGGER = log_create(GAMEBOY_INTERNAL_LOG_FILE, "GameBoy.app", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_INFO);
+    INTERNAL_LOGGER = log_create(GAMEBOY_INTERNAL_LOG_FILE, "GameBoy.app", 1, LOG_LEVEL_DEBUG);
     mostrarTitulo(INTERNAL_LOGGER);
     log_info(INTERNAL_LOGGER, "========================= Inicio de ejecución ============================");
 
@@ -12,7 +12,7 @@ int main(int argc, char **argv) {
     // Logger obligatorio
     log_debug(INTERNAL_LOGGER, "Configurando logger obligatorio...");
     char * mandatoryLogPath = servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, MANDATORY_LOG);
-    MANDATORY_LOGGER = log_create(mandatoryLogPath, "LogObligatorio", 1, LOG_LEVEL_INFO);
+    MANDATORY_LOGGER = log_create(mandatoryLogPath, "LogObligatorio", 1, LOG_LEVEL_DEBUG);
 
     // Controlador
     if (argc > 1) {
