@@ -23,7 +23,7 @@ t_list* messages_from_operation(Operation operation, Subscriber* subscriber){//t
 
 	t_list* occupied_partitions = get_occupied_partitions();
 
-	t_list* filtered_partitions = list_filter(get_occupied_partitions(), &_find_for_operation);
+	t_list* filtered_partitions = list_filter(occupied_partitions, &_find_for_operation);
 	list_destroy(occupied_partitions);
 	return filtered_partitions;
 }

@@ -16,7 +16,7 @@
 #include <delibird/protocol.h>
 
 #define DUMP_PATH "dump.log"
-#define LOGGER_PATH "/home/utnso/tp-2020-1c-C90/broker/logs/broker.log"
+#define LOGGER_PATH "logs/broker.log"
 #define BUDDY_SYSTEM "BS"
 #define DYNAMIC_PARTITIONS "PARTICIONES"
 #define FIRST_FIT "FF"
