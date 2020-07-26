@@ -25,6 +25,8 @@ void iniciarLoggers() {
 	loggerGameboy = log_create(PATH_LOGGER_GAMECARD, "Gameboy", LOG_SHOW_CONSOLE, LOG_LEVEL_DEBUG);
 	log_debug(loggerGameboy, "Logger Gameboy iniciado.");
 	puts("\n");
+
+	loggerAux = log_create(PATH_LOGGER_AUX, "Auxiliar", LOG_SHOW_CONSOLE, AUX_LOG_LEVEL);
 }
 
 void logearNewRecibido(New* unNew, uint32_t idMensaje) {
@@ -86,6 +88,7 @@ void cerrarLoggers() {
 	log_destroy(loggerCatch);
 	log_destroy(loggerGet);
 	log_destroy(loggerGameboy);
+	log_destroy(loggerAux);
 	pthread_mutex_destroy(&m_loggerNew);
 	pthread_mutex_destroy(&m_loggerCatch);
 	pthread_mutex_destroy(&m_loggerGet);

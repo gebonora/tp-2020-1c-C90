@@ -62,6 +62,7 @@ void leerMetadataFileSystem() {
 
 void iniciarSemaforosFS() {
 	pthread_mutex_init(&m_bitmap, NULL);
+	pthread_mutex_init(&m_listaSemaforos, NULL);
 	iniciarListaSemaforosDeArchivo();
 }
 

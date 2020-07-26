@@ -30,10 +30,12 @@ void iniciarListaSemaforosDeArchivo() {
 }
 
 void agregarSemaforoALista(char* nombreArchivo) {
+	pthread_mutex_lock(&m_listaSemaforos);
 	FileMutex* nuevaEntrada = malloc(sizeof(FileMutex));
 	nuevaEntrada->nombreArchivo = string_duplicate(nombreArchivo);
 	pthread_mutex_init(&(nuevaEntrada->mutexArchivo), NULL);
 	list_add(g_listaSemaforos, nuevaEntrada);
+	pthread_mutex_unlock(&m_listaSemaforos);
 }
 
 int puedeAccederAArchivo(char* nombreArchivo) {
@@ -52,8 +54,8 @@ int puedeAccederAArchivo(char* nombreArchivo) {
 		setClaveValor(path, "OPEN", "Y");
 		free(path);
 	}
-	//Consulta el OPEN. si está en Y sale. return -1
-	//					si esá en N lo graba como Y y entra. return 0
+	//Consulta el OPEN. si está en Y sale. return 0
+	//					si esá en N lo graba como Y y entra. return 1
 
 	//Libera el semaforo.
 	pthread_mutex_unlock(&(fileMutex->mutexArchivo));
@@ -94,6 +96,9 @@ int esDirectorioPokemon(char* directorio) {
 }
 
 int estaAbierto(char* nombrePokemon) {
+	if(nombrePokemon == NULL){
+		log_error(loggerAux,"Se está tratando de leer un nombrePokemon NULO!!!!!!!");
+	}
 	char* rutaMetadata = crearRutaMetadataPokemon(nombrePokemon);
 	char* valor = leerClaveValorString(rutaMetadata, "OPEN");
 	int ret = string_equals_ignore_case(valor, "Y");
