@@ -75,7 +75,6 @@ void warmUp() {
 	}
 	sem_init(&semaforoPokemone, 0, 0);
 	sem_init(&semaforoReady, 0, 0);
-	sem_init(&semaforoTrabajar2, 0, 0);
 	sem_init(&semaforoDeadlock, 0, 0);
 	sem_init(&semaforoCaptura, 0, 1);
 	pthread_mutex_init(&mtxBlock, NULL);
@@ -159,9 +158,9 @@ void configurarEstadoInicialProcesoTeam() {
 	list_iterate(equipoProcesoTeam, (void (*)(void *)) registrarEquipo);
 	log_debug(INTERNAL_LOGGER, "Agregando equipo a la planificacion...");
 	servicioDePlanificacionProcesoTeam->asignarEquipoAPlanificar(servicioDePlanificacionProcesoTeam, equipoProcesoTeam);
-	sem_post(&servicioDePlanificacionProcesoTeam->semaforoEjecucionHabilitada);
-	sem_post(&semaforoTrabajar2);
-	sem_post(&servicioDePlanificacionProcesoTeam->semaforoEjecucionHabilitada3);
+	sem_post(&servicioDePlanificacionProcesoTeam->semaforoEjecucionHabilitadaCapturas);
+	sem_post(&servicioDePlanificacionProcesoTeam->semaforoEjecucionHabilitadaCortoPlazo);
+	sem_post(&servicioDePlanificacionProcesoTeam->semaforoEjecucionHabilitadaDeadlock);
 }
 
 void liberarRecursos() {
@@ -196,6 +195,6 @@ void liberarRecursos() {
 	mapaProcesoTeam.destruir(&mapaProcesoTeam);
 	clienteBrokerV2ProcesoTeam->destruir(clienteBrokerV2ProcesoTeam);
 
-	exit(0);
+	exit(0); // TODO: mejorar para que termine bien
 	servicioDePlanificacionProcesoTeam->destruir(servicioDePlanificacionProcesoTeam);
 }

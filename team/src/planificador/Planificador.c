@@ -119,6 +119,8 @@ void moverACola(Planificador * this, UnidadPlanificable * uPlanificable, EstadoP
 			break;
 		}
 	}
+
+	// TODO: agregar mutex de la cola
 	list_add(colaDestino, uPlanificable);
 
 	log_info(MANDATORY_LOGGER, "Se movio al entrenador %s de la cola:%s a la cola: %s. Motivo: %s", uPlanificable->entrenador->id, nombreDeLaCola(estadoOrigen),

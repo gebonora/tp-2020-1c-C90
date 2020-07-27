@@ -17,6 +17,8 @@
 #include "modelo/objetivo/ObjetivoGlobal.h"
 #include "servicios/servicioDeCaptura/ServicioDeCaptura.h"
 
+#define MIN(x, y) ((x) < (y)) ? (x) : (y)
+
 /**
  * Esta clase es conocedora de que implicancias a nivel planificacion tienen los eventos del sistema.
  *
@@ -72,18 +74,20 @@ typedef struct TrabajoPlanificador {
 
 typedef struct ServicioDePlanificacion {
 	t_log * logger;
-	bool finDeTrabajo;
-	sem_t semaforoFinDeTrabajo;
-	sem_t semaforoEjecucionHabilitada;
+
 	Planificador planificador;
-	bool finDeTrabajo2;
-	sem_t semaforoEjecucionHabilitada2;
-	sem_t semaforoFinDeTrabajo2;
 
-	bool finDeTrabajo3;
-	sem_t semaforoEjecucionHabilitada3;
-	sem_t semaforoFinDeTrabajo3;
+	bool finDeTrabajoCapturas;
+	sem_t semaforoFinDeTrabajoCapturas;
+	sem_t semaforoEjecucionHabilitadaCapturas;
 
+	bool finDeTrabajoCortoPlazo;
+	sem_t semaforoEjecucionHabilitadaCortoPlazo;
+	sem_t semaforoFinDeTrabajoCortoPlazo;
+
+	bool finDeTrabajoDeadlock;
+	sem_t semaforoEjecucionHabilitadaDeadlock;
+	sem_t semaforoFinDeTrabajoDeadlock;
 
 	ServicioDeCaptura* servicioDeCaptura;
 	ObjetivoGlobal objetivoGlobal;
@@ -91,9 +95,9 @@ typedef struct ServicioDePlanificacion {
 	ServicioDeMetricas* servicioDeMetricas;
 	HiloEntrenadorPlanificable* ultimoHiloEjecutado;
 	// Interfaz publica
-	void (*trabajar)(struct ServicioDePlanificacion * this);
-	void (*trabajar2)(struct ServicioDePlanificacion * this);
-	void (*trabajar3)(struct ServicioDePlanificacion * this);
+	void (*planificadorDeCapturas)(struct ServicioDePlanificacion * this);
+	void (*planificadorCortoPlazo)(struct ServicioDePlanificacion * this);
+	void (*planificadorDeadlocks)(struct ServicioDePlanificacion * this);
 	void (*asignarEquipoAPlanificar)(struct ServicioDePlanificacion * this, Equipo equipo);
 	void (*asignarTareasDeCaptura)(struct ServicioDePlanificacion * this, t_list* listaPokemon, t_list* entrenadoresDisponibles);
 	void (*asignarIntercambios)(struct ServicioDePlanificacion * this, t_list* listaDeBloqueados);
