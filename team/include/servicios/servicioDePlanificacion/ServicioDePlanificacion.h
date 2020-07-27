@@ -17,6 +17,8 @@
 #include "modelo/objetivo/ObjetivoGlobal.h"
 #include "servicios/servicioDeCaptura/ServicioDeCaptura.h"
 
+#define MIN(x, y) ((x) < (y)) ? (x) : (y)
+
 /**
  * Esta clase es conocedora de que implicancias a nivel planificacion tienen los eventos del sistema.
  *
@@ -59,47 +61,55 @@
  *     El algoritmo de resolucion generará una o varias tareas de intercambio para solucionarlo.
  */
 
-typedef enum TipoTrabajoPlanificador {
-	CAPTURA_POKEMON, NOTIFY_CAUGHT_RESULT, // TODO: Volarlo
-	DEADLOCK_RESOLUTION // TODO: Modelar el intercambio.
+typedef enum TipoTrabajoPlanificador { // TODO: Volarlo si no se usa
+	CAPTURA_POKEMON, NOTIFY_CAUGHT_RESULT, DEADLOCK_RESOLUTION
 } TipoTrabajoPlanificador;
 
-typedef struct TrabajoPlanificador {
+typedef struct TrabajoPlanificador { // TODO: Volarlo si no se usa
 	TipoTrabajoPlanificador tipo;
 	char * objetivo;
 	Coordinate coordenadaObjetivo;
 } TrabajoPlanificador;
 
+typedef struct EntrenadorConPokemon {
+	PokemonAtrapable* pokemon;
+	int distancia;
+	HiloEntrenadorPlanificable* entrenadore;
+} EntrenadorConPokemon;
+
 typedef struct ServicioDePlanificacion {
 	t_log * logger;
-	bool finDeTrabajo;
-	sem_t semaforoFinDeTrabajo;
-	sem_t semaforoEjecucionHabilitada;
+
 	Planificador planificador;
-	bool finDeTrabajo2;
-	sem_t semaforoEjecucionHabilitada2;
-	sem_t semaforoFinDeTrabajo2;
 
-	bool finDeTrabajo3;
-	sem_t semaforoEjecucionHabilitada3;
-	sem_t semaforoFinDeTrabajo3;
+	bool finDeTrabajoCapturas;
+	sem_t semaforoFinDeTrabajoCapturas;
+	sem_t semaforoEjecucionHabilitadaCapturas;
 
+	bool finDeTrabajoCortoPlazo;
+	sem_t semaforoEjecucionHabilitadaCortoPlazo;
+	sem_t semaforoFinDeTrabajoCortoPlazo;
+
+	bool finDeTrabajoDeadlock;
+	sem_t semaforoEjecucionHabilitadaDeadlock;
+	sem_t semaforoFinDeTrabajoDeadlock;
 
 	ServicioDeCaptura* servicioDeCaptura;
 	ObjetivoGlobal objetivoGlobal;
 	ServicioDeResolucionDeDeadlocks* servicioDeResolucionDeDeadlocks;
 	ServicioDeMetricas* servicioDeMetricas;
-	HiloEntrenadorPlanificable* ultimoHiloEjecutado;
+	HiloEntrenadorPlanificable* ultimoHiloEjecutado; // TODO: pensar cambios de contexto y definir si es necesario.
 	// Interfaz publica
-	void (*trabajar)(struct ServicioDePlanificacion * this);
-	void (*trabajar2)(struct ServicioDePlanificacion * this);
-	void (*trabajar3)(struct ServicioDePlanificacion * this);
+	void (*planificadorDeCapturas)(struct ServicioDePlanificacion * this);
+	void (*planificadorDeCortoPlazo)(struct ServicioDePlanificacion * this);
+	void (*planificadorDeDeadlocks)(struct ServicioDePlanificacion * this);
 	void (*asignarEquipoAPlanificar)(struct ServicioDePlanificacion * this, Equipo equipo);
 	void (*asignarTareasDeCaptura)(struct ServicioDePlanificacion * this, t_list* listaPokemon, t_list* entrenadoresDisponibles);
 	void (*asignarIntercambios)(struct ServicioDePlanificacion * this, t_list* listaDeBloqueados);
 	void (*definirYCambiarEstado)(struct ServicioDePlanificacion* this, UnidadPlanificable* hilo);
 	bool (*teamFinalizado)(struct ServicioDePlanificacion* this);
 	bool (*evaluarEstadoPosibleDeadlock)(struct ServicioDePlanificacion* this);
+	EntrenadorConPokemon* (*entrenadorOptimo)(struct ServicioDePlanificacion* this, t_list* pokemones, t_list* entrenadores);
 	void (*destruir)(struct ServicioDePlanificacion * this);
 
 } ServicioDePlanificacion;

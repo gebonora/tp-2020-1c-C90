@@ -18,7 +18,7 @@ static void imprimirMetricas(ServicioDeMetricas* this) {
 		free(entrada);
 	}
 	dictionary_iterator(this->hashMap, imprimirEntrenador);
-	log_info(MANDATORY_LOGGER, "%-70s%6d", "Cantidad total de cambios de contexto:", this->cantidadCambiosDeContexto);
+	log_info(MANDATORY_LOGGER, "%-70s%6d", "Cantidad total de cambios de contexto:", this->cantidadCambiosDeContexto-1);
 	log_info(MANDATORY_LOGGER, "%-70s%6d", "Cantidad total de deadlocks producidos:", this->cantidadDeadlocksProducidos);
 	log_info(MANDATORY_LOGGER, "%-70s%6d", "Cantidad total de deadlocks resueltos:", this->cantidadDeadlocksResueltos);
 	if (list_is_empty(this->deadlocks)) {
