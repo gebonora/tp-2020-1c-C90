@@ -12,7 +12,7 @@ function replace_file(){
 
     if [ -f "${SOURCE}" ]; then
         if [ -f "${TARGET}" ]; then
-            echo -e "Reemplazando archivo: ${YELLOW}${TARGET}${NC}, con: ${YELLOW}${SOURCE}${NC}"
+            echo -e "${GREEN}Reemplazando${NC} archivo: ${YELLOW}${TARGET}${NC}, con: ${YELLOW}${SOURCE}${NC}"
             cp ${SOURCE} ${TARGET}
         else
             echo -e "${RED}No existe el archivo destino${NC}: ${TARGET}"
@@ -30,13 +30,11 @@ function replace_property(){
     FILE=$3
 
     if [ -f "${FILE}" ]; then
-        echo -e "Modificando archivo: ${YELLOW}${FILE}${NC}, clave: ${YELLOW}${KEY}${NC}, valor: ${YELLOW}${NEW_VALUE}${NC}"
-
         if ! grep -R "^[#]*\s*${KEY}=.*" ${FILE} > /dev/null; then
-            echo "Clave no encontrada, agregando entrada"
+            echo -e "${GREEN}Clave no encontrada, agregando entrada,${NC} archivo: ${YELLOW}${FILE}${NC}, clave: ${YELLOW}${KEY}${NC}, valor: ${YELLOW}${NEW_VALUE}${NC}${NC}"
             echo "${KEY}=${NEW_VALUE}" >> ${FILE}
         else
-            echo "Clave encontrada, reemplazando valor"
+            echo -e "${GREEN}Clave encontrada, actualizando entrada,${NC} archivo: ${YELLOW}${FILE}${NC}, clave: ${YELLOW}${KEY}${NC}, valor: ${YELLOW}${NEW_VALUE}${NC}${NC}"
 
             if [[ "$OSTYPE" == "darwin"* ]]; then
                 sed -i '' "s/^[#]*\s*${KEY}=.*/${KEY}=${NEW_VALUE}/" ${FILE}
