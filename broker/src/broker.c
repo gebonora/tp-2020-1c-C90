@@ -57,7 +57,8 @@ void send_message_from_suscription(Operation operation, Subscriber* subscriber) 
 		Partition* first_partition = partitions->head->data;
 		log_debug(LOGGER, "First partition (start=%x, position=%d, size=%d, data_size=%d)", first_partition->start, first_partition->position, first_partition->size, first_partition->message->data_size);
 
-		void _inline_send_message(Partition* partition){
+		void _inline_send_message(void* e){
+			Partition* partition = e;
 			arg_struct* args = malloc(sizeof(arg_struct));
 			args->bytes = _calculate_bytes_to_send(operation, partition->message->data_size);
 			args->partition = partition;
@@ -66,7 +67,7 @@ void send_message_from_suscription(Operation operation, Subscriber* subscriber) 
 			send_message_and_wait_for_ack(args);
 		}
 
-		list_iterate(partitions, &_inline_send_message);
+		list_iterate(partitions, _inline_send_message);
 	}
 	pthread_mutex_lock(&MUTEX_READERS);
 	READERS --;
@@ -95,6 +96,9 @@ static int _calculate_bytes_to_send(Operation operation, int data_size) {
 		break;
 	case CAUGHT: ;
 		size += sizeof(uint32_t);
+		break;
+	default: ;
+		size += 0;
 		break;
 	}
 
@@ -126,18 +130,18 @@ static void* _transform_messages(Partition* partition, Operation operation, int 
 		displacement += sizeof(Operation);
 
 		uint32_t new_name_size;
-		memcpy(&new_name_size, partition->start, sizeof(uint32_t));
+		memcpy(&new_name_size, (void*) partition->start, sizeof(uint32_t));
 		log_debug(LOGGER, "New name size: %d", new_name_size);
 		real_size = new_name_size +1;
 
 		memcpy(message + displacement, &(real_size),sizeof(uint32_t));
 		displacement += sizeof(uint32_t);
 
-		memcpy(message + displacement, partition->start + sizeof(uint32_t), new_name_size);
+		memcpy(message + displacement, (void*) partition->start + sizeof(uint32_t), new_name_size);
 		displacement += new_name_size;
 		memcpy(message + displacement, &end_of_string, 1);
 		displacement += 1;
-		memcpy(message + displacement, partition->start + sizeof(uint32_t) + new_name_size, partition->message->data_size - sizeof(uint32_t) - new_name_size);
+		memcpy(message + displacement, (void*) partition->start + sizeof(uint32_t) + new_name_size, partition->message->data_size - sizeof(uint32_t) - new_name_size);
 		displacement += partition->message->data_size - sizeof(uint32_t) - new_name_size;
 		memcpy(message + displacement, &(partition->message->message_id), sizeof(uint32_t));
 
@@ -149,18 +153,18 @@ static void* _transform_messages(Partition* partition, Operation operation, int 
 		displacement += sizeof(Operation);
 
 		uint32_t appeared_name_size;
-		memcpy(&appeared_name_size, partition->start, sizeof(uint32_t));
+		memcpy(&appeared_name_size, (void*) partition->start, sizeof(uint32_t));
 		log_debug(LOGGER, "Appeared name size: %d", appeared_name_size);
 		real_size = appeared_name_size +1;
 
 		memcpy(message + displacement, &(real_size),sizeof(uint32_t));
 		displacement += sizeof(uint32_t);
 
-		memcpy(message + displacement, partition->start + sizeof(uint32_t), appeared_name_size);
+		memcpy(message + displacement, (void*) partition->start + sizeof(uint32_t), appeared_name_size);
 		displacement += appeared_name_size;
 		memcpy(message + displacement, &end_of_string, 1);
 		displacement += 1;
-		memcpy(message + displacement, partition->start + sizeof(uint32_t) + appeared_name_size, partition->message->data_size - sizeof(uint32_t) - appeared_name_size);
+		memcpy(message + displacement, (void*) partition->start + sizeof(uint32_t) + appeared_name_size, partition->message->data_size - sizeof(uint32_t) - appeared_name_size);
 		displacement += partition->message->data_size - sizeof(uint32_t) - appeared_name_size;
 		memcpy(message + displacement, &(partition->message->correlational_id), sizeof(uint32_t));
 
@@ -171,24 +175,24 @@ static void* _transform_messages(Partition* partition, Operation operation, int 
 		displacement += sizeof(Operation);
 
 		uint32_t catch_name_size;
-		memcpy(&catch_name_size, partition->start, sizeof(uint32_t));
+		memcpy(&catch_name_size, (void*) partition->start, sizeof(uint32_t));
 		log_debug(LOGGER, "Catch name size: %d", catch_name_size);
 		real_size = catch_name_size +1;
 
 		memcpy(message + displacement, &(real_size),sizeof(uint32_t));
 		displacement += sizeof(uint32_t);
 
-		memcpy(message + displacement, partition->start + sizeof(uint32_t), catch_name_size);
+		memcpy(message + displacement, (void*) partition->start + sizeof(uint32_t), catch_name_size);
 		displacement += catch_name_size;
 		memcpy(message + displacement, &end_of_string, 1);
 		displacement += 1;
-		memcpy(message + displacement, partition->start + sizeof(uint32_t) + catch_name_size, partition->message->data_size - sizeof(uint32_t) - catch_name_size);
+		memcpy(message + displacement, (void*) partition->start + sizeof(uint32_t) + catch_name_size, partition->message->data_size - sizeof(uint32_t) - catch_name_size);
 		displacement += partition->message->data_size - sizeof(uint32_t) - catch_name_size;
 		memcpy(message + displacement, &(partition->message->message_id), sizeof(uint32_t));
 		break;
 	case CAUGHT: ;
 		memcpy(message, &operation, sizeof(Operation));
-		memcpy(message + sizeof(Operation), partition->start, partition->message->data_size);
+		memcpy(message + sizeof(Operation), (void*) partition->start, partition->message->data_size);
 		memcpy(message + sizeof(Operation) + partition->message->data_size, &(partition->message->correlational_id), sizeof(uint32_t));
 		break;
 	case LOCALIZED: ;
@@ -196,18 +200,18 @@ static void* _transform_messages(Partition* partition, Operation operation, int 
 		displacement += sizeof(Operation);
 
 		uint32_t localized_name_size;
-		memcpy(&localized_name_size, partition->start, sizeof(uint32_t));
+		memcpy(&localized_name_size, (void*) partition->start, sizeof(uint32_t));
 		log_debug(LOGGER, "Catch name size: %d", localized_name_size);
 		real_size = localized_name_size +1;
 
 		memcpy(message + displacement, &(real_size),sizeof(uint32_t));
 		displacement += sizeof(uint32_t);
 
-		memcpy(message + displacement, partition->start + sizeof(uint32_t), localized_name_size);
+		memcpy(message + displacement, (void*) partition->start + sizeof(uint32_t), localized_name_size);
 		displacement += localized_name_size;
 		memcpy(message + displacement, &end_of_string, 1);
 		displacement += 1;
-		memcpy(message + displacement, partition->start + sizeof(uint32_t) + localized_name_size, partition->message->data_size - sizeof(uint32_t) - localized_name_size);
+		memcpy(message + displacement, (void*) partition->start + sizeof(uint32_t) + localized_name_size, partition->message->data_size - sizeof(uint32_t) - localized_name_size);
 		displacement += partition->message->data_size - sizeof(uint32_t) - localized_name_size;
 		memcpy(message + displacement, &(partition->message->correlational_id), sizeof(uint32_t));
 		break;
@@ -216,20 +220,22 @@ static void* _transform_messages(Partition* partition, Operation operation, int 
 		displacement += sizeof(Operation);
 
 		uint32_t get_name_size;
-		memcpy(&get_name_size, partition->start, sizeof(uint32_t));
+		memcpy(&get_name_size, (void*) partition->start, sizeof(uint32_t));
 		log_debug(LOGGER, "Catch name size: %d", get_name_size);
 		real_size = get_name_size +1;
 
 		memcpy(message + displacement, &(real_size),sizeof(uint32_t));
 		displacement += sizeof(uint32_t);
 
-		memcpy(message + displacement, partition->start + sizeof(uint32_t), get_name_size);
+		memcpy(message + displacement, (void*) partition->start + sizeof(uint32_t), get_name_size);
 		displacement += get_name_size;
 		memcpy(message + displacement, &end_of_string, 1);
 		displacement += 1;
-		memcpy(message + displacement, partition->start + sizeof(uint32_t) + get_name_size, partition->message->data_size - sizeof(uint32_t) - get_name_size);
+		memcpy(message + displacement, (void*) partition->start + sizeof(uint32_t) + get_name_size, partition->message->data_size - sizeof(uint32_t) - get_name_size);
 		displacement += partition->message->data_size - sizeof(uint32_t) - get_name_size;
 		memcpy(message +displacement, &(partition->message->message_id), sizeof(uint32_t));
+		break;
+	default: ;
 		break;
 	}
 
@@ -241,7 +247,9 @@ static void send_message_and_wait_for_ack(arg_struct* args) {
 	void* message = _transform_messages(args->partition, args->partition->message->operation_code, args->bytes);
 
 	log_info(LOGGER, "Adquiring mutex for subscriber_identifier: %d", get_subscriber_identifier(args->subscriber));
-	sem_wait(&SUBSCRIBERS_IDENTIFIERS[get_subscriber_identifier(args->subscriber)]);
+	sem_t* sem = &SUBSCRIBERS_IDENTIFIERS[get_subscriber_identifier(args->subscriber)];
+	//sem_wait(&SUBSCRIBERS_IDENTIFIERS[get_subscriber_identifier(args->subscriber)]);
+	sem_wait(sem);
 	log_info(LOGGER, "Mutex adquired for subscriber_identifier: %d", get_subscriber_identifier(args->subscriber));
 
 	log_debug(LOGGER, "Sending message to: %d, with size: %d", args->subscriber->socket_subscriber, args->bytes);
@@ -260,22 +268,18 @@ static void send_message_and_wait_for_ack(arg_struct* args) {
 		}
 	}
 	log_info(LOGGER, "Mutex unlocked for subscriber_identifier: %d", get_subscriber_identifier(args->subscriber));
-	sem_post(&SUBSCRIBERS_IDENTIFIERS[get_subscriber_identifier(args->subscriber)]);
+	//sem_post(&SUBSCRIBERS_IDENTIFIERS[get_subscriber_identifier(args->subscriber)]);
+	sem_post(sem);
 
 	free(args);
 	free(message);
 }
 
-static bool _same_subscriber(Subscriber* s1, Subscriber* s2) {
-	log_debug(LOGGER, "Subscriber to compare (process=%s, id=%d), current Subscriber (process=%s, id=%d)", get_process_by_value(s1->process), s1->id, get_process_by_value(s2->process), s2->id);
-	return s1->process == s2->process && s1->id == s2->id;
-}
-
 static void send_messages_to_subscribers(Partition* partition) {
 
-	bool _not_notified(Subscriber* subscriber){
-		log_debug(LOGGER, "Inside not_notified");
-		return !list_any_satisfy(partition->notified_suscribers, &_same_subscriber);
+	bool _inline_not_notified(void* e){
+		Subscriber* subscriber = e;
+		return not_notified(partition, subscriber);
 	}
 
 	char* operation = get_operation_by_value(partition->message->operation_code);
@@ -285,7 +289,7 @@ static void send_messages_to_subscribers(Partition* partition) {
 	t_list* subscribers = _get_subscribers(operation);
 
 	log_debug(LOGGER, "Filtering subscribers in partition");
-	t_list* filtered_subscribers = list_filter(subscribers, &_not_notified);
+	t_list* filtered_subscribers = list_filter(subscribers, &_inline_not_notified);
 
 	void _inline_send_messages(Subscriber* subscriber){
 		arg_struct* args = malloc(sizeof(arg_struct));
@@ -330,6 +334,8 @@ static int _calculate_data_size(void* data, Operation operation) {
 		break;
 	case CAUGHT: ;
 		size = calculate_caught_bytes() - sizeof(Operation);
+		break;
+	default: ;
 		break;
 	}
 
@@ -445,6 +451,8 @@ static void* _serialize_data(void* data, Operation operation, int bytes) {
 			displacement += sizeof(uint32_t);
 		}
 
+		break;
+	default: ;
 		break;
 	}
 
