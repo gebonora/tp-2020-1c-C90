@@ -61,7 +61,7 @@ void apagarServer() {
 }
 
 void atenderAppeared() {
-	SOCKET_APPEARED = subscribirseACola(APPEARED, MANDATORY_LOGGER);
+	SOCKET_APPEARED = subscribirseACola(APPEARED);
 	esperarBrokerAppeared(SOCKET_APPEARED);
 }
 
@@ -90,7 +90,7 @@ void esperarBrokerAppeared(int socketDeEscucha) {
 		if (flagError) {
 			log_error(MANDATORY_LOGGER, "Cola: APPEARED. Se perdió la conexión con el Broker. Iniciando reconexión.");
 			close(socketDeEscucha);
-			socketDeEscucha = subscribirseACola(APPEARED, MANDATORY_LOGGER);
+			socketDeEscucha = subscribirseACola(APPEARED);
 		} else {
 			ArgumentosHilo* argumentosHilo = malloc(sizeof(ArgumentosHilo));
 			argumentosHilo->mensaje = unPokemon;
@@ -111,7 +111,7 @@ void procesarHiloAppeared(ArgumentosHilo* argumentosHilo) {
 }
 
 void atenderCaught() {
-	SOCKET_CAUGHT = subscribirseACola(CAUGHT, MANDATORY_LOGGER);
+	SOCKET_CAUGHT = subscribirseACola(CAUGHT);
 	esperarBrokerCaught(SOCKET_CAUGHT);
 }
 
@@ -141,7 +141,7 @@ void esperarBrokerCaught(int socketDeEscucha) {
 		if (flagError) {
 			log_error(MANDATORY_LOGGER, "Cola: CAUGHT, Se perdió la conexión con el Broker. Iniciando reconexión.");
 			close(socketDeEscucha);
-			socketDeEscucha = subscribirseACola(CAUGHT, MANDATORY_LOGGER);
+			socketDeEscucha = subscribirseACola(CAUGHT);
 		} else {
 
 			ArgumentosHilo* argumentosHilo = malloc(sizeof(ArgumentosHilo));
@@ -163,7 +163,7 @@ void procesarHiloCaught(ArgumentosHilo* argumentosHilo) {
 }
 
 void atenderLocalized() {
-	SOCKET_LOCALIZED = subscribirseACola(LOCALIZED, MANDATORY_LOGGER);
+	SOCKET_LOCALIZED = subscribirseACola(LOCALIZED);
 	esperarBrokerLocalized(SOCKET_LOCALIZED);
 }
 
@@ -194,7 +194,7 @@ void esperarBrokerLocalized(int socketDeEscucha) {
 		if (flagError) {
 			log_error(MANDATORY_LOGGER, "Cola: LOCALIZED. Se perdió la conexión con el Broker. Iniciando reconexión.");
 			close(socketDeEscucha);
-			socketDeEscucha = subscribirseACola(LOCALIZED, MANDATORY_LOGGER);
+			socketDeEscucha = subscribirseACola(LOCALIZED);
 		} else {
 
 			ArgumentosHilo* argumentosHilo = malloc(sizeof(ArgumentosHilo));
@@ -298,7 +298,7 @@ int iniciarSocketDeEscucha(Operation cola) {
 	return socketDeEscucha;
 }
 
-int subscribirseACola(Operation cola, t_log* logger) {
+int subscribirseACola(Operation cola) {
 	int socketDeEscucha = iniciarSocketDeEscucha(cola);
 	while (socketDeEscucha == -1) {
 		log_error(MANDATORY_LOGGER, "Cola: %s. Error al conectar con Broker. Reintentando en '%d' segundos...", traducirOperacion(cola), Tiempo_Reconexion);

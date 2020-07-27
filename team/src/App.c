@@ -43,9 +43,10 @@ int main() {
 	// Cuando se complete el objetivo global, podremos finalizar el proceso y liberar los recursos.
 	if (ESPERAR_OBJETIVO_GLOBAL) {
 		log_info(INTERNAL_LOGGER, "Esperando a que se complete el objetivo global...");
-		sem_wait(&semaforoObjetivoGlobalCompletado);
+		for (int a = 0; a < list_size(equipoProcesoTeam); a++) {
+			sem_wait(&semaforoObjetivoGlobalCompletado);
+		}
 	}
-
 	// Mostramos las metricas para comparar contra otros procesos team
 	servicioDeMetricasProcesoTeam->imprimirMetricas(servicioDeMetricasProcesoTeam);
 
@@ -73,16 +74,10 @@ void warmUp() {
 	if (!ACTIVAR_RETARDO_CPU) {
 		log_warning(INTERNAL_LOGGER, "Retardo de CPU: DESACTIVADO");
 	}
-	sem_init(&semaforoPokemone, 0, 0);
-	sem_init(&semaforoReady, 0, 0);
-	sem_init(&semaforoDeadlock, 0, 0);
-	sem_init(&semaforoCaptura, 0, 1);
-	pthread_mutex_init(&mtxBlock, NULL);
-	pthread_mutex_init(&mtxExec, NULL);
-	pthread_mutex_init(&mtxExit, NULL);
-	pthread_mutex_init(&mtxReady, NULL);
-	pthread_mutex_init(&mtxNew, NULL);
-	pthread_mutex_init(&messi,NULL);
+
+	for (int a = 0; a < 5; a++) {
+		pthread_mutex_init(&arrayMutexColas[a], NULL);
+	}
 }
 
 void mostrarTitulo(t_log * logger) {
@@ -128,8 +123,14 @@ void inicializarComponentesDelSistema() {
 	registradorDeEventosProcesoTeam = RegistradorDeEventosConstructor.new();
 	manejadorDeEventosProcesoTeam = ManejadorDeEventosConstructor.new(servicioDeCapturaProcesoTeam, registradorDeEventosProcesoTeam);
 
-	log_debug(INTERNAL_LOGGER, "Inicializando semanforo de fin de proceso...");
+	log_debug(INTERNAL_LOGGER, "Inicializando semáforo de fin de proceso...");
 	sem_init(&semaforoObjetivoGlobalCompletado, 0, 0);
+
+	log_debug(INTERNAL_LOGGER, "Inicializando semáforos contadores...");
+	sem_init(&semaforoReady, 0, 0);
+	sem_init(&semaforoDeadlock, 0, 0);
+	sem_init(&semaforoContadorPokemon, 0, 0);
+	sem_init(&semaforoContadorEntrenadoresDisponibles, 0, 0);
 }
 
 /**
@@ -181,7 +182,9 @@ void liberarRecursos() {
 	log_debug(INTERNAL_LOGGER, "Liberando servicios...");
 	servicioDeConfiguracion.destruir(&servicioDeConfiguracion);
 	servicioDeCapturaProcesoTeam->destruir(servicioDeCapturaProcesoTeam);
-	//servicioDePlanificacionProcesoTeam->destruir(servicioDePlanificacionProcesoTeam);
+
+	servicioDePlanificacionProcesoTeam->destruir(servicioDePlanificacionProcesoTeam);
+
 	servicioDeResolucionDeDeadlocksProcesoTeam->destruir(servicioDeResolucionDeDeadlocksProcesoTeam);
 	servicioDeMetricasProcesoTeam->destruir(servicioDeMetricasProcesoTeam);
 
@@ -194,7 +197,4 @@ void liberarRecursos() {
 	destruirAlgoritmosDePlanificacion();
 	mapaProcesoTeam.destruir(&mapaProcesoTeam);
 	clienteBrokerV2ProcesoTeam->destruir(clienteBrokerV2ProcesoTeam);
-
-	exit(0); // TODO: mejorar para que termine bien
-	servicioDePlanificacionProcesoTeam->destruir(servicioDePlanificacionProcesoTeam);
 }

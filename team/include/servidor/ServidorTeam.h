@@ -41,7 +41,7 @@ void esperarBrokerLocalized(int socketDeEscucha);
 void procesarHiloLocalized(ArgumentosHilo* argumentosHilo);
 
 int iniciarSocketDeEscucha(Operation cola);
-int subscribirseACola(Operation cola, t_log* logger);
+int subscribirseACola(Operation cola);
 char* traducirOperacion(Operation operacion);
 
 void atenderGameboy();

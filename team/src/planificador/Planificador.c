@@ -5,10 +5,14 @@
 #include "planificador/Planificador.h"
 
 void agregarUnidadesPlanificables(Planificador * this, t_list * unidadesPlanificables) {
-	list_add_all(this->colas->colaNew, unidadesPlanificables);
+	for (int a = 0; a < list_size(unidadesPlanificables); a++) {
+		UnidadPlanificable* unidadActual = (UnidadPlanificable*) list_get(unidadesPlanificables, a);
+		this->agregarUnidadPlanificable(this, unidadActual);
+	}
 }
 
 void agregarUnidadPlanificable(Planificador * this, UnidadPlanificable * unidadPlanificable) {
+	log_info(MANDATORY_LOGGER, "Se movió al entrenador %s a la cola: NEW. Motivo: Se generó un hilo de entrenador", unidadPlanificable->entrenador->id);
 	list_add(this->colas->colaNew, unidadPlanificable);
 }
 
@@ -112,6 +116,7 @@ void moverACola(Planificador * this, UnidadPlanificable * uPlanificable, EstadoP
 	colaDestino = colaSegunEstado(this, estadoDestino);
 	colaOrigen = colaSegunEstado(this, estadoOrigen);
 
+	pthread_mutex_lock(&arrayMutexColas[estadoOrigen]);
 	for (int a = 0; a < list_size(colaOrigen); a++) {
 		UnidadPlanificable* unidadActual = (UnidadPlanificable*) list_get(colaOrigen, a);
 		if (string_equals_ignore_case(unidadActual->entrenador->id, uPlanificable->entrenador->id)) {
@@ -119,14 +124,26 @@ void moverACola(Planificador * this, UnidadPlanificable * uPlanificable, EstadoP
 			break;
 		}
 	}
+	pthread_mutex_unlock(&arrayMutexColas[estadoOrigen]);
 
-	// TODO: agregar mutex de la cola
+	pthread_mutex_lock(&arrayMutexColas[estadoDestino]);
 	list_add(colaDestino, uPlanificable);
+	pthread_mutex_unlock(&arrayMutexColas[estadoDestino]);
 
-	log_info(MANDATORY_LOGGER, "Se movio al entrenador %s de la cola:%s a la cola: %s. Motivo: %s", uPlanificable->entrenador->id, nombreDeLaCola(estadoOrigen),
+	log_info(MANDATORY_LOGGER, "Se movió al entrenador %s de la cola: %s a la cola: %s. Motivo: %s", uPlanificable->entrenador->id, nombreDeLaCola(estadoOrigen),
 			nombreDeLaCola(estadoDestino), motivoCambio);
-	sem_post(&semaforoDeadlock);
-	sem_post(&semaforoCaptura);
+	switch (estadoDestino) {
+	case READY:
+		sem_post(&semaforoReady);
+		break;
+	case EXIT:
+		sem_post(&semaforoObjetivoGlobalCompletado);
+		sem_post(&semaforoDeadlock);
+		break;
+	case BLOCK:
+		sem_post(&semaforoDeadlock);
+		break;
+	}
 }
 
 void destruirPlanificador(Planificador * this, void (*destructorUnidadPlanificable)(UnidadPlanificable *)) {
@@ -136,19 +153,14 @@ void destruirPlanificador(Planificador * this, void (*destructorUnidadPlanificab
 }
 
 static Planificador new(ServicioDeMetricas* servicio) { // TODO: asignar servicioDeMetricas que tiene que llegar por parametro.
-	t_log * logger = log_create(TEAM_INTERNAL_LOG_FILE, "Planificador", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_INFO);
-
+	t_log * logger = log_create(TEAM_INTERNAL_LOG_FILE, "Planificador", SHOW_INTERNAL_CONSOLE, INTERNAL_LOG_LEVEL);
 	char * nombreAlgoritmo = servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, ALGORITMO_PLANIFICACION);
 	log_info(logger, "El planificador se inicializará con el algoritmo %s", nombreAlgoritmoCompleto(nombreAlgoritmo));
 
 	Planificador planificador = { .logger = logger, .quantum = servicioDeConfiguracion.obtenerEntero(&servicioDeConfiguracion, QUANTUM), .algoritmoPlanificador =
 			obtenerAlgoritmo(nombreAlgoritmo), .transicionadorDeEstados = TransicionadorDeEstadosConstructor.new(), .colas = crearColasDePlanificacion(),
-			.servicioDeMetricas = servicio, &agregarUnidadesPlanificables, &agregarUnidadPlanificable,
-
-			&armarListaEntrenadoresDisponibles, &obtenerProximoAEjecutar, &cantidadDeRafagas,
-
-			&colaSegunEstado, &moverACola, &obtenerEstadoDeUnidadPlanificable, &destruirPlanificador, };
-
+			.servicioDeMetricas = servicio, &agregarUnidadesPlanificables, &agregarUnidadPlanificable, &armarListaEntrenadoresDisponibles, &obtenerProximoAEjecutar,
+			&cantidadDeRafagas, &colaSegunEstado, &moverACola, &obtenerEstadoDeUnidadPlanificable, &destruirPlanificador, };
 	return planificador;
 }
 
