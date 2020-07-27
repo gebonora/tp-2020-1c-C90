@@ -37,7 +37,7 @@ function replace_property(){
             echo "${KEY}=${NEW_VALUE}" >> ${FILE}
         else
             echo "Clave encontrada, reemplazando valor"
-            sed -ir "s/^[#]*\s*${KEY}=.*/${KEY}=${NEW_VALUE}/" ${FILE}
+            sed -i '' "s/^[#]*\s*${KEY}=.*/${KEY}=${NEW_VALUE}/" ${FILE}
         fi 
     else 
         echo -e "${RED}No existe el archivo${NC}: ${FILE}"
