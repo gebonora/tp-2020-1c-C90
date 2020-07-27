@@ -84,7 +84,7 @@ static bool registrarCapturaExitosa(ServicioDeCaptura * this, CapturaPokemon * c
 		sem_post(&semaforoDeadlock);
 
 		if (capturaPokemon->entrenador->puedeAtraparPokemones) {
-			sem_wait(&capturaPokemon->entrenador->finalizacionDeCapturaSegura);
+			log_debug(capturaPokemon->entrenador->logger, "Capturó un %s y se marcó como disponible de nuevo.", capturaPokemon->especie(capturaPokemon));
 			sem_post(&semaforoContadorEntrenadoresDisponibles);
 		}
 
@@ -118,7 +118,8 @@ static bool registrarCapturaFallida(ServicioDeCaptura * this, CapturaPokemon * c
 		sem_post(&semaforoDeadlock);
 
 		if (capturaPokemon->entrenador->puedeAtraparPokemones) {
-			sem_wait(&capturaPokemon->entrenador->finalizacionDeCapturaSegura);
+			//sem_wait(&capturaPokemon->entrenador->finalizacionDeCapturaSegura);
+			log_debug(capturaPokemon->entrenador->logger, "Falló en capturar un %s y se marcó como disponible de nuevo.", capturaPokemon->especie(capturaPokemon));
 			sem_post(&semaforoContadorEntrenadoresDisponibles); // Quiero que este post no llegue antes que el entrenador a la cola blocked.
 		}
 		free(posicion);

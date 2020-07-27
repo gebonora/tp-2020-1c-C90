@@ -34,6 +34,8 @@ void planificadorDeCapturas(ServicioDePlanificacion * this) {
 		t_list* trabajo = this->servicioDeCaptura->pokemonesDisponibles(this->servicioDeCaptura);
 
 		this->asignarTareasDeCaptura(this, trabajo, entrenadoresDisponibles);
+		this->planificador.mostrarLasColas(&this->planificador);
+
 		sem_post(&this->semaforoEjecucionHabilitadaCapturas);
 	}
 	sem_post(&this->semaforoFinDeTrabajoCapturas);
@@ -43,7 +45,6 @@ void planificadorDeCortoPlazo(ServicioDePlanificacion* this) {
 	log_debug(this->logger, "Hilo de Planificador de corto plazo creado.");
 	while (!this->finDeTrabajoCortoPlazo) {
 		sem_wait(&this->semaforoEjecucionHabilitadaCortoPlazo);
-		puts("clavado antes del ready");
 		sem_wait(&semaforoReady);
 
 		if (this->finDeTrabajoCortoPlazo) {
@@ -74,6 +75,8 @@ void planificadorDeCortoPlazo(ServicioDePlanificacion* this) {
 			this->servicioDeMetricas->registrarCicloRealizadoPorEntrenador(this->servicioDeMetricas, aEjecutar->entrenador->id);
 		}
 
+		// TODO: esperar a que termine la instruccion del hilo para correr definirYCambiarEstado. Sino me llega el CAUGHT que desencadena planificacion y
+		// mi entrenador está todavía en la cola EXEC, entonces lo ignoro.
 		this->definirYCambiarEstado(this, aEjecutar); // Lo pasa a Ready si no terminó su tarea, Blocked o Exit si terminó su tarea.
 		this->planificador.mostrarLasColas(&this->planificador);
 
@@ -116,6 +119,7 @@ void planificadorDeDeadlocks(ServicioDePlanificacion* this) {
 			t_list* listaDeIntercambios = this->servicioDeResolucionDeDeadlocks->procesarDeadlock(this->servicioDeResolucionDeDeadlocks, listaDeBloqueados);
 			this->asignarIntercambios(this, listaDeIntercambios);
 		}
+		this->planificador.mostrarLasColas(&this->planificador);
 		sem_post(&this->semaforoEjecucionHabilitadaDeadlock);
 	}
 	sem_post(&this->semaforoFinDeTrabajoDeadlock);
@@ -225,7 +229,7 @@ void asignarTareasDeCaptura(ServicioDePlanificacion* this, t_list* listaPokemon,
 	}
 	list_destroy(listaPokemon);
 
-	for (int g = 0; g > iteracionesPosibles - 1; g++) {
+	for (int g = 0; g < iteracionesPosibles - 1; g++) {
 		sem_wait(&semaforoContadorPokemon);
 		sem_wait(&semaforoContadorEntrenadoresDisponibles);
 	}
@@ -259,7 +263,6 @@ void definirYCambiarEstado(ServicioDePlanificacion* this, UnidadPlanificable* hi
 		if (hilo->entrenador->estaEsperandoAlgo) {
 			if (hilo->entrenador->puedeAtraparPokemones(hilo->entrenador)) {
 				this->planificador.moverACola(&this->planificador, hilo, BLOCK, "Está en espera del resultado de una captura.");
-				sem_post(&hilo->entrenador->finalizacionDeCapturaSegura);
 				return;
 			}
 			if (!hilo->entrenador->puedeAtraparPokemones(hilo->entrenador)) {
@@ -302,9 +305,9 @@ bool teamFinalizado(ServicioDePlanificacion* this) { // TODO: se puede ir
 bool evaluarEstadoPosibleDeadlock(ServicioDePlanificacion* this) { // TODO: pensar mass
 // el if loco. Buscamos un entrenador en blocked que no pueda capturar
 // Cola NEW, y EXEC VACIO
-	if (!list_is_empty(this->planificador.colas->colaNew) || !list_is_empty(this->planificador.colas->colaExec)) {
+	/*if (!list_is_empty(this->planificador.colas->colaNew) || !list_is_empty(this->planificador.colas->colaExec)) {
 		return false;
-	}
+	}*/
 
 	bool entrenadorEnDeadlock(void* elem) {
 		HiloEntrenadorPlanificable* hilo = (HiloEntrenadorPlanificable*) elem;

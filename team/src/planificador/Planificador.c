@@ -19,8 +19,13 @@ void agregarUnidadPlanificable(Planificador * this, UnidadPlanificable * unidadP
 
 t_list* armarListaEntrenadoresDisponibles(Planificador * this) {
 	// Retorna los de New, Blocked sin Espera y no llenos.
+	pthread_mutex_lock(&arrayMutexColas[NEW]);
 	t_list* entrenadoresDisponibles = list_duplicate(this->colas->colaNew); // Si hago duplicate a lista vacia, me retorna lista vacia?
+	pthread_mutex_unlock(&arrayMutexColas[NEW]);
+
+	pthread_mutex_lock(&arrayMutexColas[BLOCK]);
 	t_list* auxiliarBlocked = list_duplicate(this->colas->colaBlocked);
+	pthread_mutex_unlock(&arrayMutexColas[BLOCK]);
 	for (int a = 0; a < list_size(auxiliarBlocked); a++) {
 		HiloEntrenadorPlanificable* elementoIterado = (HiloEntrenadorPlanificable*) list_get(auxiliarBlocked, a);
 		if (!elementoIterado->entrenador->estaEsperandoAlgo && elementoIterado->entrenador->puedeAtraparPokemones(elementoIterado->entrenador)) {
@@ -162,6 +167,10 @@ void mostrarLasColas(Planificador* this) {
 	sem_getvalue(&semaforoReady, &ready);
 	sem_getvalue(&semaforoDeadlock, &deadlock);
 	log_info(this->logger, "Semaforos. ContadorPokemon: %d, ContadorEntrenadoresDisponibles: %d, Ready: %d, Deadlock: %d", pokemon, entrenadores, ready, deadlock);
+
+	t_list* mapa = mapaProcesoTeam.pokemonesDisponibles(&mapaProcesoTeam);
+	log_info(this->logger, "Cantidad de Pokemon disponibles: %d", list_size(mapa));
+	list_destroy(mapa);
 }
 
 void destruirPlanificador(Planificador * this, void (*destructorUnidadPlanificable)(UnidadPlanificable *)) {
