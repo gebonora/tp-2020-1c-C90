@@ -37,7 +37,12 @@ function replace_property(){
             echo "${KEY}=${NEW_VALUE}" >> ${FILE}
         else
             echo "Clave encontrada, reemplazando valor"
-            sed -i '' "s/^[#]*\s*${KEY}=.*/${KEY}=${NEW_VALUE}/" ${FILE}
+
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+                sed -i '' "s/^[#]*\s*${KEY}=.*/${KEY}=${NEW_VALUE}/" ${FILE}
+            else
+                sed -i "s/^[#]*\s*${KEY}=.*/${KEY}=${NEW_VALUE}/" ${FILE}
+            fi
         fi 
     else 
         echo -e "${RED}No existe el archivo${NC}: ${FILE}"
