@@ -14,6 +14,7 @@ typedef struct CapturaPokemon {
     Entrenador * entrenador;
     uint32_t idCorrelatividad;
     PokemonAtrapable * pokemonAtrapable;
+    sem_t finalizacionDeCapturaSegura;
     bool (*eliminarPokemonCapturadoDelMapa)(struct CapturaPokemon * this);
     char * (*posicion)(struct CapturaPokemon * this);
     char * (*especie)(struct CapturaPokemon * this);

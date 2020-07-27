@@ -14,6 +14,7 @@ void agregarUnidadesPlanificables(Planificador * this, t_list * unidadesPlanific
 void agregarUnidadPlanificable(Planificador * this, UnidadPlanificable * unidadPlanificable) {
 	log_info(MANDATORY_LOGGER, "Se movió al entrenador %s a la cola: NEW. Motivo: Se generó un hilo de entrenador", unidadPlanificable->entrenador->id);
 	list_add(this->colas->colaNew, unidadPlanificable);
+	sem_post(&semaforoContadorEntrenadoresDisponibles);
 }
 
 t_list* armarListaEntrenadoresDisponibles(Planificador * this) {
@@ -146,6 +147,23 @@ void moverACola(Planificador * this, UnidadPlanificable * uPlanificable, EstadoP
 	}
 }
 
+void mostrarLasColas(Planificador* this) {
+	log_info(this->logger, "Cantidad en NEW: %d", list_size(this->colas->colaNew));
+	log_info(this->logger, "Cantidad en READY: %d", list_size(this->colas->colaReady));
+	log_info(this->logger, "Cantidad en EXEC: %d", list_size(this->colas->colaExec));
+	log_info(this->logger, "Cantidad en BLOCKED: %d", list_size(this->colas->colaBlocked));
+	log_info(this->logger, "Cantidad en EXIT: %d", list_size(this->colas->colaExit));
+	int pokemon;
+	int entrenadores;
+	int ready;
+	int deadlock;
+	sem_getvalue(&semaforoContadorPokemon, &pokemon);
+	sem_getvalue(&semaforoContadorEntrenadoresDisponibles, &entrenadores);
+	sem_getvalue(&semaforoReady, &ready);
+	sem_getvalue(&semaforoDeadlock, &deadlock);
+	log_info(this->logger, "Semaforos. ContadorPokemon: %d, ContadorEntrenadoresDisponibles: %d, Ready: %d, Deadlock: %d", pokemon, entrenadores, ready, deadlock);
+}
+
 void destruirPlanificador(Planificador * this, void (*destructorUnidadPlanificable)(UnidadPlanificable *)) {
 	log_destroy(this->logger);
 	this->transicionadorDeEstados.destruir(&this->transicionadorDeEstados);
@@ -160,7 +178,7 @@ static Planificador new(ServicioDeMetricas* servicio) { // TODO: asignar servici
 	Planificador planificador = { .logger = logger, .quantum = servicioDeConfiguracion.obtenerEntero(&servicioDeConfiguracion, QUANTUM), .algoritmoPlanificador =
 			obtenerAlgoritmo(nombreAlgoritmo), .transicionadorDeEstados = TransicionadorDeEstadosConstructor.new(), .colas = crearColasDePlanificacion(),
 			.servicioDeMetricas = servicio, &agregarUnidadesPlanificables, &agregarUnidadPlanificable, &armarListaEntrenadoresDisponibles, &obtenerProximoAEjecutar,
-			&cantidadDeRafagas, &colaSegunEstado, &moverACola, &obtenerEstadoDeUnidadPlanificable, &destruirPlanificador, };
+			&cantidadDeRafagas, &colaSegunEstado, &moverACola, &obtenerEstadoDeUnidadPlanificable, &mostrarLasColas, &destruirPlanificador, };
 	return planificador;
 }
 

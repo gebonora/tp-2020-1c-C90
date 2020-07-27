@@ -22,9 +22,10 @@ void planificadorDeCapturas(ServicioDePlanificacion * this) {
 		}
 		log_debug(this->logger, "Iniciando planificación de capturas.");
 
-		if (list_is_empty(this->servicioDeCaptura->pokemonesAtrapables) || list_is_empty(this->planificador.colas->colaBlocked)
-				|| list_is_empty(this->planificador.colas->colaNew)) {
-			log_error(this->logger, "Se quizó asignar capturas con listas vacías!!! (Si estás corriendo los tests es esperable.)");
+		if (list_is_empty(this->servicioDeCaptura->pokemonesAtrapables)
+				|| (list_is_empty(this->planificador.colas->colaBlocked) && list_is_empty(this->planificador.colas->colaNew))) {
+			log_error(this->logger, "Se quizo asignar capturas con listas vacías!!! (Si estás corriendo los tests es esperable.)");
+			this->planificador.mostrarLasColas(&this->planificador);
 			sem_post(&this->semaforoEjecucionHabilitadaCapturas);
 			continue;
 		}
@@ -42,19 +43,22 @@ void planificadorDeCortoPlazo(ServicioDePlanificacion* this) {
 	log_debug(this->logger, "Hilo de Planificador de corto plazo creado.");
 	while (!this->finDeTrabajoCortoPlazo) {
 		sem_wait(&this->semaforoEjecucionHabilitadaCortoPlazo);
+		puts("clavado antes del ready");
 		sem_wait(&semaforoReady);
-
-		if (list_is_empty(this->planificador.colas->colaReady)) {
-			log_error(this->logger, "Se quizo planificar con una cola de ready vacía!!! (Si estás corriendo los tests es esperable.)");
-			sem_post(&this->semaforoEjecucionHabilitadaCortoPlazo);
-			continue;
-		}
 
 		if (this->finDeTrabajoCortoPlazo) {
 			log_debug(this->logger, "Se terminó el hilo de Planificador de corto plazo");
 			break;
 		}
-		log_debug(this->logger, "Iniciando planificación de capturas.");
+
+		log_debug(this->logger, "Iniciando planificación de corto plazo.");
+
+		if (list_is_empty(this->planificador.colas->colaReady)) {
+			log_error(this->logger, "Se quizo planificar con una cola de ready vacía!!! (Si estás corriendo los tests es esperable.)");
+			this->planificador.mostrarLasColas(&this->planificador);
+			sem_post(&this->semaforoEjecucionHabilitadaCortoPlazo);
+			continue;
+		}
 
 		HiloEntrenadorPlanificable* aEjecutar = this->planificador.obtenerProximoAEjecutar(&this->planificador);
 		int ciclosAEjecutar = this->planificador.cantidadDeRafagas(&this->planificador, aEjecutar);
@@ -71,6 +75,7 @@ void planificadorDeCortoPlazo(ServicioDePlanificacion* this) {
 		}
 
 		this->definirYCambiarEstado(this, aEjecutar); // Lo pasa a Ready si no terminó su tarea, Blocked o Exit si terminó su tarea.
+		this->planificador.mostrarLasColas(&this->planificador);
 
 		sem_post(&this->semaforoEjecucionHabilitadaCortoPlazo);
 	}
@@ -84,13 +89,17 @@ void planificadorDeDeadlocks(ServicioDePlanificacion* this) {
 		sem_wait(&this->semaforoEjecucionHabilitadaDeadlock);
 		// Debería recibir post cuando llega un Caught, un hilo pasa a BLOCK o EXIT.
 		sem_wait(&semaforoDeadlock);
+
 		if (this->finDeTrabajoDeadlock) {
 			log_debug(this->logger, "Se terminó el hilo de Planificador de deadlocks");
 			break;
 		}
 
+		log_debug(this->logger, "Iniciando planificación de deadlocks.");
+
 		if (list_is_empty(this->planificador.colas->colaBlocked)) {
 			log_error(this->logger, "Se quizo tratar deadlocks con una lista de blocked vacía!!! (Si estás corriendo los tests es esperable.)");
+			this->planificador.mostrarLasColas(&this->planificador);
 			sem_post(&this->semaforoEjecucionHabilitadaDeadlock);
 			continue;
 		}
@@ -248,11 +257,18 @@ void asignarIntercambios(ServicioDePlanificacion* this, t_list* intercambios) {
 void definirYCambiarEstado(ServicioDePlanificacion* this, UnidadPlanificable* hilo) {
 	if (hilo->tareaAsignada == NULL) {
 		if (hilo->entrenador->estaEsperandoAlgo) {
-			this->planificador.moverACola(&this->planificador, hilo, BLOCK, "Está en espera de un evento.");
-			return;
+			if (hilo->entrenador->puedeAtraparPokemones(hilo->entrenador)) {
+				this->planificador.moverACola(&this->planificador, hilo, BLOCK, "Está en espera del resultado de una captura.");
+				sem_post(&hilo->entrenador->finalizacionDeCapturaSegura);
+				return;
+			}
+			if (!hilo->entrenador->puedeAtraparPokemones(hilo->entrenador)) {
+				this->planificador.moverACola(&this->planificador, hilo, BLOCK, "Está en espera de un intercambio.");
+				return;
+			}
 		}
 		if (!hilo->entrenador->objetivoCompletado(hilo->entrenador) && !hilo->entrenador->puedeAtraparPokemones(hilo->entrenador)) {
-			this->planificador.moverACola(&this->planificador, hilo, BLOCK, "Está en espera de un intercambio.");
+			this->planificador.moverACola(&this->planificador, hilo, BLOCK, "Está en espera de la resolución de deadlocks.");
 			return;
 		}
 	}
@@ -267,7 +283,7 @@ void definirYCambiarEstado(ServicioDePlanificacion* this, UnidadPlanificable* hi
 		}
 	}
 	if (hilo->entrenador->puedeAtraparPokemones(hilo->entrenador)) {
-		this->planificador.moverACola(&this->planificador, hilo, BLOCK, "Está en espera de un evento.");
+		this->planificador.moverACola(&this->planificador, hilo, BLOCK, "Está en espera de un evento. RARO!!!!"); // TODO: ver si hace falta.
 		return;
 	}
 
@@ -309,7 +325,7 @@ void destruir(ServicioDePlanificacion* this) {
 	this->finDeTrabajoCortoPlazo = true;
 	this->finDeTrabajoDeadlock = true;
 
-	// Posteamos los semaforos con el flag -> va a entrar y morir.
+// Posteamos los semaforos con el flag -> va a entrar y morir.
 	sem_post(&semaforoContadorEntrenadoresDisponibles);
 	sem_post(&semaforoContadorPokemon);
 	sem_post(&semaforoReady);

@@ -253,7 +253,7 @@ void atenderGameboy() {
 			pthread_create(&thread, NULL, (void*) procesarHiloAppeared, argumentosHilo);
 			pthread_detach(thread);
 		} else {
-			log_error(INTERNAL_LOGGER, "El gameboy envio un mensaje erroneo.");
+			log_error(INTERNAL_LOGGER, "El gameboy envió un mensaje erróneo.");
 			close(socketCliente);
 		}
 	}
@@ -321,7 +321,7 @@ char* traducirOperacion(Operation operacion) {
 	case LOCALIZED:
 		return "LOCALIZED";
 	default:
-		return "OPERACIÓN DESCONICDA. ALGO ANDA MAL!";
+		return "OPERACIÓN DESCONOCIDA. ALGO ANDA MAL!";
 	}
 }
 

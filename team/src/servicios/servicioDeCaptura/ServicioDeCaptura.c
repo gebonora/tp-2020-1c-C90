@@ -83,6 +83,11 @@ static bool registrarCapturaExitosa(ServicioDeCaptura * this, CapturaPokemon * c
 		capturaPokemon->entrenador->estaEsperandoAlgo = false;
 		sem_post(&semaforoDeadlock);
 
+		if (capturaPokemon->entrenador->puedeAtraparPokemones) {
+			sem_wait(&capturaPokemon->entrenador->finalizacionDeCapturaSegura);
+			sem_post(&semaforoContadorEntrenadoresDisponibles);
+		}
+
 		free(posicion);
 	} else {
 		log_error(this->logger, "No se puede capturar un pokemon que no figure en el mapa");
@@ -111,6 +116,11 @@ static bool registrarCapturaFallida(ServicioDeCaptura * this, CapturaPokemon * c
 		log_info(this->logger, "%s eliminó las coordenadas de un %s en %s porque falló su captura.", capturaPokemon->idEntrenador(capturaPokemon),
 				capturaPokemon->pokemonAtrapable->especie, posicion);
 		sem_post(&semaforoDeadlock);
+
+		if (capturaPokemon->entrenador->puedeAtraparPokemones) {
+			sem_wait(&capturaPokemon->entrenador->finalizacionDeCapturaSegura);
+			sem_post(&semaforoContadorEntrenadoresDisponibles); // Quiero que este post no llegue antes que el entrenador a la cola blocked.
+		}
 		free(posicion);
 	} else {
 		log_error(this->logger, "No se puede eliminar un pokemon que no figure en el mapa");

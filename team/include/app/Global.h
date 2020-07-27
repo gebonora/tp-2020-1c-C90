@@ -21,8 +21,8 @@
 #ifndef TEAM_DEVELOPMENT_MODE
 #define INTERNAL_LOG_LEVEL LOG_LEVEL_DEBUG
 #define SHOW_INTERNAL_CONSOLE 1 // 1 para mostrar la consola de uso interno, 0 para el caso contrario.
-#define CORRER_TESTS 1
-#define ESPERAR_OBJETIVO_GLOBAL 0
+#define CORRER_TESTS 0
+#define ESPERAR_OBJETIVO_GLOBAL 1
 #define ACTIVAR_RETARDO_CPU 0
 #endif //TEAM_DEVELOPMENT_MODE
 
