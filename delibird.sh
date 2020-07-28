@@ -25,7 +25,11 @@ else
     cd ${DELIBIRD_PATH}/gameboy && ./deploy.sh $1 && rm -f deploy/logs/*
     cd ${DELIBIRD_PATH}/broker && make && rm -f logs/*
     cd ${DELIBIRD_PATH}/gamecard && make && rm -f logs/*
-    cd ${DELIBIRD_PATH}/team && ./deploy.sh $1 && cp -r deploy deploy_team_2 && rm -f deploy/logs/* && rm -f deploy_team_2/logs/*
+    cd ${DELIBIRD_PATH}/team && ./deploy.sh $1
+    cd ${DELIBIRD_PATH}/team && cp -r deploy deploy_team_2
+    cd ${DELIBIRD_PATH}/team && mv deploy/team deploy/team_1
+    cd ${DELIBIRD_PATH}/team && mv deploy_team_2/team deploy/team_2
+    cd ${DELIBIRD_PATH}/team && rm -f deploy/logs/* && rm -f deploy_team_2/logs/*
 
     echo -e "${GREEN}Todos los modulos compilados!${NC}"
 fi

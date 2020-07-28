@@ -8,8 +8,6 @@ NC='\033[0m'
 function process() {
     TEST_NAME=$1
     SCRIPT_NAME=$2
-    local BROKER_PID=$(pidof broker.app)
-    local VALGRIND_PID=$(pidof valgrind.bin)
 
     SCRIPT_TO_EXECUTE=${SCRIPTS_PATH}/${SCRIPT_NAME}
     TEST_DUMP=${DUMPS_PATH}/${TEST_NAME}_dump.log
