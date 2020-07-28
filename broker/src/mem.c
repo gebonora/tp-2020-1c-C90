@@ -16,13 +16,14 @@ Partition* save_message(void* data, Message* message) {
 
 t_list* messages_from_operation(Operation operation, Subscriber* subscriber){//todo sincronizar
 
-	bool _find_for_operation(Partition* partition){
+	bool _inline_find_for_operation(void* e){
+		Partition* partition = e;
 		return partition->message->operation_code == operation && not_notified(partition, subscriber);
 	}
 
 	t_list* occupied_partitions = get_occupied_partitions();
 
-	t_list* filtered_partitions = list_filter(occupied_partitions, &_find_for_operation);
+	t_list* filtered_partitions = list_filter(occupied_partitions, _inline_find_for_operation);
 
 	bool _by_message_id(void* e1, void* e2){
 		Partition* partition_1 = e1;
@@ -41,7 +42,8 @@ bool not_notified(void* e1, void* e2) {
 	Subscriber* subscriber = e2;
 	log_debug(LOGGER, "Inside not_notified");
 
-	bool _inline_same_subscriber(Subscriber* to_compare) {
+	bool _inline_same_subscriber(void* e) {
+		Subscriber* to_compare = e;
 		return _same_subscriber(subscriber, to_compare);
 	}
 

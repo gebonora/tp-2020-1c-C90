@@ -14,7 +14,6 @@ static void send_messages_to_subscribers(Partition* partition);
 static int _calculate_data_size(void*, Operation);
 static void* _serialize_data(void*, Operation, int);
 static int _calculate_bytes_to_send(Operation, int);
-static bool _same_subscriber(Subscriber*, Subscriber*);
 
 uint32_t get_id() {
 	pthread_mutex_lock(&MUTEX_MESSAGE_ID);
@@ -54,11 +53,13 @@ void send_message_from_suscription(Operation operation, Subscriber* subscriber) 
 	log_debug(LOGGER, "Found %d partitions", partitions->elements_count);
 
 	if (partitions->elements_count > 0) {
+		uint32_t now = get_time();
 		Partition* first_partition = partitions->head->data;
 		log_debug(LOGGER, "First partition (start=%x, position=%d, size=%d, data_size=%d)", first_partition->start, first_partition->position, first_partition->size, first_partition->message->data_size);
 
 		void _inline_send_message(void* e){
 			Partition* partition = e;
+			partition->access_time = now;
 			arg_struct* args = malloc(sizeof(arg_struct));
 			args->bytes = _calculate_bytes_to_send(operation, partition->message->data_size);
 			args->partition = partition;
@@ -112,9 +113,7 @@ static t_list* _get_subscribers(char* queue_key) {
 	return subscribers;
 }
 
-static void* _transform_messages(Partition* partition, Operation operation, int bytes) { //todo: esto vamos a tener que sincronizarlo porque se leen aca los datos de los start de las particiones.
-	uint32_t now = get_time();
-	partition->access_time = now;
+static void* _transform_messages(Partition* partition, Operation operation, int bytes) {
 
 	void* message = malloc(bytes);
 	char end_of_string = '\0';
@@ -247,7 +246,7 @@ static void send_message_and_wait_for_ack(arg_struct* args) {
 	void* message = _transform_messages(args->partition, args->partition->message->operation_code, args->bytes);
 
 	log_info(LOGGER, "Adquiring mutex for subscriber_identifier: %d", get_subscriber_identifier(args->subscriber));
-	sem_t* sem = &SUBSCRIBERS_IDENTIFIERS[get_subscriber_identifier(args->subscriber)];
+	sem_t* sem = (sem_t*) &SUBSCRIBERS_IDENTIFIERS[get_subscriber_identifier(args->subscriber)];
 	//sem_wait(&SUBSCRIBERS_IDENTIFIERS[get_subscriber_identifier(args->subscriber)]);
 	sem_wait(sem);
 	log_info(LOGGER, "Mutex adquired for subscriber_identifier: %d", get_subscriber_identifier(args->subscriber));
@@ -291,7 +290,8 @@ static void send_messages_to_subscribers(Partition* partition) {
 	log_debug(LOGGER, "Filtering subscribers in partition");
 	t_list* filtered_subscribers = list_filter(subscribers, &_inline_not_notified);
 
-	void _inline_send_messages(Subscriber* subscriber){
+	void _inline_send_messages(void* e){
+		Subscriber* subscriber = e;
 		arg_struct* args = malloc(sizeof(arg_struct));
 		args->bytes = _calculate_bytes_to_send(partition->message->operation_code, partition->message->data_size);
 		args->partition = partition;

@@ -6,8 +6,6 @@
 #include "arithmetic.h"
 #include "constants.h"
 #include "dump.h"
-// TODO: borrar luego de los test
-#include "test.h"
 
 int main();
 

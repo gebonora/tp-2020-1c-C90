@@ -37,7 +37,7 @@ static void _create_dump() {
 	for(int index = 0, number = 1; index < memory->partitions->elements_count; index++, number++) {
 		partition = list_get(memory->partitions, index);
 		if(partition->free) {
-			fprintf(dump_file, "Partición %d: | %d - %d | [%s] | Size: %d b | LRU: %d |\n", number, partition->position, partition->position + partition->size - 1, "L", partition->size, partition->access_time);
+			fprintf(dump_file, "Partición %d: | %d - %d | [%s] | Size: %d b |\n", number, partition->position, partition->position + partition->size - 1, "L", partition->size);
 		} else {
 			fprintf(dump_file, "Partición %d: | %d - %d | [%s] | Size: %d b | LRU: %d | COLA: %s | ID: %d |\n", number, partition->position, partition->position + partition->size - 1, "X", partition->size, partition->access_time, get_operation_by_value(partition->message->operation_code), partition->message->message_id);
 		}

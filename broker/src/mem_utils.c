@@ -1,20 +1,20 @@
 #include "mem_utils.h"
 
 static Partition* _choose_victim(bool (*)(void*, void*));
-static bool _is_occupied(Partition*);
-static bool _less_access_time(Partition*, Partition*);
-static bool _less_creation_time(Partition*, Partition*);
-static bool _is_free(Partition*);
+static bool _is_occupied(void*);
+static bool _less_access_time(void*, void*);
+static bool _less_creation_time(void*, void*);
+static bool _is_free(void*);
 static t_list* _get_occupied_partitions();
 static void _show_partition(Partition*, int);
 static void _show_message(Message*);
 static bool _greater_equals_and_free(uint32_t, Partition*);
 static Partition* _find_partition(int, bool);
 static t_list* greater_equals_and_free(uint32_t);
-static bool _smaller_size(Partition*, Partition*);
-static void _free_partition(Partition*);
+static bool _smaller_size(void*, void*);
+static void _free_partition(void*);
 static void _free_partition_attributes(Partition*);
-static void _free_subscriber(Subscriber*);
+static void _free_subscriber(void*);
 static int _list_find_index(uintptr_t);
 static bool _partition_with_start(uintptr_t, uintptr_t);
 
@@ -46,7 +46,7 @@ Partition* choose_victim() {
 }
 
 Partition* create_partition(uint32_t position, uintptr_t start, uint32_t size) {
-	uint32_t now = get_time();
+	uint32_t now = -1;
 	Partition* partition = malloc(sizeof(Partition));
 	partition->creation_time = now;
 	partition->access_time = now;
@@ -65,11 +65,11 @@ Partition* create_partition_with_message(uint32_t position, uintptr_t start, uin
 }
 
 void replace_partition_at(uintptr_t start_to_replace, Partition* replacement) {
-	list_replace_and_destroy_element(memory->partitions, _list_find_index(start_to_replace), replacement, &_free_partition);
+	list_replace_and_destroy_element(memory->partitions, _list_find_index(start_to_replace), replacement, _free_partition);
 }
 
 void remove_partition_at(uintptr_t start_to_delete) {
-	list_remove_and_destroy_element(memory->partitions, _list_find_index(start_to_delete), &_free_partition);
+	list_remove_and_destroy_element(memory->partitions, _list_find_index(start_to_delete), _free_partition);
 }
 
 void add_partition_next_to(uintptr_t start, Partition* partition_to_add) {
@@ -77,19 +77,20 @@ void add_partition_next_to(uintptr_t start, Partition* partition_to_add) {
 }
 
 Partition* find_partition_at(uintptr_t start_to_find) {
-	bool _inline_partition_with_start(Partition* partition) {
+	bool _inline_partition_with_start(void* e) {
+		Partition* partition = e;
 		return _partition_with_start(start_to_find, partition->start);
 	}
 
-	return list_find(memory->partitions, &_inline_partition_with_start);
+	return list_find(memory->partitions, _inline_partition_with_start);
 }
 
 t_list* get_occupied_partitions() {
-	return list_filter(memory->partitions, &_is_occupied);
+	return list_filter(memory->partitions, _is_occupied);
 }
 
 t_list* get_free_partitions() {
-	return list_filter(memory->partitions, &_is_free);
+	return list_filter(memory->partitions, _is_free);
 }
 
 
@@ -109,7 +110,7 @@ void show_partitions_with_index(t_list* partitions) {
 
 static Partition* _find_partition(int desired_size, bool best) {
 	t_list* potential_partitions = greater_equals_and_free(desired_size);
-	if(best) list_sort(potential_partitions, &_smaller_size);
+	if(best) list_sort(potential_partitions, _smaller_size);
 	Partition* partition = list_get(potential_partitions, 0);
 	list_destroy(potential_partitions);
 	return partition;
@@ -136,13 +137,16 @@ static int _list_find_index(uintptr_t start_to_find) {
 }
 
 static t_list* greater_equals_and_free(uint32_t size_to_compare) {
-	bool _inline_greater_equals_and_free(Partition* partition) {
+	bool _inline_greater_equals_and_free(void* e) {
+		Partition* partition = e;
 		return _greater_equals_and_free(size_to_compare, partition);
 	}
-	return list_filter(memory->partitions, &_inline_greater_equals_and_free);
+	return list_filter(memory->partitions, _inline_greater_equals_and_free);
 }
 
-static bool _smaller_size(Partition* partition_1, Partition* partition_2) {
+static bool _smaller_size(void* e1, void* e2) {
+	Partition* partition_1 = e1;
+	Partition* partition_2 = e2;
 	return partition_1->size < partition_2->size;
 }
 
@@ -190,19 +194,25 @@ static Partition* _choose_victim(bool (*comparator)(void*, void*)) {
 	return victim;
 }
 
-static bool _is_occupied(Partition* partition) {
+static bool _is_occupied(void* e) {
+	Partition* partition = e;
 	return !partition->free;
 }
 
-static bool _is_free(Partition* partition) {
+static bool _is_free(void* e) {
+	Partition* partition = e;
 	return partition->free;
 }
 
-static bool _less_access_time(Partition* partition_a, Partition* partition_b) {
+static bool _less_access_time(void* e1, void* e2) {
+	Partition* partition_a = e1;
+		Partition* partition_b = e2;
 	return partition_a->access_time < partition_b->access_time;
 }
 
-static bool _less_creation_time(Partition* partition_a, Partition* partition_b) {
+static bool _less_creation_time(void* e1, void* e2) {
+	Partition* partition_a = e1;
+	Partition* partition_b = e2;
 	return partition_a->creation_time < partition_b->creation_time;
 }
 
@@ -214,9 +224,10 @@ static bool _partition_with_start(uintptr_t start_to_compare, uintptr_t actual_s
 	return start_to_compare == actual_start;
 }
 
-static void _free_partition(Partition* partition) {
+static void _free_partition(void* e) {
+	Partition* partition = e;
 	log_debug(LOGGER, "Free subscribers");
-	list_destroy_and_destroy_elements(partition->notified_suscribers, &_free_subscriber);
+	list_destroy_and_destroy_elements(partition->notified_suscribers, _free_subscriber);
 	free(partition);
 }
 
@@ -227,6 +238,7 @@ static void _free_partition_attributes(Partition* partition) {
 	free(partition->message);
 }
 
-static void _free_subscriber(Subscriber* subscriber) {
+static void _free_subscriber(void* e) {
+	Subscriber* subscriber = e;
 	free(subscriber);
 }

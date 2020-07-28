@@ -1,7 +1,7 @@
 #include "buddy.h"
 
 static void _consolidate_buddy(Partition*);
-static Partition* _break_buddys(Partition*, uint32_t);
+static void _break_buddys(Partition*, uint32_t);
 static Partition* _buddy_of(Partition*);
 static Partition* _find_partition_at_position(uint32_t);
 static bool _partition_at_position(uint32_t, uint32_t);
@@ -37,7 +37,7 @@ Partition* save_to_cache_buddy_system(void* data, Message* message) {
 	log_debug(LOGGER, "Free partition found. Check if needs to be broken");
 	if(partition->size != desired_size) {
 		// rompo la particion libre elegida, hasta la minima pot2 posible
-		Partition* choosed_partition = _break_buddys(partition, desired_size);
+		_break_buddys(partition, desired_size);
 	}
 
 	// marco la particion como ocupada, y completo el resto de los atributos
@@ -50,7 +50,7 @@ Partition* save_to_cache_buddy_system(void* data, Message* message) {
 
 	log_debug(LOGGER, "Partition broken, doing memcpy in start=%x, with data_size=%d", partition->start, message->data_size);
 	// guardo el data con el memcpy
-	memcpy(partition->start, data, message->data_size);
+	memcpy((void*) partition->start, data, message->data_size);
 	log_info(LOGGER, "Mensaje %d guardado con exito en la particion que comienza en %d",partition->message->message_id, partition->position);
 
 	log_debug(LOGGER, "Done memcpy");
@@ -93,7 +93,7 @@ static void _consolidate_buddy(Partition* partition) {
 	log_info(LOGGER, "Buddy is not free or same size...done consolidating");
 }
 
-static Partition* _break_buddys(Partition* partition_to_break, uint32_t data_size) {
+static void _break_buddys(Partition* partition_to_break, uint32_t data_size) {
 	// mientras la particion actual sea mayor a mi data_size (que ya es pot2), entonces sigo rompiendo
 	log_debug(LOGGER, "Partition size: %d, Data size: %d", partition_to_break->size, data_size);
 
@@ -118,7 +118,6 @@ static Partition* _break_buddys(Partition* partition_to_break, uint32_t data_siz
 
 	log_debug(LOGGER, "Partition's size is same as desired, no breaking needed");
 	// cuando ya no tengo que romper mas, devuelvo la que me quedo, que es del tamanio deseado
-	return partition_to_break;
 }
 
 static Partition* _buddy_of(Partition* partition) {
@@ -130,11 +129,12 @@ static uint32_t _buddy_position(Partition* partition) {
 }
 
 static Partition* _find_partition_at_position(uint32_t position_to_find) {
-	bool _inline_partition_at_position(Partition* partition) {
+	bool _inline_partition_at_position(void* e) {
+		Partition* partition = e;
 		return _partition_at_position(position_to_find, partition->position);
 	}
 
-	return list_find(memory->partitions, &_inline_partition_at_position);
+	return list_find(memory->partitions, _inline_partition_at_position);
 }
 
 static bool _partition_at_position(uint32_t position_to_compare, uint32_t actual_position) {

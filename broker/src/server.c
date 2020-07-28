@@ -45,13 +45,13 @@ static void _esperar_cliente(int socket_servidor)
 	struct sockaddr_in dir_cliente;
 
 	int tam_direccion = sizeof(struct sockaddr_in);
-	int socket_cliente = accept(socket_servidor, (void*) &dir_cliente, &tam_direccion);
+	int socket_cliente = accept(socket_servidor, (void*) &dir_cliente, (socklen_t *)&tam_direccion);
 
-	log_info(LOGGER, "Se conecto el cliente: %d", socket_cliente);
+	log_info(LOGGER, "Se conecto el cliente: %d", (void* )socket_cliente);
 
 	pthread_t thread;
 
-	pthread_create(&thread,NULL,(void*)_serve_client, socket_cliente);
+	pthread_create(&thread,NULL,(void*)_serve_client, (void*)socket_cliente);
 	pthread_detach(thread);
 }
 
@@ -207,13 +207,14 @@ static void _process_request(uint32_t cod_op, int socket) {
 
 		log_info(LOGGER, "Suscripcion proceso=%s, id=%d, cola=%s, socket=%d", get_process_by_value(cod_process), process_id, get_operation_by_value(cod_cola), socket);
 
-		bool _inline_find_subscriber(Subscriber* to_compare) {
+		bool _inline_find_subscriber(void* e) {
+			Subscriber* to_compare = e;
 			return cod_process == to_compare->process && process_id == to_compare->id;
 		}
 
 		pthread_mutex_lock(&MUTEX_SUBSCRIBERS_BY_QUEUE);
 		t_list* subscribers = dictionary_get(SUBSCRIBERS_BY_QUEUE, get_operation_by_value(cod_cola));
-		Subscriber* subscriber = list_find(subscribers, &_inline_find_subscriber);
+		Subscriber* subscriber = list_find(subscribers, _inline_find_subscriber);
 
 		// si existe en la lista solo hay que actualizar el socket, sino lo agrego a la lista
 		if (subscriber != NULL) {
@@ -226,7 +227,8 @@ static void _process_request(uint32_t cod_op, int socket) {
 			subscriber->process = (Process) cod_process;
 			subscriber->socket_subscriber = socket;
 			list_add(subscribers, subscriber);
-			sem_init(&SUBSCRIBERS_IDENTIFIERS[get_subscriber_identifier(subscriber)], 0, 1);
+			sem_t* sem = (sem_t*) &SUBSCRIBERS_IDENTIFIERS[get_subscriber_identifier(subscriber)];
+			sem_init(sem, 0, 1);
 		}
 
 		send_message_from_suscription(cod_cola, subscriber);

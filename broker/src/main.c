@@ -25,7 +25,7 @@ static void _init_logger() {
 }
 
 static void _init_config() {
-	t_config* config = config_create("config/broker.config");
+	t_config* config = config_create("/home/utnso/tp-2020-1c-C90/broker/config/broker.config");
 
 	IP = string_duplicate(config_get_string_value(config, "IP_BROKER"));
 	PUERTO = string_duplicate(config_get_string_value(config, "PUERTO_BROKER"));
@@ -79,7 +79,7 @@ static void _init_memory() {
 	memory = malloc(sizeof(Memory));
 	memory->cache = malloc(TAMANO_MEMORIA);
 	memory->partitions = list_create();
-	list_add(memory->partitions, create_partition(0, memory->cache, TAMANO_MEMORIA));
+	list_add(memory->partitions, create_partition(0, (uintptr_t)memory->cache, TAMANO_MEMORIA));
 	log_debug(LOGGER, "Memory Cache: %x (%d), Size: %d", memory->cache, memory->cache, TAMANO_MEMORIA);
 }
 

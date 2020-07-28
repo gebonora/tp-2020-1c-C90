@@ -27,7 +27,7 @@ Partition* save_to_cache_dynamic_partitions(void* data, Message* message){
 	partition->access_time = now;
 	partition->creation_time = now;
 	log_debug(LOGGER, "Copying bytes to cache");
-	memcpy(partition->start, data, message->data_size);
+	memcpy((void*) partition->start, data, message->data_size);
 	log_info(LOGGER, "Mensaje %d guardado con exito en la particion que comienza en %d",partition->message->message_id, partition->position);
 	log_debug(LOGGER, "memcpy done");
 	sem_post(&MEMORY);
@@ -165,14 +165,14 @@ static void _compact() {
 	log_debug(LOGGER, "Free partitions count: %d", not_occupied->elements_count);
 
 	uint32_t _inline_sum_all_sizes(void* e1, void* e2){
-		uint32_t accum = e1;
+		uint32_t accum = (uint32_t)e1;
 		Partition* partition = e2;
 		log_debug(LOGGER, "Accumulator (%d) += %d", accum, partition->size);
 		return accum + partition->size;
 	}
 
 	log_debug(LOGGER, "Summing free sizes");
-	uint32_t free_size = list_fold(not_occupied, 0, _inline_sum_all_sizes);
+	uint32_t free_size = (uint32_t) list_fold(not_occupied, 0, (void*(*)(void*, void*))_inline_sum_all_sizes);
 
 	log_debug(LOGGER, "Total free size: %d", free_size);
 
