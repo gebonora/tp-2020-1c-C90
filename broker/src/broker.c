@@ -247,7 +247,6 @@ static void send_message_and_wait_for_ack(arg_struct* args) {
 
 	log_info(LOGGER, "Adquiring mutex for subscriber_identifier: %d", get_subscriber_identifier(args->subscriber));
 	sem_t* sem = (sem_t*) &SUBSCRIBERS_IDENTIFIERS[get_subscriber_identifier(args->subscriber)];
-	//sem_wait(&SUBSCRIBERS_IDENTIFIERS[get_subscriber_identifier(args->subscriber)]);
 	sem_wait(sem);
 	log_info(LOGGER, "Mutex adquired for subscriber_identifier: %d", get_subscriber_identifier(args->subscriber));
 
@@ -267,7 +266,6 @@ static void send_message_and_wait_for_ack(arg_struct* args) {
 		}
 	}
 	log_info(LOGGER, "Mutex unlocked for subscriber_identifier: %d", get_subscriber_identifier(args->subscriber));
-	//sem_post(&SUBSCRIBERS_IDENTIFIERS[get_subscriber_identifier(args->subscriber)]);
 	sem_post(sem);
 
 	free(args);
