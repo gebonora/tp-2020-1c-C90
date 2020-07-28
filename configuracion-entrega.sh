@@ -7,8 +7,8 @@ function show_usage(){
 }
 
 function replace_file(){
-    SOURCE=$1
-    TARGET=$2
+    local SOURCE=$1
+    local TARGET=$2
 
     if [ -f "${SOURCE}" ]; then
         if [ -f "${TARGET}" ]; then
@@ -25,9 +25,9 @@ function replace_file(){
 }
 
 function replace_property(){
-    KEY=$1
-    NEW_VALUE=$2
-    FILE=$3
+    local KEY=$1
+    local NEW_VALUE=$2
+    local FILE=$3
 
     if [ -f "${FILE}" ]; then
         if ! grep -R "^[#]*\s*${KEY}=.*" ${FILE} > /dev/null; then
@@ -43,7 +43,19 @@ function replace_property(){
             fi
         fi 
     else 
-        echo -e "${RED}No existe el archivo${NC}: ${FILE}"
+        echo -e "${RED}No existe el archivo:${NC} ${YELLOW}${FILE}${NC}"
+    fi
+}
+
+function clean_log_file(){
+    local FILE=$1
+
+    if [ -f "${FILE}" ]; then
+        echo -e "${GREEN}Limpiando archivo de log:${NC} ${YELLOW}${FILE}${NC}"
+        > ${FILE}
+    else 
+        echo -e "${GREEN}Creando archivo de log:${NC} ${YELLOW}${FILE}${NC}"
+        touch ${FILE}
     fi
 }
 
@@ -100,14 +112,19 @@ esac
 
 BROKER_CONFIG=${DELIBIRD_PATH}/broker/config/broker.config
 BROKER_ENTREGA=${DELIBIRD_PATH}/broker/config/entrega_broker.config
+BROKER_LOG_FILE=${DELIBIRD_PATH}/broker/logs/broker.log
 GAMEBOY_CONFIG=${DELIBIRD_PATH}/gameboy/config/gameboy.config
 GAMEBOY_ENTREGA=${DELIBIRD_PATH}/gameboy/config/entrega_gameboy.config
+GAMEBOY_LOG_FILE=${DELIBIRD_PATH}/gameboy/deploy/logs/gameboy.log
 GAMECARD_CONFIG=${DELIBIRD_PATH}/gamecard/config/gameCard.config
 GAMECARD_ENTREGA=${DELIBIRD_PATH}/gamecard/config/entrega_gamecard.config
+GAMECARD_LOG_FILE=${DELIBIRD_PATH}/gamecard/logs/logGamecard.log
 TEAM_1_CONFIG=${DELIBIRD_PATH}/team/deploy/config/team.config
-TEAM_2_CONFIG=${DELIBIRD_PATH}/team/deploy_team_2/config/team.config
 TEAM_1_ENTREGA=${DELIBIRD_PATH}/team/deploy/config/entrega_team_1.config
+TEAM_1_LOG_FILE=${DELIBIRD_PATH}/team/deploy/logs/team_1.log
+TEAM_2_CONFIG=${DELIBIRD_PATH}/team/deploy_team_2/config/team.config
 TEAM_2_ENTREGA=${DELIBIRD_PATH}/team/deploy_team_2/config/entrega_team_2.config
+TEAM_2_LOG_FILE=${DELIBIRD_PATH}/team/deploy_team_2/logs/team_2.log
 
 echo -e "DELIBIRD_PATH: ${YELLOW}${DELIBIRD_PATH}${NC}"
 echo -e "BROKER_CONFIG: ${YELLOW}${BROKER_CONFIG}${NC}"
@@ -116,10 +133,13 @@ echo -e "GAMEBOY_CONFIG: ${YELLOW}${GAMEBOY_CONFIG}${NC}"
 echo -e "GAMEBOY_ENTREGA: ${YELLOW}${GAMEBOY_ENTREGA}${NC}"
 echo -e "GAMECARD_CONFIG: ${YELLOW}${GAMECARD_CONFIG}${NC}"
 echo -e "GAMECARD_ENTREGA: ${YELLOW}${GAMECARD_ENTREGA}${NC}"
+echo -e "GAMECARD_LOG_FILE: ${YELLOW}${GAMECARD_LOG_FILE}${NC}"
 echo -e "TEAM_1_CONFIG: ${YELLOW}${TEAM_1_CONFIG}${NC}"
-echo -e "TEAM_2_CONFIG: ${YELLOW}${TEAM_2_CONFIG}${NC}"
 echo -e "TEAM_1_ENTREGA: ${YELLOW}${TEAM_1_ENTREGA}${NC}"
+echo -e "TEAM_1_LOG_FILE: ${YELLOW}${TEAM_1_LOG_FILE}${NC}"
+echo -e "TEAM_2_CONFIG: ${YELLOW}${TEAM_2_CONFIG}${NC}"
 echo -e "TEAM_2_ENTREGA: ${YELLOW}${TEAM_2_ENTREGA}${NC}"
+echo -e "TEAM_2_LOG_FILE: ${YELLOW}${TEAM_2_LOG_FILE}${NC}"
 echo -e "IP_BROKER: ${YELLOW}${IP_BROKER}${NC}"
 echo -e "IP_GAMEBOY_BROKER: ${YELLOW}${IP_GAMEBOY_BROKER}${NC}"
 echo -e "IP_GAMEBOY_GAMECARD: ${YELLOW}${IP_GAMEBOY_GAMECARD}${NC}"
@@ -141,3 +161,9 @@ replace_property "IP_BROKER" ${IP_BROKER} ${TEAM_2_CONFIG}
 replace_property "IP_BROKER" ${IP_GAMEBOY_BROKER} ${GAMEBOY_CONFIG}
 replace_property "IP_GAMECARD" ${IP_GAMEBOY_GAMECARD} ${GAMEBOY_CONFIG}
 replace_property "IP_TEAM" ${IP_GAMEBOY_TEAM} ${GAMEBOY_CONFIG}
+
+clean_log_file ${BROKER_LOG_FILE}
+clean_log_file ${GAMEBOY_LOG_FILE}
+clean_log_file ${GAMECARD_LOG_FILE}
+clean_log_file ${TEAM_1_LOG_FILE}
+clean_log_file ${TEAM_2_LOG_FILE}

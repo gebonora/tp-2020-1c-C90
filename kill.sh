@@ -8,8 +8,8 @@ function kill_process() {
             local PID=$(pidof broker.app);;
         gamecard)
             local PID=$(pidof gameCard.app);;
-        team_1)
-            local PID=$(pidof pidof team_1);;
+        team)
+            local PID=$(pidof pidof team);;
         team_2)
             local PID=$(pidof pidof team_2);;
         *)

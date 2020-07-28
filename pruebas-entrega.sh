@@ -8,8 +8,8 @@ function kill_process() {
             local PID=$(pidof broker.app);;
         gamecard)
             local PID=$(pidof gameCard.app);;
-        team_1)
-            local PID=$(pidof pidof team_1);;
+        team)
+            local PID=$(pidof pidof team);;
         team_2)
             local PID=$(pidof pidof team_2);;
         *)
@@ -42,7 +42,7 @@ BROKER_PATH=${DELIBIRD_PATH}/broker
 GAMEBOY_PATH=${DELIBIRD_PATH}/gameboy
 GAMECARD_PATH=${DELIBIRD_PATH}/gamecard
 TEAM_1_PATH=${DELIBIRD_PATH}/team/deploy
-TEAM_2_PATH=${DELIBIRT_PATH}/team/deploy_team_2
+TEAM_2_PATH=${DELIBIRD_PATH}/team/deploy_team_2
 
 echo -e "DELIBIRD_PATH: ${YELLOW}${DELIBIRD_PATH}${NC}"
 echo -e "BROKER_PATH: ${YELLOW}${BROKER_PATH}${NC}"
@@ -65,14 +65,16 @@ cd ${GAMEBOY_PATH}/scripts && time ./new_pokemon_antes_team.sh
 sleep 1
 
 echo -e "Iniciando proceso: ${YELLOW}team 1${NC}"
-cd ${TEAM_1_PATH} && ./team.app &
+cd ${TEAM_1_PATH} && ./team &
 
 echo -e "Iniciando proceso: ${YELLOW}team 2${NC}"
-cd ${TEAM_2_PATH} && ./team_2.app &
+cd ${TEAM_2_PATH} && ./team_2 &
 
-read -n 1 -s -r -p "PRESIONAR CUALQUIER TECLA PARA TERMINAR"
+sleep 2
 
 echo -e "Ejecutando script: ${YELLOW}new_pokemon_post_team.sh${NC}"
+
+read -n 1 -s -r -p "PRESIONAR CUALQUIER TECLA PARA TERMINAR"
 
 kill_process "broker"
 kill_process "gamecard"
