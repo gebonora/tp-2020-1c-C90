@@ -19,8 +19,6 @@ int crearSocketCliente(char* ip, char* puerto) {
 
 	int socketCliente = socket(server_info->ai_family, server_info->ai_socktype, server_info->ai_protocol);
 
-    setsockopt(socketCliente, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int));
-
 	if (connect(socketCliente, server_info->ai_addr, server_info->ai_addrlen) == -1) {
 		socketCliente = -1;
 		perror("Error al crear Socket Cliente");
@@ -44,6 +42,9 @@ int crearSocketServidor(char* ip, char* puerto) {
 
 	for (p = servinfo; p != NULL; p = p->ai_next) {
 		if ((socketServidor = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1)
+			continue;
+
+		if (setsockopt(socketServidor, SOL_SOCKET, SO_REUSEADDR, &(int ) { 1 }, sizeof(int)) == -1)
 			continue;
 
 		if (bind(socketServidor, p->ai_addr, p->ai_addrlen) == -1) {

@@ -13,7 +13,9 @@ void planificadorDeCapturas(ServicioDePlanificacion * this) {
 		// Cuando pasamos un entrenadors a exit hacemo signal al objetivoGlobalCompletado, que fue inicializado con la cantidad de entrenadores.
 		// Otra opción para esto: cuando pasamos a exit, llamamos a una funcion que revisa que la cola exit este llena y hago un post.
 
+		log_warning(this->logger, "ESPERANDO SEM CONTADOR POKEMON CICLO");
 		sem_wait(&semaforoContadorPokemon);
+		log_warning(this->logger, "ESPERANDO SEM ENTRENADOR CICLO");
 		sem_wait(&semaforoContadorEntrenadoresDisponibles);
 
 		if (this->finDeTrabajoCapturas) { // Esto permite al hilo morirse
@@ -32,6 +34,7 @@ void planificadorDeCapturas(ServicioDePlanificacion * this) {
 
 		t_list* entrenadoresDisponibles = this->planificador.armarListaEntrenadoresDisponibles(&this->planificador);
 		t_list* trabajo = this->servicioDeCaptura->pokemonesDisponibles(this->servicioDeCaptura);
+		this->planificador.mostrarLasColas(&this->planificador);
 
 		this->asignarTareasDeCaptura(this, trabajo, entrenadoresDisponibles);
 		this->planificador.mostrarLasColas(&this->planificador);
@@ -66,9 +69,11 @@ void planificadorDeCortoPlazo(ServicioDePlanificacion* this) {
 
 		log_info(this->logger, "va a ejecutar %s por %d.", aEjecutar->entrenador->id, ciclosAEjecutar);
 
+		pthread_mutex_lock(&aEjecutar->entrenador->mutex);
 		this->servicioDeMetricas->registrarCambioDeContexto(this->servicioDeMetricas); // TODO: pensarlo bien
 		this->planificador.moverACola(&this->planificador, aEjecutar, EXEC, "Ejecutará en el procesador.");
 		this->servicioDeMetricas->registrarCambioDeContexto(this->servicioDeMetricas);
+
 		aEjecutar->ejecutarParcialmente(aEjecutar, ciclosAEjecutar);
 
 		for (int a = 0; a < ciclosAEjecutar; a++) {
@@ -78,6 +83,8 @@ void planificadorDeCortoPlazo(ServicioDePlanificacion* this) {
 		// TODO: esperar a que termine la instruccion del hilo para correr definirYCambiarEstado. Sino me llega el CAUGHT que desencadena planificacion y
 		// mi entrenador está todavía en la cola EXEC, entonces lo ignoro.
 		this->definirYCambiarEstado(this, aEjecutar); // Lo pasa a Ready si no terminó su tarea, Blocked o Exit si terminó su tarea.
+
+		pthread_mutex_unlock(&aEjecutar->entrenador->mutex);
 		this->planificador.mostrarLasColas(&this->planificador);
 
 		sem_post(&this->semaforoEjecucionHabilitadaCortoPlazo);
@@ -195,44 +202,79 @@ static EntrenadorConPokemon* entrenadorOptimo(ServicioDePlanificacion* this, t_l
 	}
 	return NULL;
 }
+/*
+ void asignarTareasDeCapturaORIGINAL(ServicioDePlanificacion* this, t_list* listaPokemon, t_list* entrenadoresDisponibles) {
+ log_info(this->logger, "Asignando tareas de captura");
+ int iteracionesPosibles = MIN(list_size(listaPokemon), list_size(entrenadoresDisponibles));
+ for (int i = 0; i < iteracionesPosibles; i++) {
+ EntrenadorConPokemon* ganador = this->entrenadorOptimo(this, listaPokemon, entrenadoresDisponibles);
+ if (ganador != NULL) {
+ HiloEntrenadorPlanificable* hiloElegido = (HiloEntrenadorPlanificable*) ganador->entrenadore;
+ log_info(this->logger, "Ya tengo un entrenador optimo");
+ PokemonAtrapable* pokemon = ganador->pokemon;
+ Coordinate coordenadaPokemon = pokemon->gps->posicionActual(pokemon->gps).coordenada;
+ TareaPlanificable* tarea = generarTareaDeCaptura(hiloElegido->entrenador, pokemon->especie, coordenadaPokemon);
+ hiloElegido->asignarTarea(hiloElegido, tarea);
+ hiloElegido->entrenador->estaEsperandoAlgo = true;
+ hiloElegido->infoUltimaEjecucion.seNecesitaNuevaEstimacion = true;
+ hiloElegido->infoUltimaEjecucion.rafaga_real_actual = hiloElegido->tareaAsignada->totalInstrucciones;
+ pokemon->marcarComoObjetivo(pokemon, hiloElegido->entrenador->id);
+ this->objetivoGlobal.restarUnCapturado(&this->objetivoGlobal, pokemon->especie);
+ this->planificador.moverACola(&this->planificador, hiloElegido, READY, "Se le asignó una tarea de captura.");
+ bool pokemon_igual_a(void* elem) {
+ PokemonAtrapable * poke = (PokemonAtrapable*) elem;
+ return string_equals_ignore_case(poke->especie, pokemon->especie);
+ }
+ list_remove_by_condition(listaPokemon, pokemon_igual_a);
+ bool entrenador_by_id(void* elem) {
+ HiloEntrenadorPlanificable* entrenador_actual = (HiloEntrenadorPlanificable*) elem;
+ return string_equals_ignore_case(entrenador_actual->entrenador->id, hiloElegido->entrenador->id);
+ }
+ list_remove_by_condition(entrenadoresDisponibles, entrenador_by_id);
+ }
+ free(ganador);
+ }
+ list_destroy(listaPokemon);
 
+ for (int g = 0; g < iteracionesPosibles - 1; g++) {
+ log_warning(this->logger, "ESPERANDO SEM CONTADOR POKEMON FUNCION");
+ sem_wait(&semaforoContadorPokemon);
+ log_warning(this->logger, "ESPERANDO SEM CONTADOR ENTRNENADORES FUNCION");
+ sem_wait(&semaforoContadorEntrenadoresDisponibles);
+ }
+ }
+ */
 void asignarTareasDeCaptura(ServicioDePlanificacion* this, t_list* listaPokemon, t_list* entrenadoresDisponibles) {
 	log_info(this->logger, "Asignando tareas de captura");
-	int iteracionesPosibles = MIN(list_size(listaPokemon), list_size(entrenadoresDisponibles));
-	for (int i = 0; i < iteracionesPosibles; i++) {
-		EntrenadorConPokemon* ganador = this->entrenadorOptimo(this, listaPokemon, entrenadoresDisponibles);
-		if (ganador != NULL) {
-			HiloEntrenadorPlanificable* hiloElegido = (HiloEntrenadorPlanificable*) ganador->entrenadore;
-			log_info(this->logger, "Ya tengo un entrenador optimo");
-			PokemonAtrapable* pokemon = ganador->pokemon;
-			Coordinate coordenadaPokemon = pokemon->gps->posicionActual(pokemon->gps).coordenada;
-			TareaPlanificable* tarea = generarTareaDeCaptura(hiloElegido->entrenador, pokemon->especie, coordenadaPokemon);
-			hiloElegido->asignarTarea(hiloElegido, tarea);
-			hiloElegido->entrenador->estaEsperandoAlgo = true;
-			hiloElegido->infoUltimaEjecucion.seNecesitaNuevaEstimacion = true;
-			hiloElegido->infoUltimaEjecucion.rafaga_real_actual = hiloElegido->tareaAsignada->totalInstrucciones;
-			pokemon->marcarComoObjetivo(pokemon, hiloElegido->entrenador->id);
-			this->objetivoGlobal.restarUnCapturado(&this->objetivoGlobal, pokemon->especie);
-			this->planificador.moverACola(&this->planificador, hiloElegido, READY, "Se le asignó una tarea de captura.");
-			bool pokemon_igual_a(void* elem) {
-				PokemonAtrapable * poke = (PokemonAtrapable*) elem;
-				return string_equals_ignore_case(poke->especie, pokemon->especie);
-			}
-			list_remove_by_condition(listaPokemon, pokemon_igual_a);
-			bool entrenador_by_id(void* elem) {
-				HiloEntrenadorPlanificable* entrenador_actual = (HiloEntrenadorPlanificable*) elem;
-				return string_equals_ignore_case(entrenador_actual->entrenador->id, hiloElegido->entrenador->id);
-			}
-			list_remove_by_condition(entrenadoresDisponibles, entrenador_by_id);
+	EntrenadorConPokemon* ganador = this->entrenadorOptimo(this, listaPokemon, entrenadoresDisponibles);
+	if (ganador != NULL) {
+		HiloEntrenadorPlanificable* hiloElegido = (HiloEntrenadorPlanificable*) ganador->entrenadore;
+		log_info(this->logger, "Ya tengo un entrenador optimo");
+		PokemonAtrapable* pokemon = ganador->pokemon;
+		Coordinate coordenadaPokemon = pokemon->gps->posicionActual(pokemon->gps).coordenada;
+		TareaPlanificable* tarea = generarTareaDeCaptura(hiloElegido->entrenador, pokemon->especie, coordenadaPokemon);
+		hiloElegido->asignarTarea(hiloElegido, tarea);
+		hiloElegido->entrenador->estaEsperandoAlgo = true;
+		hiloElegido->infoUltimaEjecucion.seNecesitaNuevaEstimacion = true;
+		hiloElegido->infoUltimaEjecucion.rafaga_real_actual = hiloElegido->tareaAsignada->totalInstrucciones;
+		pokemon->marcarComoObjetivo(pokemon, hiloElegido->entrenador->id);
+		this->objetivoGlobal.restarUnCapturado(&this->objetivoGlobal, pokemon->especie);
+		this->planificador.moverACola(&this->planificador, hiloElegido, READY, "Se le asignó una tarea de captura.");
+		bool pokemon_igual_a(void* elem) {
+			PokemonAtrapable * poke = (PokemonAtrapable*) elem;
+			return string_equals_ignore_case(poke->especie, pokemon->especie);
 		}
+		list_remove_by_condition(listaPokemon, pokemon_igual_a);
+		bool entrenador_by_id(void* elem) {
+			HiloEntrenadorPlanificable* entrenador_actual = (HiloEntrenadorPlanificable*) elem;
+			return string_equals_ignore_case(entrenador_actual->entrenador->id, hiloElegido->entrenador->id);
+		}
+		list_remove_by_condition(entrenadoresDisponibles, entrenador_by_id);
 		free(ganador);
+	} else {
+		log_error(this->logger, "GANADOR EN NULL");
 	}
 	list_destroy(listaPokemon);
-
-	for (int g = 0; g < iteracionesPosibles - 1; g++) {
-		sem_wait(&semaforoContadorPokemon);
-		sem_wait(&semaforoContadorEntrenadoresDisponibles);
-	}
 }
 
 void asignarIntercambios(ServicioDePlanificacion* this, t_list* intercambios) {
@@ -258,43 +300,28 @@ void asignarIntercambios(ServicioDePlanificacion* this, t_list* intercambios) {
 	}
 }
 
-void definirYCambiarEstado(ServicioDePlanificacion* this, UnidadPlanificable* hilo) {
+void definirYCambiarEstado(ServicioDePlanificacion* this, UnidadPlanificable* hilo) { // TODO: Ver que pasa cuando el intercambio se resuelve sin broker. es previo a esta funcion.
 	if (hilo->tareaAsignada == NULL) {
-		if (hilo->entrenador->estaEsperandoAlgo) {
-			if (hilo->entrenador->puedeAtraparPokemones(hilo->entrenador)) {
-				this->planificador.moverACola(&this->planificador, hilo, BLOCK, "Está en espera del resultado de una captura.");
-				return;
-			}
-			if (!hilo->entrenador->puedeAtraparPokemones(hilo->entrenador)) {
-				this->planificador.moverACola(&this->planificador, hilo, BLOCK, "Está en espera de un intercambio.");
-				return;
-			}
-		}
-		if (!hilo->entrenador->objetivoCompletado(hilo->entrenador) && !hilo->entrenador->puedeAtraparPokemones(hilo->entrenador)) {
-			this->planificador.moverACola(&this->planificador, hilo, BLOCK, "Está en espera de la resolución de deadlocks.");
+		if (hilo->entrenador->objetivoCompletado(hilo->entrenador)) {
+			this->planificador.moverACola(&this->planificador, hilo, EXIT, "Completó su objetivo personal.");
 			return;
+		} else {
+			this->planificador.moverACola(&this->planificador, hilo, BLOCK, "Está en espera de un evento.");
+			if (!hilo->entrenador->estaEsperandoAlgo && hilo->entrenador->puedeAtraparPokemones(hilo->entrenador)) {
+				sem_post(&semaforoContadorEntrenadoresDisponibles);
+				log_warning(this->logger, "Postié el semaforo entrenadores disponibles");
+			}
+			return;
+
 		}
-	}
-	if (hilo->entrenador->objetivoCompletado(hilo->entrenador)) {
-		this->planificador.moverACola(&this->planificador, hilo, EXIT, "Completó su objetivo personal.");
-		return;
-	}
-	if (hilo->tareaAsignada != NULL) {
+	} else {
 		if (hilo->tareaAsignada->cantidadInstruccionesEjecutadas(hilo->tareaAsignada) < hilo->tareaAsignada->totalInstrucciones) {
 			this->planificador.moverACola(&this->planificador, hilo, READY, "Terminó una ráfaga y aún le quedan ciclos pendientes.");
 			return;
 		}
 	}
-	if (hilo->entrenador->puedeAtraparPokemones(hilo->entrenador)) {
-		this->planificador.moverACola(&this->planificador, hilo, BLOCK, "Está en espera de un evento. RARO!!!!"); // TODO: ver si hace falta.
-		return;
-	}
-
-	if (hilo->tareaAsignada->cantidadInstruccionesEjecutadas(hilo->tareaAsignada) > hilo->tareaAsignada->totalInstrucciones) {
-		log_error(this->logger, "El entrenador '%s' ejecutó más de lo que debía", hilo->entrenador->id);
-		return;
-	}
-	this->planificador.moverACola(&this->planificador, hilo, BLOCK, "Terminó en un estado block. Hay algo RANCIO!!!!!");
+	log_error(this->logger, "NO SE PUDO ASGINAR UN ESTADO!!!");
+	// TODO: post semaforoEntrenadores. Cuando lo paso a blocked porque finalizo captura.
 }
 
 bool teamFinalizado(ServicioDePlanificacion* this) { // TODO: se puede ir
@@ -305,9 +332,9 @@ bool teamFinalizado(ServicioDePlanificacion* this) { // TODO: se puede ir
 bool evaluarEstadoPosibleDeadlock(ServicioDePlanificacion* this) { // TODO: pensar mass
 // el if loco. Buscamos un entrenador en blocked que no pueda capturar
 // Cola NEW, y EXEC VACIO
-	/*if (!list_is_empty(this->planificador.colas->colaNew) || !list_is_empty(this->planificador.colas->colaExec)) {
-		return false;
-	}*/
+/*if (!list_is_empty(this->planificador.colas->colaNew) || !list_is_empty(this->planificador.colas->colaExec)) {
+ return false;
+ }*/
 
 	bool entrenadorEnDeadlock(void* elem) {
 		HiloEntrenadorPlanificable* hilo = (HiloEntrenadorPlanificable*) elem;

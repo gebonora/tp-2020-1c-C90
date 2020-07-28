@@ -173,6 +173,14 @@ void mostrarLasColas(Planificador* this) {
 	list_destroy(mapa);
 }
 
+HiloEntrenadorPlanificable* obtenerHiloSegunEntrenador(Planificador* this, Entrenador* entrenador) {
+	bool trainerById(void* elem) {
+		HiloEntrenadorPlanificable* hilo = elem;
+		return hilo->entrenador->id = entrenador->id;
+	}
+	return list_find(this->colas->colaBlocked, trainerById);
+}
+
 void destruirPlanificador(Planificador * this, void (*destructorUnidadPlanificable)(UnidadPlanificable *)) {
 	log_destroy(this->logger);
 	this->transicionadorDeEstados.destruir(&this->transicionadorDeEstados);
@@ -187,7 +195,7 @@ static Planificador new(ServicioDeMetricas* servicio) { // TODO: asignar servici
 	Planificador planificador = { .logger = logger, .quantum = servicioDeConfiguracion.obtenerEntero(&servicioDeConfiguracion, QUANTUM), .algoritmoPlanificador =
 			obtenerAlgoritmo(nombreAlgoritmo), .transicionadorDeEstados = TransicionadorDeEstadosConstructor.new(), .colas = crearColasDePlanificacion(),
 			.servicioDeMetricas = servicio, &agregarUnidadesPlanificables, &agregarUnidadPlanificable, &armarListaEntrenadoresDisponibles, &obtenerProximoAEjecutar,
-			&cantidadDeRafagas, &colaSegunEstado, &moverACola, &obtenerEstadoDeUnidadPlanificable, &mostrarLasColas, &destruirPlanificador, };
+			&cantidadDeRafagas, &colaSegunEstado, &moverACola, &obtenerEstadoDeUnidadPlanificable, &mostrarLasColas, &obtenerHiloSegunEntrenador, &destruirPlanificador, };
 	return planificador;
 }
 

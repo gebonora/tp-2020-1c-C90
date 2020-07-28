@@ -46,6 +46,7 @@ typedef struct Planificador {
 	void (*moverACola)(struct Planificador * this, UnidadPlanificable * uPlanificable, EstadoPlanificador estado, char* motivoCambio);
 	EstadoPlanificador (*obtenerEstadoDeUnidadPlanificable)(struct Planificador* this, UnidadPlanificable* unidadPlanificable);
 	void (*mostrarLasColas)(struct Planificador* this);
+	HiloEntrenadorPlanificable* (*obtenerHiloSegunEntrenador)(struct Planificador* this, Entrenador* entrenador);
 	void (*destruir)(struct Planificador *this, void (*destructorUnidadPlanificable)(UnidadPlanificable *));
 } Planificador;
 
