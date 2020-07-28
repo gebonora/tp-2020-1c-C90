@@ -13,7 +13,8 @@ function kill_process() {
         team_2)
             local PID=$(pidof pidof team_2);;
         *)
-            echo -e "${RED}Proceso desconocido: ${NC}${PROCESS}"
+            echo -e "Proceso desconocido: ${RED}${PROCESS}${NC}"
+            echo -e "Procesos válidos: ${YELLOW}broker|gamecard|team|team_2${NC}"
             exit 2;;
     esac
 
