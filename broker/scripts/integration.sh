@@ -79,13 +79,14 @@ function process() {
     cd ${SCRIPTS_PATH} && ./${BROKER_SCRIPT} -k
 }
 
-BROKER_PATH=/home/utnso/tp-2020-1c-C90/broker
+HOME_PATH=/home/utnso/tp-2020-1c-C90
+BROKER_PATH=${HOME_PATH}/broker
 BROKER_CONFIG_FILE=${BROKER_PATH}/config/broker.config
 BROKER_BACKUP_FILE=${BROKER_PATH}/config/backup.config
 CONFIGS_PATH=${BROKER_PATH}/tests/configs
 LOGS_PATH=${BROKER_PATH}/tests/expected
 DUMPS_PATH=${BROKER_PATH}/tests/actual
-SCRIPTS_PATH=${BROKER_PATH}/scripts
+SCRIPTS_PATH=${HOME_PATH}/gameboy/scripts
 DUMP_FILE=${SCRIPTS_PATH}/dump.log
 DUMP_SCRIPT=dump.sh
 BROKER_SCRIPT=broker.sh
