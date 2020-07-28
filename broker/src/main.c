@@ -21,7 +21,7 @@ int main(){
 /** PRIVATE FUNCTIONS **/
 
 static void _init_logger() {
-    LOGGER = log_create(LOGGER_PATH, "Broker Server", 0, LOG_LEVEL_INFO);
+    LOGGER = log_create(LOGGER_PATH, "Broker Server", SHOW_IN_CONSOLE, LOG_NOTIFICATION_LEVEL);
 }
 
 static void _init_config() {
@@ -41,6 +41,8 @@ static void _init_config() {
 		TAMANO_MINIMO_PARTICION = config_get_int_value(config, "TAMANO_MINIMO_PARTICION");
 		TAMANO_MEMORIA = config_get_int_value(config, "TAMANO_MEMORIA");
 	}
+	SHOW_IN_CONSOLE = config_get_int_value(config, "SHOW_IN_CONSOLE");
+	LOG_NOTIFICATION_LEVEL = config_get_int_value(config, "LOG_NOTIFICATION_LEVEL");
 
 	log_debug(LOGGER, "IP: %s", IP);
 	log_debug(LOGGER, "PUERTO: %s", PUERTO);
@@ -60,7 +62,6 @@ static void _init_semaphores() {
 	pthread_mutex_init(&MUTEX_READERS, NULL);
 	pthread_mutex_init(&MUTEX_TIME, NULL);
 	sem_init(&MEMORY, 0, 1);
-
 }
 
 static void _init_context() {
@@ -80,7 +81,7 @@ static void _init_memory() {
 	memory = malloc(sizeof(Memory));
 	memory->cache = malloc(TAMANO_MEMORIA);
 	memory->partitions = list_create();
-	list_add(memory->partitions, create_partition(0, memory->cache, TAMANO_MEMORIA));
+	list_add(memory->partitions, create_partition(0, (uintptr_t)memory->cache, TAMANO_MEMORIA));
 	log_debug(LOGGER, "Memory Cache: %x (%d), Size: %d", memory->cache, memory->cache, TAMANO_MEMORIA);
 }
 

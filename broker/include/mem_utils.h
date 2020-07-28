@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include "arithmetic.h"
 #include "constants.h"
+#include <delibird/interface.h>
 
 #define MAX_PARTITION_SIZE(x) MAX(x, TAMANO_MINIMO_PARTICION)
 
