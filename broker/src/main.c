@@ -21,7 +21,7 @@ int main(){
 /** PRIVATE FUNCTIONS **/
 
 static void _init_logger() {
-    LOGGER = log_create(LOGGER_PATH, "Broker Server", 1, LOG_LEVEL_INFO);
+    LOGGER = log_create(LOGGER_PATH, "Broker Server", SHOW_IN_CONSOLE, LOG_NOTIFICATION_LEVEL);
 }
 
 static void _init_config() {
@@ -41,6 +41,8 @@ static void _init_config() {
 		TAMANO_MINIMO_PARTICION = config_get_int_value(config, "TAMANO_MINIMO_PARTICION");
 		TAMANO_MEMORIA = config_get_int_value(config, "TAMANO_MEMORIA");
 	}
+	SHOW_IN_CONSOLE = config_get_int_value(config, "SHOW_IN_CONSOLE");
+	LOG_NOTIFICATION_LEVEL = config_get_int_value(config, "LOG_NOTIFICATION_LEVEL");
 
 	log_debug(LOGGER, "IP: %s", IP);
 	log_debug(LOGGER, "PUERTO: %s", PUERTO);
