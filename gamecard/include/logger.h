@@ -20,7 +20,7 @@
 
 #include "server.h"
 
-#define LOG_SHOW_CONSOLE 1
+#define LOG_SHOW_CONSOLE 0
 
 t_log* loggerMain;
 t_log* loggerNew;

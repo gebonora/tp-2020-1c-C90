@@ -7,7 +7,7 @@ function kill_process() {
         broker)
             local PID=$(pidof broker.app);;
         gamecard)
-            local PID=$(pidof gameCard.app;;
+            local PID=$(pidof gameCard.app);;
         team_1)
             local PID=$(pidof pidof team_1);;
         team_2)
@@ -38,40 +38,43 @@ if [ "${RELATIVE_MODE}" == "$1" ]; then
     DELIBIRD_PATH=`pwd`
 fi
 
-BROKER__PATH=${DELIBIRD_PATH}/broker/scripts
+BROKER_PATH=${DELIBIRD_PATH}/broker
+GAMEBOY_PATH=${DELIBIRD_PATH}/gameboy
 GAMECARD_PATH=${DELIBIRD_PATH}/gamecard
 TEAM_1_PATH=${DELIBIRD_PATH}/team/deploy
 TEAM_2_PATH=${DELIBIRT_PATH}/team/deploy_team_2
 
 echo -e "DELIBIRD_PATH: ${YELLOW}${DELIBIRD_PATH}${NC}"
 echo -e "BROKER_PATH: ${YELLOW}${BROKER_PATH}${NC}"
+echo -e "GAMEBOY_PATH: ${YELLOW}${GAMEBOY_PATH}${NC}"
 echo -e "GAMECARD_PATH: ${YELLOW}${GAMECARD_PATH}${NC}"
 echo -e "TEAM_1_PATH: ${YELLOW}${TEAM_1_PATH}${NC}"
 echo -e "TEAM_2_PATH: ${YELLOW}${TEAM_2_PATH}${NC}"
 
-echo -e "Iniciando proceso: ${YELLOW}broker${NC}\n"
-
+echo -e "Iniciando proceso: ${YELLOW}broker${NC}"
 cd ${BROKER_PATH} && ./broker.app &
 
-echo -e "Iniciando proceso: ${YELLOW}gamecard${NC}\n"
+sleep 1
 
+echo -e "Iniciando proceso: ${YELLOW}gamecard${NC}"
 cd ${GAMECARD_PATH} && ./gameCard.app &
 
-echo -e "Iniciando proceso: ${YELLOW}team 1${NC}\n"
+echo -e "Ejecutando script: ${YELLOW}new_pokemon_antes_team.sh${NC}"
+cd ${GAMEBOY_PATH}/scripts && time ./new_pokemon_antes_team.sh
 
+sleep 1
+
+echo -e "Iniciando proceso: ${YELLOW}team 1${NC}"
 cd ${TEAM_1_PATH} && ./team.app &
 
-echo -e "Iniciando proceso: ${YELLOW}team 2${NC}\n"
-
+echo -e "Iniciando proceso: ${YELLOW}team 2${NC}"
 cd ${TEAM_2_PATH} && ./team_2.app &
 
-echo -e "Ejecutando script: ${YELLOW}new_pokemon_antes_team.sh${NC}\n"
+read -n 1 -s -r -p "PRESIONAR CUALQUIER TECLA PARA TERMINAR"
 
-echo -e "\n${YELLOW}Esperando confirmación de usuario${NC}\n"
+echo -e "Ejecutando script: ${YELLOW}new_pokemon_post_team.sh${NC}"
 
-echo -e "Ejecutando script: ${YELLOW}new_pokemon_post_team.sh${NC}\n"
-
-#kill_process "broker"
-#kill_process "gamecard"
-#kill_process "team"
-#kill_process "team_2"
+kill_process "broker"
+kill_process "gamecard"
+kill_process "team"
+kill_process "team_2"

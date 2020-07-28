@@ -25,7 +25,8 @@ else
     cd ${DELIBIRD_PATH}/gameboy && ./deploy.sh $1 && rm -f deploy/logs/*
     cd ${DELIBIRD_PATH}/broker && make && rm -f logs/*
     cd ${DELIBIRD_PATH}/gamecard && make && rm -f logs/*
-    cd ${DELIBIRD_PATH}/team && ./deploy.sh $1 && cp -r deploy deploy_team_2
+    cd ${DELIBIRD_PATH}/team && ./deploy.sh $1
+    cd ${DELIBIRD_PATH}/team && rm -rf deploy_team_2 && cp -r deploy deploy_team_2
     cd ${DELIBIRD_PATH}/team/deploy_team_2 && mv team team_2
     cd ${DELIBIRD_PATH}/team && rm -f deploy/logs/* && rm -f deploy_team_2/logs/*
 
