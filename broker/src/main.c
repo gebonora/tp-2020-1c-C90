@@ -8,8 +8,8 @@ static void _init_memory();
 static void _init_dump();
 
 int main(){
-	_init_logger();
 	_init_config();
+	_init_logger();
 	_init_semaphores();
 	_init_context();
 	_init_memory();
@@ -22,6 +22,15 @@ int main(){
 
 static void _init_logger() {
     LOGGER = log_create(LOGGER_PATH, "Broker Server", SHOW_IN_CONSOLE, LOG_NOTIFICATION_LEVEL);
+
+	log_debug(LOGGER, "IP: %s", IP);
+	log_debug(LOGGER, "PUERTO: %s", PUERTO);
+	log_debug(LOGGER, "ALGORITMO_MEMORIA: %s", ALGORITMO_MEMORIA);
+	log_debug(LOGGER, "ALGORITMO_REEMPLAZO: %s", ALGORITMO_REEMPLAZO);
+	log_debug(LOGGER, "ALGORITMO_PARTICION_LIBRE: %s", ALGORITMO_PARTICION_LIBRE);
+	log_debug(LOGGER, "FRECUENCIA_COMPACTACION: %d", FRECUENCIA_COMPACTACION);
+	log_debug(LOGGER, "TAMANO_MEMORIA: %d", TAMANO_MEMORIA);
+	log_debug(LOGGER, "TAMANO_MINIMO_PARTICION: %d", TAMANO_MINIMO_PARTICION);
 }
 
 static void _init_config() {
@@ -43,15 +52,6 @@ static void _init_config() {
 	}
 	SHOW_IN_CONSOLE = config_get_int_value(config, "SHOW_IN_CONSOLE");
 	LOG_NOTIFICATION_LEVEL = config_get_int_value(config, "LOG_NOTIFICATION_LEVEL");
-
-	log_debug(LOGGER, "IP: %s", IP);
-	log_debug(LOGGER, "PUERTO: %s", PUERTO);
-	log_debug(LOGGER, "ALGORITMO_MEMORIA: %s", ALGORITMO_MEMORIA);
-	log_debug(LOGGER, "ALGORITMO_REEMPLAZO: %s", ALGORITMO_REEMPLAZO);
-	log_debug(LOGGER, "ALGORITMO_PARTICION_LIBRE: %s", ALGORITMO_PARTICION_LIBRE);
-	log_debug(LOGGER, "FRECUENCIA_COMPACTACION: %d", FRECUENCIA_COMPACTACION);
-	log_debug(LOGGER, "TAMANO_MEMORIA: %d", TAMANO_MEMORIA);
-	log_debug(LOGGER, "TAMANO_MINIMO_PARTICION: %d", TAMANO_MINIMO_PARTICION);
 
 	config_destroy(config);
 }

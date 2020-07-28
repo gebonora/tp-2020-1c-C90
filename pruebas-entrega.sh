@@ -13,13 +13,15 @@ function kill_process() {
         team_2)
             local PID=$(pidof pidof team_2);;
         *)
-            echo -e "${RED}PROCESS, proceso desconocido: ${NC}${PROCESS}"
+            echo -e "${RED}Proceso desconocido: ${NC}${PROCESS}"
             exit 2;;
     esac
 
     if [ ! -z "${PID}" ]; then
-        echo -e "${RED}Killing process: ${NC}${YELLOW}${PROCESS}${NC}"
+        echo -e "${GREEN}Matando proceso: ${NC}${YELLOW}${PROCESS}${NC}"
         kill -s SIGTERM ${PID}
+    else
+        echo -e "${RED}Proceso no se encuentra ejecutando: ${NC}${YELLOW}${PROCESS}${NC}"
     fi
 }
 
@@ -49,7 +51,7 @@ echo -e "TEAM_2_PATH: ${YELLOW}${TEAM_2_PATH}${NC}"
 
 echo -e "Iniciando proceso: ${YELLOW}broker${NC}\n"
 
-cd ${BROKER_PATH} && ./broker.sh -d
+cd ${BROKER_PATH} && ./broker.app &
 
 echo -e "Iniciando proceso: ${YELLOW}gamecard${NC}\n"
 
@@ -61,7 +63,7 @@ cd ${TEAM_1_PATH} && ./team.app &
 
 echo -e "Iniciando proceso: ${YELLOW}team 2${NC}\n"
 
-cd ${TEAM_2_PATH} && ./team.app &
+cd ${TEAM_2_PATH} && ./team_2.app &
 
 echo -e "Ejecutando script: ${YELLOW}new_pokemon_antes_team.sh${NC}\n"
 
@@ -71,5 +73,5 @@ echo -e "Ejecutando script: ${YELLOW}new_pokemon_post_team.sh${NC}\n"
 
 #kill_process "broker"
 #kill_process "gamecard"
-#kill_process "team_1"
+#kill_process "team"
 #kill_process "team_2"
