@@ -28,28 +28,19 @@ void send_message_from_new_request(void* data, Operation operation, uint32_t mes
 	Message* message = _create_message(operation, message_id, correlational_id, _calculate_data_size(data, operation));
 	void* serialized_data = _serialize_data(data, operation, message->data_size);
 
-	pthread_mutex_lock(&MEMORY);
+	lock_memory_for_write("send_message_from_new_request, operation %s, message_id %d", get_operation_by_value(operation), message_id);
 	Partition* partition = save_message(serialized_data, message);
-	pthread_mutex_unlock(&MEMORY);
+	unlock_memory_for_write("send_message_from_new_request, operation %s, message_id %d", get_operation_by_value(operation), message_id);
 
 	if(partition != NULL){
-		pthread_mutex_lock(&MUTEX_READERS);
-		READERS ++;
-		if(READERS == 1) pthread_mutex_lock(&MEMORY);
-		pthread_mutex_unlock(&MUTEX_READERS);
+		lock_memory_for_read("send_message_from_new_request, operation %s, message_id %d", get_operation_by_value(operation), message_id);
 		send_messages_to_subscribers(partition);
-		pthread_mutex_lock(&MUTEX_READERS);
-		READERS --;
-		if(READERS == 0) pthread_mutex_unlock(&MEMORY);
-		pthread_mutex_unlock(&MUTEX_READERS);
+		unlock_memory_for_read("send_message_from_new_request, operation %s, message_id %d", get_operation_by_value(operation), message_id);
 	}
 }
 
 void send_message_from_suscription(Operation operation, Subscriber* subscriber) {
-	pthread_mutex_lock(&MUTEX_READERS);
-	READERS ++;
-	if(READERS == 1) pthread_mutex_lock(&MEMORY);
-	pthread_mutex_unlock(&MUTEX_READERS);
+	lock_memory_for_read("send_message_from_suscription, operation %s, subscriber %s-%d", get_operation_by_value(operation), get_process_by_value(subscriber->process), subscriber->id);
 	log_debug(LOGGER, "Consuming messages from operation: %s", get_operation_by_value(operation));
 	log_debug(LOGGER, "Getting partitions");
 
@@ -74,11 +65,34 @@ void send_message_from_suscription(Operation operation, Subscriber* subscriber) 
 
 		list_iterate(partitions, _inline_send_message);
 	}
+	unlock_memory_for_read("send_message_from_suscription, operation %s, subscriber %s-%d", get_operation_by_value(operation), get_process_by_value(subscriber->process), subscriber->id);
+	list_destroy(partitions);
+}
+
+void lock_memory_for_read(char* name){
+	log_warning(LOGGER, "lock_memory_for_read: %s", name);
+	pthread_mutex_lock(&MUTEX_READERS);
+	READERS ++;
+	if(READERS == 1) pthread_mutex_lock(&MEMORY);
+	pthread_mutex_unlock(&MUTEX_READERS);
+}
+
+void unlock_memory_for_read(char* name){
+	log_warning(LOGGER, "unlock_memory_for_read: %s", name);
 	pthread_mutex_lock(&MUTEX_READERS);
 	READERS --;
 	if(READERS == 0) pthread_mutex_unlock(&MEMORY);
 	pthread_mutex_unlock(&MUTEX_READERS);
-	list_destroy(partitions);
+}
+
+void lock_memory_for_write(char* name){
+	log_warning(LOGGER, "lock_memory_for_write: %s", name);
+	pthread_mutex_lock(&MEMORY);
+}
+
+void unlock_memory_for_write(char* name){
+	log_warning(LOGGER, "unlock_memory_for_write: %s", name);
+	pthread_mutex_unlock(&MEMORY);
 }
 
 uint32_t get_subscriber_identifier(Subscriber* subscriber){
