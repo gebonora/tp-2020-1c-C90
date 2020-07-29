@@ -21,7 +21,7 @@ cd ${DEPLOY_PATH} && cmake .. && make
 install_result=$?
 if [ $install_result -eq 0 ]
 then
-  echo "${GREEN}Proceso Team deployado!${NC}"
+  echo -e "${GREEN}Proceso Team deployado!${NC}"
 else
-  echo "${RED}Error al deployar el proceso Team${NC}"
+  echo -e "${RED}Error al deployar el proceso Team${NC}"
 fi

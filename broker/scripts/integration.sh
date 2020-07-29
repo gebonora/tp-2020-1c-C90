@@ -8,8 +8,6 @@ NC='\033[0m'
 function process() {
     TEST_NAME=$1
     SCRIPT_NAME=$2
-    local BROKER_PID=$(pidof broker.app)
-    local VALGRIND_PID=$(pidof valgrind.bin)
 
     SCRIPT_TO_EXECUTE=${SCRIPTS_PATH}/${SCRIPT_NAME}
     TEST_DUMP=${DUMPS_PATH}/${TEST_NAME}_dump.log
@@ -37,13 +35,13 @@ function process() {
 
     echo -e "\n${YELLOW}Starting up broker process ${NC}\n"
 
-    cd ${SCRIPTS_PATH} && ./${BROKER_SCRIPT} -d
+    cd ${BROKER_SCRIPTS} && ./broker.sh -d
 
     # ejecuto la prueba correspondiente en script
 
     echo -e "\n\nExecuting script: ${YELLOW} ${SCRIPT_TO_EXECUTE} ${NC} and performing memory dump"
 
-    cd ${SCRIPTS_PATH} && ./${SCRIPT_NAME} && ./${DUMP_SCRIPT}
+    cd ${SCRIPTS_PATH} && ./${SCRIPT_NAME} && ./dump.sh
 
     # creo archivo de dump para el test y ejecuto dump de la memoria redireccionando el output a otro file
 
@@ -78,19 +76,19 @@ function process() {
 
     echo -e "\n${YELLOW}Shuting down broker process ${NC}\n"
 
-    cd ${SCRIPTS_PATH} && ./${BROKER_SCRIPT} -k
+    cd ${BROKER_SCRIPTS} && ./broker.sh -k
 }
 
-BROKER_PATH=/home/utnso/tp-2020-1c-C90/broker
+HOME_PATH=/home/utnso/tp-2020-1c-C90
+BROKER_PATH=${HOME_PATH}/broker
+BROKER_SCRIPTS=${BROKER_PATH}/scripts
 BROKER_CONFIG_FILE=${BROKER_PATH}/config/broker.config
 BROKER_BACKUP_FILE=${BROKER_PATH}/config/backup.config
-CONFIGS_PATH=${BROKER_PATH}/tests/configs
+CONFIGS_PATH=${BROKER_PATH}/config
 LOGS_PATH=${BROKER_PATH}/tests/expected
 DUMPS_PATH=${BROKER_PATH}/tests/actual
-SCRIPTS_PATH=${BROKER_PATH}/scripts
-DUMP_FILE=${SCRIPTS_PATH}/dump.log
-DUMP_SCRIPT=dump.sh
-BROKER_SCRIPT=broker.sh
+SCRIPTS_PATH=${HOME_PATH}/gameboy/scripts
+DUMP_FILE=${BROKER_PATH}/dump.log
 FAILED_TESTS=""
 PASSED_TESTS=""
 

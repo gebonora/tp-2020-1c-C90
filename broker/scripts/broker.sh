@@ -18,9 +18,23 @@ RED='\033[0;31m'
 YELLOW='\033[0;33m'
 NC='\033[0m'
 
+HOME_PATH=/home/utnso
+DELIBIRD_PATH=${HOME_PATH}/tp-2020-1c-C90
+
+if [ "-r" = "$1" ]; then
+    echo "Using relative routes for directories"
+    DELIBIRD_PATH=`pwd`
+fi
+
+BROKER_PATH=${DELIBIRD_PATH}/broker
+LOG_FILE=${BROKER_PATH}/logs/broker.log
+
+echo -e "DELIBIRD_PATH: ${YELLOW}${DELIBIRD_PATH}${NC}"
+echo -e "BROKER_PATH: ${YELLOW}${BROKER_PATH}${NC}"
+
 get_pid
 
-if [ "-k" == "$1" ]; then
+if [ "-k" = "$1" ]; then
     if [ -z "${PID}" ]; then
         echo -e "${RED}Broker is not running${NC}"
     else
@@ -38,31 +52,37 @@ if [ "-k" == "$1" ]; then
     fi
 elif [ -z "${PID}" ]; then
 
+    echo -e "Cleaning log file: ${YELLOW}${LOG_FILE}${NC}"
+    > ${LOG_FILE}
+
     case $1 in
         -v)
             echo -e "${YELLOW}Starting broker in valgrind mode${NC}"
-            if [ "-d" == "$1" ]; then
-                valgrind --show-leak-kinds=all --leak-check=full --log-file="../logs/broker.log" -v ./../broker.app &
+            if [ "-d" = $1 ] || [ "-d" = $2 ]; then
+                echo -e "${YELLOW}Using detached mode -d${NC}"
+                cd ${BROKER_PATH} && valgrind --show-leak-kinds=all --leak-check=full --log-file="${LOG_FILE}" -v ./broker.app &
             else
-                valgrind --show-leak-kinds=all --leak-check=full --log-file="../logs/broker.log" -v ./../broker.app
+                cd ${BROKER_PATH} && valgrind --show-leak-kinds=all --leak-check=full --log-file="${LOG_FILE}" -v ./broker.app
             fi
             ;;
         -h)
             echo -e "${YELLOW}Starting broker in helgrind mode${NC}"
         
-            if [ "-d" == "$1" ]; then
-                valgrind --tool="helgrind" --log-file="../logs/broker.log" -v ./../broker.app &
+            if [ "-d" = $1 ] || [ "-d" = $2 ]; then
+                echo -e "${YELLOW}Using detached mode -d${NC}"
+                cd ${BROKER_PATH} && valgrind --tool="helgrind" --log-file=${LOG_FILE} -v ./broker.app &
             else
-                valgrind --tool="helgrind" --log-file="../logs/broker.log" -v ./../broker.app
+                cd ${BROKER_PATH} && valgrind --tool="helgrind" --log-file=${LOG_FILE} -v ./broker.app
             fi
             ;;
         *)
             echo -e "${YELLOW}Starting broker${NC}"
 
-            if [ "-d" == "$1" ]; then
-                ./../broker.app &
+            if [ "-d" = $1 ] || [ "-d" = $2 ]; then
+                echo -e "${YELLOW}Using detached mode -d${NC}"
+                cd ${BROKER_PATH} && ./broker.app &
             else
-                ./../broker.app
+                cd ${BROKER_PATH} && ./broker.app
             fi
             ;;
     esac
