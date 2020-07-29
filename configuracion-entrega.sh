@@ -113,12 +113,12 @@ esac
 BROKER_CONFIG=${DELIBIRD_PATH}/broker/config/broker.config
 BROKER_ENTREGA=${DELIBIRD_PATH}/broker/config/entrega_broker.config
 BROKER_LOG_FILE=${DELIBIRD_PATH}/broker/logs/broker.log
-GAMEBOY_CONFIG=${DELIBIRD_PATH}/gameboy/config/gameboy.config
-GAMEBOY_ENTREGA=${DELIBIRD_PATH}/gameboy/config/entrega_gameboy.config
+GAMEBOY_CONFIG=${DELIBIRD_PATH}/gameboy/config/deploy/gameboy.config
+GAMEBOY_ENTREGA=${DELIBIRD_PATH}/gameboy/config/deploy/entrega_gameboy.config
 GAMEBOY_LOG_FILE=${DELIBIRD_PATH}/gameboy/deploy/logs/gameboy.log
 GAMECARD_CONFIG=${DELIBIRD_PATH}/gamecard/config/gameCard.config
 GAMECARD_ENTREGA=${DELIBIRD_PATH}/gamecard/config/entrega_gamecard.config
-GAMECARD_LOG_FILE=${DELIBIRD_PATH}/gamecard/logs/logGamecard.log
+GAMECARD_LOG_FILE=${DELIBIRD_PATH}/gamecard/logs/LOG_GAMECARD.log
 TEAM_1_CONFIG=${DELIBIRD_PATH}/team/deploy/config/team.config
 TEAM_1_ENTREGA=${DELIBIRD_PATH}/team/deploy/config/entrega_team_1.config
 TEAM_1_LOG_FILE=${DELIBIRD_PATH}/team/deploy/logs/team_1.log
