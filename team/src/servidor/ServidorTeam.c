@@ -5,17 +5,13 @@
 #include "servidor/ServidorTeam.h"
 
 void configurarServer() {
-	IP_Broker = string_new();
-	string_append(&IP_Broker, servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, IP_BROKER));
+	IP_Broker = string_duplicate(servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, IP_BROKER));
 
-	Puerto_Broker = string_new();
-	string_append(&Puerto_Broker, servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, PUERTO_BROKER));
+	Puerto_Broker = string_duplicate(servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, PUERTO_BROKER));
 
-	IP_Team_Gameboy = string_new();
-	string_append(&IP_Team_Gameboy, servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, IP_TEAM_GAMEBOY));
+	IP_Team_Gameboy = string_duplicate(servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, IP_TEAM_GAMEBOY));
 
-	Puerto_Team_Gameboy = string_new();
-	string_append(&Puerto_Team_Gameboy, servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, PUERTO_TEAM_GAMEBOY));
+	Puerto_Team_Gameboy = string_duplicate(servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, PUERTO_TEAM_GAMEBOY));
 
 	Tiempo_Reconexion = servicioDeConfiguracion.obtenerEntero(&servicioDeConfiguracion, TIEMPO_RECONEXION);
 
@@ -250,12 +246,14 @@ void atenderGameboy() {
 			argumentosHilo->mensaje = unPokemon;
 			argumentosHilo->idMensaje = UINT32_MAX;
 
-			pthread_create(&thread, NULL, (void*) procesarHiloAppeared, argumentosHilo);
-			pthread_detach(thread);
+			procesarHiloAppeared(argumentosHilo); // TODO: ahora es single threaded, chequear si es posible una solución multi que respete orden.
+			//pthread_create(&thread, NULL, (void*) procesarHiloAppeared, argumentosHilo);
+			//pthread_detach(thread);
 		} else {
 			log_error(INTERNAL_LOGGER, "El gameboy envió un mensaje erróneo.");
-			close(socketCliente);
+			//close(socketCliente);
 		}
+		close(socketCliente); // TODO: chequear si está bien este close
 	}
 }
 

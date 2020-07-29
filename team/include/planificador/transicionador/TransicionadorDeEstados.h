@@ -19,13 +19,16 @@
  *  - EXEC: Entrenador mas cercano al pokemon.
  */
 
+// TODO: esta clase no se usó y ya resolvimos el problema en otro lado. Podríamos volarla.
+
+
 typedef enum {
     TRANSICION_EXITOSA,
     TRANSICION_FALLIDA
 } ResultadoTransicion;
 
 typedef struct TransicionadorDeEstados {
-    t_log *logger; // TODO: agregarEstadoPlanificacion
+    t_log *logger;
     ResultadoTransicion (*transicionarA)(struct TransicionadorDeEstados *this, UnidadPlanificable * unidadPlanificable, EstadoPlanificador estadoDeseado);
     void (*destruir)(struct TransicionadorDeEstados *this);
 } TransicionadorDeEstados;

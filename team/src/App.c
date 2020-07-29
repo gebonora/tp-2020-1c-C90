@@ -33,7 +33,7 @@ int main() {
 	log_info(INTERNAL_LOGGER, "Levantando el server...");
 	configurarServer();
 	if (ESPERAR_OBJETIVO_GLOBAL) {
-		atenderConexiones(); //TODO: Hacer apagable por si logramos cumplir con el objetivo.
+		atenderConexiones(); //TODO: Analizar si el apagado leakea o es aceptable.
 	}
 
 	// Por cada pokemon del objetivo global, enviar un GET [POKEMON].
@@ -47,6 +47,7 @@ int main() {
 			sem_wait(&semaforoObjetivoGlobalCompletado);
 		}
 	}
+
 	// Mostramos las metricas para comparar contra otros procesos team
 	servicioDeMetricasProcesoTeam->imprimirMetricas(servicioDeMetricasProcesoTeam);
 

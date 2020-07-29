@@ -34,7 +34,7 @@ t_list * especiesNecesarias(ObjetivoGlobal * this) {
     return especiesNecesarias;
 }
 
-bool puedeCapturarse(ObjetivoGlobal * this, char * especiePokemon) { // TODO actualizar para contablidadModificable.
+bool puedeCapturarse(ObjetivoGlobal * this, char * especiePokemon) {
     if (dictionary_has_key(this->contabilidadEspeciesActualizable, especiePokemon)) {
         pthread_mutex_lock(&this->mutexContabilidadActualizable);
         ContabilidadEspecie * contabilidadEspecie = dictionary_get(this->contabilidadEspeciesActualizable, especiePokemon);
