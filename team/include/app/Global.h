@@ -20,7 +20,7 @@
 // Configuración de ambiente -> Acá definimos las de la entrega -> En el CMake se sobreescriben para desarrollo.
 #ifndef TEAM_DEVELOPMENT_MODE
 #define INTERNAL_LOG_LEVEL LOG_LEVEL_DEBUG
-#define SHOW_INTERNAL_CONSOLE 0 // 1 para mostrar la consola de uso interno, 0 para el caso contrario.
+#define SHOW_INTERNAL_CONSOLE 1 // 1 para mostrar la consola de uso interno, 0 para el caso contrario.
 #define CORRER_TESTS 0
 #define ESPERAR_OBJETIVO_GLOBAL 1
 #define ACTIVAR_RETARDO_CPU 1
@@ -48,21 +48,16 @@
 #define ID_TEAM "ID_TEAM"
 
 // Mutex de los recursos compartidos
-pthread_mutex_t MTX_INTERNAL_LOG;
+pthread_mutex_t MTX_INTERNAL_LOG; // TODO: Se usa solo para logear en server y es medio al pedo. Se podría borrar.
 
-sem_t semaforoPokemone;
+sem_t semaforoObjetivoGlobalCompletado;
+
+sem_t semaforoContadorPokemon;
+sem_t semaforoContadorEntrenadoresDisponibles;
 sem_t semaforoReady;
-sem_t semaforoTrabajar2;
-
-pthread_mutex_t messi;
 sem_t semaforoDeadlock;
-sem_t semaforoCaptura;
 
-pthread_mutex_t mtxNew;
-pthread_mutex_t mtxReady;
-pthread_mutex_t mtxExec;
-pthread_mutex_t mtxExit;
-pthread_mutex_t mtxBlock;
+pthread_mutex_t arrayMutexColas[5]; // Tengo 5 colas, que van en un enum de 0 a 4 TODO: Pasarlo al planificador como property.
 
 // Variables globales
 t_log * MANDATORY_LOGGER;

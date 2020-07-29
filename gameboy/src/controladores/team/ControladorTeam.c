@@ -35,6 +35,7 @@ void atenderPedidoTeam(PedidoGameBoy pedidoGameBoy, t_log * logger) {
 	default:
 		log_error(MANDATORY_LOGGER, "Los parámetros ingresados no son compatibles con TEAM. Abortando.");
 	}
+	close(socketCliente);
 }
 
 ControladorGameBoy controladorTeam = { .proceso = TEAM, .atenderPedido = atenderPedidoTeam };
