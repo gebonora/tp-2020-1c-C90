@@ -1,5 +1,10 @@
 #/!usr/bin/env sh
 
+function clean_log() {
+    echo -e "Cleaning log file: ${YELLOW}${LOG_FILE}${NC}"
+    > ${LOG_FILE}
+}
+
 function get_pid() {
     PID=""
     local BROKER_PID=$(pidof broker.app)
@@ -52,11 +57,9 @@ if [ "-k" = "$1" ]; then
     fi
 elif [ -z "${PID}" ]; then
 
-    echo -e "Cleaning log file: ${YELLOW}${LOG_FILE}${NC}"
-    > ${LOG_FILE}
-
     case $1 in
         -v)
+            clean_log
             echo -e "${YELLOW}Starting broker in valgrind mode${NC}"
             if [ "-d" = $1 ] || [ "-d" = $2 ]; then
                 echo -e "${YELLOW}Using detached mode -d${NC}"
@@ -66,6 +69,7 @@ elif [ -z "${PID}" ]; then
             fi
             ;;
         -h)
+            clean_log
             echo -e "${YELLOW}Starting broker in helgrind mode${NC}"
         
             if [ "-d" = $1 ] || [ "-d" = $2 ]; then

@@ -31,4 +31,11 @@ RED='\033[0;31m'
 YELLOW='\033[0;33m'
 NC='\033[0m'
 
-kill_process $1
+if [ "all" = "$1" ]; then
+    kill_process broker
+    kill_process gamecard
+    kill_process team
+    kill_process team_2
+else
+    kill_process $1
+fi
