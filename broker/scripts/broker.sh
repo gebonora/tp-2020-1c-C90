@@ -27,7 +27,7 @@ if [ "-r" = "$1" ]; then
 fi
 
 BROKER_PATH=${DELIBIRD_PATH}/broker
-LOG_FILE=${BROKER_PATH}/logs/broker.log
+LOG_FILE=${BROKER_PATH}/logs/valgrind.log
 
 echo -e "DELIBIRD_PATH: ${YELLOW}${DELIBIRD_PATH}${NC}"
 echo -e "BROKER_PATH: ${YELLOW}${BROKER_PATH}${NC}"
