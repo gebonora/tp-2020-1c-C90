@@ -9,9 +9,9 @@ function kill_process() {
         gamecard)
             local PID=$(pidof gameCard.app);;
         team)
-            local PID=$(pidof pidof team);;
+            local PID=$(pidof team);;
         team_2)
-            local PID=$(pidof pidof team_2);;
+            local PID=$(pidof team_2);;
         *)
             echo -e "Proceso desconocido: ${RED}${PROCESS}${NC}"
             echo -e "Procesos válidos: ${YELLOW}broker|gamecard|team|team_2${NC}"
