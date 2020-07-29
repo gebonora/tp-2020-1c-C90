@@ -97,7 +97,6 @@ void mostrarTitulo(t_log * logger) {
 
 void inicializarComponentesDelSistema() {
 	srandom(time(NULL));
-	pthread_mutex_init(&MTX_INTERNAL_LOG, NULL); //TODO: por ahi conviene moverlo a configurarServer()
 
 	log_debug(INTERNAL_LOGGER, "Creando el cliente para comunicarse con el broker...");
 	clienteBrokerV2ProcesoTeam = ClienteBrokerV2Constructor.new();
@@ -192,7 +191,6 @@ void liberarRecursos() {
 	// Componentes
 	log_debug(INTERNAL_LOGGER, "Liberando componentes del sistema...");
 	manejadorDeEventosProcesoTeam->destruir(manejadorDeEventosProcesoTeam);
-	pthread_mutex_destroy(&MTX_INTERNAL_LOG);
 	sem_destroy(&semaforoObjetivoGlobalCompletado);
 	registradorDeEventosProcesoTeam->destruir(registradorDeEventosProcesoTeam);
 	destruirAlgoritmosDePlanificacion();

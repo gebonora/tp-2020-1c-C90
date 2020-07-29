@@ -17,7 +17,7 @@ static RespuestaBroker enviarGet(ClienteBrokerV2 * this, char* nombrePokemon) {
 
     uint32_t idAsignado;
 
-    if (recv(socketDescartable, &idAsignado, sizeof(uint32_t), 0) <= 0) {
+    if (recv(socketDescartable, &idAsignado, sizeof(uint32_t), MSG_WAITALL) <= 0) {
         flagBrokerCaido = 1;
     }
 
@@ -44,7 +44,7 @@ static RespuestaBroker enviarCatch(ClienteBrokerV2 * this, char * especie, uint3
 
     uint32_t idAsignado;
 
-    if (recv(socketDescartable, &idAsignado, sizeof(uint32_t), 0) <= 0) {
+    if (recv(socketDescartable, &idAsignado, sizeof(uint32_t), MSG_WAITALL) <= 0) {
         flagBrokerCaido = 1;
     }
 
