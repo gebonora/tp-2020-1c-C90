@@ -3,7 +3,7 @@
 static void _create_dump();
 static void _show_memory_status();
 static void _show_partition(Partition*, int);
-static void _show_subscriber(Subscriber*);
+static void _show_subscriber(void*);
 static void _show_message(Message*);
 
 void dump_handler(int signum) {
@@ -37,7 +37,7 @@ static void _create_dump() {
 	for(int index = 0, number = 1; index < memory->partitions->elements_count; index++, number++) {
 		partition = list_get(memory->partitions, index);
 		if(partition->free) {
-			fprintf(dump_file, "Partición %d: | %d - %d | [%s] | Size: %d b | LRU: %d |\n", number, partition->position, partition->position + partition->size - 1, "L", partition->size, partition->access_time);
+			fprintf(dump_file, "Partición %d: | %d - %d | [%s] | Size: %d b |\n", number, partition->position, partition->position + partition->size - 1, "L", partition->size);
 		} else {
 			fprintf(dump_file, "Partición %d: | %d - %d | [%s] | Size: %d b | LRU: %d | COLA: %s | ID: %d |\n", number, partition->position, partition->position + partition->size - 1, "X", partition->size, partition->access_time, get_operation_by_value(partition->message->operation_code), partition->message->message_id);
 		}
@@ -73,11 +73,12 @@ static void _show_partition(Partition* partition, int number) {
 	if(!partition->free) {
 		_show_message(partition->message);
 	}
-	list_iterate(partition->notified_suscribers, &_show_subscriber);
+	list_iterate(partition->notified_suscribers, _show_subscriber);
 	log_info(LOGGER, "--------------------------------");
 }
 
-static void _show_subscriber(Subscriber* subscriber) {
+static void _show_subscriber(void* e) {
+	Subscriber* subscriber = e;
 	log_info(LOGGER, "Notified Subscriber (process=%s, id=%d, socket=%d)", get_process_by_value(subscriber->process), subscriber->id, subscriber->socket_subscriber);
 }
 

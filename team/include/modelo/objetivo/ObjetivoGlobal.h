@@ -49,6 +49,5 @@ ContabilidadEspecie * crearContabilidadEspecie(int necesarios, int capturados);
 
 ObjetivoGlobal objetivoGlobalProcesoTeam;
 
-sem_t semaforoObjetivoGlobalCompletado;
 
 #endif //TEAM_OBJETIVOGLOBAL_H

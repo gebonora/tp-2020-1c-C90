@@ -27,7 +27,7 @@ Partition* save_to_cache_dynamic_partitions(void* data, Message* message){
 	partition->access_time = now;
 	partition->creation_time = now;
 	log_debug(LOGGER, "Copying bytes to cache");
-	memcpy(partition->start, data, message->data_size);
+	memcpy((void*) partition->start, data, message->data_size);
 	log_info(LOGGER, "Mensaje %d guardado con exito en la particion que comienza en %d",partition->message->message_id, partition->position);
 	log_debug(LOGGER, "memcpy done");
 	sem_post(&MEMORY);
@@ -123,12 +123,14 @@ static void _compact() {
 
 	log_debug(LOGGER, "Getting ocuppied partitions");
 	t_list* occupied = get_occupied_partitions();
-	bool minor_position(Partition* p1, Partition* p2){
+	bool _inline_minor_position(void* e1, void* e2){
+		Partition* p1 = e1;
+		Partition* p2 = e2;
 		return p1->position < p2->position;
 	}
 
-	list_sort(occupied, &minor_position);
-	uintptr_t start = memory->cache;
+	list_sort(occupied, _inline_minor_position);
+	uintptr_t start = (uintptr_t) memory->cache;
 	uint32_t position = 0;
 	t_list* data_occupied = list_create();
 
@@ -139,7 +141,7 @@ static void _compact() {
 
 		log_debug(LOGGER, "New values for start=%x, position=%d", start, position);
 		void* data = malloc(partition->message->data_size);
-		memcpy(data, partition->start, partition->message->data_size);
+		memcpy(data, (void*) partition->start, partition->message->data_size);
 		list_add(data_occupied, data);
 
 		partition->start = start;
@@ -153,7 +155,7 @@ static void _compact() {
 		void* d = list_get(data_occupied, a);
 		Partition* part = list_get(occupied, a);
 
-		memcpy(part->start, d, part->message->data_size);
+		memcpy((void*) part->start, d, part->message->data_size);
 		free(d);
 	}
 
@@ -162,13 +164,15 @@ static void _compact() {
 
 	log_debug(LOGGER, "Free partitions count: %d", not_occupied->elements_count);
 
-	uint32_t _sum_all_sizes(uint32_t accum, Partition* partition){
+	uint32_t _inline_sum_all_sizes(void* e1, void* e2){
+		uint32_t accum = (uint32_t)e1;
+		Partition* partition = e2;
 		log_debug(LOGGER, "Accumulator (%d) += %d", accum, partition->size);
 		return accum + partition->size;
 	}
 
 	log_debug(LOGGER, "Summing free sizes");
-	uint32_t free_size = list_fold(not_occupied, 0, &_sum_all_sizes);
+	uint32_t free_size = (uint32_t) list_fold(not_occupied, 0, (void*(*)(void*, void*))_inline_sum_all_sizes);
 
 	log_debug(LOGGER, "Total free size: %d", free_size);
 
@@ -183,12 +187,13 @@ static void _compact() {
 
 	log_debug(LOGGER, "Free big partition (position=%d, start=%x, size=%d)", new_free_partition->position, new_free_partition->start, new_free_partition->size);
 
-	void _remove(Partition* partition) {
+	void _inline_remove_partition_at(void* e1) {
+		Partition* partition = e1;
 		remove_partition_at(partition->start);
 	}
 
 	log_debug(LOGGER, "Removing all free partitions from memory");
-	list_iterate(not_occupied, &_remove);
+	list_iterate(not_occupied, _inline_remove_partition_at);
 
 	log_debug(LOGGER, "Adding new free big partition at the end");
 	add_partition_next_to(last_occupied->start, new_free_partition);
@@ -283,7 +288,6 @@ static Partition* find_partition_dynamic(uint32_t size_of_data) {
 		int old_size = partition->size;
 
 		log_debug(LOGGER, "Partition new size: %d, old size: %d", new_size, old_size);
-		uint32_t now = get_time();
 
 		if(old_size != new_size){
 			log_debug(LOGGER, "New size is different than old_size. Breaking partition");

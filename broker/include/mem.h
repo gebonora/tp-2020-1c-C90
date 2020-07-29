@@ -11,5 +11,6 @@
 
 Partition* save_message(void*, Message*);
 t_list* messages_from_operation(Operation, Subscriber*);
+bool not_notified(void*, void*);
 
 #endif /* BROKER_INCLUDE_MEM_H_ */

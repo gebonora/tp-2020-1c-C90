@@ -32,6 +32,7 @@ typedef struct Entrenador {
     ContadorPokemones pokemonesObjetivo;
     bool estaEsperandoAlgo; // True si está en una captura o involucrado en un intercambio (yendo o esperando)
     int limiteDeCaptura; // Establece cuantos pokemones puede capturar
+    pthread_mutex_t mutex;
     // Interfaz publica
     void (*mover)(struct Entrenador * this, Coordinate * posicionObjetivo);
     bool (*objetivoCompletado)(struct Entrenador * this); // Es true si pokemones_objetivo es igual a pokemones_capturados.
