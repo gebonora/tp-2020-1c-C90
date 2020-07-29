@@ -28,19 +28,19 @@ void send_message_from_new_request(void* data, Operation operation, uint32_t mes
 	Message* message = _create_message(operation, message_id, correlational_id, _calculate_data_size(data, operation));
 	void* serialized_data = _serialize_data(data, operation, message->data_size);
 
-	sem_wait(&MEMORY);
+	pthread_mutex_lock(&MEMORY);
 	Partition* partition = save_message(serialized_data, message);
-	sem_post(&MEMORY);
+	pthread_mutex_unlock(&MEMORY);
 
 	if(partition != NULL){
 		pthread_mutex_lock(&MUTEX_READERS);
 		READERS ++;
-		if(READERS == 1) sem_wait(&MEMORY);
+		if(READERS == 1) pthread_mutex_lock(&MEMORY);
 		pthread_mutex_unlock(&MUTEX_READERS);
 		send_messages_to_subscribers(partition);
 		pthread_mutex_lock(&MUTEX_READERS);
 		READERS --;
-		if(READERS == 0) sem_post(&MEMORY);
+		if(READERS == 0) pthread_mutex_unlock(&MEMORY);
 		pthread_mutex_unlock(&MUTEX_READERS);
 	}
 }
@@ -48,7 +48,7 @@ void send_message_from_new_request(void* data, Operation operation, uint32_t mes
 void send_message_from_suscription(Operation operation, Subscriber* subscriber) {
 	pthread_mutex_lock(&MUTEX_READERS);
 	READERS ++;
-	if(READERS == 1) sem_wait(&MEMORY);
+	if(READERS == 1) pthread_mutex_lock(&MEMORY);
 	pthread_mutex_unlock(&MUTEX_READERS);
 	log_debug(LOGGER, "Consuming messages from operation: %s", get_operation_by_value(operation));
 	log_debug(LOGGER, "Getting partitions");
@@ -76,7 +76,7 @@ void send_message_from_suscription(Operation operation, Subscriber* subscriber) 
 	}
 	pthread_mutex_lock(&MUTEX_READERS);
 	READERS --;
-	if(READERS == 0) sem_post(&MEMORY);
+	if(READERS == 0) pthread_mutex_unlock(&MEMORY);
 	pthread_mutex_unlock(&MUTEX_READERS);
 	list_destroy(partitions);
 }
