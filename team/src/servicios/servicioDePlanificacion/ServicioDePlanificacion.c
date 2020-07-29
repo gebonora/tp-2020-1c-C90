@@ -70,9 +70,12 @@ void planificadorDeCortoPlazo(ServicioDePlanificacion* this) {
 		log_info(this->logger, "va a ejecutar %s por %d.", aEjecutar->entrenador->id, ciclosAEjecutar);
 
 		pthread_mutex_lock(&aEjecutar->entrenador->mutex);
-		this->servicioDeMetricas->registrarCambioDeContexto(this->servicioDeMetricas); // TODO: pensarlo bien
 		this->planificador.moverACola(&this->planificador, aEjecutar, EXEC, "Ejecutará en el procesador.");
+
+		// chequeamos si es igual al entrenador que se trabajaba antes y si no lo es se registra el context switch
+		if(!(string_equals(aEjecutar->entrenador->id,this->ultimoHiloEjecutado->entrenador->id))){
 		this->servicioDeMetricas->registrarCambioDeContexto(this->servicioDeMetricas);
+		}
 
 		aEjecutar->ejecutarParcialmente(aEjecutar, ciclosAEjecutar);
 
@@ -80,6 +83,7 @@ void planificadorDeCortoPlazo(ServicioDePlanificacion* this) {
 			this->servicioDeMetricas->registrarCicloRealizadoPorEntrenador(this->servicioDeMetricas, aEjecutar->entrenador->id);
 		}
 		this->definirYCambiarEstado(this, aEjecutar);
+		this->ultimoHiloEjecutado = aEjecutar;
 		pthread_mutex_unlock(&aEjecutar->entrenador->mutex);
 
 		this->planificador.mostrarLasColas(&this->planificador);
