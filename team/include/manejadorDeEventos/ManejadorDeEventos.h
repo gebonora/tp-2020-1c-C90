@@ -10,6 +10,7 @@
 #include "servicios/servicioDeCaptura/ServicioDeCaptura.h"
 #include "manejadorDeEventos/registro/RegistradorDeEventos.h"
 #include "modelo/objetivo/ObjetivoGlobal.h"
+#include "servicios/servicioDePlanificacion/ServicioDePlanificacion.h"
 /**
  * El server va a llamar al manejador de eventos cuando recibamos los mensajes, y el cliente cuando enviemos mensajes.
  * Esta clase se va a encargar de hacer el preprocesamiento necesario para descartar mensajes por ID, y el caso especial del get, que se debe ignorar si llega

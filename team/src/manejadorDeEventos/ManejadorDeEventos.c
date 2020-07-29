@@ -108,8 +108,6 @@ static void procesarAppearedRecibido(ManejadorDeEventos* this, Pokemon* unPokemo
 	free(aux);
 	free(coor);
 
-	// TODO: filtrar pokemon que no me sirven.
-
 	Coordinate* auxCoor = list_get(unPokemon->coordinates, 0);
 	this->servicioDeCaptura->procesarPokemonCapturable(this->servicioDeCaptura, string_duplicate(unPokemon->name->value), convertirACoordenada(auxCoor));
 	free_pokemon(unPokemon);
@@ -142,15 +140,19 @@ static void procesarCaughtRecibido(ManejadorDeEventos* this, Caught* unCaught, u
 			traducirResult(unCaught->result));
 
 	// Coincide con un pedido, ver el resultado
+	pthread_mutex_lock(&capturaPokemon->entrenador->mutex);
 	if (unCaught->result == FAIL) {
 		// Informar que falló, liberar memoria y cerrar.
 		this->servicioDeCaptura->registrarCapturaFallida(this->servicioDeCaptura, capturaPokemon);
-		free(unCaught);
-		return;
+		this->objetivoGlobalTeam.restarUnCapturado(&this->objetivoGlobalTeam, capturaPokemon->especie(capturaPokemon));
+	} else {
+		this->servicioDeCaptura->registrarCapturaExitosa(this->servicioDeCaptura, capturaPokemon);
 	}
-	// Caso feliz:
-	this->servicioDeCaptura->registrarCapturaExitosa(this->servicioDeCaptura, capturaPokemon);
+	servicioDePlanificacionProcesoTeam->definirYCambiarEstado(servicioDePlanificacionProcesoTeam,
+			servicioDePlanificacionProcesoTeam->planificador.obtenerHiloSegunEntrenador(&servicioDePlanificacionProcesoTeam->planificador, capturaPokemon->entrenador));
+	pthread_mutex_unlock(&capturaPokemon->entrenador->mutex);
 	free(unCaught);
+	return;
 }
 
 static void destruir(ManejadorDeEventos * this) {

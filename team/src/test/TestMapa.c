@@ -54,7 +54,7 @@ void testDeMapa() {
     assert(posicionPokemonDisponible->pos_x == 2);
     assert(posicionPokemonDisponible->pos_y == 2);
 
-    list_destroy_and_destroy_elements(pokemones, free_pokemon);
+    list_destroy_and_destroy_elements(pokemones, (void(*)(void*))free_pokemon);
     free(destino);
     entrenadorARegistrar->destruir(entrenadorARegistrar);
     pokemonARegistrar->destruir(pokemonARegistrar);

@@ -35,7 +35,7 @@ TareaPlanificable * generarTareaDeIntercambio(Entrenador * entrenadorMovil, Entr
         Instruccion * instruccionFinal = crearInstruccion(
                 list_size(instrucciones),
                 (void (*)(void *, ...)) intercambiarPokemones,
-                string_from_format("Intercambiar un %s de %s por un %s de %s", pokemonAEntregar, entrenadorMovil->id, pokemonARecibir, entrenadorEstatico),
+                string_from_format("Intercambiar un %s de %s por un %s de %s", pokemonAEntregar, entrenadorMovil->id, pokemonARecibir, entrenadorEstatico->id),
                 argumentosCaptura
         );
         list_add(instrucciones, instruccionFinal);

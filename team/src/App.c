@@ -43,9 +43,10 @@ int main() {
 	// Cuando se complete el objetivo global, podremos finalizar el proceso y liberar los recursos.
 	if (ESPERAR_OBJETIVO_GLOBAL) {
 		log_info(INTERNAL_LOGGER, "Esperando a que se complete el objetivo global...");
-		sem_wait(&semaforoObjetivoGlobalCompletado);
+		for (int a = 0; a < list_size(equipoProcesoTeam); a++) {
+			sem_wait(&semaforoObjetivoGlobalCompletado);
+		}
 	}
-
 	// Mostramos las metricas para comparar contra otros procesos team
 	servicioDeMetricasProcesoTeam->imprimirMetricas(servicioDeMetricasProcesoTeam);
 
@@ -72,6 +73,10 @@ void warmUp() {
 	}
 	if (!ACTIVAR_RETARDO_CPU) {
 		log_warning(INTERNAL_LOGGER, "Retardo de CPU: DESACTIVADO");
+	}
+
+	for (int a = 0; a < 5; a++) {
+		pthread_mutex_init(&arrayMutexColas[a], NULL);
 	}
 }
 
@@ -118,8 +123,14 @@ void inicializarComponentesDelSistema() {
 	registradorDeEventosProcesoTeam = RegistradorDeEventosConstructor.new();
 	manejadorDeEventosProcesoTeam = ManejadorDeEventosConstructor.new(servicioDeCapturaProcesoTeam, registradorDeEventosProcesoTeam);
 
-	log_debug(INTERNAL_LOGGER, "Inicializando semanforo de fin de proceso...");
+	log_debug(INTERNAL_LOGGER, "Inicializando semáforo de fin de proceso...");
 	sem_init(&semaforoObjetivoGlobalCompletado, 0, 0);
+
+	log_debug(INTERNAL_LOGGER, "Inicializando semáforos contadores...");
+	sem_init(&semaforoReady, 0, 0);
+	sem_init(&semaforoDeadlock, 0, 0);
+	sem_init(&semaforoContadorPokemon, 0, 0);
+	sem_init(&semaforoContadorEntrenadoresDisponibles, 0, 0);
 }
 
 /**
@@ -130,16 +141,16 @@ void inicializarComponentesDelSistema() {
  * Finalmente, con el cliente broker a mano: Por cada pokemon del objetivo global, enviar un GET \[POKEMON\] - OK
  */
 void configurarEstadoInicialProcesoTeam() {
+	printf("entre a configurar\n");
 	log_debug(INTERNAL_LOGGER, "Instanciando entrenadores y armando el equipo...");
 	equipoProcesoTeam = crearEquipoPorConfiguracion();
 	log_debug(INTERNAL_LOGGER, "Calculando el objetivo global...");
-    objetivoGlobalProcesoTeam = ObjetivoGlobalConstructor.new(equipoProcesoTeam, clienteBrokerV2ProcesoTeam, registradorDeEventosProcesoTeam);
-    manejadorDeEventosProcesoTeam->setObjetivoGlobal(manejadorDeEventosProcesoTeam,objetivoGlobalProcesoTeam);
-    manejadorDeEventosProcesoTeam->registrarpokemonsNecesarios(manejadorDeEventosProcesoTeam);
+	objetivoGlobalProcesoTeam = ObjetivoGlobalConstructor.new(equipoProcesoTeam, clienteBrokerV2ProcesoTeam, registradorDeEventosProcesoTeam);
+	manejadorDeEventosProcesoTeam->setObjetivoGlobal(manejadorDeEventosProcesoTeam, objetivoGlobalProcesoTeam);
+	manejadorDeEventosProcesoTeam->registrarpokemonsNecesarios(manejadorDeEventosProcesoTeam);
 
-    servicioDePlanificacionProcesoTeam->servicioDeCaptura = servicioDeCapturaProcesoTeam;
-    servicioDePlanificacionProcesoTeam->objetivoGlobal = objetivoGlobalProcesoTeam;
-
+	servicioDePlanificacionProcesoTeam->servicioDeCaptura = servicioDeCapturaProcesoTeam;
+	servicioDePlanificacionProcesoTeam->objetivoGlobal = objetivoGlobalProcesoTeam;
 
 	log_debug(INTERNAL_LOGGER, "Registrando al equipo en el mapa...");
 	void registrarEquipo(Entrenador * entrenador) {
@@ -148,6 +159,9 @@ void configurarEstadoInicialProcesoTeam() {
 	list_iterate(equipoProcesoTeam, (void (*)(void *)) registrarEquipo);
 	log_debug(INTERNAL_LOGGER, "Agregando equipo a la planificacion...");
 	servicioDePlanificacionProcesoTeam->asignarEquipoAPlanificar(servicioDePlanificacionProcesoTeam, equipoProcesoTeam);
+	sem_post(&servicioDePlanificacionProcesoTeam->semaforoEjecucionHabilitadaCapturas);
+	sem_post(&servicioDePlanificacionProcesoTeam->semaforoEjecucionHabilitadaCortoPlazo);
+	sem_post(&servicioDePlanificacionProcesoTeam->semaforoEjecucionHabilitadaDeadlock);
 }
 
 void liberarRecursos() {
@@ -168,7 +182,9 @@ void liberarRecursos() {
 	log_debug(INTERNAL_LOGGER, "Liberando servicios...");
 	servicioDeConfiguracion.destruir(&servicioDeConfiguracion);
 	servicioDeCapturaProcesoTeam->destruir(servicioDeCapturaProcesoTeam);
+
 	servicioDePlanificacionProcesoTeam->destruir(servicioDePlanificacionProcesoTeam);
+
 	servicioDeResolucionDeDeadlocksProcesoTeam->destruir(servicioDeResolucionDeDeadlocksProcesoTeam);
 	servicioDeMetricasProcesoTeam->destruir(servicioDeMetricasProcesoTeam);
 

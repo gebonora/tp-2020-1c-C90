@@ -13,12 +13,12 @@ bool mismaEspecieMismaPosicion(void * pokemon_) { \
 }
 
 static t_list * pokemonesDisponibles(ServicioDeCaptura * this) {
-    bool estaLibre(void * pokemonAtrapable_) {
-        PokemonAtrapable * pokemonAtrapable = pokemonAtrapable_;
-        return pokemonAtrapable->esAtrapable(pokemonAtrapable);
-    }
-    t_list * pokemones_disponibles = list_filter(this->pokemonesAtrapables, estaLibre);
-    return pokemones_disponibles;
+	bool estaLibre(void * pokemonAtrapable_) {
+		PokemonAtrapable * pokemonAtrapable = pokemonAtrapable_;
+		return pokemonAtrapable->esAtrapable(pokemonAtrapable);
+	}
+	t_list * pokemones_disponibles = list_filter(this->pokemonesAtrapables, estaLibre);
+	return pokemones_disponibles;
 }
 
 static PokemonAtrapable * obtenerPokemonAtrapable(ServicioDeCaptura * this, char * especie, Coordinate posicion) {
@@ -49,13 +49,16 @@ static PokemonAtrapable * altaDePokemon(ServicioDeCaptura * this, char * especie
 	log_info(this->logger, "Agregamos un %s en la posición %s", especie, ubicacionPokemonACapturar);
 	list_add(this->pokemonesAtrapables, pokemonAtrapable);
 	free(ubicacionPokemonACapturar);
+	sem_post(&semaforoContadorPokemon);
+	int value;
+	sem_getvalue(&semaforoContadorPokemon, &value);
+	log_warning(this->logger, "HICE UN POST DE SEMAFORO CONTADOR POKEMONE, valor: %d", value);
 	return pokemonAtrapable;
 }
 
 static void encargarTrabajoDeCaptura(ServicioDeCaptura * this, char * especie, Coordinate posicion) {
 	char * ubicacionPokemonACapturar = coordenadaClave(posicion);
 	log_info(this->logger, "Se le encarga al servicio de planificacion que mande a un entrenador a capturar a %s en %s", especie, ubicacionPokemonACapturar);
-
 
 	free(especie);
 	free(ubicacionPokemonACapturar);
@@ -81,6 +84,7 @@ static bool registrarCapturaExitosa(ServicioDeCaptura * this, CapturaPokemon * c
 		log_info(this->logger, "%s capturó con exito un %s en %s", capturaPokemon->idEntrenador(capturaPokemon), capturaPokemon->pokemonAtrapable->especie, posicion);
 
 		capturaPokemon->entrenador->estaEsperandoAlgo = false;
+		sem_post(&semaforoDeadlock);
 
 		free(posicion);
 	} else {
@@ -91,6 +95,7 @@ static bool registrarCapturaExitosa(ServicioDeCaptura * this, CapturaPokemon * c
 
 	return sePudoRegistrar;
 }
+
 
 static bool registrarCapturaFallida(ServicioDeCaptura * this, CapturaPokemon * capturaPokemon) {
 	bool sePudoRegistrar = false;
@@ -109,6 +114,13 @@ static bool registrarCapturaFallida(ServicioDeCaptura * this, CapturaPokemon * c
 		char * posicion = capturaPokemon->posicion(capturaPokemon);
 		log_info(this->logger, "%s eliminó las coordenadas de un %s en %s porque falló su captura.", capturaPokemon->idEntrenador(capturaPokemon),
 				capturaPokemon->pokemonAtrapable->especie, posicion);
+		sem_post(&semaforoDeadlock);
+
+		if (capturaPokemon->entrenador->puedeAtraparPokemones) {
+			//sem_wait(&capturaPokemon->entrenador->finalizacionDeCapturaSegura);
+			log_debug(capturaPokemon->entrenador->logger, "Falló en capturar un %s y se marcó como disponible de nuevo.", capturaPokemon->especie(capturaPokemon));
+			sem_post(&semaforoContadorEntrenadoresDisponibles); // Quiero que este post no llegue antes que el entrenador a la cola blocked.
+		}
 		free(posicion);
 	} else {
 		log_error(this->logger, "No se puede eliminar un pokemon que no figure en el mapa");
@@ -129,7 +141,7 @@ void destruirServicioDeCaptura(ServicioDeCaptura * this) {
 static ServicioDeCaptura * new(Mapa mapa) {
 	ServicioDeCaptura * servicio = malloc(sizeof(ServicioDeCaptura));
 
-	servicio->logger = log_create(TEAM_INTERNAL_LOG_FILE, "ServicioDeCaptura", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_INFO);
+	servicio->logger = log_create(TEAM_INTERNAL_LOG_FILE, "ServicioDeCaptura", SHOW_INTERNAL_CONSOLE, INTERNAL_LOG_LEVEL);
 	servicio->mapa = mapa;
 	servicio->pokemonesAtrapables = list_create();
 	servicio->registrarCapturaExitosa = &registrarCapturaExitosa;

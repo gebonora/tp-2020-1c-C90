@@ -223,7 +223,7 @@ static void destruir(Mapa *this) {
 
 static Mapa new() {
     return (Mapa) {
-            .logger = log_create(TEAM_INTERNAL_LOG_FILE, "Mapa", SHOW_INTERNAL_CONSOLE, INTERNAL_LOG_LEVEL),
+            .logger = log_create(TEAM_INTERNAL_LOG_FILE, "Mapa", 0, INTERNAL_LOG_LEVEL),
             .plano = crearPlano(),
             &cantidadPosicionables,
             &moverPosicionable,

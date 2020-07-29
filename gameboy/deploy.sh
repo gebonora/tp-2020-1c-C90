@@ -3,7 +3,7 @@
 RELATIVE_MODE="-r"
 GAMEBOY_PATH=/home/utnso/tp-2020-1c-C90/gameboy
 
-if [ "${RELATIVE_MODE}" == "$1" ]; then
+if [ "${RELATIVE_MODE}" = "$1" ]; then
     GAMEBOY_PATH=`pwd`
 fi
 
