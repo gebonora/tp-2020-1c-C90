@@ -170,7 +170,7 @@ void mostrarLasColas(Planificador* this) {
 
 	t_list* mapa = mapaProcesoTeam.pokemonesDisponibles(&mapaProcesoTeam);
 	log_info(this->logger, "Cantidad de Pokemon disponibles: %d", list_size(mapa));
-	list_destroy(mapa);
+	list_destroy_and_destroy_elements(mapa, free_pokemon);
 }
 
 HiloEntrenadorPlanificable* obtenerHiloSegunEntrenador(Planificador* this, Entrenador* entrenador) {
