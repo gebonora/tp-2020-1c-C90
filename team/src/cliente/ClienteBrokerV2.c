@@ -22,8 +22,9 @@ static RespuestaBroker enviarGet(ClienteBrokerV2 * this, char* nombrePokemon) {
     }
 
     if (!flagBrokerCaido) {
-        log_info(MANDATORY_LOGGER, "Se envió al Broker un GET pokemon: %s. Se le asignó el idMensaje: %d.",
+        log_info(MANDATORY_LOGGER, "Se envió al Broker a través del socket: %d un GET pokemon: %s. Se le asignó el idMensaje: %d.", socketDescartable,
                  nombrePokemon, idAsignado);
+        close(socketDescartable); // TODO: chequear si está bien cerrarlo
         return (RespuestaBroker) {.esValida = true, .idCorrelatividad = idAsignado};
     } else {
         log_warning(MANDATORY_LOGGER, "No se pudo enviar un GET pokemon: %s. Se procede a asumir que no hay coordenadas para el pokemon.", nombrePokemon);
@@ -49,8 +50,9 @@ static RespuestaBroker enviarCatch(ClienteBrokerV2 * this, char * especie, uint3
 
     if (!flagBrokerCaido) {
         log_info(MANDATORY_LOGGER,
-                 "Se envió al Broker un CATCH pokemon: %s, coordenadas: (%d,%d). Se le asignó el idMensaje: %d.",
+                 "Se envió al Broker a través del socket: %d un CATCH pokemon: %s, coordenadas: (%d,%d). Se le asignó el idMensaje: %d.", socketDescartable,
                  especie, posX, posY, idAsignado);
+        close(socketDescartable); // TODO: chequear si está bien cerralo
         return (RespuestaBroker) {.esValida = true, .idCorrelatividad = idAsignado};
     } else {
         log_warning(MANDATORY_LOGGER, "No se puedo enviar un CATCH pokemon: %s, coordenadas: (%d,%d)", especie, posX, posY);

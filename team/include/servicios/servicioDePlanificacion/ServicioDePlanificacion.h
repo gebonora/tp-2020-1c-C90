@@ -61,15 +61,17 @@
  *     El algoritmo de resolucion generará una o varias tareas de intercambio para solucionarlo.
  */
 
-typedef enum TipoTrabajoPlanificador { // TODO: Volarlo si no se usa
+/*
+typedef enum TipoTrabajoPlanificador { // TODO: Estas dos estructuras no es están usando. Podríamos sacarlas.
 	CAPTURA_POKEMON, NOTIFY_CAUGHT_RESULT, DEADLOCK_RESOLUTION
 } TipoTrabajoPlanificador;
 
-typedef struct TrabajoPlanificador { // TODO: Volarlo si no se usa
+typedef struct TrabajoPlanificador {
 	TipoTrabajoPlanificador tipo;
 	char * objetivo;
 	Coordinate coordenadaObjetivo;
 } TrabajoPlanificador;
+*/
 
 typedef struct EntrenadorConPokemon {
 	PokemonAtrapable* pokemon;

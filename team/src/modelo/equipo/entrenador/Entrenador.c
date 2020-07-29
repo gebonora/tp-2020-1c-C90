@@ -139,6 +139,7 @@ static void destruir(Entrenador * this) {
 
 static Entrenador *new(char * posicionInicial, char * pokemonesIniciales, char * pokemonesObjetivos) {
     Entrenador * entrenador = malloc(sizeof(Entrenador));
+    pthread_mutex_init(&entrenador->mutex,NULL);
 
     entrenador->id = string_from_format("Entrenador_%d", ++contadorEntrenadores);
     entrenador->logger = log_create(TEAM_INTERNAL_LOG_FILE, entrenador->id, SHOW_INTERNAL_CONSOLE, INTERNAL_LOG_LEVEL);

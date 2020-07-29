@@ -12,7 +12,7 @@ bool mismaEspecieMismaPosicion(void * pokemon_) { \
            pokemon->posicionInicial.pos_y == posicion.pos_y; \
 }
 
-static t_list * pokemonesDisponibles(ServicioDeCaptura * this) {
+static t_list * pokemonesDisponibles(ServicioDeCaptura * this) { // TODO: Respetar orden de aparición de los pokemon para pasarle al ServicioDePlanificacion.
 	bool estaLibre(void * pokemonAtrapable_) {
 		PokemonAtrapable * pokemonAtrapable = pokemonAtrapable_;
 		return pokemonAtrapable->esAtrapable(pokemonAtrapable);
@@ -50,6 +50,9 @@ static PokemonAtrapable * altaDePokemon(ServicioDeCaptura * this, char * especie
 	list_add(this->pokemonesAtrapables, pokemonAtrapable);
 	free(ubicacionPokemonACapturar);
 	sem_post(&semaforoContadorPokemon);
+	int value;
+	sem_getvalue(&semaforoContadorPokemon, &value);
+	log_warning(this->logger, "HICE UN POST DE SEMAFORO CONTADOR POKEMONE, valor: %d", value);
 	return pokemonAtrapable;
 }
 
@@ -83,11 +86,6 @@ static bool registrarCapturaExitosa(ServicioDeCaptura * this, CapturaPokemon * c
 		capturaPokemon->entrenador->estaEsperandoAlgo = false;
 		sem_post(&semaforoDeadlock);
 
-		if (capturaPokemon->entrenador->puedeAtraparPokemones) {
-			log_debug(capturaPokemon->entrenador->logger, "Capturó un %s y se marcó como disponible de nuevo.", capturaPokemon->especie(capturaPokemon));
-			sem_post(&semaforoContadorEntrenadoresDisponibles);
-		}
-
 		free(posicion);
 	} else {
 		log_error(this->logger, "No se puede capturar un pokemon que no figure en el mapa");
@@ -97,6 +95,7 @@ static bool registrarCapturaExitosa(ServicioDeCaptura * this, CapturaPokemon * c
 
 	return sePudoRegistrar;
 }
+
 
 static bool registrarCapturaFallida(ServicioDeCaptura * this, CapturaPokemon * capturaPokemon) {
 	bool sePudoRegistrar = false;

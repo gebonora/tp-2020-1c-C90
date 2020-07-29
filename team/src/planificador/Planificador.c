@@ -170,7 +170,15 @@ void mostrarLasColas(Planificador* this) {
 
 	t_list* mapa = mapaProcesoTeam.pokemonesDisponibles(&mapaProcesoTeam);
 	log_info(this->logger, "Cantidad de Pokemon disponibles: %d", list_size(mapa));
-	list_destroy(mapa);
+	list_destroy_and_destroy_elements(mapa, (void(*)(void*))free_pokemon);
+}
+
+HiloEntrenadorPlanificable* obtenerHiloSegunEntrenador(Planificador* this, Entrenador* entrenador) {
+	bool trainerById(void* elem) {
+		HiloEntrenadorPlanificable* hilo = elem;
+		return hilo->entrenador->id = entrenador->id;
+	}
+	return list_find(this->colas->colaBlocked, trainerById);
 }
 
 void destruirPlanificador(Planificador * this, void (*destructorUnidadPlanificable)(UnidadPlanificable *)) {
@@ -179,7 +187,7 @@ void destruirPlanificador(Planificador * this, void (*destructorUnidadPlanificab
 	destruirColasDePlanificacion(this->colas, destructorUnidadPlanificable);
 }
 
-static Planificador new(ServicioDeMetricas* servicio) { // TODO: asignar servicioDeMetricas que tiene que llegar por parametro.
+static Planificador new(ServicioDeMetricas* servicio) {
 	t_log * logger = log_create(TEAM_INTERNAL_LOG_FILE, "Planificador", SHOW_INTERNAL_CONSOLE, INTERNAL_LOG_LEVEL);
 	char * nombreAlgoritmo = servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, ALGORITMO_PLANIFICACION);
 	log_info(logger, "El planificador se inicializará con el algoritmo %s", nombreAlgoritmoCompleto(nombreAlgoritmo));
@@ -187,7 +195,7 @@ static Planificador new(ServicioDeMetricas* servicio) { // TODO: asignar servici
 	Planificador planificador = { .logger = logger, .quantum = servicioDeConfiguracion.obtenerEntero(&servicioDeConfiguracion, QUANTUM), .algoritmoPlanificador =
 			obtenerAlgoritmo(nombreAlgoritmo), .transicionadorDeEstados = TransicionadorDeEstadosConstructor.new(), .colas = crearColasDePlanificacion(),
 			.servicioDeMetricas = servicio, &agregarUnidadesPlanificables, &agregarUnidadPlanificable, &armarListaEntrenadoresDisponibles, &obtenerProximoAEjecutar,
-			&cantidadDeRafagas, &colaSegunEstado, &moverACola, &obtenerEstadoDeUnidadPlanificable, &mostrarLasColas, &destruirPlanificador, };
+			&cantidadDeRafagas, &colaSegunEstado, &moverACola, &obtenerEstadoDeUnidadPlanificable, &mostrarLasColas, &obtenerHiloSegunEntrenador, &destruirPlanificador, };
 	return planificador;
 }
 
