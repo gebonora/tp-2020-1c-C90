@@ -111,7 +111,7 @@ case ${VM_GAMEBOY} in
 esac
 
 BROKER_CONFIG=${DELIBIRD_PATH}/broker/config/broker.config
-BROKER_ENTREGA=${DELIBIRD_PATH}/broker/config/entrega_broker.config
+BROKER_ENTREGA=${DELIBIRD_PATH}/broker/config/entrega_broker_dynamic.config
 BROKER_LOG_FILE=${DELIBIRD_PATH}/broker/logs/broker.log
 GAMEBOY_CONFIG=${DELIBIRD_PATH}/gameboy/deploy/config/gameboy.config
 GAMEBOY_ENTREGA=${DELIBIRD_PATH}/gameboy/deploy/config/entrega_gameboy.config
