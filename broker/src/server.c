@@ -227,10 +227,12 @@ static void _process_request(uint32_t cod_op, int socket) {
 			subscriber->process = (Process) cod_process;
 			subscriber->socket_subscriber = socket;
 			list_add(subscribers, subscriber);
-			pthread_mutex_t mutex = SUBSCRIBERS_IDENTIFIERS[get_subscriber_identifier(subscriber)];
-			pthread_mutex_init(&mutex, NULL);
-			//sem_t* sem = (sem_t*) &SUBSCRIBERS_IDENTIFIERS[get_subscriber_identifier(subscriber)];
-			//sem_init(sem, 0, 1);
+			SubscriberWithMutex* subscriber_with_mutex = malloc(sizeof(SubscriberWithMutex));
+			subscriber_with_mutex->subscriber = subscriber;
+			pthread_mutex_init(&subscriber_with_mutex->mutex, NULL);
+			pthread_mutex_lock(&MUTEX_SUBSCRIBERS_IDENTIFIERS);
+			list_add(SUBSCRIBERS_IDENTIFIERS, subscriber_with_mutex);
+			pthread_mutex_unlock(&MUTEX_SUBSCRIBERS_IDENTIFIERS);
 		}
 
 		send_message_from_suscription(cod_cola, subscriber);

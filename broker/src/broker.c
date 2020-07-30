@@ -77,20 +77,16 @@ uint32_t get_subscriber_identifier(Subscriber* subscriber){
 	return SUM(subscriber->process * 10, subscriber->id);
 }
 
-/*PRIVATE FUNCTIONS*/
-
-/*
-static void _lock_subscriber(Process process, uint32_t id){
-	switch(process){
-	case GAMECARD: ;
-		pthread_mutex_lock(&GAMECARD_MUTEX);
-		break;
-	case GAMECARD: ;
-		pthread_mutex_lock(&GAMECARD_MUTEX);
-		break;
+SubscriberWithMutex* find_mutex_by_subscriber(Subscriber* subscriber){
+	bool _inline_find_mutex_by_subscriber(void* e){
+		SubscriberWithMutex* subscriber_with_mutex = e;
+		return subscriber_with_mutex->subscriber->process == subscriber->process && subscriber_with_mutex->subscriber->id == subscriber->id;
 	}
+
+	return list_find(SUBSCRIBERS_IDENTIFIERS, _inline_find_mutex_by_subscriber);
 }
-*/
+
+/*PRIVATE FUNCTIONS*/
 
 static void _lock_memory_for_read(char* name){
 	pthread_mutex_lock(&MUTEX_READERS);
@@ -281,8 +277,8 @@ static void send_message_and_wait_for_ack(arg_struct* args) {
 	void* message = _transform_messages(args->partition, args->partition->message->operation_code, args->bytes);
 
 	log_info(LOGGER, "NEW_REQUEST message_id: %d, Adquiring mutex for subscriber_identifier: %d", args->partition->message->message_id, get_subscriber_identifier(args->subscriber));
-	pthread_mutex_t mutex = (pthread_mutex_t) SUBSCRIBERS_IDENTIFIERS[get_subscriber_identifier(args->subscriber)];
-	pthread_mutex_lock(&mutex);
+	SubscriberWithMutex* swm = find_mutex_by_subscriber(args->subscriber);
+	pthread_mutex_lock(&swm->mutex);
 	log_info(LOGGER, "NEW_REQUEST message_id: %d, Mutex adquired for subscriber_identifier: %d", args->partition->message->message_id, get_subscriber_identifier(args->subscriber));
 
 	log_debug(LOGGER, "Sending message to: %d, with size: %d", args->subscriber->socket_subscriber, args->bytes);
@@ -301,7 +297,7 @@ static void send_message_and_wait_for_ack(arg_struct* args) {
 		}
 	}
 	log_info(LOGGER, "NEW_REQUEST message_id: %d, Mutex unlocked for subscriber_identifier: %d", args->partition->message->message_id, get_subscriber_identifier(args->subscriber));
-	pthread_mutex_unlock(&mutex);
+	pthread_mutex_unlock(&swm->mutex);
 
 	free(args);
 	free(message);
@@ -311,10 +307,8 @@ static void send_message_and_wait_for_ack_2(arg_struct* args) {
 	void* message = _transform_messages(args->partition, args->partition->message->operation_code, args->bytes);
 
 	log_info(LOGGER, "SUBSCRIBE message_id: %d, Adquiring mutex for subscriber_identifier: %d", args->partition->message->message_id, get_subscriber_identifier(args->subscriber));
-	//sem_t* sem = (sem_t*) &SUBSCRIBERS_IDENTIFIERS[get_subscriber_identifier(args->subscriber)];
-	//sem_wait(sem);
-	pthread_mutex_t mutex = (pthread_mutex_t) SUBSCRIBERS_IDENTIFIERS[get_subscriber_identifier(args->subscriber)];
-	pthread_mutex_lock(&mutex);
+	SubscriberWithMutex* swm = find_mutex_by_subscriber(args->subscriber);
+	pthread_mutex_lock(&swm->mutex);
 	log_info(LOGGER, "SUBSCRIBE message_id: %d, Mutex adquired for subscriber_identifier: %d", args->partition->message->message_id, get_subscriber_identifier(args->subscriber));
 
 	log_debug(LOGGER, "Sending message to: %d, with size: %d", args->subscriber->socket_subscriber, args->bytes);
@@ -333,8 +327,7 @@ static void send_message_and_wait_for_ack_2(arg_struct* args) {
 		}
 	}
 	log_info(LOGGER, "SUBSCRIBE message_id: %d, Mutex unlocked for subscriber_identifier: %d", args->partition->message->message_id, get_subscriber_identifier(args->subscriber));
-	//sem_post(sem);
-	pthread_mutex_unlock(&mutex);
+	pthread_mutex_unlock(&swm->mutex);
 
 	free(args);
 	free(message);
