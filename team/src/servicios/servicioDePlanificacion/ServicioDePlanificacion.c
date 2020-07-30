@@ -73,23 +73,31 @@ void planificadorDeCortoPlazo(ServicioDePlanificacion* this) {
 		this->planificador.moverACola(&this->planificador, aEjecutar, EXEC, "Ejecutará en el procesador.");
 
 		// chequeamos si es igual al entrenador que se trabajaba antes y si no lo es se registra el context switch
-		if(!(string_equals(aEjecutar->entrenador->id,this->ultimoHiloEjecutado->entrenador->id))){
-		this->servicioDeMetricas->registrarCambioDeContexto(this->servicioDeMetricas);
+		if(this->ultimoHiloEjecutado != NULL){
+			if(!(string_equals(aEjecutar->entrenador->id,this->ultimoHiloEjecutado->entrenador->id))){
+			this->servicioDeMetricas->registrarCambioDeContexto(this->servicioDeMetricas);
+			}
+		}else{
+			// aca registramos el primer cambio de contexto -> de no tener nada a tener algo en exec
+			this->servicioDeMetricas->registrarCambioDeContexto(this->servicioDeMetricas);
+			this->ultimoHiloEjecutado = aEjecutar;
 		}
 
+
 		aEjecutar->ejecutarParcialmente(aEjecutar, ciclosAEjecutar);
+		this->ultimoHiloEjecutado = aEjecutar;
 
 		for (int a = 0; a < ciclosAEjecutar; a++) {
 			this->servicioDeMetricas->registrarCicloRealizadoPorEntrenador(this->servicioDeMetricas, aEjecutar->entrenador->id);
 		}
 		this->definirYCambiarEstado(this, aEjecutar);
-		this->ultimoHiloEjecutado = aEjecutar;
 		pthread_mutex_unlock(&aEjecutar->entrenador->mutex);
 
 		this->planificador.mostrarLasColas(&this->planificador);
 
 		sem_post(&this->semaforoEjecucionHabilitadaCortoPlazo);
 	}
+
 	sem_post(&this->semaforoFinDeTrabajoCortoPlazo);
 }
 
@@ -112,6 +120,14 @@ void planificadorDeDeadlocks(ServicioDePlanificacion* this) {
 			HiloEntrenadorPlanificable* hilo = (HiloEntrenadorPlanificable*) list_get(this->planificador.colas->colaBlocked, a);
 			if (hilo->entrenador->objetivoCompletado(hilo->entrenador)) {
 				this->planificador.moverACola(&this->planificador, hilo, EXIT, "Estaba en espera de un evento para finalizar, y llegó.");
+
+				// agrego aca contar el cambio de contexto cuando se saca al ultimo entrenador de exec
+				if(list_is_empty(this->planificador.colas->colaExec) &&
+					list_is_empty(this->planificador.colas->colaReady)
+					&& list_is_empty(this->planificador.colas->colaBlocked)){
+
+					this->servicioDeMetricas->registrarCambioDeContexto(this->servicioDeMetricas);
+				}
 			}
 		}
 		if (this->evaluarEstadoPosibleDeadlock(this)) {
