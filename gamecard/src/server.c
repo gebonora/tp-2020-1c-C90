@@ -39,14 +39,14 @@ void esperarBrokerNew(int socketDeEscucha) {
 		uint32_t idMensaje;
 		Operation operacion;
 
-		if (recv(socketDeEscucha, &operacion, sizeof(Operation), 0) <= 0) {
+		if (recv(socketDeEscucha, &operacion, sizeof(Operation), MSG_WAITALL) <= 0) {
 			flagError = 1;
 		}
 		New* unNew = recv_new(socketDeEscucha);
 		if (unNew == NULL) {
 			flagError = 1;
 		}
-		if (recv(socketDeEscucha, &idMensaje, sizeof(uint32_t), 0) <= 0) {
+		if (recv(socketDeEscucha, &idMensaje, sizeof(uint32_t), MSG_WAITALL) <= 0) {
 			flagError = 1;
 		}
 		Result ack = ACKNOWLEDGE;
@@ -95,7 +95,7 @@ void procesarHiloNew(ArgumentosHilo* argumentosHilo) {
 		flagBrokerCaido = 1;
 	}
 	uint32_t idRespuesta;
-	if (recv(socketDescartable, &idRespuesta, sizeof(uint32_t), 0) <= 0) {
+	if (recv(socketDescartable, &idRespuesta, sizeof(uint32_t), MSG_WAITALL) <= 0) {
 		flagBrokerCaido = 1;
 	}
 
@@ -138,14 +138,14 @@ void esperarBrokerCatch(int socketDeEscucha) {
 		uint32_t idMensaje;
 		Operation operacion;
 
-		if (recv(socketDeEscucha, &operacion, sizeof(Operation), 0) <= 0) {
+		if (recv(socketDeEscucha, &operacion, sizeof(Operation), MSG_WAITALL) <= 0) {
 			flagError = 1;
 		}
 		Pokemon* unCatch = recv_pokemon(socketDeEscucha, false);
 		if (unCatch == NULL) {
 			flagError = 1;
 		}
-		if (recv(socketDeEscucha, &idMensaje, sizeof(uint32_t), 0) <= 0) {
+		if (recv(socketDeEscucha, &idMensaje, sizeof(uint32_t), MSG_WAITALL) <= 0) {
 			flagError = 1;
 		}
 		Result ack = ACKNOWLEDGE;
@@ -194,7 +194,7 @@ void procesarHiloCatch(ArgumentosHilo* argumentosHilo) {
 		flagBrokerCaido = 1;
 	}
 	uint32_t idRespuesta;
-	if (recv(socketDescartable, &idRespuesta, sizeof(uint32_t), 0) <= 0) {
+	if (recv(socketDescartable, &idRespuesta, sizeof(uint32_t), MSG_WAITALL) <= 0) {
 		flagBrokerCaido = 1;
 	}
 
@@ -237,7 +237,7 @@ void esperarBrokerGet(int socketDeEscucha) {
 		uint32_t idMensaje;
 		Operation operacion;
 
-		if (recv(socketDeEscucha, &operacion, sizeof(Operation), 0) <= 0) {
+		if (recv(socketDeEscucha, &operacion, sizeof(Operation), MSG_WAITALL) <= 0) {
 			flagError = 1;
 		}
 		Get* unGet = recv_get(socketDeEscucha);
@@ -245,7 +245,7 @@ void esperarBrokerGet(int socketDeEscucha) {
 		if (unGet == NULL) {
 			flagError = 1;
 		}
-		if (recv(socketDeEscucha, &idMensaje, sizeof(uint32_t), 0) <= 0) {
+		if (recv(socketDeEscucha, &idMensaje, sizeof(uint32_t), MSG_WAITALL) <= 0) {
 			flagError = 1;
 		}
 		Result ack = ACKNOWLEDGE;
@@ -294,7 +294,7 @@ void procesarHiloGet(ArgumentosHilo* argumentosHilo) {
 		flagBrokerCaido = 1;
 	}
 	uint32_t idRespuesta;
-	if (recv(socketDescartable, &idRespuesta, sizeof(uint32_t), 0) <= 0) {
+	if (recv(socketDescartable, &idRespuesta, sizeof(uint32_t), MSG_WAITALL) <= 0) {
 		flagBrokerCaido = 1;
 	}
 
@@ -344,7 +344,7 @@ void atenderGameboy() {
 		case NEW:
 			;
 			New* unNew = recv_new(socketCliente);
-			recv(socketCliente, &idMensaje, sizeof(uint32_t), 0);
+			recv(socketCliente, &idMensaje, sizeof(uint32_t), MSG_WAITALL);
 			if (socketCliente > 0)
 				close(socketCliente);
 
@@ -357,7 +357,7 @@ void atenderGameboy() {
 		case CATCH:
 			;
 			Pokemon* unCatch = recv_pokemon(socketCliente, false);
-			recv(socketCliente, &idMensaje, sizeof(uint32_t), 0);
+			recv(socketCliente, &idMensaje, sizeof(uint32_t), MSG_WAITALL);
 			if (socketCliente > 0)
 				close(socketCliente);
 
@@ -370,7 +370,7 @@ void atenderGameboy() {
 		case GET:
 			;
 			Get* unGet = recv_get(socketCliente);
-			recv(socketCliente, &idMensaje, sizeof(uint32_t), 0);
+			recv(socketCliente, &idMensaje, sizeof(uint32_t), MSG_WAITALL);
 			if (socketCliente > 0)
 				close(socketCliente);
 
@@ -414,7 +414,7 @@ int iniciarSocketDeEscucha(Operation cola) {
 	}
 	Result result;
 
-	if (recv(socketDeEscucha, &result, sizeof(Result), 0) <= 0) {
+	if (recv(socketDeEscucha, &result, sizeof(Result), MSG_WAITALL) <= 0) {
 		close(socketDeEscucha);
 		return -1;
 	}

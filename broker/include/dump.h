@@ -3,6 +3,8 @@
 
 #include <signal.h>
 #include "delibird/utils/tiempo/Tiempo.h"
+#include "delibird/interface.h"
+#include "arithmetic.h"
 #include "constants.h"
 
 #define DUMP_PATH "dump.log"

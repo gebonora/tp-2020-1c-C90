@@ -1,8 +1,7 @@
 #include "mem.h"
 
 static Partition* _save_to_cache(void*, Message*);
-static bool _not_notified(Partition*, Subscriber*);
-static bool _same_subscriber(Subscriber*, Subscriber*);
+static bool _same_subscriber(void*, void*);
 
 /** PUBLIC FUNCTIONS **/
 
@@ -17,33 +16,41 @@ Partition* save_message(void* data, Message* message) {
 
 t_list* messages_from_operation(Operation operation, Subscriber* subscriber){//todo sincronizar
 
-	bool _find_for_operation(Partition* partition){
-		return partition->message->operation_code == operation && _not_notified(partition, subscriber);
+	bool _inline_find_for_operation(void* e){
+		Partition* partition = e;
+		return partition->message->operation_code == operation && not_notified(partition, subscriber);
 	}
 
 	t_list* occupied_partitions = get_occupied_partitions();
 
-	t_list* filtered_partitions = list_filter(get_occupied_partitions(), &_find_for_operation);
+	t_list* filtered_partitions = list_filter(occupied_partitions, _inline_find_for_operation);
+
+	bool _by_message_id(void* e1, void* e2){
+		Partition* partition_1 = e1;
+		Partition* partition_2 = e2;
+
+		return partition_1->message->message_id < partition_2->message->message_id;
+	}
+
+	list_sort(filtered_partitions, _by_message_id);
 	list_destroy(occupied_partitions);
 	return filtered_partitions;
 }
 
-/** PRIVATE FUNCTIONS **/
-
-static bool _same_subscriber(Subscriber* s1, Subscriber* s2) {
-	log_debug(LOGGER, "Subscriber to compare (process=%s, id=%d), current Subscriber (process=%s, id=%d)", get_process_by_value(s1->process), s1->id, get_process_by_value(s2->process), s2->id);
-	return s1->process == s2->process && s1->id == s2->id;
-}
-
-static bool _not_notified(Partition* partition, Subscriber* subscriber) {
+bool not_notified(void* e1, void* e2) {
+	Partition* partition = e1;
+	Subscriber* subscriber = e2;
 	log_debug(LOGGER, "Inside not_notified");
 
-	bool _inline_same_subscriber(Subscriber* to_compare) {
+	bool _inline_same_subscriber(void* e) {
+		Subscriber* to_compare = e;
 		return _same_subscriber(subscriber, to_compare);
 	}
 
-	return !list_any_satisfy(partition->notified_suscribers, &_inline_same_subscriber);
+	return !list_any_satisfy(partition->notified_suscribers, _inline_same_subscriber);
 }
+
+/** PRIVATE FUNCTIONS **/
 
 static Partition* _save_to_cache(void* data, Message* message) {
 	if(string_equals_ignore_case(ALGORITMO_MEMORIA, BUDDY_SYSTEM)) {
@@ -55,6 +62,9 @@ static Partition* _save_to_cache(void* data, Message* message) {
 	}
 }
 
-
-
-
+static bool _same_subscriber(void* e1, void* e2) {
+	Subscriber* s1 = e1;
+	Subscriber* s2 = e2;
+	log_debug(LOGGER, "Subscriber to compare (process=%s, id=%d), current Subscriber (process=%s, id=%d)", get_process_by_value(s1->process), s1->id, get_process_by_value(s2->process), s2->id);
+	return s1->process == s2->process && s1->id == s2->id;
+}

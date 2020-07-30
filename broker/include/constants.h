@@ -32,16 +32,19 @@ char* ALGORITMO_MEMORIA;
 char* ALGORITMO_REEMPLAZO;
 int FRECUENCIA_COMPACTACION;
 char* ALGORITMO_PARTICION_LIBRE;
+int SHOW_IN_CONSOLE;
+int LOG_NOTIFICATION_LEVEL;
 
 uint32_t MESSAGE_ID;
 t_log* LOGGER;
 pthread_mutex_t MUTEX_MESSAGE_ID;
 pthread_mutex_t MUTEX_READERS;
 pthread_mutex_t MUTEX_TIME;
-sem_t MEMORY;
+pthread_mutex_t MEMORY;t_list* SUBSCRIBERS_IDENTIFIERS;
 
 t_dictionary* SUBSCRIBERS_BY_QUEUE;
 pthread_mutex_t MUTEX_SUBSCRIBERS_BY_QUEUE;
+pthread_mutex_t MUTEX_SUBSCRIBERS_IDENTIFIERS;
 sem_t SUBSCRIBERS;
 
 int READERS;
@@ -75,6 +78,12 @@ typedef struct {
 	Message* message; // datos administrativos del mensaje (id, id correlacional, cod op)
 	t_list* notified_suscribers; // suscriptores que ya devolvieron ACK para este mensaje
 } Partition;
+
+typedef struct {
+	Operation operation;
+	Subscriber* subscriber;
+	pthread_mutex_t mutex;
+} SubscriberWithMutex;
 
 Memory* memory;
 

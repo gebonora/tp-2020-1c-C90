@@ -71,6 +71,9 @@ static void destruirPokemonAtrapable(PokemonAtrapable * this) {
 
 static PokemonAtrapable * new(char * especie, char * posicionInicial) {
     PokemonAtrapable * pokemonAtrapable = malloc(sizeof(PokemonAtrapable));
+    pthread_mutex_lock(&ordenDeAparicionMutex);
+    pokemonAtrapable->ordenDeAparicion = ORDEN_DE_APARICION++;
+    pthread_mutex_unlock(&ordenDeAparicionMutex);
 
     pokemonAtrapable->logger = log_create(TEAM_INTERNAL_LOG_FILE, "PokemonAtrapable", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_INFO);
     pokemonAtrapable->especie = string_duplicate(especie);

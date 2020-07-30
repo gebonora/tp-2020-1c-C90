@@ -165,7 +165,7 @@ void atenderPedidoBroker(PedidoGameBoy pedidoGameBoy, t_log * logger) {
     	log_info(logger, "End of timer...shutting down connection");
     	break;
     }
-    list_destroy(pedidoGameBoy.argumentos);
+    //list_destroy(pedidoGameBoy.argumentos); AHORA SE LIBERA EN EL MAIN.
     if (socket_broker != -1) {
     	close(socket_broker);
     }

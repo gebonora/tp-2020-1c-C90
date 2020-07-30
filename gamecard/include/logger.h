@@ -21,12 +21,14 @@
 #include "server.h"
 
 #define LOG_SHOW_CONSOLE 1
+#define AUX_LOG_LEVEL LOG_LEVEL_DEBUG // Pasar a info para entrega.
 
 t_log* loggerMain;
 t_log* loggerNew;
 t_log* loggerCatch;
 t_log* loggerGet;
 t_log* loggerGameboy;
+t_log* loggerAux;
 
 pthread_mutex_t m_loggerNew;
 pthread_mutex_t m_loggerCatch;
@@ -45,6 +47,7 @@ void logearLocalizedProcesado(Localized* unLocalized, uint32_t idMensaje);
 
 char* logCoordenadas(t_list* listaCoor);
 
-#define PATH_LOGGER_GAMECARD "logs/logGamecard.log"
+#define PATH_LOGGER_GAMECARD "logs/LOG_GAMECARD.log"
+#define PATH_LOGGER_AUX "logs/logAuxiliar.log"
 
 #endif /* GAMECARD_INCLUDE_LOGGER_H_ */

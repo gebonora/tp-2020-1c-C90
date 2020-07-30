@@ -97,7 +97,6 @@ void mostrarTitulo(t_log * logger) {
 
 void inicializarComponentesDelSistema() {
 	srandom(time(NULL));
-	pthread_mutex_init(&MTX_INTERNAL_LOG, NULL); //TODO: por ahi conviene moverlo a configurarServer()
 
 	log_debug(INTERNAL_LOGGER, "Creando el cliente para comunicarse con el broker...");
 	clienteBrokerV2ProcesoTeam = ClienteBrokerV2Constructor.new();
@@ -132,6 +131,8 @@ void inicializarComponentesDelSistema() {
 	sem_init(&semaforoDeadlock, 0, 0);
 	sem_init(&semaforoContadorPokemon, 0, 0);
 	sem_init(&semaforoContadorEntrenadoresDisponibles, 0, 0);
+	pthread_mutex_init(&ordenDeAparicionMutex, NULL);
+	ORDEN_DE_APARICION = 0;
 }
 
 /**
@@ -142,7 +143,6 @@ void inicializarComponentesDelSistema() {
  * Finalmente, con el cliente broker a mano: Por cada pokemon del objetivo global, enviar un GET \[POKEMON\] - OK
  */
 void configurarEstadoInicialProcesoTeam() {
-	printf("entre a configurar\n");
 	log_debug(INTERNAL_LOGGER, "Instanciando entrenadores y armando el equipo...");
 	equipoProcesoTeam = crearEquipoPorConfiguracion();
 	log_debug(INTERNAL_LOGGER, "Calculando el objetivo global...");
@@ -192,7 +192,6 @@ void liberarRecursos() {
 	// Componentes
 	log_debug(INTERNAL_LOGGER, "Liberando componentes del sistema...");
 	manejadorDeEventosProcesoTeam->destruir(manejadorDeEventosProcesoTeam);
-	pthread_mutex_destroy(&MTX_INTERNAL_LOG);
 	sem_destroy(&semaforoObjetivoGlobalCompletado);
 	registradorDeEventosProcesoTeam->destruir(registradorDeEventosProcesoTeam);
 	destruirAlgoritmosDePlanificacion();

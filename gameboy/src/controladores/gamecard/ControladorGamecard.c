@@ -88,8 +88,9 @@ void atenderPedidoGamecard(PedidoGameBoy pedidoGameBoy, t_log * logger) {
 		break;
 	default:
 		log_error(MANDATORY_LOGGER, "Los parámetros ingresados no son compatibles con GAMECARD. Abortando.");
-		return;
+		break;
 	}
+	close(socketCliente);
 }
 
 ControladorGameBoy controladorGamecard = { .proceso = GAMECARD, .atenderPedido = atenderPedidoGamecard };

@@ -64,6 +64,7 @@ void iniciarCaptura(Entrenador * entrenador, char * especie, Coordinate * posici
 	RespuestaBroker respuestaBroker = clienteBrokerV2ProcesoTeam->enviarCatch(clienteBrokerV2ProcesoTeam, especie, posicionPokemon->pos_x, posicionPokemon->pos_y);
 
 	if (respuestaBroker.esValida) {
+		capturaPokemon->idCorrelatividad = respuestaBroker.idCorrelatividad;
 		registradorDeEventosProcesoTeam->registrarCatchEnEspera(registradorDeEventosProcesoTeam, capturaPokemon);
 		entrenador->estaEsperandoAlgo = true;
 	} else {
