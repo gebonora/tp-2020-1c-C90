@@ -265,13 +265,12 @@ static void* _transform_messages(Partition* partition, Operation operation, int 
 }
 
 static void send_message_and_wait_for_ack(arg_struct* args) {
-	log_warning(LOGGER, "WAIT_FOR_ACK NEW REQUEST");
 	void* message = _transform_messages(args->partition, args->partition->message->operation_code, args->bytes);
 
-	log_info(LOGGER, "Adquiring mutex for subscriber_identifier: %d", get_subscriber_identifier(args->subscriber));
+	log_info(LOGGER, "NEW_REQUEST message_id: %d, Adquiring mutex for subscriber_identifier: %d", args->partition->message->message_id, get_subscriber_identifier(args->subscriber));
 	sem_t* sem = (sem_t*) &SUBSCRIBERS_IDENTIFIERS[get_subscriber_identifier(args->subscriber)];
 	sem_wait(sem);
-	log_info(LOGGER, "New request: Mutex adquired for subscriber_identifier: %d", get_subscriber_identifier(args->subscriber));
+	log_info(LOGGER, "NEW_REQUEST message_id: %d, Mutex adquired for subscriber_identifier: %d", args->partition->message->message_id, get_subscriber_identifier(args->subscriber));
 
 	log_debug(LOGGER, "Sending message to: %d, with size: %d", args->subscriber->socket_subscriber, args->bytes);
 	log_info(LOGGER, "Enviando el mensaje %d al suscriptor con ID: %d, Proceso:  %s, Socket: %d", args->partition->message->message_id, args->subscriber->id, get_process_by_value(args->subscriber->process), args->subscriber->socket_subscriber);
@@ -288,7 +287,7 @@ static void send_message_and_wait_for_ack(arg_struct* args) {
 			log_info(LOGGER, "Se cayo el suscriptor con ID: %d, Proceso:  %s, Socket: %d", args->subscriber->id, get_process_by_value(args->subscriber->process), args->subscriber->socket_subscriber);
 		}
 	}
-	log_info(LOGGER, "Mutex unlocked for subscriber_identifier: %d", get_subscriber_identifier(args->subscriber));
+	log_info(LOGGER, "NEW_REQUEST message_id: %d, Mutex unlocked for subscriber_identifier: %d", args->partition->message->message_id, get_subscriber_identifier(args->subscriber));
 	sem_post(sem);
 
 	free(args);
@@ -296,13 +295,12 @@ static void send_message_and_wait_for_ack(arg_struct* args) {
 }
 
 static void send_message_and_wait_for_ack_2(arg_struct* args) {
-	log_warning(LOGGER, "WAIT_FOR_ACK SUBSCRIBE");
 	void* message = _transform_messages(args->partition, args->partition->message->operation_code, args->bytes);
 
-	log_info(LOGGER, "Adquiring mutex for subscriber_identifier: %d", get_subscriber_identifier(args->subscriber));
+	log_info(LOGGER, "SUBSCRIBE message_id: %d, Adquiring mutex for subscriber_identifier: %d", args->partition->message->message_id, get_subscriber_identifier(args->subscriber));
 	sem_t* sem = (sem_t*) &SUBSCRIBERS_IDENTIFIERS[get_subscriber_identifier(args->subscriber)];
 	sem_wait(sem);
-	log_info(LOGGER, "Subscribe: Mutex adquired for subscriber_identifier: %d", get_subscriber_identifier(args->subscriber));
+	log_info(LOGGER, "SUBSCRIBE message_id: %d, Mutex adquired for subscriber_identifier: %d", args->partition->message->message_id, get_subscriber_identifier(args->subscriber));
 
 	log_debug(LOGGER, "Sending message to: %d, with size: %d", args->subscriber->socket_subscriber, args->bytes);
 	log_info(LOGGER, "Enviando el mensaje %d al suscriptor con ID: %d, Proceso:  %s, Socket: %d", args->partition->message->message_id, args->subscriber->id, get_process_by_value(args->subscriber->process), args->subscriber->socket_subscriber);
@@ -319,7 +317,7 @@ static void send_message_and_wait_for_ack_2(arg_struct* args) {
 			log_info(LOGGER, "Se cayo el suscriptor con ID: %d, Proceso:  %s, Socket: %d", args->subscriber->id, get_process_by_value(args->subscriber->process), args->subscriber->socket_subscriber);
 		}
 	}
-	log_info(LOGGER, "Mutex unlocked for subscriber_identifier: %d", get_subscriber_identifier(args->subscriber));
+	log_info(LOGGER, "SUBSCRIBE message_id: %d, Mutex unlocked for subscriber_identifier: %d", args->partition->message->message_id, get_subscriber_identifier(args->subscriber));
 	sem_post(sem);
 
 	free(args);
