@@ -38,14 +38,16 @@ static RespuestaBroker enviarCatch(ClienteBrokerV2 * this, char * especie, uint3
 
     Pokemon* unPokemon = create_pokemon(especie, posX, posY);
 
-    if (send_pokemon(unPokemon, socketDescartable, false) < 0) {
+    if (send_pokemon(unPokemon, CATCH, socketDescartable) < 0) {
         flagBrokerCaido = 1;
     }
 
     uint32_t idAsignado;
 
+    log_error(this->logger, "Se envió un catch para %s en (%d,%d)", especie, posX, posY );
+
     if (recv(socketDescartable, &idAsignado, sizeof(uint32_t), MSG_WAITALL) <= 0) {
-        flagBrokerCaido = 1;
+    	flagBrokerCaido = 1;
     }
 
     if (!flagBrokerCaido) {

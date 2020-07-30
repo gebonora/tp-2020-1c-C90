@@ -23,6 +23,7 @@ typedef struct PokemonAtrapable {
     TipoPosicionable tipoPosicionable;
     bool disponible;
     char * idMarcador;
+    int ordenDeAparicion;
     // Interfaz publica
     Posicion (*posicion)(struct PokemonAtrapable * this);
     bool (*marcarComoObjetivo)(struct PokemonAtrapable * this, char * idMarcador); //La idea es evitar que 2 entrenadores vayan a la misma posicion.

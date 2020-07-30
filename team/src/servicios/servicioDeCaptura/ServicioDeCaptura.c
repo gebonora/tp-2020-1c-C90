@@ -17,7 +17,13 @@ static t_list * pokemonesDisponibles(ServicioDeCaptura * this) { // TODO: Respet
 		PokemonAtrapable * pokemonAtrapable = pokemonAtrapable_;
 		return pokemonAtrapable->esAtrapable(pokemonAtrapable);
 	}
+	bool elMasViejo(void* elem1, void* elem2) {
+		PokemonAtrapable* pokemon1 = elem1;
+		PokemonAtrapable* pokemon2 = elem2;
+		return pokemon1->ordenDeAparicion < pokemon2->ordenDeAparicion;
+	}
 	t_list * pokemones_disponibles = list_filter(this->pokemonesAtrapables, estaLibre);
+	list_sort(pokemones_disponibles, elMasViejo);
 	return pokemones_disponibles;
 }
 
@@ -95,7 +101,6 @@ static bool registrarCapturaExitosa(ServicioDeCaptura * this, CapturaPokemon * c
 
 	return sePudoRegistrar;
 }
-
 
 static bool registrarCapturaFallida(ServicioDeCaptura * this, CapturaPokemon * capturaPokemon) {
 	bool sePudoRegistrar = false;

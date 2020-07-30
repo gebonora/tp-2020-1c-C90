@@ -10,7 +10,7 @@ static void registrarCatchEnEspera(RegistradorDeEventos * this, CapturaPokemon* 
     pthread_mutex_unlock(&(this->listaCatchEnEspera->mtx));
     char* coor = capturaPokemon->posicion(capturaPokemon);
     log_debug(this->logger, "Se agregó una CapturaPokemon a la listaDeCatchsEnEspera para entrenadorId: %s, pokemon: %s,coordenadas: %s, idCorrelativo: %d.",
-              capturaPokemon->idEntrenador, capturaPokemon->pokemonAtrapable->especie, coor, capturaPokemon->idCorrelatividad);
+              capturaPokemon->idEntrenador(capturaPokemon), capturaPokemon->pokemonAtrapable->especie, coor, capturaPokemon->idCorrelatividad);
     free(coor);
 }
 
@@ -33,7 +33,7 @@ static void destruir(RegistradorDeEventos * this) {
 static RegistradorDeEventos * new() {
     RegistradorDeEventos * registradorDeEventos = malloc(sizeof(RegistradorDeEventos));
 
-    registradorDeEventos->logger = log_create(TEAM_INTERNAL_LOG_FILE, "RegistradorDeEventos", SHOW_INTERNAL_CONSOLE, LOG_LEVEL_INFO);
+    registradorDeEventos->logger = log_create(TEAM_INTERNAL_LOG_FILE, "RegistradorDeEventos", SHOW_INTERNAL_CONSOLE, INTERNAL_LOG_LEVEL);
     registradorDeEventos->listaGetEnEspera = iniciarListaSincronizada();
     registradorDeEventos->listaCatchEnEspera = iniciarListaSincronizada();
     registradorDeEventos->registrarCatchEnEspera = &registrarCatchEnEspera;

@@ -131,6 +131,8 @@ void inicializarComponentesDelSistema() {
 	sem_init(&semaforoDeadlock, 0, 0);
 	sem_init(&semaforoContadorPokemon, 0, 0);
 	sem_init(&semaforoContadorEntrenadoresDisponibles, 0, 0);
+	pthread_mutex_init(&ordenDeAparicionMutex, NULL);
+	ORDEN_DE_APARICION = 0;
 }
 
 /**
