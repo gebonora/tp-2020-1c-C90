@@ -73,14 +73,10 @@ void send_message_from_suscription(Operation operation, Subscriber* subscriber) 
 	list_destroy(partitions);
 }
 
-uint32_t get_subscriber_identifier(Subscriber* subscriber){
-	return SUM(subscriber->process * 10, subscriber->id);
-}
-
-SubscriberWithMutex* find_mutex_by_subscriber(Subscriber* subscriber){
+SubscriberWithMutex* find_mutex_by_subscriber(Operation operation, Subscriber* subscriber){
 	bool _inline_find_mutex_by_subscriber(void* e){
 		SubscriberWithMutex* subscriber_with_mutex = e;
-		return subscriber_with_mutex->subscriber->process == subscriber->process && subscriber_with_mutex->subscriber->id == subscriber->id;
+		return subscriber_with_mutex->operation == operation && subscriber_with_mutex->subscriber->process == subscriber->process && subscriber_with_mutex->subscriber->id == subscriber->id;
 	}
 
 	return list_find(SUBSCRIBERS_IDENTIFIERS, _inline_find_mutex_by_subscriber);
@@ -276,10 +272,10 @@ static void* _transform_messages(Partition* partition, Operation operation, int 
 static void send_message_and_wait_for_ack(arg_struct* args) {
 	void* message = _transform_messages(args->partition, args->partition->message->operation_code, args->bytes);
 
-	log_info(LOGGER, "NEW_REQUEST message_id: %d, Adquiring mutex for subscriber_identifier: %d", args->partition->message->message_id, get_subscriber_identifier(args->subscriber));
-	SubscriberWithMutex* swm = find_mutex_by_subscriber(args->subscriber);
+log_info(LOGGER, "SUBSCRIBE message_id: %d, Adquiring mutex for subscriber with id: %d, process: %d, operation: %s", args->partition->message->message_id, swm->subscriber->id, get_process_by_value(swm->subscriber->process), get_operation_by_value(args->partition->message->operation_code));
+	SubscriberWithMutex* swm = find_mutex_by_subscriber(args->partition->message->operation_code, args->subscriber);
 	pthread_mutex_lock(&swm->mutex);
-	log_info(LOGGER, "NEW_REQUEST message_id: %d, Mutex adquired for subscriber_identifier: %d", args->partition->message->message_id, get_subscriber_identifier(args->subscriber));
+	log_info(LOGGER, "NEW_REQUEST message_id: %d, Mutex adquired for subscriber with id: %d, process: %d, operation: %s", args->partition->message->message_id, swm->subscriber->id, get_process_by_value(swm->subscriber->process), get_operation_by_value(args->partition->message->operation_code));
 
 	log_debug(LOGGER, "Sending message to: %d, with size: %d", args->subscriber->socket_subscriber, args->bytes);
 	log_info(LOGGER, "Enviando el mensaje %d al suscriptor con ID: %d, Proceso:  %s, Socket: %d", args->partition->message->message_id, args->subscriber->id, get_process_by_value(args->subscriber->process), args->subscriber->socket_subscriber);
@@ -296,7 +292,7 @@ static void send_message_and_wait_for_ack(arg_struct* args) {
 			log_info(LOGGER, "Se cayo el suscriptor con ID: %d, Proceso:  %s, Socket: %d", args->subscriber->id, get_process_by_value(args->subscriber->process), args->subscriber->socket_subscriber);
 		}
 	}
-	log_info(LOGGER, "NEW_REQUEST message_id: %d, Mutex unlocked for subscriber_identifier: %d", args->partition->message->message_id, get_subscriber_identifier(args->subscriber));
+	log_info(LOGGER, "NEW_REQUEST message_id: %d, Mutex unlocked for subscriber with id: %d, process: %d, operation: %s", args->partition->message->message_id, swm->subscriber->id, get_process_by_value(swm->subscriber->process), get_operation_by_value(args->partition->message->operation_code));
 	pthread_mutex_unlock(&swm->mutex);
 
 	free(args);
@@ -306,10 +302,10 @@ static void send_message_and_wait_for_ack(arg_struct* args) {
 static void send_message_and_wait_for_ack_2(arg_struct* args) {
 	void* message = _transform_messages(args->partition, args->partition->message->operation_code, args->bytes);
 
-	log_info(LOGGER, "SUBSCRIBE message_id: %d, Adquiring mutex for subscriber_identifier: %d", args->partition->message->message_id, get_subscriber_identifier(args->subscriber));
+	log_info(LOGGER, "SUBSCRIBE message_id: %d, Adquiring mutex for subscriber with id: %d, process: %d, operation: %s", args->partition->message->message_id, swm->subscriber->id, get_process_by_value(swm->subscriber->process), get_operation_by_value(args->partition->message->operation_code));
 	SubscriberWithMutex* swm = find_mutex_by_subscriber(args->subscriber);
 	pthread_mutex_lock(&swm->mutex);
-	log_info(LOGGER, "SUBSCRIBE message_id: %d, Mutex adquired for subscriber_identifier: %d", args->partition->message->message_id, get_subscriber_identifier(args->subscriber));
+	log_info(LOGGER, "SUBSCRIBE message_id: %d, Mutex adquired for subscriber with id: %d, process: %d, operation: %s", args->partition->message->message_id, swm->subscriber->id, get_process_by_value(swm->subscriber->process), get_operation_by_value(args->partition->message->operation_code));
 
 	log_debug(LOGGER, "Sending message to: %d, with size: %d", args->subscriber->socket_subscriber, args->bytes);
 	log_info(LOGGER, "Enviando el mensaje %d al suscriptor con ID: %d, Proceso:  %s, Socket: %d", args->partition->message->message_id, args->subscriber->id, get_process_by_value(args->subscriber->process), args->subscriber->socket_subscriber);
@@ -326,7 +322,7 @@ static void send_message_and_wait_for_ack_2(arg_struct* args) {
 			log_info(LOGGER, "Se cayo el suscriptor con ID: %d, Proceso:  %s, Socket: %d", args->subscriber->id, get_process_by_value(args->subscriber->process), args->subscriber->socket_subscriber);
 		}
 	}
-	log_info(LOGGER, "SUBSCRIBE message_id: %d, Mutex unlocked for subscriber_identifier: %d", args->partition->message->message_id, get_subscriber_identifier(args->subscriber));
+	log_info(LOGGER, "SUBSCRIBE message_id: %d, Mutex unlocked for subscriber with id: %d, process: %d, operation: %s", args->partition->message->message_id, swm->subscriber->id, get_process_by_value(swm->subscriber->process), get_operation_by_value(args->partition->message->operation_code));
 	pthread_mutex_unlock(&swm->mutex);
 
 	free(args);

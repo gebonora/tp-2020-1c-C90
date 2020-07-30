@@ -80,6 +80,7 @@ typedef struct {
 } Partition;
 
 typedef struct {
+	Operation operation;
 	Subscriber* subscriber;
 	pthread_mutex_t mutex;
 } SubscriberWithMutex;

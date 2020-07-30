@@ -228,6 +228,7 @@ static void _process_request(uint32_t cod_op, int socket) {
 			subscriber->socket_subscriber = socket;
 			list_add(subscribers, subscriber);
 			SubscriberWithMutex* subscriber_with_mutex = malloc(sizeof(SubscriberWithMutex));
+			subscriber_with_mutex->operation = cod_cola;
 			subscriber_with_mutex->subscriber = subscriber;
 			pthread_mutex_init(&subscriber_with_mutex->mutex, NULL);
 			pthread_mutex_lock(&MUTEX_SUBSCRIBERS_IDENTIFIERS);
