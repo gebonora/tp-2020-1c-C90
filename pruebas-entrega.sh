@@ -60,7 +60,7 @@ echo -e "Iniciando proceso: ${YELLOW}gamecard${NC}"
 cd ${GAMECARD_PATH} && ./gameCard.app &
 
 echo -e "Ejecutando script: ${YELLOW}new_pokemon_antes_team.sh${NC}"
-cd ${GAMEBOY_PATH}/scripts && time ./new_pokemon_antes_team.sh
+cd ${GAMEBOY_PATH}/scripts && ./new_pokemon_antes_team.sh
 
 sleep 1
 
@@ -70,9 +70,10 @@ cd ${TEAM_1_PATH} && ./team &
 echo -e "Iniciando proceso: ${YELLOW}team 2${NC}"
 cd ${TEAM_2_PATH} && ./team_2 &
 
-sleep 2
+read -n 1 -s -r -p "PRESIONAR CUALQUIER TECLA PARA TERMINAR"
 
 echo -e "Ejecutando script: ${YELLOW}new_pokemon_post_team.sh${NC}"
+cd ${GAMEBOY_PATH}/scripts && ./new_pokemon_post_team.sh
 
 read -n 1 -s -r -p "PRESIONAR CUALQUIER TECLA PARA TERMINAR"
 
