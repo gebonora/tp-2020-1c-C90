@@ -227,8 +227,10 @@ static void _process_request(uint32_t cod_op, int socket) {
 			subscriber->process = (Process) cod_process;
 			subscriber->socket_subscriber = socket;
 			list_add(subscribers, subscriber);
-			sem_t* sem = (sem_t*) &SUBSCRIBERS_IDENTIFIERS[get_subscriber_identifier(subscriber)];
-			sem_init(sem, 0, 1);
+			pthread_mutex_t mutex = (pthread_mutex_t) SUBSCRIBERS_IDENTIFIERS[get_subscriber_identifier(subscriber)];
+			pthread_mutex_init(&mutex, NULL);
+			//sem_t* sem = (sem_t*) &SUBSCRIBERS_IDENTIFIERS[get_subscriber_identifier(subscriber)];
+			//sem_init(sem, 0, 1);
 		}
 
 		send_message_from_suscription(cod_cola, subscriber);

@@ -41,7 +41,8 @@ pthread_mutex_t MUTEX_MESSAGE_ID;
 pthread_mutex_t MUTEX_READERS;
 pthread_mutex_t MUTEX_TIME;
 pthread_mutex_t MEMORY;
-sem_t* SUBSCRIBERS_IDENTIFIERS[100];
+//sem_t* SUBSCRIBERS_IDENTIFIERS[100];
+pthread_mutex_t* SUBSCRIBERS_IDENTIFIERS[100];
 
 t_dictionary* SUBSCRIBERS_BY_QUEUE;
 pthread_mutex_t MUTEX_SUBSCRIBERS_BY_QUEUE;
