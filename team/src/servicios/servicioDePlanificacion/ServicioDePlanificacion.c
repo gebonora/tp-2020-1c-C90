@@ -195,35 +195,50 @@ static EntrenadorConPokemon* entrenadorOptimo(ServicioDePlanificacion* this, t_l
 
 void asignarTareasDeCaptura(ServicioDePlanificacion* this, t_list* listaPokemon, t_list* entrenadoresDisponibles) {
 	log_info(this->logger, "Asignando tareas de captura");
-	EntrenadorConPokemon* ganador = this->entrenadorOptimo(this, listaPokemon, entrenadoresDisponibles);
-	if (ganador != NULL) {
-		HiloEntrenadorPlanificable* hiloElegido = (HiloEntrenadorPlanificable*) ganador->entrenadore;
-		log_info(this->logger, "Ya tengo un entrenador optimo");
-		PokemonAtrapable* pokemon = ganador->pokemon;
-		Coordinate coordenadaPokemon = pokemon->gps->posicionActual(pokemon->gps).coordenada;
-		TareaPlanificable* tarea = generarTareaDeCaptura(hiloElegido->entrenador, pokemon->especie, coordenadaPokemon);
-		hiloElegido->asignarTarea(hiloElegido, tarea);
-		hiloElegido->entrenador->estaEsperandoAlgo = true;
-		hiloElegido->infoUltimaEjecucion.seNecesitaNuevaEstimacion = true;
-		hiloElegido->infoUltimaEjecucion.rafaga_real_actual = hiloElegido->tareaAsignada->totalInstrucciones;
-		pokemon->marcarComoObjetivo(pokemon, hiloElegido->entrenador->id);
-		this->objetivoGlobal.restarUnCapturado(&this->objetivoGlobal, pokemon->especie);
-		this->planificador.moverACola(&this->planificador, hiloElegido, READY, "Se le asignó una tarea de captura.");
-		bool pokemon_igual_a(void* elem) {
-			PokemonAtrapable * poke = (PokemonAtrapable*) elem;
-			return string_equals_ignore_case(poke->especie, pokemon->especie);
-		}
-		list_remove_by_condition(listaPokemon, pokemon_igual_a);
-		bool entrenador_by_id(void* elem) {
-			HiloEntrenadorPlanificable* entrenador_actual = (HiloEntrenadorPlanificable*) elem;
-			return string_equals_ignore_case(entrenador_actual->entrenador->id, hiloElegido->entrenador->id);
-		}
-		list_remove_by_condition(entrenadoresDisponibles, entrenador_by_id);
-		free(ganador);
-	} else {
-		log_error(this->logger, "GANADOR EN NULL");
+
+	bool pokemon_capturable(void* elem) {
+		PokemonAtrapable* poke = (PokemonAtrapable*) elem;
+		return this->objetivoGlobal.puedeCapturarse(&this->objetivoGlobal, poke->especie);
 	}
+
+	t_list* pokemones_capturables = list_filter(listaPokemon, pokemon_capturable);
+
+	for (int a = 0; a < list_size(pokemones_capturables); a++) {
+		PokemonAtrapable* pok = list_get(listaPokemon, a);
+		log_error(this->logger, "posicion: %d %s", a, pok->especie);
+	}
+
+	PokemonAtrapable* pokemonAPlanificar = list_get(pokemones_capturables, 0);
+	Coordinate coordenadaPokemon = pokemonAPlanificar->gps->posicionActual(pokemonAPlanificar->gps).coordenada;
+
+	bool masCercano(void* elem1, void* elem2) {
+		HiloEntrenadorPlanificable* hilo1 = elem1;
+		HiloEntrenadorPlanificable* hilo2 = elem2;
+		Coordinate coor1 = hilo1->entrenador->gps->posicionActual(hilo1->entrenador->gps).coordenada;
+		Coordinate coor2 = hilo2->entrenador->gps->posicionActual(hilo2->entrenador->gps).coordenada;
+		return distanciaEntre(coordenadaPokemon, coor1) <= distanciaEntre(coordenadaPokemon, coor2);
+	}
+
+	list_sort(entrenadoresDisponibles, masCercano);
+
+	for (int a = 0; a < list_size(entrenadoresDisponibles); a++) {
+		HiloEntrenadorPlanificable* hilda = list_get(entrenadoresDisponibles, a);
+		log_error(this->logger, "posicion: %d %s", a, hilda->entrenador->id);
+	}
+
+	HiloEntrenadorPlanificable* hiloElegido = list_get(entrenadoresDisponibles, 0);
+	log_info(this->logger, "Ya tengo un entrenador optimo, es el %s", hiloElegido->entrenador->id);
+	TareaPlanificable* tarea = generarTareaDeCaptura(hiloElegido->entrenador, pokemonAPlanificar->especie, coordenadaPokemon);
+	hiloElegido->asignarTarea(hiloElegido, tarea);
+	hiloElegido->entrenador->estaEsperandoAlgo = true;
+	hiloElegido->infoUltimaEjecucion.seNecesitaNuevaEstimacion = true;
+	hiloElegido->infoUltimaEjecucion.rafaga_real_actual = hiloElegido->tareaAsignada->totalInstrucciones;
+	pokemonAPlanificar->marcarComoObjetivo(pokemonAPlanificar, hiloElegido->entrenador->id);
+	this->objetivoGlobal.restarUnCapturado(&this->objetivoGlobal, pokemonAPlanificar->especie);
+	this->planificador.moverACola(&this->planificador, hiloElegido, READY, "Se le asignó una tarea de captura.");
 	list_destroy(listaPokemon);
+	list_destroy(pokemones_capturables);
+	list_destroy(entrenadoresDisponibles);
 }
 
 void asignarIntercambios(ServicioDePlanificacion* this, t_list* intercambios) {

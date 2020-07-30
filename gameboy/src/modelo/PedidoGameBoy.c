@@ -5,7 +5,7 @@
 #include "modelo/PedidoGameBoy.h"
 
 PedidoGameBoy crearPedidoGameBoy(int cantidadArgumentos, char** arrayArgumentos) {
-    PedidoGameBoy pedidoGameBoy = {.argumentos=malloc(sizeof(Argumentos))};
+    PedidoGameBoy pedidoGameBoy = {};
 
     Process proceso = obtenerProceso(arrayArgumentos[1]);
     pedidoGameBoy.proceso = proceso;

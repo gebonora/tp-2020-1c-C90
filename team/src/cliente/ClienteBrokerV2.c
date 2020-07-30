@@ -38,14 +38,16 @@ static RespuestaBroker enviarCatch(ClienteBrokerV2 * this, char * especie, uint3
 
     Pokemon* unPokemon = create_pokemon(especie, posX, posY);
 
-    if (send_pokemon(unPokemon, socketDescartable, false) < 0) {
+    if (send_pokemon(unPokemon, CATCH, socketDescartable) < 0) {
         flagBrokerCaido = 1;
     }
 
     uint32_t idAsignado;
 
+    log_error(this->logger, "Se envió un catch para %s en (%d,%d)", especie, posX, posY );
+
     if (recv(socketDescartable, &idAsignado, sizeof(uint32_t), MSG_WAITALL) <= 0) {
-        flagBrokerCaido = 1;
+    	flagBrokerCaido = 1;
     }
 
     if (!flagBrokerCaido) {
@@ -55,7 +57,7 @@ static RespuestaBroker enviarCatch(ClienteBrokerV2 * this, char * especie, uint3
         close(socketDescartable); // TODO: chequear si está bien cerralo
         return (RespuestaBroker) {.esValida = true, .idCorrelatividad = idAsignado};
     } else {
-        log_warning(MANDATORY_LOGGER, "No se puedo enviar un CATCH pokemon: %s, coordenadas: (%d,%d)", especie, posX, posY);
+        log_warning(MANDATORY_LOGGER, "No se puedo enviar un CATCH pokemon: %s, coordenadas: (%d,%d). Se procede a asumir que fue capturado con éxito.", especie, posX, posY);
         return (RespuestaBroker) {.esValida = false};
     }
 }
