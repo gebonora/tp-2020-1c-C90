@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+function show_usage(){
+    echo -e "Uso: ${YELLOW}$0 all|broker|gamecard|team|team_2${NC}"
+}
+
 function kill_process() {
     local PROCESS=$1
 
@@ -30,6 +34,12 @@ GREEN='\033[0;32m'
 RED='\033[0;31m'
 YELLOW='\033[0;33m'
 NC='\033[0m'
+
+if [ "$#" -ne 1 ] ; then
+    echo -e "${RED}Número de parámetros incorrecto${NC}"
+    show_usage
+    exit 2
+fi
 
 if [ "all" = "$1" ]; then
     kill_process broker
