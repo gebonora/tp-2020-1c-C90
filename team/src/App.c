@@ -33,7 +33,7 @@ int main() {
 	log_info(INTERNAL_LOGGER, "Levantando el server...");
 	configurarServer();
 	if (ESPERAR_OBJETIVO_GLOBAL) {
-		atenderConexiones(); //TODO: Hacer apagable por si logramos cumplir con el objetivo.
+		atenderConexiones(); //TODO: Analizar si el apagado leakea o es aceptable.
 	}
 
 	// Por cada pokemon del objetivo global, enviar un GET [POKEMON].
@@ -47,6 +47,7 @@ int main() {
 			sem_wait(&semaforoObjetivoGlobalCompletado);
 		}
 	}
+
 	// Mostramos las metricas para comparar contra otros procesos team
 	servicioDeMetricasProcesoTeam->imprimirMetricas(servicioDeMetricasProcesoTeam);
 
@@ -96,7 +97,6 @@ void mostrarTitulo(t_log * logger) {
 
 void inicializarComponentesDelSistema() {
 	srandom(time(NULL));
-	pthread_mutex_init(&MTX_INTERNAL_LOG, NULL); //TODO: por ahi conviene moverlo a configurarServer()
 
 	log_debug(INTERNAL_LOGGER, "Creando el cliente para comunicarse con el broker...");
 	clienteBrokerV2ProcesoTeam = ClienteBrokerV2Constructor.new();
@@ -191,7 +191,6 @@ void liberarRecursos() {
 	// Componentes
 	log_debug(INTERNAL_LOGGER, "Liberando componentes del sistema...");
 	manejadorDeEventosProcesoTeam->destruir(manejadorDeEventosProcesoTeam);
-	pthread_mutex_destroy(&MTX_INTERNAL_LOG);
 	sem_destroy(&semaforoObjetivoGlobalCompletado);
 	registradorDeEventosProcesoTeam->destruir(registradorDeEventosProcesoTeam);
 	destruirAlgoritmosDePlanificacion();

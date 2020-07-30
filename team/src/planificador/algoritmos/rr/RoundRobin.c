@@ -1,7 +1,5 @@
 #include "planificador/algoritmos/rr/RoundRobin.h"
 
-//TODO: Falta definir el lugar donde se le dira al proceso que se ejecute parcialmente
-
 static UnidadPlanificable * proximoAEjecutar(AlgoritmoPlanificador * this, t_list * listaReady) {
     if (list_is_empty(listaReady)) {
         log_error(this->logger, "No hay nada para planificar.");

@@ -5,17 +5,13 @@
 #include "servidor/ServidorTeam.h"
 
 void configurarServer() {
-	IP_Broker = string_new();
-	string_append(&IP_Broker, servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, IP_BROKER));
+	IP_Broker = string_duplicate(servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, IP_BROKER));
 
-	Puerto_Broker = string_new();
-	string_append(&Puerto_Broker, servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, PUERTO_BROKER));
+	Puerto_Broker = string_duplicate(servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, PUERTO_BROKER));
 
-	IP_Team_Gameboy = string_new();
-	string_append(&IP_Team_Gameboy, servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, IP_TEAM_GAMEBOY));
+	IP_Team_Gameboy = string_duplicate(servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, IP_TEAM_GAMEBOY));
 
-	Puerto_Team_Gameboy = string_new();
-	string_append(&Puerto_Team_Gameboy, servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, PUERTO_TEAM_GAMEBOY));
+	Puerto_Team_Gameboy = string_duplicate(servicioDeConfiguracion.obtenerString(&servicioDeConfiguracion, PUERTO_TEAM_GAMEBOY));
 
 	Tiempo_Reconexion = servicioDeConfiguracion.obtenerEntero(&servicioDeConfiguracion, TIEMPO_RECONEXION);
 
@@ -72,14 +68,14 @@ void esperarBrokerAppeared(int socketDeEscucha) {
 		uint32_t idMensaje;
 		Operation operacion;
 
-		if (recv(socketDeEscucha, &operacion, sizeof(Operation), 0) <= 0) {
+		if (recv(socketDeEscucha, &operacion, sizeof(Operation), MSG_WAITALL) <= 0) {
 			flagError = 1;
 		}
 		Pokemon* unPokemon = recv_pokemon(socketDeEscucha, 0);
 		if (unPokemon == NULL) {
 			flagError = 1;
 		}
-		if (recv(socketDeEscucha, &idMensaje, sizeof(uint32_t), 0) <= 0) {
+		if (recv(socketDeEscucha, &idMensaje, sizeof(uint32_t), MSG_WAITALL) <= 0) {
 			flagError = 1;
 		}
 		Result ack = ACKNOWLEDGE;
@@ -121,7 +117,7 @@ void esperarBrokerCaught(int socketDeEscucha) {
 		uint32_t idMensaje;
 		Operation operacion;
 
-		if (recv(socketDeEscucha, &operacion, sizeof(Operation), 0) <= 0) {
+		if (recv(socketDeEscucha, &operacion, sizeof(Operation), MSG_WAITALL) <= 0) {
 			flagError = 1;
 		}
 		Caught* unCaught = recv_caught(socketDeEscucha);
@@ -129,7 +125,7 @@ void esperarBrokerCaught(int socketDeEscucha) {
 			flagError = 1;
 		}
 
-		if (recv(socketDeEscucha, &idMensaje, sizeof(uint32_t), 0) <= 0) {
+		if (recv(socketDeEscucha, &idMensaje, sizeof(uint32_t), MSG_WAITALL) <= 0) {
 			flagError = 1;
 		}
 
@@ -158,7 +154,6 @@ void esperarBrokerCaught(int socketDeEscucha) {
 void procesarHiloCaught(ArgumentosHilo* argumentosHilo) {
 	Caught* unCaught = (Caught*) argumentosHilo->mensaje;
 	uint32_t idMensaje = argumentosHilo->idMensaje;
-	//
 	manejadorDeEventosProcesoTeam->procesarCaughtRecibido(manejadorDeEventosProcesoTeam, unCaught, idMensaje);
 }
 
@@ -173,7 +168,7 @@ void esperarBrokerLocalized(int socketDeEscucha) {
 		uint32_t idMensaje;
 		Operation operacion;
 
-		if (recv(socketDeEscucha, &operacion, sizeof(Operation), 0) <= 0) {
+		if (recv(socketDeEscucha, &operacion, sizeof(Operation), MSG_WAITALL) <= 0) {
 			flagError = 1;
 		}
 		Localized* unLocalized = recv_localized(socketDeEscucha);
@@ -182,7 +177,7 @@ void esperarBrokerLocalized(int socketDeEscucha) {
 			flagError = 1;
 
 		}
-		if (recv(socketDeEscucha, &idMensaje, sizeof(uint32_t), 0) <= 0) {
+		if (recv(socketDeEscucha, &idMensaje, sizeof(uint32_t), MSG_WAITALL) <= 0) {
 			flagError = 1;
 
 		}
@@ -218,9 +213,7 @@ void procesarHiloLocalized(ArgumentosHilo* argumentosHilo) {
 void atenderGameboy() {
 	SOCKET_GAMEBOY = crearSocketServidor(IP_Team_Gameboy, Puerto_Team_Gameboy);
 
-	pthread_mutex_lock(&MTX_INTERNAL_LOG);
 	log_info(INTERNAL_LOGGER, "Esperando Gameboys en el socket: '%d'", SOCKET_GAMEBOY);
-	pthread_mutex_unlock(&MTX_INTERNAL_LOG);
 
 	while (1) {
 
@@ -231,16 +224,12 @@ void atenderGameboy() {
 
 		int socketCliente = accept(SOCKET_GAMEBOY, (void*) &dir_cliente, &tam_direccion);
 
-		pthread_mutex_lock(&MTX_INTERNAL_LOG);
 		log_info(INTERNAL_LOGGER, "Se conectó un Gameboy en el socket: '%d'", socketCliente);
-		pthread_mutex_unlock(&MTX_INTERNAL_LOG);
 
 		int codOp;
 		recv(socketCliente, &codOp, sizeof(int), MSG_WAITALL);
 
-		pthread_mutex_lock(&MTX_INTERNAL_LOG);
 		log_info(INTERNAL_LOGGER, "Se recibió un: '%s' a traves de un Gameboy. Procesando....", traducirOperacion(codOp));
-		pthread_mutex_unlock(&MTX_INTERNAL_LOG);
 
 		if (codOp == APPEARED) {
 			Pokemon* unPokemon = recv_pokemon(socketCliente, 0);
@@ -250,12 +239,13 @@ void atenderGameboy() {
 			argumentosHilo->mensaje = unPokemon;
 			argumentosHilo->idMensaje = UINT32_MAX;
 
-			pthread_create(&thread, NULL, (void*) procesarHiloAppeared, argumentosHilo);
-			pthread_detach(thread);
+			procesarHiloAppeared(argumentosHilo); // TODO: ahora es single threaded, chequear si es posible una solución multi que respete orden.
+			//pthread_create(&thread, NULL, (void*) procesarHiloAppeared, argumentosHilo);
+			//pthread_detach(thread);
 		} else {
 			log_error(INTERNAL_LOGGER, "El gameboy envió un mensaje erróneo.");
-			close(socketCliente);
 		}
+		close(socketCliente); // TODO: chequear si está bien este close
 	}
 }
 
@@ -286,7 +276,7 @@ int iniciarSocketDeEscucha(Operation cola) {
 	}
 	Result result;
 
-	if (recv(socketDeEscucha, &result, sizeof(Result), 0) <= 0) {
+	if (recv(socketDeEscucha, &result, sizeof(Result), MSG_WAITALL) <= 0) {
 		close(socketDeEscucha);
 		return -1;
 	}

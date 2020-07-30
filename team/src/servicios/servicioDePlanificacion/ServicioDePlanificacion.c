@@ -104,13 +104,6 @@ void planificadorDeDeadlocks(ServicioDePlanificacion* this) {
 
 		log_debug(this->logger, "Iniciando planificación de deadlocks.");
 
-		if (list_is_empty(this->planificador.colas->colaBlocked)) {
-			log_error(this->logger, "Se quizo tratar deadlocks con una lista de blocked vacía!!! (Si estás corriendo los tests es esperable.)");
-			this->planificador.mostrarLasColas(&this->planificador);
-			sem_post(&this->semaforoEjecucionHabilitadaDeadlock);
-			continue;
-		}
-
 		for (int a = 0; a < list_size(this->planificador.colas->colaBlocked); a++) {
 			HiloEntrenadorPlanificable* hilo = (HiloEntrenadorPlanificable*) list_get(this->planificador.colas->colaBlocked, a);
 			if (hilo->entrenador->objetivoCompletado(hilo->entrenador)) {
@@ -138,7 +131,7 @@ void asignarEquipoAPlanificar(ServicioDePlanificacion * this, Equipo equipo) {
 	list_destroy(unidadesPlanificables);
 }
 
-static EntrenadorConPokemon* entrenadorOptimo(ServicioDePlanificacion* this, t_list* pokemones, t_list* entrenadores) {
+static EntrenadorConPokemon* entrenadorOptimo(ServicioDePlanificacion* this, t_list* pokemones, t_list* entrenadores) { // TODO: Cambiar para que respete orden.
 	bool pokemon_capturable(void* elem) {
 		PokemonAtrapable* poke = (PokemonAtrapable*) elem;
 		return this->objetivoGlobal.puedeCapturarse(&this->objetivoGlobal, poke->especie);
@@ -276,7 +269,7 @@ void definirYCambiarEstado(ServicioDePlanificacion* this, UnidadPlanificable* hi
 			return;
 		}
 	}
-	log_error(this->logger, "NO SE PUDO ASGINAR UN ESTADO!!!");
+	log_error(this->logger, "NO SE PUDO ASIGNAR UN ESTADO!!!");
 }
 
 bool teamFinalizado(ServicioDePlanificacion* this) { // TODO: se puede ir
@@ -324,7 +317,7 @@ void destruir(ServicioDePlanificacion* this) {
 
 }
 
-static ServicioDePlanificacion * new(ServicioDeMetricas* servicioDeMetricas, ServicioDeResolucionDeDeadlocks* servicioDeadlocks) { // TODO arreglar esto para que planificador tenga servicio de metricas
+static ServicioDePlanificacion * new(ServicioDeMetricas* servicioDeMetricas, ServicioDeResolucionDeDeadlocks* servicioDeadlocks) {
 	ServicioDePlanificacion * servicio = malloc(sizeof(ServicioDePlanificacion));
 
 	servicio->logger = log_create(TEAM_INTERNAL_LOG_FILE, "ServicioDePlanificacion", SHOW_INTERNAL_CONSOLE, INTERNAL_LOG_LEVEL);
