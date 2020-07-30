@@ -57,7 +57,7 @@ static RespuestaBroker enviarCatch(ClienteBrokerV2 * this, char * especie, uint3
         close(socketDescartable); // TODO: chequear si está bien cerralo
         return (RespuestaBroker) {.esValida = true, .idCorrelatividad = idAsignado};
     } else {
-        log_warning(MANDATORY_LOGGER, "No se puedo enviar un CATCH pokemon: %s, coordenadas: (%d,%d)", especie, posX, posY);
+        log_warning(MANDATORY_LOGGER, "No se puedo enviar un CATCH pokemon: %s, coordenadas: (%d,%d). Se procede a asumir que fue capturado con éxito.", especie, posX, posY);
         return (RespuestaBroker) {.esValida = false};
     }
 }

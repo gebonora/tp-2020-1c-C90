@@ -143,7 +143,6 @@ void inicializarComponentesDelSistema() {
  * Finalmente, con el cliente broker a mano: Por cada pokemon del objetivo global, enviar un GET \[POKEMON\] - OK
  */
 void configurarEstadoInicialProcesoTeam() {
-	printf("entre a configurar\n");
 	log_debug(INTERNAL_LOGGER, "Instanciando entrenadores y armando el equipo...");
 	equipoProcesoTeam = crearEquipoPorConfiguracion();
 	log_debug(INTERNAL_LOGGER, "Calculando el objetivo global...");
