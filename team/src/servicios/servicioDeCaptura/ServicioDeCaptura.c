@@ -12,7 +12,7 @@ bool mismaEspecieMismaPosicion(void * pokemon_) { \
            pokemon->posicionInicial.pos_y == posicion.pos_y; \
 }
 
-static t_list * pokemonesDisponibles(ServicioDeCaptura * this) {
+static t_list * pokemonesDisponibles(ServicioDeCaptura * this) { // TODO: Respetar orden de aparición de los pokemon para pasarle al ServicioDePlanificacion.
 	bool estaLibre(void * pokemonAtrapable_) {
 		PokemonAtrapable * pokemonAtrapable = pokemonAtrapable_;
 		return pokemonAtrapable->esAtrapable(pokemonAtrapable);

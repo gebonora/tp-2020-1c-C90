@@ -8,7 +8,6 @@ static Partition* _positive_frecuency(uint32_t);
 static Partition* _zero_frecuency(uint32_t);
 
 Partition* save_to_cache_dynamic_partitions(void* data, Message* message){
-	sem_wait(&MEMORY);
 	Partition* partition;
 
 	log_debug(LOGGER, "Frecuencia Compactacion: %d", FRECUENCIA_COMPACTACION);
@@ -30,7 +29,6 @@ Partition* save_to_cache_dynamic_partitions(void* data, Message* message){
 	memcpy((void*) partition->start, data, message->data_size);
 	log_info(LOGGER, "Mensaje %d guardado con exito en la particion que comienza en %d",partition->message->message_id, partition->position);
 	log_debug(LOGGER, "memcpy done");
-	sem_post(&MEMORY);
 	free(data);
 	return partition;
 }

@@ -58,7 +58,6 @@ typedef struct HiloEntrenadorPlanificable {
     void (*trabajar)(struct HiloEntrenadorPlanificable * this);
     void (*ejecutarParcialmente)(struct HiloEntrenadorPlanificable * this, int cantInstrucciones);
     void (*ejecutar)(struct HiloEntrenadorPlanificable * this);
-    // nuevoEstado(estado) - Asi nos enteramos si nos dan permiso para ejecutar o nos bloquearon TODO ¿Lo necesito?
     void (*destruir)(struct HiloEntrenadorPlanificable * this);
 } HiloEntrenadorPlanificable;
 

@@ -47,8 +47,7 @@
 #define PUERTO_TEAM_GAMEBOY "PUERTO_TEAM_GAMEBOY"
 #define ID_TEAM "ID_TEAM"
 
-// Mutex de los recursos compartidos
-pthread_mutex_t MTX_INTERNAL_LOG; // TODO: Se usa solo para logear en server y es medio al pedo. Se podría borrar.
+// Semaforos de los recursos compartidos
 
 sem_t semaforoObjetivoGlobalCompletado;
 
@@ -57,7 +56,7 @@ sem_t semaforoContadorEntrenadoresDisponibles;
 sem_t semaforoReady;
 sem_t semaforoDeadlock;
 
-pthread_mutex_t arrayMutexColas[5]; // Tengo 5 colas, que van en un enum de 0 a 4 TODO: Pasarlo al planificador como property.
+pthread_mutex_t arrayMutexColas[5]; // Tengo 5 colas, que van en un enum de 0 a 4
 
 // Variables globales
 t_log * MANDATORY_LOGGER;

@@ -14,7 +14,6 @@ static uint32_t _buddy_position(Partition*);
 //   	   2.b.ii) genero n buddys particionando hasta que me queda el tamanio del buddy = pot2 calculadass
 //   3) si no encontre ninguna particion, elijo una victima y vuelvo a lanzar la busqueda
 Partition* save_to_cache_buddy_system(void* data, Message* message) {
-	sem_wait(&MEMORY);
 	log_debug(LOGGER, "MAX between MIN_PARTITION_SIZE (%d) and next_power_of_2 of data_size (%d)", TAMANO_MINIMO_PARTICION, message->data_size);
 	int desired_size = MAX_PARTITION_SIZE(next_power_of_2(message->data_size));
 
@@ -54,7 +53,6 @@ Partition* save_to_cache_buddy_system(void* data, Message* message) {
 	log_info(LOGGER, "Mensaje %d guardado con exito en la particion que comienza en %d",partition->message->message_id, partition->position);
 
 	log_debug(LOGGER, "Done memcpy");
-	sem_post(&MEMORY);
 	free(data);
 	return partition;
 

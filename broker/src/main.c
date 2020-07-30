@@ -61,7 +61,8 @@ static void _init_semaphores() {
 	pthread_mutex_init(&MUTEX_SUBSCRIBERS_BY_QUEUE, NULL);
 	pthread_mutex_init(&MUTEX_READERS, NULL);
 	pthread_mutex_init(&MUTEX_TIME, NULL);
-	sem_init(&MEMORY, 0, 1);
+	pthread_mutex_init(&MEMORY, NULL);
+	pthread_mutex_init(&MUTEX_SUBSCRIBERS_IDENTIFIERS, NULL);
 }
 
 static void _init_context() {
@@ -75,6 +76,7 @@ static void _init_context() {
 	dictionary_put(SUBSCRIBERS_BY_QUEUE, "LOCALIZED", list_create());
 	dictionary_put(SUBSCRIBERS_BY_QUEUE, "CATCH", list_create());
 	dictionary_put(SUBSCRIBERS_BY_QUEUE, "CAUGHT", list_create());
+	SUBSCRIBERS_IDENTIFIERS = list_create();
 }
 
 static void _init_memory() {
