@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
 function show_usage(){
-    echo -e "Uso: ${YELLOW}$0 IP_BROKER IP_GAMECARD IP_TEAM VM_GAMEBOY${NC}"
+    echo -e "Uso: ${YELLOW}$0 IP_BROKER IP_GAMECARD IP_TEAM VM_GAMEBOY NRO_ENTREGA${NC}"
     echo -e "El parámetro VM_GAMEBOY recibe el nombre del módulo con el que comparte VM: ${YELLOW}broker|team|gamecard${NC}"
+    echo -e "El parámetro NRO_ENTREGA recibe un número que indica si es la 1ra parte (FIFO, RR, PARTICIONES), o si es la 2da parte (SJF, BUDDY): ${YELLOW}1ra|2da${NC}"
     echo -e "Opcionalmente podemos pasar como primer parámetro ${YELLOW}-r${NC} para que utilice rutas relativas"
 }
 
@@ -64,7 +65,7 @@ RED='\033[0;31m'
 YELLOW='\033[0;33m'
 NC='\033[0m'
 
-if [ "$#" -lt 4 ] || [ "$#" -gt 5 ] ; then
+if [ "$#" -lt 5 ] || [ "$#" -gt 6 ] ; then
     echo -e "${RED}Número de parámetros incorrecto${NC}"
     show_usage
     exit 2
@@ -72,7 +73,7 @@ fi
 
 HOME_PATH=/home/utnso
 
-if [ "$#" -eq 5 ]; then
+if [ "$#" -eq 6 ]; then
     if [ "-r" != "$1" ]; then
         echo -e "${RED}Parámetros en orden incorrecto${NC}"
         show_usage
@@ -84,6 +85,7 @@ if [ "$#" -eq 5 ]; then
         IP_GAMECARD=$3
         IP_TEAM=$4
         VM_GAMEBOY=$5
+        NRO_ENTREGA=$6
     fi
 else
     DELIBIRD_PATH=${HOME_PATH}/tp-2020-1c-C90
@@ -91,6 +93,7 @@ else
     IP_GAMECARD=$2
     IP_TEAM=$3
     VM_GAMEBOY=$4
+    NRO_ENTREGA=$5
 fi
 
 IP_GAMEBOY_BROKER=${IP_BROKER}
@@ -110,8 +113,22 @@ case ${VM_GAMEBOY} in
         exit 2;;
 esac
 
+case ${NRO_ENTREGA} in
+    1ra)
+        BROKER_ENTREGA=${DELIBIRD_PATH}/broker/config/entrega_broker_dynamic.config
+        TEAM_1_ENTREGA=${DELIBIRD_PATH}/team/deploy/config/entrega_team_1_fifo.config
+        TEAM_2_ENTREGA=${DELIBIRD_PATH}/team/deploy_team_2/config/entrega_team_2_rr.config;;
+    2da)
+        BROKER_ENTREGA=${DELIBIRD_PATH}/broker/config/entrega_broker_buddy.config
+        TEAM_1_ENTREGA=${DELIBIRD_PATH}/team/deploy/config/entrega_team_1_sjf_sd.config
+        TEAM_2_ENTREGA=${DELIBIRD_PATH}/team/deploy_team_2/config/entrega_team_2_sjf_cd.config;;
+    *)
+        echo -e "${RED}NRO_ENTREGA, desconocida: ${NC}${NRO_ENTREGA}"
+        show_usage
+        exit 2;;
+esac
+
 BROKER_CONFIG=${DELIBIRD_PATH}/broker/config/broker.config
-BROKER_ENTREGA=${DELIBIRD_PATH}/broker/config/entrega_broker_dynamic.config
 BROKER_LOG_FILE=${DELIBIRD_PATH}/broker/logs/broker.log
 GAMEBOY_CONFIG=${DELIBIRD_PATH}/gameboy/deploy/config/gameboy.config
 GAMEBOY_ENTREGA=${DELIBIRD_PATH}/gameboy/deploy/config/entrega_gameboy.config
@@ -120,10 +137,8 @@ GAMECARD_CONFIG=${DELIBIRD_PATH}/gamecard/config/gameCard.config
 GAMECARD_ENTREGA=${DELIBIRD_PATH}/gamecard/config/entrega_gamecard.config
 GAMECARD_LOG_FILE=${DELIBIRD_PATH}/gamecard/logs/LOG_GAMECARD.log
 TEAM_1_CONFIG=${DELIBIRD_PATH}/team/deploy/config/team.config
-TEAM_1_ENTREGA=${DELIBIRD_PATH}/team/deploy/config/entrega_team_1.config
 TEAM_1_LOG_FILE=${DELIBIRD_PATH}/team/deploy/logs/team_1.log
 TEAM_2_CONFIG=${DELIBIRD_PATH}/team/deploy_team_2/config/team.config
-TEAM_2_ENTREGA=${DELIBIRD_PATH}/team/deploy_team_2/config/entrega_team_2.config
 TEAM_2_LOG_FILE=${DELIBIRD_PATH}/team/deploy_team_2/logs/team_2.log
 
 echo -e "DELIBIRD_PATH: ${YELLOW}${DELIBIRD_PATH}${NC}"
