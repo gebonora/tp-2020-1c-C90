@@ -303,7 +303,7 @@ static void send_message_and_wait_for_ack_2(arg_struct* args) {
 	void* message = _transform_messages(args->partition, args->partition->message->operation_code, args->bytes);
 
 	log_info(LOGGER, "SUBSCRIBE message_id: %d, Adquiring mutex for subscriber with id: %d, process: %d, operation: %s", args->partition->message->message_id, args->subscriber->id, get_process_by_value(args->subscriber->process), get_operation_by_value(args->partition->message->operation_code));
-	SubscriberWithMutex* swm = find_mutex_by_subscriber(args->partition->message->operation_code, ->subscriber);
+	SubscriberWithMutex* swm = find_mutex_by_subscriber(args->partition->message->operation_code, args->subscriber);
 	pthread_mutex_lock(&swm->mutex);
 	log_info(LOGGER, "SUBSCRIBE message_id: %d, Mutex adquired for subscriber with id: %d, process: %d, operation: %s", args->partition->message->message_id, swm->subscriber->id, get_process_by_value(swm->subscriber->process), get_operation_by_value(args->partition->message->operation_code));
 
