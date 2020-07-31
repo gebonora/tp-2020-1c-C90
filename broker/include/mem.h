@@ -12,9 +12,9 @@
 
 Partition* save_message(void*, Message*);
 t_list* messages_from_operation(Operation, Subscriber*);
-int lock_memory_for_read(char* context);
-int unlock_memory_for_read(char* context);
-int lock_memory_for_write(char* context);
-int unlock_memory_for_write(char* context);
+void lock_memory_for_read(char* context);
+void unlock_memory_for_read(char* context);
+void lock_memory_for_write(char* context);
+void unlock_memory_for_write(char* context);
 
 #endif /* BROKER_INCLUDE_MEM_H_ */

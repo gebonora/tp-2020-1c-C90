@@ -43,7 +43,7 @@ t_list *messages_from_operation(Operation operation, Subscriber *subscriber)
 	return filtered_partitions;
 }
 
-int lock_memory_for_read(char *name)
+void lock_memory_for_read(char *name)
 {
 	pthread_mutex_lock(&MEMORY_READERS_MUTEX);
 	READERS++;
@@ -54,9 +54,10 @@ int lock_memory_for_read(char *name)
 	sem_getvalue(&MEMORY_WRITE_MUTEX, &wrt_value);
 	log_warning(LOGGER, "lock_memory_for_read, readers count: %d, %s, writer_sem: %d", READERS, name, wrt_value);
 	pthread_mutex_unlock(&MEMORY_READERS_MUTEX);
+	log_debug(LOGGER, "Finish lock_memory_for_read");
 }
 
-int unlock_memory_for_read(char *name)
+void unlock_memory_for_read(char *name)
 {
 	pthread_mutex_lock(&MEMORY_READERS_MUTEX);
 	READERS--;
@@ -67,18 +68,20 @@ int unlock_memory_for_read(char *name)
 	sem_getvalue(&MEMORY_WRITE_MUTEX, &wrt_value);
 	log_warning(LOGGER, "unlock_memory_for_read, readers count: %d, %s, writer_sem: %d", READERS, name, wrt_value);
 	pthread_mutex_unlock(&MEMORY_READERS_MUTEX);
+	log_debug(LOGGER, "Finish unlock_memory_for_read");
 }
 
-int lock_memory_for_write(char *name)
+void lock_memory_for_write(char *name)
 {
 	sem_wait(&MEMORY_WRITE_MUTEX);
 	log_warning(LOGGER, "lock_memory_for_write: %s", name);
 }
 
-int unlock_memory_for_write(char *name)
+void unlock_memory_for_write(char *name)
 {
 	log_warning(LOGGER, "unlock_memory_for_write: %s", name);
 	sem_post(&MEMORY_WRITE_MUTEX);
+	log_debug(LOGGER, "Finish unlock_memory_for_write");
 }
 
 /** PRIVATE FUNCTIONS **/
