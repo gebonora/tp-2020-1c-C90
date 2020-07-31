@@ -11,7 +11,6 @@ static t_list* _get_subscribers(char*);
 static void* _transform_messages(Partition*, Operation, int);
 static Message* _create_message(Operation, uint32_t, uint32_t, uint32_t);
 static void send_message_and_wait_for_ack(arg_struct*);
-static void send_message_and_wait_for_ack_2(arg_struct*);
 static void send_messages_to_subscribers(Partition* partition);
 static int _calculate_data_size(void*, Operation);
 static void* _serialize_data(void*, Operation, int);
@@ -373,7 +372,6 @@ static void send_message_and_wait_for_ack(arg_struct* args) {
 	log_info(LOGGER, "%s - message_id: %d, Mutex unlocked for subscriber with id: %d, process: %s, operation: %s", args->context, args->partition->message->message_id, swm->subscriber->id, get_process_by_value(swm->subscriber->process), get_operation_by_value(args->partition->message->operation_code));
 	pthread_mutex_unlock(&swm->mutex);
 
-	free(args->context);
 	free(args);
 	free(message);
 
