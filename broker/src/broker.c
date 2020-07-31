@@ -343,7 +343,7 @@ static void send_messages_to_subscribers(Partition* partition) {
 }
 
 static void send_message_and_wait_for_ack(arg_struct* args) {
-	char* context = string_from_format("send_message_and_wait_for_ack, operation %s, message_id %d, subscriber %s-%d", get_operation_by_value(args->partition->message->operation_code), args->partition->message->message_id, get_process_by_value(args->subscriber->process), args->subscriber->id);
+	char* context = string_from_format("%s - send_message_and_wait_for_ack, operation %s, message_id %d, subscriber %s-%d", args->context, get_operation_by_value(args->partition->message->operation_code), args->partition->message->message_id, get_process_by_value(args->subscriber->process), args->subscriber->id);
 
 	_lock_memory_for_read(context);
 
