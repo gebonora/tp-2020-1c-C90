@@ -12,7 +12,7 @@ bool mismaEspecieMismaPosicion(void * pokemon_) { \
            pokemon->posicionInicial.pos_y == posicion.pos_y; \
 }
 
-static t_list * pokemonesDisponibles(ServicioDeCaptura * this) { // TODO: Respetar orden de aparición de los pokemon para pasarle al ServicioDePlanificacion.
+static t_list * pokemonesDisponibles(ServicioDeCaptura * this) {
 	bool estaLibre(void * pokemonAtrapable_) {
 		PokemonAtrapable * pokemonAtrapable = pokemonAtrapable_;
 		return pokemonAtrapable->esAtrapable(pokemonAtrapable);
@@ -90,7 +90,7 @@ static bool registrarCapturaExitosa(ServicioDeCaptura * this, CapturaPokemon * c
 		log_info(this->logger, "%s capturó con exito un %s en %s", capturaPokemon->idEntrenador(capturaPokemon), capturaPokemon->pokemonAtrapable->especie, posicion);
 
 		capturaPokemon->entrenador->estaEsperandoAlgo = false;
-		sem_post(&semaforoDeadlock);
+		//sem_post(&semaforoDeadlock);
 
 		free(posicion);
 	} else {
@@ -119,13 +119,13 @@ static bool registrarCapturaFallida(ServicioDeCaptura * this, CapturaPokemon * c
 		char * posicion = capturaPokemon->posicion(capturaPokemon);
 		log_info(this->logger, "%s eliminó las coordenadas de un %s en %s porque falló su captura.", capturaPokemon->idEntrenador(capturaPokemon),
 				capturaPokemon->pokemonAtrapable->especie, posicion);
-		sem_post(&semaforoDeadlock);
+		//sem_post(&semaforoDeadlock);
 
-		if (capturaPokemon->entrenador->puedeAtraparPokemones) {
+		/*if (capturaPokemon->entrenador->puedeAtraparPokemones) {
 			//sem_wait(&capturaPokemon->entrenador->finalizacionDeCapturaSegura);
 			log_debug(capturaPokemon->entrenador->logger, "Falló en capturar un %s y se marcó como disponible de nuevo.", capturaPokemon->especie(capturaPokemon));
-			sem_post(&semaforoContadorEntrenadoresDisponibles); // Quiero que este post no llegue antes que el entrenador a la cola blocked.
-		}
+			//sem_post(&semaforoContadorEntrenadoresDisponibles); // Quiero que este post no llegue antes que el entrenador a la cola blocked.
+		}*/
 		free(posicion);
 	} else {
 		log_error(this->logger, "No se puede eliminar un pokemon que no figure en el mapa");
