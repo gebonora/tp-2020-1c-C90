@@ -35,6 +35,8 @@ void init_server() {
 
     freeaddrinfo(servinfo);
 
+	log_info(LOGGER, "Broker server is: UP");
+
     while(1) _esperar_cliente(socket_servidor);
 }
 
