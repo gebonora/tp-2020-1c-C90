@@ -6,15 +6,12 @@ static bool _less_access_time(void*, void*);
 static bool _less_creation_time(void*, void*);
 static bool _is_free(void*);
 static t_list* _get_occupied_partitions();
-static void _show_partition(Partition*, int);
-static void _show_message(Message*);
 static bool _greater_equals_and_free(uint32_t, Partition*);
 static Partition* _find_partition(int, bool);
 static t_list* greater_equals_and_free(uint32_t);
 static bool _smaller_size(void*, void*);
 static void _free_partition(void*);
 static void _free_partition_attributes(Partition*);
-static void _free_subscriber(void*);
 static int _list_find_index(uintptr_t);
 static bool _partition_with_start(uintptr_t, uintptr_t);
 
@@ -54,7 +51,7 @@ Partition* create_partition(uint32_t position, uintptr_t start, uint32_t size) {
 	partition->size = size;
 	partition->position = position;
 	partition->start = start;
-	partition->notified_suscribers = list_create();
+	pthread_mutex_init(&partition->mutex, NULL);
 	return partition;
 }
 
@@ -91,19 +88,6 @@ t_list* get_occupied_partitions() {
 
 t_list* get_free_partitions() {
 	return list_filter(memory->partitions, _is_free);
-}
-
-
-void show_partitions_with_index(t_list* partitions) {
-	log_info(LOGGER, "--------Partitions Size: %d-------", partitions->elements_count);
-
-	Partition* partition;
-
-	// nro particion, direccion memoria comienzo, direccion fin, ocupada(X) libre(L), size,LRU, cola, id
-	for(int index = 0, number = 1; index < partitions->elements_count; index++, number++) {
-		partition = list_get(partitions, index);
-		_show_partition(partition, number);
-	}
 }
 
 /** PRIVATE FUNCTIONS **/
@@ -150,29 +134,6 @@ static bool _smaller_size(void* e1, void* e2) {
 	return partition_1->size < partition_2->size;
 }
 
-static void _show_partition(Partition* partition, int number) {
-	log_info(LOGGER, "--------------------------------");
-	log_info(LOGGER, "Partition #%d", number);
-	log_info(LOGGER, "Free: %s", partition->free ? "true" : "false");
-	log_info(LOGGER, "Size: %d", partition->size);
-	log_info(LOGGER, "Position: %d - %d", partition->position, partition->position + partition->size -1);
-	log_info(LOGGER, "Start: %x (%d) - %x (%d)", partition->start, partition->start, partition->start + partition->size - 1, partition->start + partition->size - 1);
-	log_info(LOGGER, "Buddy: %d", xor_int_and_int(partition->position, partition->size));
-	log_info(LOGGER, "Creation time: %d", partition->creation_time);
-	log_info(LOGGER, "Last access: %d", partition->access_time);
-	if(!partition->free) {
-		_show_message(partition->message);
-	}
-	log_info(LOGGER, "--------------------------------");
-}
-
-static void _show_message(Message* message) {
-	log_info(LOGGER, "Message Queue: %s", get_operation_by_value(message->operation_code));
-	log_info(LOGGER, "Message ID: %d", message->message_id);
-	log_info(LOGGER, "Correlative ID: %d", message->correlational_id);
-	log_info(LOGGER, "Message Size: %d", message->data_size);
-}
-
 static bool _greater_equals_and_free(uint32_t to_compare, Partition* partition) {
 	return partition->free && partition->size >= to_compare;
 }
@@ -190,7 +151,6 @@ static Partition* _choose_victim(bool (*comparator)(void*, void*)) {
 	victim->free = true;
 	log_debug(LOGGER, "Free partition attributes");
 	_free_partition_attributes(victim);
-	//list_destroy(occupied_partitions); Se está liberando 2 veces -> explota. Volar esta línea.
 	return victim;
 }
 
@@ -226,19 +186,9 @@ static bool _partition_with_start(uintptr_t start_to_compare, uintptr_t actual_s
 
 static void _free_partition(void* e) {
 	Partition* partition = e;
-	log_debug(LOGGER, "Free subscribers");
-	list_destroy_and_destroy_elements(partition->notified_suscribers, _free_subscriber);
 	free(partition);
 }
 
 static void _free_partition_attributes(Partition* partition) {
-	log_debug(LOGGER, "Cleaning subscribers");
-	list_clean(partition->notified_suscribers);
-	log_debug(LOGGER, "Free message");
 	free(partition->message);
-}
-
-static void _free_subscriber(void* e) {
-	Subscriber* subscriber = e;
-	free(subscriber);
 }

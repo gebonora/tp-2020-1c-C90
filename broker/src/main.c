@@ -2,8 +2,8 @@
 
 static void _init_logger();
 static void _init_config();
-static void _init_semaphores();
 static void _init_context();
+static void _init_semaphores();
 static void _init_memory();
 static void _init_dump();
 
@@ -58,33 +58,44 @@ static void _init_config() {
 
 static void _init_semaphores() {
 	pthread_mutex_init(&MUTEX_MESSAGE_ID, NULL);
-	pthread_mutex_init(&MUTEX_SUBSCRIBERS_BY_QUEUE, NULL);
-	pthread_mutex_init(&MUTEX_READERS, NULL);
+	pthread_mutex_init(&MEMORY_READERS_MUTEX, NULL);
 	pthread_mutex_init(&MUTEX_TIME, NULL);
-	pthread_mutex_init(&MEMORY, NULL);
-	pthread_mutex_init(&MUTEX_SUBSCRIBERS_IDENTIFIERS, NULL);
+	sem_init(&MEMORY_WRITE_MUTEX, 0, 1);
 }
 
 static void _init_context() {
 	MESSAGE_ID = 0;
 	READERS = 0;
 	TIME = 0;
-	SUBSCRIBERS_BY_QUEUE = dictionary_create();
-	dictionary_put(SUBSCRIBERS_BY_QUEUE, "NEW", list_create());
-	dictionary_put(SUBSCRIBERS_BY_QUEUE, "APPEARED", list_create());
-	dictionary_put(SUBSCRIBERS_BY_QUEUE, "GET", list_create());
-	dictionary_put(SUBSCRIBERS_BY_QUEUE, "LOCALIZED", list_create());
-	dictionary_put(SUBSCRIBERS_BY_QUEUE, "CATCH", list_create());
-	dictionary_put(SUBSCRIBERS_BY_QUEUE, "CAUGHT", list_create());
-	SUBSCRIBERS_IDENTIFIERS = list_create();
+
+	NOTIFIED_SUBSCRIBERS = malloc(sizeof(NotifiedSubscribers));
+	NOTIFIED_SUBSCRIBERS->map = dictionary_create();
+	pthread_mutex_init(&NOTIFIED_SUBSCRIBERS->mutex, NULL); 
+
+	REGISTERED_SUBSCRIBERS = malloc(sizeof(RegisteredSubscribers));
+	REGISTERED_SUBSCRIBERS->list = list_create();
+	pthread_mutex_init(&REGISTERED_SUBSCRIBERS->mutex, NULL);
+
+	SUBSCRIBERS_BY_OPERATION = malloc(sizeof(SubscribersByOperation));
+	SUBSCRIBERS_BY_OPERATION->map = dictionary_create();
+	pthread_mutex_init(&SUBSCRIBERS_BY_OPERATION->mutex, NULL);
+
+	dictionary_put(SUBSCRIBERS_BY_OPERATION->map, "NEW", list_create());
+	dictionary_put(SUBSCRIBERS_BY_OPERATION->map, "APPEARED", list_create());
+	dictionary_put(SUBSCRIBERS_BY_OPERATION->map, "GET", list_create());
+	dictionary_put(SUBSCRIBERS_BY_OPERATION->map, "LOCALIZED", list_create());
+	dictionary_put(SUBSCRIBERS_BY_OPERATION->map, "CATCH", list_create());
+	dictionary_put(SUBSCRIBERS_BY_OPERATION->map, "CAUGHT", list_create());
 }
 
 static void _init_memory() {
+	lock_memory_for_write("_init_memory");
 	memory = malloc(sizeof(Memory));
 	memory->cache = malloc(TAMANO_MEMORIA);
 	memory->partitions = list_create();
 	list_add(memory->partitions, create_partition(0, (uintptr_t)memory->cache, TAMANO_MEMORIA));
 	log_debug(LOGGER, "Memory Cache: %x (%d), Size: %d", memory->cache, memory->cache, TAMANO_MEMORIA);
+	unlock_memory_for_write("_init_memory");
 }
 
 static void _init_dump() {

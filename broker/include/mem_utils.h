@@ -18,7 +18,6 @@ void add_partition_next_to(uintptr_t, Partition*);
 Partition* find_partition_at(uintptr_t);
 t_list* get_occupied_partitions();
 t_list* get_free_partitions();
-void show_partitions_with_index(t_list*);
 uint32_t get_time();
 
 #endif /* BROKER_INCLUDE_MEM_UTILS_H_ */

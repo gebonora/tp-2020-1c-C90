@@ -1,14 +1,14 @@
 #ifndef BROKER_INCLUDE_BROKER_H_
 #define BROKER_INCLUDE_BROKER_H_
 
+#include "delibird/interface.h"
 #include "delibird/protocol.h"
 #include "constants.h"
-#include "delibird/interface.h"
 #include "mem.h"
+#include "serialization.h"
 
 uint32_t get_id();
-void send_message_from_new_request(void*, Operation, uint32_t, uint32_t);
-void send_message_from_suscription(Operation, Subscriber*);
-SubscriberWithMutex* find_mutex_by_subscriber(Operation, Subscriber*);
+void new_request(void*, Operation, uint32_t, uint32_t);
+void new_suscription(Operation, Subscriber*);
 
 #endif

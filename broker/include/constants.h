@@ -24,32 +24,6 @@
 #define FIFO "FIFO"
 #define LRU "LRU"
 
-char* IP;
-char* PUERTO;
-int TAMANO_MEMORIA;
-int TAMANO_MINIMO_PARTICION;
-char* ALGORITMO_MEMORIA;
-char* ALGORITMO_REEMPLAZO;
-int FRECUENCIA_COMPACTACION;
-char* ALGORITMO_PARTICION_LIBRE;
-int SHOW_IN_CONSOLE;
-int LOG_NOTIFICATION_LEVEL;
-
-uint32_t MESSAGE_ID;
-t_log* LOGGER;
-pthread_mutex_t MUTEX_MESSAGE_ID;
-pthread_mutex_t MUTEX_READERS;
-pthread_mutex_t MUTEX_TIME;
-pthread_mutex_t MEMORY;t_list* SUBSCRIBERS_IDENTIFIERS;
-
-t_dictionary* SUBSCRIBERS_BY_QUEUE;
-pthread_mutex_t MUTEX_SUBSCRIBERS_BY_QUEUE;
-pthread_mutex_t MUTEX_SUBSCRIBERS_IDENTIFIERS;
-sem_t SUBSCRIBERS;
-
-int READERS;
-uint32_t TIME;
-
 typedef struct {
 	void* cache;
 	t_list* partitions;
@@ -76,7 +50,7 @@ typedef struct {
 	uint32_t creation_time; // timestamp del momento en que se creo
 	uint32_t access_time; // timestamp del ultimo acceso a esta particion
 	Message* message; // datos administrativos del mensaje (id, id correlacional, cod op)
-	t_list* notified_suscribers; // suscriptores que ya devolvieron ACK para este mensaje
+	pthread_mutex_t mutex;
 } Partition;
 
 typedef struct {
@@ -85,6 +59,42 @@ typedef struct {
 	pthread_mutex_t mutex;
 } SubscriberWithMutex;
 
+typedef struct {
+	t_list* list;
+	pthread_mutex_t mutex;
+} RegisteredSubscribers;
+
+typedef struct {
+	t_dictionary* map;
+	pthread_mutex_t mutex;
+} SubscribersByOperation;
+
+typedef struct {
+	t_dictionary* map;
+	pthread_mutex_t mutex;
+} NotifiedSubscribers;
+
+char* IP;
+char* PUERTO;
+int TAMANO_MEMORIA;
+int TAMANO_MINIMO_PARTICION;
+char* ALGORITMO_MEMORIA;
+char* ALGORITMO_REEMPLAZO;
+int FRECUENCIA_COMPACTACION;
+char* ALGORITMO_PARTICION_LIBRE;
+int SHOW_IN_CONSOLE;
+int LOG_NOTIFICATION_LEVEL;
+t_log* LOGGER;
+uint32_t MESSAGE_ID;
+pthread_mutex_t MUTEX_MESSAGE_ID;
+pthread_mutex_t MUTEX_TIME;
+pthread_mutex_t MEMORY_READERS_MUTEX;
+sem_t MEMORY_WRITE_MUTEX;
+int READERS;
+uint32_t TIME;
+RegisteredSubscribers* REGISTERED_SUBSCRIBERS;
+NotifiedSubscribers* NOTIFIED_SUBSCRIBERS;
+SubscribersByOperation* SUBSCRIBERS_BY_OPERATION;
 Memory* memory;
 
 #endif

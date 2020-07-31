@@ -77,7 +77,7 @@ static void _process_request(uint32_t cod_op, int socket) {
 		if(new_pokemon != NULL) {
 			generated_id = get_id();
 			log_info(LOGGER, "Se recibio un nuevo mensaje en la cola %s. Pokemon: %s, cantidad: %d, pos_x: %d, pos_y: %d, id generado: %d, socket: %d", get_operation_by_value(cod_op),new_pokemon->pokemon->name->value, new_pokemon->quantity, ((Coordinate*)new_pokemon->pokemon->coordinates->head->data)->pos_x, ((Coordinate*)new_pokemon->pokemon->coordinates->head->data)->pos_y, generated_id, socket);
-			send_message_from_new_request(new_pokemon, NEW, generated_id, correlational_id);
+			new_request(new_pokemon, NEW, generated_id, correlational_id);
 			send(socket, &generated_id, sizeof(uint32_t), 0);
 
 			free_new(new_pokemon);
@@ -96,7 +96,7 @@ static void _process_request(uint32_t cod_op, int socket) {
 				generated_id = get_id();
 				log_info(LOGGER, "Se recibio un nuevo mensaje en la cola %s. Resultado: %s, id correlacional: %d, id generado: %d, socket: %d", get_operation_by_value(cod_op), get_result_by_value(caught_pokemon->result), correlational_id, generated_id, socket);
 
-				send_message_from_new_request(caught_pokemon, CAUGHT, generated_id, correlational_id);
+				new_request(caught_pokemon, CAUGHT, generated_id, correlational_id);
 				send(socket, &generated_id, sizeof(uint32_t), 0);
 
 				free(caught_pokemon);
@@ -112,7 +112,7 @@ static void _process_request(uint32_t cod_op, int socket) {
 			generated_id = get_id();
 			log_info(LOGGER, "Se recibio un nuevo mensaje en la cola %s. Pokemon: %s, socket: %d", get_operation_by_value(cod_op), get_pokemon->name->value, socket);
 
-			send_message_from_new_request(get_pokemon, GET, generated_id, correlational_id);
+			new_request(get_pokemon, GET, generated_id, correlational_id);
 			send(socket, &generated_id, sizeof(uint32_t), 0);
 
 			free_get(get_pokemon);
@@ -135,7 +135,7 @@ static void _process_request(uint32_t cod_op, int socket) {
 					log_info(LOGGER, "Coordenada: x=%d, y=%d, socket: %d", loc_coordinate->pos_x, loc_coordinate->pos_y, socket);
 				}
 
-				send_message_from_new_request(localized_pokemon, LOCALIZED, generated_id, correlational_id);
+				new_request(localized_pokemon, LOCALIZED, generated_id, correlational_id);
 				send(socket, &generated_id, sizeof(uint32_t), 0);
 
 				free_localized(localized_pokemon);
@@ -156,7 +156,7 @@ static void _process_request(uint32_t cod_op, int socket) {
 				generated_id = get_id();
 				log_info(LOGGER, "Se recibio un nuevo mensaje en la cola %s. Pokemon: %s, pos_x: %d, pos_y: %d, id correlacional: %d, id generado: %d, socket: %d", get_operation_by_value(cod_op), appeared_pokemon->name->value, ((Coordinate*)appeared_pokemon->coordinates->head->data)->pos_x, ((Coordinate*)appeared_pokemon->coordinates->head->data)->pos_y, correlational_id, generated_id, socket);
 
-				send_message_from_new_request(appeared_pokemon, APPEARED, generated_id, correlational_id);
+				new_request(appeared_pokemon, APPEARED, generated_id, correlational_id);
 				send(socket, &generated_id, sizeof(uint32_t), 0);
 
 				free_pokemon(appeared_pokemon);
@@ -172,7 +172,7 @@ static void _process_request(uint32_t cod_op, int socket) {
 			generated_id = get_id();
 			log_info(LOGGER, "Se recibio un nuevo mensaje en la cola %s. Pokemon: %s, pos_x: %d, pos_y: %d, id generado: %d, socket: %d", get_operation_by_value(cod_op), catch_pokemon->name->value, ((Coordinate*)catch_pokemon->coordinates->head->data)->pos_x, ((Coordinate*)catch_pokemon->coordinates->head->data)->pos_y, generated_id, socket);
 
-			send_message_from_new_request(catch_pokemon, CATCH, generated_id, correlational_id);
+			new_request(catch_pokemon, CATCH, generated_id, correlational_id);
 			send(socket, &generated_id, sizeof(uint32_t), 0);
 
 			free_pokemon(catch_pokemon);
@@ -209,38 +209,9 @@ static void _process_request(uint32_t cod_op, int socket) {
 
 		log_info(LOGGER, "Suscripcion proceso=%s, id=%d, cola=%s, socket=%d", get_process_by_value(cod_process), process_id, get_operation_by_value(cod_cola), socket);
 
-		bool _inline_find_subscriber(void* e) {
-			Subscriber* to_compare = e;
-			return cod_process == to_compare->process && process_id == to_compare->id;
-		}
+		Subscriber* subscriber = create_or_update_subscriber(cod_cola, cod_process, process_id, socket);
 
-		pthread_mutex_lock(&MUTEX_SUBSCRIBERS_BY_QUEUE);
-		t_list* subscribers = dictionary_get(SUBSCRIBERS_BY_QUEUE, get_operation_by_value(cod_cola));
-		Subscriber* subscriber = list_find(subscribers, _inline_find_subscriber);
-
-		// si existe en la lista solo hay que actualizar el socket, sino lo agrego a la lista
-		if (subscriber != NULL) {
-			log_debug(LOGGER, "Subscriber already in list, updating socket from=%d, to=%d", subscriber->socket_subscriber, socket);
-			subscriber->socket_subscriber = socket;
-		} else {
-			log_debug(LOGGER, "Subscriber not present in list, creating new one");
-			subscriber = malloc(sizeof(Subscriber));
-			subscriber->id = process_id;
-			subscriber->process = (Process) cod_process;
-			subscriber->socket_subscriber = socket;
-			list_add(subscribers, subscriber);
-			SubscriberWithMutex* subscriber_with_mutex = malloc(sizeof(SubscriberWithMutex));
-			subscriber_with_mutex->operation = cod_cola;
-			subscriber_with_mutex->subscriber = subscriber;
-			pthread_mutex_init(&subscriber_with_mutex->mutex, NULL);
-			pthread_mutex_lock(&MUTEX_SUBSCRIBERS_IDENTIFIERS);
-			list_add(SUBSCRIBERS_IDENTIFIERS, subscriber_with_mutex);
-			pthread_mutex_unlock(&MUTEX_SUBSCRIBERS_IDENTIFIERS);
-		}
-
-		send_message_from_suscription(cod_cola, subscriber);
-
-		pthread_mutex_unlock(&MUTEX_SUBSCRIBERS_BY_QUEUE);
+		new_suscription(cod_cola, subscriber);
 
 		break;
 	case -1:
