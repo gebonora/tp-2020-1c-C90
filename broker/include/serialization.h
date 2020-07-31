@@ -4,6 +4,7 @@
 #include <pthread.h>
 #include <commons/string.h>
 #include <commons/collections/dictionary.h>
+#include <delibird/interface.h>
 #include "constants.h"
 
 int calculate_message_size(void* data, Operation operation);
