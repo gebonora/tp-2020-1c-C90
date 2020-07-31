@@ -28,7 +28,12 @@ t_list* procesarDeadlock(ServicioDeResolucionDeDeadlocks * this, t_list* unidade
 	}
 	ListaDeEntrenadores entrenadoresFiltrados = list_filter(entrenadoresBloqueados, esProcesable); // Esto libera se libera, pero no sus elementos!!!
 
+	log_error(this->logger, "ME LLEGARON %d ENTRENADORES PARA RESOLVER", list_size(unidadesPlanificablesBloqueadas));
+	log_error(this->logger, "FILTRE Y TENGO %d ENTRENADORES PARA RESOLVER", list_size(entrenadoresFiltrados));
+
 	ListaDeDependencias listaDeDependencias = this->crearListaDeDependencias(this, entrenadoresFiltrados);
+
+	imprimirListaDeDependencias(listaDeDependencias);
 
 	if (this->primeraVez) {
 		this->detectarEnDetalleYLogear(this, listaDeDependencias);
@@ -114,7 +119,7 @@ void detectarEnDetalleYLogear(ServicioDeResolucionDeDeadlocks* this, ListaDeDepe
 	list_destroy_and_destroy_elements(deadlocksTotales, destruirListaDeStrings);
 
 	// Descomentar para debug.
-	//imprimirListaDeListas(aux);
+	imprimirListaDeListas(aux);
 
 	ListaDeListaDeString deadlocks = eliminarListasRepetidas(aux);
 	char* reporte = obtenerReporteDeadlocks(deadlocks);

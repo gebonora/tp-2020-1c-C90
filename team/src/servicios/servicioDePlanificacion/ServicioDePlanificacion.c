@@ -282,6 +282,7 @@ void asignarIntercambios(ServicioDePlanificacion* this, t_list* intercambios) {
 		free(intercambio->pokemonQueObtieneElQueSeMueve);
 		free(intercambio);
 	}
+	list_destroy(intercambios);
 }
 
 void definirYCambiarEstado(ServicioDePlanificacion* this, UnidadPlanificable* hilo) {

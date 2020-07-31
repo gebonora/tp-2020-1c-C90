@@ -233,7 +233,7 @@ void atenderGameboy() {
 
 		if (codOp == APPEARED) {
 			Pokemon* unPokemon = recv_pokemon(socketCliente, 0);
-			close(socketCliente);
+			//close(socketCliente);
 
 			ArgumentosHilo* argumentosHilo = malloc(sizeof(ArgumentosHilo));
 			argumentosHilo->mensaje = unPokemon;

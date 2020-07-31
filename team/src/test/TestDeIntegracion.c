@@ -7,7 +7,7 @@
 void testDeIntegracion() {
 	t_log * testLogger = log_create(TEAM_INTERNAL_LOG_FILE, "TestDeIntegracion", 1, LOG_LEVEL_INFO);
 	t_list * tests = list_create();
-
+/*
 	// Libs
 	list_add(tests, testLibs);
 
@@ -54,7 +54,7 @@ void testDeIntegracion() {
 	list_add(tests, testDeEventos);
 
 	// Servicio de Métricas
-	list_add(tests, testDeServicioDeMetricas);
+	list_add(tests, testDeServicioDeMetricas);*/
 
 	// Servicio de Deadlock
 	list_add(tests, testDeadlock);

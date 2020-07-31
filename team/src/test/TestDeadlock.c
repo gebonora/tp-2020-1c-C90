@@ -138,46 +138,46 @@ void testDeadlock() {
 	t_list* resultado2 = servicioDeadlockTest->procesarDeadlock(servicioDeadlockTest, lista3);
 	list_destroy_and_destroy_elements(resultado2, destruirIntercambio);
 
-	log_info(testLogger, "Debería haber deadlock entre todos:");
+	log_info(testLogger, "TESTEANDO SIMULACION PRUEBA");
 
 	t_list* lista4 = list_create();
 
-	Entrenador * _a1 = EntrenadorConstructor.new("2|4", "1|2", "6|5");
+	Entrenador * _a1 = EntrenadorConstructor.new("2|3", "Flareon", "Vaporeon");
 	free(_a1->id);
-	_a1->id = string_from_format("a1");
+	_a1->id = string_from_format("Entrenador_1");
 	HiloEntrenadorPlanificable* a1 = HiloEntrenadorPlanificableConstructor.new(_a1);
 
-	Entrenador * _a2 = EntrenadorConstructor.new("2|4", "5", "6");
+	Entrenador * _a2 = EntrenadorConstructor.new("6|5", "Umbreon", "Jolteon");
 	free(_a2->id);
-	_a2->id = string_from_format("a2");
+	_a2->id = string_from_format("Entrenador_2");
 	HiloEntrenadorPlanificable* a2 = HiloEntrenadorPlanificableConstructor.new(_a2);
 
-	Entrenador * _a3 = EntrenadorConstructor.new("2|4", "1|2|3", "4|5|2");
+	Entrenador * _a3 = EntrenadorConstructor.new("9|9", "Espeon", "Flareon");
 	free(_a3->id);
-	_a3->id = string_from_format("a3");
+	_a3->id = string_from_format("Entrenador_3");
 	HiloEntrenadorPlanificable* a3 = HiloEntrenadorPlanificableConstructor.new(_a3);
 
-	Entrenador * _a4 = EntrenadorConstructor.new("2|4", "4|3", "1|2");
+	Entrenador * _a4 = EntrenadorConstructor.new("9|2", "Vaporeon", "Umbreon");
 	free(_a4->id);
-	_a4->id = string_from_format("a4");
+	_a4->id = string_from_format("Entrenador_4");
 	HiloEntrenadorPlanificable* a4 = HiloEntrenadorPlanificableConstructor.new(_a4);
 
-	Entrenador * _a5 = EntrenadorConstructor.new("2|4", "5|2", "3|1");
+	Entrenador * _a5 = EntrenadorConstructor.new("2|9", "Jolteon", "Espeon");
 	free(_a5->id);
-	_a5->id = string_from_format("a5");
+	_a5->id = string_from_format("Entrenador_5");
 	HiloEntrenadorPlanificable* a5 = HiloEntrenadorPlanificableConstructor.new(_a5);
 
-	Entrenador * _a6 = EntrenadorConstructor.new("2|4", "6|6", "2|3");
+	/*Entrenador * _a6 = EntrenadorConstructor.new("2|4", "6|6", "2|3");
 	free(_a6->id);
 	_a6->id = string_from_format("a6");
-	HiloEntrenadorPlanificable* a6 = HiloEntrenadorPlanificableConstructor.new(_a6);
+	HiloEntrenadorPlanificable* a6 = HiloEntrenadorPlanificableConstructor.new(_a6);*/
 
 	list_add(lista4, a1);
 	list_add(lista4, a2);
 	list_add(lista4, a3);
 	list_add(lista4, a4);
 	list_add(lista4, a5);
-	list_add(lista4, a6);
+	//list_add(lista4, a6);
 
 	servicioDeadlockTest->primeraVez = true;
 	t_list* resultado4 = servicioDeadlockTest->procesarDeadlock(servicioDeadlockTest, lista4);
