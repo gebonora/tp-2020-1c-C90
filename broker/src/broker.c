@@ -36,10 +36,10 @@ void send_message_from_new_request(void* data, Operation operation, uint32_t mes
 	char* context = string_from_format("send_message_from_new_request, operation %s, message_id %d", get_operation_by_value(operation), message_id);
 	_lock_memory_for_write(context);
 	Partition* partition = save_message(serialized_data, message);
-	_unlock_memory_for_write(string_from_format(context);
+	_unlock_memory_for_write(context);
 
 	if(partition != NULL){
-		_lock_memory_for_read(string_from_format(context);
+		_lock_memory_for_read(context);
 		send_messages_to_subscribers(partition);
 		_unlock_memory_for_read(context);
 	}
