@@ -97,7 +97,7 @@ static bool registrarCapturaExitosa(ServicioDeCaptura * this, CapturaPokemon * c
 		log_error(this->logger, "No se puede capturar un pokemon que no figure en el mapa");
 	}
 
-	capturaPokemon->destruir(capturaPokemon);
+	//capturaPokemon->destruir(capturaPokemon); // TODO: cuando se libera?
 
 	return sePudoRegistrar;
 }
@@ -131,7 +131,7 @@ static bool registrarCapturaFallida(ServicioDeCaptura * this, CapturaPokemon * c
 		log_error(this->logger, "No se puede eliminar un pokemon que no figure en el mapa");
 	}
 
-	capturaPokemon->destruir(capturaPokemon);
+	//capturaPokemon->destruir(capturaPokemon); // TODO: cuando se libera?
 
 	return sePudoRegistrar;
 }

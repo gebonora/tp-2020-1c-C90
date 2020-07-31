@@ -136,6 +136,8 @@ void moverACola(Planificador * this, UnidadPlanificable * uPlanificable, EstadoP
 	list_add(colaDestino, uPlanificable);
 	pthread_mutex_unlock(&arrayMutexColas[estadoDestino]);
 
+	imprimirEntrenadoresEnCola(this->colas->colaBlocked, "BLOCKED");
+
 	log_info(MANDATORY_LOGGER, "Se movió al entrenador %s de la cola: %s a la cola: %s. Motivo: %s", uPlanificable->entrenador->id, nombreDeLaCola(estadoOrigen),
 			nombreDeLaCola(estadoDestino), motivoCambio);
 	switch (estadoDestino) {
@@ -170,13 +172,14 @@ void mostrarLasColas(Planificador* this) {
 
 	t_list* mapa = mapaProcesoTeam.pokemonesDisponibles(&mapaProcesoTeam);
 	log_info(this->logger, "Cantidad de Pokemon disponibles: %d", list_size(mapa));
-	list_destroy_and_destroy_elements(mapa, (void(*)(void*))free_pokemon);
+	list_destroy_and_destroy_elements(mapa, (void (*)(void*)) free_pokemon);
 }
 
 HiloEntrenadorPlanificable* obtenerHiloSegunEntrenador(Planificador* this, Entrenador* entrenador) {
 	bool trainerById(void* elem) {
 		HiloEntrenadorPlanificable* hilo = elem;
-		return hilo->entrenador->id = entrenador->id;
+		log_error(this->logger,"Buscando trainer por id, si no rompo borrame.");
+		return string_equals(hilo->entrenador->id , entrenador->id);
 	}
 	return list_find(this->colas->colaBlocked, trainerById);
 }
@@ -227,3 +230,17 @@ char* nombreDeLaCola(EstadoPlanificador estado) {
 	}
 	return "ERROR";
 }
+
+void imprimirEntrenadoresEnCola(t_list* cola, char* nombre) {
+	log_error(INTERNAL_LOGGER, "IMPRIENDO ESTADO COLA: %s", nombre);
+	for (int a = 0; a < list_size(cola); a++) {
+		HiloEntrenadorPlanificable* hilo = list_get(cola, a);
+		log_error(INTERNAL_LOGGER, "Pos %d :: %s", a, hilo->entrenador->id);
+		void fun(char* key, void* na) {
+			log_error(INTERNAL_LOGGER, "Pokemon capturado: %s", key);
+		}
+		dictionary_iterator(hilo->entrenador->pokemonesCapturados, fun);
+
+	}
+}
+

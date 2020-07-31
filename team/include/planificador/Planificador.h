@@ -56,5 +56,6 @@ extern const struct PlanificadorClass {
 
 int minimo(int nro1, int nro2);
 char* nombreDeLaCola(EstadoPlanificador estado);
+void imprimirEntrenadoresEnCola(t_list* cola, char* nombre);
 
 #endif //TEAM_PLANIFICADOR_H
