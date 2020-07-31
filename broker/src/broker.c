@@ -122,7 +122,7 @@ static void send_messages_to_subscribers(Partition* partition) {
 	}
 
 	for(int i = 0; i < list_size(filtered_subscribers); i++){
-		pthread_join(&thread[i], NULL);
+		pthread_join(thread[i], NULL);
 	}
 
 	list_destroy(filtered_subscribers);
