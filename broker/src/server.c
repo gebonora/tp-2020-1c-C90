@@ -76,7 +76,7 @@ static void _process_request(uint32_t cod_op, int socket) {
 		New* new_pokemon = recv_new(socket);
 		if(new_pokemon != NULL) {
 			generated_id = get_id();
-			log_info(LOGGER, "Se recibio un nuevo mensaje en la cola %s. Pokemon: %s, cantidad: %d, pos_x: %d, pos_y: %d, id generado: %d", get_operation_by_value(cod_op),new_pokemon->pokemon->name->value, new_pokemon->quantity, ((Coordinate*)new_pokemon->pokemon->coordinates->head->data)->pos_x, ((Coordinate*)new_pokemon->pokemon->coordinates->head->data)->pos_y, generated_id);
+			log_info(LOGGER, "Se recibio un nuevo mensaje en la cola %s. Pokemon: %s, cantidad: %d, pos_x: %d, pos_y: %d, id generado: %d, socket: %d", get_operation_by_value(cod_op),new_pokemon->pokemon->name->value, new_pokemon->quantity, ((Coordinate*)new_pokemon->pokemon->coordinates->head->data)->pos_x, ((Coordinate*)new_pokemon->pokemon->coordinates->head->data)->pos_y, generated_id, socket);
 			send_message_from_new_request(new_pokemon, NEW, generated_id, correlational_id);
 			send(socket, &generated_id, sizeof(uint32_t), 0);
 
@@ -94,7 +94,7 @@ static void _process_request(uint32_t cod_op, int socket) {
 			int result = recv(socket,&correlational_id,sizeof(uint32_t),0);
 			if(result > 0){
 				generated_id = get_id();
-				log_info(LOGGER, "Se recibio un nuevo mensaje en la cola %s. Resultado: %s, id correlacional: %d, id generado: %d", get_operation_by_value(cod_op), get_result_by_value(caught_pokemon->result), correlational_id, generated_id);
+				log_info(LOGGER, "Se recibio un nuevo mensaje en la cola %s. Resultado: %s, id correlacional: %d, id generado: %d, socket: %d", get_operation_by_value(cod_op), get_result_by_value(caught_pokemon->result), correlational_id, generated_id, socket);
 
 				send_message_from_new_request(caught_pokemon, CAUGHT, generated_id, correlational_id);
 				send(socket, &generated_id, sizeof(uint32_t), 0);
@@ -110,7 +110,7 @@ static void _process_request(uint32_t cod_op, int socket) {
 		Get* get_pokemon = recv_get(socket);
 		if(get_pokemon != NULL){
 			generated_id = get_id();
-			log_info(LOGGER, "Se recibio un nuevo mensaje en la cola %s. Pokemon: %s", get_operation_by_value(cod_op), get_pokemon->name->value);
+			log_info(LOGGER, "Se recibio un nuevo mensaje en la cola %s. Pokemon: %s, socket: %d", get_operation_by_value(cod_op), get_pokemon->name->value, socket);
 
 			send_message_from_new_request(get_pokemon, GET, generated_id, correlational_id);
 			send(socket, &generated_id, sizeof(uint32_t), 0);
@@ -128,11 +128,11 @@ static void _process_request(uint32_t cod_op, int socket) {
 			int result = recv(socket,&correlational_id,sizeof(uint32_t),0);
 			if (result > 0) {
 				generated_id = get_id();
-				log_info(LOGGER, "Se recibio un nuevo mensaje en la cola %s. Pokemon: %s, cantidad de coordenadas: %d, id correlacional: %d, id generado: %d", get_operation_by_value(cod_op), localized_pokemon->pokemon->name->value, localized_pokemon->coordinates_quantity, correlational_id, generated_id);
+				log_info(LOGGER, "Se recibio un nuevo mensaje en la cola %s. Pokemon: %s, cantidad de coordenadas: %d, id correlacional: %d, id generado: %d, socket: %d", get_operation_by_value(cod_op), localized_pokemon->pokemon->name->value, localized_pokemon->coordinates_quantity, correlational_id, generated_id, socket);
 
 				for(int i = 0; i < localized_pokemon->coordinates_quantity; i++) {
 					Coordinate* loc_coordinate = list_get(localized_pokemon->pokemon->coordinates, i);
-					log_info(LOGGER, "Coordenada: x=%d, y=%d", loc_coordinate->pos_x, loc_coordinate->pos_y);
+					log_info(LOGGER, "Coordenada: x=%d, y=%d, socket: %d", loc_coordinate->pos_x, loc_coordinate->pos_y, socket);
 				}
 
 				send_message_from_new_request(localized_pokemon, LOCALIZED, generated_id, correlational_id);
@@ -154,7 +154,7 @@ static void _process_request(uint32_t cod_op, int socket) {
 			int result = recv(socket,&correlational_id,sizeof(uint32_t),0);
 			if(result > 0){
 				generated_id = get_id();
-				log_info(LOGGER, "Se recibio un nuevo mensaje en la cola %s. Pokemon: %s, pos_x: %d, pos_y: %d, id correlacional: %d, id generado: %d", get_operation_by_value(cod_op), appeared_pokemon->name->value, ((Coordinate*)appeared_pokemon->coordinates->head->data)->pos_x, ((Coordinate*)appeared_pokemon->coordinates->head->data)->pos_y, correlational_id, generated_id);
+				log_info(LOGGER, "Se recibio un nuevo mensaje en la cola %s. Pokemon: %s, pos_x: %d, pos_y: %d, id correlacional: %d, id generado: %d, socket: %d", get_operation_by_value(cod_op), appeared_pokemon->name->value, ((Coordinate*)appeared_pokemon->coordinates->head->data)->pos_x, ((Coordinate*)appeared_pokemon->coordinates->head->data)->pos_y, correlational_id, generated_id, socket);
 
 				send_message_from_new_request(appeared_pokemon, APPEARED, generated_id, correlational_id);
 				send(socket, &generated_id, sizeof(uint32_t), 0);
@@ -170,7 +170,7 @@ static void _process_request(uint32_t cod_op, int socket) {
 		Pokemon* catch_pokemon = recv_pokemon(socket, false);
 		if(catch_pokemon != NULL) {
 			generated_id = get_id();
-			log_info(LOGGER, "Se recibio un nuevo mensaje en la cola %s. Pokemon: %s, pos_x: %d, pos_y: %d, id generado: %d", get_operation_by_value(cod_op), catch_pokemon->name->value, ((Coordinate*)catch_pokemon->coordinates->head->data)->pos_x, ((Coordinate*)catch_pokemon->coordinates->head->data)->pos_y, generated_id);
+			log_info(LOGGER, "Se recibio un nuevo mensaje en la cola %s. Pokemon: %s, pos_x: %d, pos_y: %d, id generado: %d, socket: %d", get_operation_by_value(cod_op), catch_pokemon->name->value, ((Coordinate*)catch_pokemon->coordinates->head->data)->pos_x, ((Coordinate*)catch_pokemon->coordinates->head->data)->pos_y, generated_id, socket);
 
 			send_message_from_new_request(catch_pokemon, CATCH, generated_id, correlational_id);
 			send(socket, &generated_id, sizeof(uint32_t), 0);
