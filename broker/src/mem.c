@@ -43,7 +43,7 @@ t_list *messages_from_operation(Operation operation, Subscriber *subscriber)
 	return filtered_partitions;
 }
 
-void lock_memory_for_read(char *name)
+int lock_memory_for_read(char *name)
 {
 	pthread_mutex_lock(&MEMORY_READERS_MUTEX);
 	READERS++;
@@ -56,7 +56,7 @@ void lock_memory_for_read(char *name)
 	pthread_mutex_unlock(&MEMORY_READERS_MUTEX);
 }
 
-unlock_memory_for_read(char *name)
+int unlock_memory_for_read(char *name)
 {
 	pthread_mutex_lock(&MEMORY_READERS_MUTEX);
 	READERS--;
@@ -69,13 +69,13 @@ unlock_memory_for_read(char *name)
 	pthread_mutex_unlock(&MEMORY_READERS_MUTEX);
 }
 
-lock_memory_for_write(char *name)
+int lock_memory_for_write(char *name)
 {
 	sem_wait(&MEMORY_WRITE_MUTEX);
 	log_warning(LOGGER, "lock_memory_for_write: %s", name);
 }
 
-unlock_memory_for_write(char *name)
+int unlock_memory_for_write(char *name)
 {
 	log_warning(LOGGER, "unlock_memory_for_write: %s", name);
 	sem_post(&MEMORY_WRITE_MUTEX);
