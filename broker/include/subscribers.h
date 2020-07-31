@@ -4,6 +4,7 @@
 #include <pthread.h>
 #include <commons/string.h>
 #include <commons/collections/dictionary.h>
+#include <delibird/interface.h>
 #include "constants.h"
 
 t_list* get_notified_subscribers_by_message_id(uint32_t message_id);
