@@ -278,45 +278,6 @@ static void* _transform_messages(Partition* partition, Operation operation, int 
 	return message;
 }
 
-static void send_message_and_wait_for_ack(arg_struct* args) {
-	char* context = string_from_format("send_message_and_wait_for_ack, operation %s, message_id %d, subscriber %s-%d", get_operation_by_value(operation), message_id, get_process_by_value(args->subscriber->process), args->subscriber->id);
-
-	_lock_memory_for_read(context);
-
-	void* message = _transform_messages(args->partition, args->partition->message->operation_code, args->bytes);
-
-	log_info(LOGGER, "%s - message_id: %d, Adquiring mutex for subscriber with id: %d, process: %s, operation: %s", args->context, args->partition->message->message_id, args->subscriber->id, get_process_by_value(args->subscriber->process), get_operation_by_value(args->partition->message->operation_code));
-	SubscriberWithMutex* swm = find_mutex_by_subscriber(args->partition->message->operation_code, args->subscriber);
-	pthread_mutex_lock(&swm->mutex);
-	log_info(LOGGER, "%s - message_id: %d, Mutex adquired for subscriber with id: %d, process: %s, operation: %s", args->context, args->partition->message->message_id, swm->subscriber->id, get_process_by_value(swm->subscriber->process), get_operation_by_value(args->partition->message->operation_code));
-
-	log_debug(LOGGER, "%s - Sending message to: %d, with size: %d", args->context, args->subscriber->socket_subscriber, args->bytes);
-	log_info(LOGGER, "%s - Enviando el mensaje %d al suscriptor con ID: %d, Proceso:  %s, Socket: %d", args->context, args->partition->message->message_id, args->subscriber->id, get_process_by_value(args->subscriber->process), args->subscriber->socket_subscriber);
-	if (send(args->subscriber->socket_subscriber, message, args->bytes, MSG_NOSIGNAL) < 0) {
-		log_info(LOGGER, "%s - Se cayo el suscriptor con ID: %d, Proceso:  %s, Socket: %d", args->context, args->subscriber->id, get_process_by_value(args->subscriber->process), args->subscriber->socket_subscriber);
-	} else {
-		Result result;
-		log_debug(LOGGER, "%s - Waiting for ack", args->context);
-		if(recv(args->subscriber->socket_subscriber, &result, sizeof(Result), MSG_WAITALL) > 0){
-			log_info(LOGGER, "%s - ACK recibido del suscriptor %d", args->context, args->subscriber->socket_subscriber);
-			log_debug(LOGGER, "%s - Adding subscriber to notified_subscribers in partition", args->context);
-			list_add(args->partition->notified_suscribers, args->subscriber);
-		} else {
-			log_info(LOGGER, "%s - Se cayo el suscriptor con ID: %d, Proceso:  %s, Socket: %d", args->context, args->subscriber->id, get_process_by_value(args->subscriber->process), args->subscriber->socket_subscriber);
-		}
-	}
-	log_info(LOGGER, "%s - message_id: %d, Mutex unlocked for subscriber with id: %d, process: %s, operation: %s", args->context, args->partition->message->message_id, swm->subscriber->id, get_process_by_value(swm->subscriber->process), get_operation_by_value(args->partition->message->operation_code));
-	pthread_mutex_unlock(&swm->mutex);
-
-	free(args->context);
-	free(args);
-	free(message);
-
-	_unlock_memory_for_read(context);
-
-	free(context);
-}
-
 /*
 static void send_message_and_wait_for_ack_2(arg_struct* args) {
 	void* message = _transform_messages(args->partition, args->partition->message->operation_code, args->bytes);
@@ -380,6 +341,45 @@ static void send_messages_to_subscribers(Partition* partition) {
 
 	list_iterate(filtered_subscribers, &_inline_send_messages);
 	list_destroy(filtered_subscribers);
+}
+
+static void send_message_and_wait_for_ack(arg_struct* args) {
+	char* context = string_from_format("send_message_and_wait_for_ack, operation %s, message_id %d, subscriber %s-%d", get_operation_by_value(args->partition->message->operation_code), args->partition->message->message_id, get_process_by_value(args->subscriber->process), args->subscriber->id);
+
+	_lock_memory_for_read(context);
+
+	void* message = _transform_messages(args->partition, args->partition->message->operation_code, args->bytes);
+
+	log_info(LOGGER, "%s - message_id: %d, Adquiring mutex for subscriber with id: %d, process: %s, operation: %s", args->context, args->partition->message->message_id, args->subscriber->id, get_process_by_value(args->subscriber->process), get_operation_by_value(args->partition->message->operation_code));
+	SubscriberWithMutex* swm = find_mutex_by_subscriber(args->partition->message->operation_code, args->subscriber);
+	pthread_mutex_lock(&swm->mutex);
+	log_info(LOGGER, "%s - message_id: %d, Mutex adquired for subscriber with id: %d, process: %s, operation: %s", args->context, args->partition->message->message_id, swm->subscriber->id, get_process_by_value(swm->subscriber->process), get_operation_by_value(args->partition->message->operation_code));
+
+	log_debug(LOGGER, "%s - Sending message to: %d, with size: %d", args->context, args->subscriber->socket_subscriber, args->bytes);
+	log_info(LOGGER, "%s - Enviando el mensaje %d al suscriptor con ID: %d, Proceso:  %s, Socket: %d", args->context, args->partition->message->message_id, args->subscriber->id, get_process_by_value(args->subscriber->process), args->subscriber->socket_subscriber);
+	if (send(args->subscriber->socket_subscriber, message, args->bytes, MSG_NOSIGNAL) < 0) {
+		log_info(LOGGER, "%s - Se cayo el suscriptor con ID: %d, Proceso:  %s, Socket: %d", args->context, args->subscriber->id, get_process_by_value(args->subscriber->process), args->subscriber->socket_subscriber);
+	} else {
+		Result result;
+		log_debug(LOGGER, "%s - Waiting for ack", args->context);
+		if(recv(args->subscriber->socket_subscriber, &result, sizeof(Result), MSG_WAITALL) > 0){
+			log_info(LOGGER, "%s - ACK recibido del suscriptor %d", args->context, args->subscriber->socket_subscriber);
+			log_debug(LOGGER, "%s - Adding subscriber to notified_subscribers in partition", args->context);
+			list_add(args->partition->notified_suscribers, args->subscriber);
+		} else {
+			log_info(LOGGER, "%s - Se cayo el suscriptor con ID: %d, Proceso:  %s, Socket: %d", args->context, args->subscriber->id, get_process_by_value(args->subscriber->process), args->subscriber->socket_subscriber);
+		}
+	}
+	log_info(LOGGER, "%s - message_id: %d, Mutex unlocked for subscriber with id: %d, process: %s, operation: %s", args->context, args->partition->message->message_id, swm->subscriber->id, get_process_by_value(swm->subscriber->process), get_operation_by_value(args->partition->message->operation_code));
+	pthread_mutex_unlock(&swm->mutex);
+
+	free(args->context);
+	free(args);
+	free(message);
+
+	_unlock_memory_for_read(context);
+
+	free(context);
 }
 
 static Message* _create_message(Operation operation, uint32_t message_id, uint32_t correlational_id, uint32_t data_size) {
