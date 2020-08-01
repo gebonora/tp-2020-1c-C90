@@ -73,13 +73,8 @@ static void _show_partition(Partition* partition, int number) {
 	if(!partition->free) {
 		_show_message(partition->message);
 	}
-	list_iterate(partition->notified_suscribers, _show_subscriber);
+	list_iterate(get_notified_subscribers_by_message_id(partition->message->message_id), _show_subscriber);
 	log_info(LOGGER, "--------------------------------");
-}
-
-static void _show_subscriber(void* e) {
-	Subscriber* subscriber = e;
-	log_info(LOGGER, "Notified Subscriber (process=%s, id=%d, socket=%d)", get_process_by_value(subscriber->process), subscriber->id, subscriber->socket_subscriber);
 }
 
 static void _show_message(Message* message) {
@@ -89,4 +84,9 @@ static void _show_message(Message* message) {
 		log_info(LOGGER, "Correlative ID: %d", message->correlational_id);
 	}
 	log_info(LOGGER, "Message Size: %d", message->data_size);
+}
+
+static void _show_subscriber(void* e) {
+	Subscriber* subscriber = e;
+	log_info(LOGGER, "Notified Subscriber (process=%s, id=%d, socket=%d)", get_process_by_value(subscriber->process), subscriber->id, subscriber->socket_subscriber);
 }

@@ -6,6 +6,7 @@
 #include "delibird/interface.h"
 #include "arithmetic.h"
 #include "constants.h"
+#include "subscribers.h"
 
 #define DUMP_PATH "dump.log"
 

@@ -74,9 +74,9 @@ elif [ -z "${PID}" ]; then
         
             if [ "-d" = $1 ] || [ "-d" = $2 ]; then
                 echo -e "${YELLOW}Using detached mode -d${NC}"
-                cd ${BROKER_PATH} && valgrind --tool="helgrind" --log-file=${LOG_FILE} -v ./broker.app &
+                cd ${BROKER_PATH} && valgrind --tool="helgrind" --read-var-info=yes --log-file=${LOG_FILE} -v ./broker.app &
             else
-                cd ${BROKER_PATH} && valgrind --tool="helgrind" --log-file=${LOG_FILE} -v ./broker.app
+                cd ${BROKER_PATH} && valgrind --tool="helgrind" --read-var-info=yes --log-file=${LOG_FILE} -v ./broker.app
             fi
             ;;
         *)
