@@ -96,19 +96,6 @@ static void send_messages_to_subscribers(Partition* partition) {
 	log_debug(LOGGER, "Filtering subscribers in partition");
 	t_list* filtered_subscribers = list_filter(subscribers, &_inline_not_notified);
 
-	void _inline_send_messages(void* e){
-		Subscriber* subscriber = e;
-		arg_struct* args = malloc(sizeof(arg_struct));
-		args->bytes = _calculate_bytes_to_send(partition->message->operation_code, partition->message->data_size);
-		args->partition = partition;
-		args->subscriber = subscriber;
-		args->context = "new_request";
-
-		pthread_t thread_localized;
-		pthread_create(&thread_localized, NULL, (void*)send_message_and_wait_for_ack, args);
-		pthread_detach(thread_localized);
-	}
-
 	pthread_t thread[list_size(filtered_subscribers)];
 
 	for(int i = 0; i < list_size(filtered_subscribers); i++){
