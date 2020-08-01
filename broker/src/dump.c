@@ -73,7 +73,13 @@ static void _show_partition(Partition* partition, int number) {
 	if(!partition->free) {
 		_show_message(partition->message);
 	}
-	list_iterate(get_notified_subscribers_by_message_id(partition->message->message_id), _show_subscriber);
+
+	t_list* notified_subscribers = get_notified_subscribers_by_message_id(partition->message->message_id)
+	
+	if(notified_subscribers != NULL && !list_is_empty(notified_subscribers)){
+		list_iterate(notified_subscribers, _show_subscriber);		
+	}
+
 	log_info(LOGGER, "--------------------------------");
 }
 
