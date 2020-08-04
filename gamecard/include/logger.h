@@ -20,7 +20,7 @@
 
 #include "server.h"
 
-#define LOG_SHOW_CONSOLE 0
+#define LOG_SHOW_CONSOLE 1
 #define AUX_LOG_LEVEL LOG_LEVEL_INFO // Pasar a info para entrega.
 
 t_log* loggerMain;
