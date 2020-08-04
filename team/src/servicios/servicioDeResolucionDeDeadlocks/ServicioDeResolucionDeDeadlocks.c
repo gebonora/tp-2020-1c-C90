@@ -33,7 +33,7 @@ t_list* procesarDeadlock(ServicioDeResolucionDeDeadlocks * this, t_list* unidade
 
 	ListaDeDependencias listaDeDependencias = this->crearListaDeDependencias(this, entrenadoresFiltrados);
 
-	imprimirListaDeDependencias(listaDeDependencias);
+	// imprimirListaDeDependencias(listaDeDependencias);
 
 	if (this->primeraVez) {
 		this->detectarEnDetalleYLogear(this, listaDeDependencias);
@@ -119,7 +119,7 @@ void detectarEnDetalleYLogear(ServicioDeResolucionDeDeadlocks* this, ListaDeDepe
 	list_destroy_and_destroy_elements(deadlocksTotales, destruirListaDeStrings);
 
 	// Descomentar para debug.
-	imprimirListaDeListas(aux);
+	// imprimirListaDeListas(aux);
 
 	ListaDeListaDeString deadlocks = eliminarListasRepetidas(aux);
 	char* reporte = obtenerReporteDeadlocks(deadlocks);
