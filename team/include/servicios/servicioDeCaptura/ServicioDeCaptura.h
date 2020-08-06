@@ -13,6 +13,7 @@
 #include "modelo/mapa/coordenadas/UtilidadesCoordenadas.h"
 #include "modelo/mapa/registro/RegistradorDePosiciones.h"
 #include "commons/collections/queue.h"
+#include "modelo/objetivo/ObjetivoGlobal.h"
 
 typedef struct ServicioDeCaptura {
     t_log * logger;

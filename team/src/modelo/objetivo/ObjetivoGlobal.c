@@ -42,6 +42,7 @@ bool puedeCapturarse(ObjetivoGlobal * this, char * especiePokemon) {
         pthread_mutex_unlock(&this->mutexContabilidadActualizable);
         if (!sePuede) {
             log_debug(this->logger, "No se puede capturar a %s porque tenemos %d/%d", especiePokemon, contabilidadEspecie->capturados, contabilidadEspecie->necesarios);
+            return false;
         }
         return sePuede;
     }
