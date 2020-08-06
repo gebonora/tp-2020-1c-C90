@@ -27,7 +27,7 @@ void dump_handler(int signum) {
 
 static void _create_dump() {
     FILE * dump_file;
-    dump_file = fopen(DUMP_PATH, "w+");
+    dump_file = fopen(DUMP_PATH, "a");
 
 	fprintf(dump_file, "Dump: %s\n", current_date_time_as_string());
 
@@ -38,8 +38,10 @@ static void _create_dump() {
 		partition = list_get(memory->partitions, index);
 		if(partition->free) {
 			fprintf(dump_file, "Partición %d: | %d - %d | [%s] | Size: %d b |\n", number, partition->position, partition->position + partition->size - 1, "L", partition->size);
-		} else {
+		} else if (string_equals_ignore_case(ALGORITMO_REEMPLAZO, LRU)) {
 			fprintf(dump_file, "Partición %d: | %d - %d | [%s] | Size: %d b | LRU: %d | COLA: %s | ID: %d |\n", number, partition->position, partition->position + partition->size - 1, "X", partition->size, partition->access_time, get_operation_by_value(partition->message->operation_code), partition->message->message_id);
+		} else {
+			fprintf(dump_file, "Partición %d: | %d - %d | [%s] | Size: %d b | COLA: %s | ID: %d |\n", number, partition->position, partition->position + partition->size - 1, "X", partition->size, get_operation_by_value(partition->message->operation_code), partition->message->message_id);
 		}
 	}
 
@@ -68,16 +70,12 @@ static void _show_partition(Partition* partition, int number) {
 	if (string_equals_ignore_case(ALGORITMO_MEMORIA, BUDDY_SYSTEM)) {
 		log_info(LOGGER, "Buddy: %d", xor_int_and_int(partition->position, partition->size));
 	}
-	log_info(LOGGER, "Creation time: %d", partition->creation_time);
-	log_info(LOGGER, "Last access: %d ", partition->access_time);
 	if(!partition->free) {
+		log_info(LOGGER, "Creation time: %d", partition->creation_time);
+		if (string_equals_ignore_case(ALGORITMO_REEMPLAZO, LRU)){
+			log_info(LOGGER, "Last access: %d ", partition->access_time);
+		}
 		_show_message(partition->message);
-	}
-
-	t_list* notified_subscribers = get_notified_subscribers_by_message_id(partition->message->message_id);
-	
-	if(notified_subscribers != NULL && !list_is_empty(notified_subscribers)){
-		list_iterate(notified_subscribers, _show_subscriber);		
 	}
 
 	log_info(LOGGER, "--------------------------------");
@@ -90,6 +88,11 @@ static void _show_message(Message* message) {
 		log_info(LOGGER, "Correlative ID: %d", message->correlational_id);
 	}
 	log_info(LOGGER, "Message Size: %d", message->data_size);
+	t_list* notified_subscribers = get_notified_subscribers_by_message_id(message->message_id);
+
+	if (notified_subscribers != NULL && !list_is_empty(notified_subscribers)){
+		list_iterate(notified_subscribers, _show_subscriber);
+	}
 }
 
 static void _show_subscriber(void* e) {
