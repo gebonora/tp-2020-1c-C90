@@ -48,7 +48,7 @@ static Partition* _negative_frecuency(uint32_t data_size){
 		log_debug(LOGGER, "Finding free partition");
 		partition = find_partition_dynamic(data_size);
 		if (partition == NULL) {
-			log_debug(LOGGER, "Free partition not found. Choosing victim");
+			log_info(LOGGER, "Free partition not found. Choosing victim");
 			choose_victim();//que tambien la mata
 			log_debug(LOGGER, "Consolidating victim");
 			_consolidate();
@@ -101,11 +101,11 @@ static Partition* _positive_frecuency(uint32_t data_size) {
 			log_debug(LOGGER, "Free partition not found");
 			log_debug(LOGGER, "Frequency (%d) - Partitions killed (%d)", FRECUENCIA_COMPACTACION, partitions_killed);
 			if(FRECUENCIA_COMPACTACION == partitions_killed) {
-				log_debug(LOGGER, "Frequency is equal to partitions killed. Compacting");
+				log_info(LOGGER, "Frequency is equal to partitions killed. Compacting");
 				_compact();
 				partitions_killed = 0;
 			} else {
-				log_debug(LOGGER, "Frequency is different to partitions killed. Choosing victim");
+				log_info(LOGGER, "Frequency is different to partitions killed. Choosing victim");
 				choose_victim();//que tambien la mata
 				log_debug(LOGGER, "Consolidating victim");
 				_consolidate();

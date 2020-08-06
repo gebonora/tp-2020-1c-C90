@@ -64,7 +64,7 @@ static void _serve_client(int socket_client) {
 	if(result > 0){
 		_process_request(cod_op, socket_client);
 	} else {
-		log_info(LOGGER, "Se cayo el cliente: %d", socket_client);
+		log_warning(LOGGER, "Se cayo el cliente: %d", socket_client);
 	}
 }
 
@@ -82,7 +82,7 @@ static void _process_request(uint32_t cod_op, int socket) {
 
 			free_new(new_pokemon);
 		} else {
-			log_info(LOGGER, "Se cayo el cliente: %d", socket);
+			log_warning(LOGGER, "Se cayo el cliente: %d", socket);
 		}
 		close(socket);
 		break;
@@ -102,7 +102,7 @@ static void _process_request(uint32_t cod_op, int socket) {
 				free(caught_pokemon);
 			}
 		} else {
-			log_info(LOGGER, "Se cayo el cliente: %d", socket);
+			log_warning(LOGGER, "Se cayo el cliente: %d", socket);
 		}
 		close(socket);
 		break;
@@ -117,7 +117,7 @@ static void _process_request(uint32_t cod_op, int socket) {
 
 			free_get(get_pokemon);
 		} else {
-			log_info(LOGGER, "Se cayo el cliente: %d", socket);
+			log_warning(LOGGER, "Se cayo el cliente: %d", socket);
 		}
 		close(socket);
 		break;
@@ -140,10 +140,10 @@ static void _process_request(uint32_t cod_op, int socket) {
 
 				free_localized(localized_pokemon);
 			} else {
-				log_info(LOGGER, "Se cayo el cliente %d", socket);
+				log_warning(LOGGER, "Se cayo el cliente %d", socket);
 			}
 		} else {
-			log_info(LOGGER, "Se cayo el cliente: %d", socket);
+			log_warning(LOGGER, "Se cayo el cliente: %d", socket);
 		}
 		close(socket);
 		break;
@@ -162,7 +162,7 @@ static void _process_request(uint32_t cod_op, int socket) {
 				free_pokemon(appeared_pokemon);
 			}
 		} else {
-			log_info(LOGGER, "Se cayo el cliente: %d", socket);
+			log_warning(LOGGER, "Se cayo el cliente: %d", socket);
 		}
 		close(socket);
 		break;
@@ -177,7 +177,7 @@ static void _process_request(uint32_t cod_op, int socket) {
 
 			free_pokemon(catch_pokemon);
 		} else {
-			log_info(LOGGER, "Se cayo el cliente: %d", socket);
+			log_warning(LOGGER, "Se cayo el cliente: %d", socket);
 		}
 		close(socket);
 		break;
@@ -187,6 +187,7 @@ static void _process_request(uint32_t cod_op, int socket) {
 		int cod_process;
 		result = recv(socket, &cod_process, sizeof(int), MSG_WAITALL);
 		if(result <= 0) {
+			log_warning(LOGGER, "Se cayo el cliente: %d", socket);
 			close(socket);
 			break;
 		}
@@ -194,6 +195,7 @@ static void _process_request(uint32_t cod_op, int socket) {
 		int cod_cola;
 		result = recv(socket, &cod_cola, sizeof(int), MSG_WAITALL);
 		if(result <= 0) {
+			log_warning(LOGGER, "Se cayo el cliente: %d", socket);
 			close(socket);
 			break;
 		}
@@ -201,6 +203,7 @@ static void _process_request(uint32_t cod_op, int socket) {
 		int process_id;
 		result = recv(socket, &process_id, sizeof(int), MSG_WAITALL);
 		if(result <= 0) {
+			log_warning(LOGGER, "Se cayo el cliente: %d", socket);
 			close(socket);
 			break;
 		}

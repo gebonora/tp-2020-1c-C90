@@ -18,8 +18,8 @@ void dump_handler(int signum) {
 		_show_memory_status();
 		break;
 	default:
-		log_info(LOGGER, "Received %d", signum);
-		log_info(LOGGER, "Signal not recognized");
+		log_warning(LOGGER, "Received %d", signum);
+		log_warning(LOGGER, "Signal not recognized");
 	}
 }
 

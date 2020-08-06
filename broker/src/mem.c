@@ -52,7 +52,7 @@ void lock_memory_for_read(char *name)
 	}
 	int wrt_value;
 	sem_getvalue(&MEMORY_WRITE_MUTEX, &wrt_value);
-	log_warning(LOGGER, "lock_memory_for_read, readers count: %d, %s, writer_sem: %d", READERS, name, wrt_value);
+	log_debug(LOGGER, "lock_memory_for_read, readers count: %d, %s, writer_sem: %d", READERS, name, wrt_value);
 	pthread_mutex_unlock(&MEMORY_READERS_MUTEX);
 	log_debug(LOGGER, "Finish lock_memory_for_read");
 }
@@ -66,7 +66,7 @@ void unlock_memory_for_read(char *name)
 	}
 	int wrt_value;
 	sem_getvalue(&MEMORY_WRITE_MUTEX, &wrt_value);
-	log_warning(LOGGER, "unlock_memory_for_read, readers count: %d, %s, writer_sem: %d", READERS, name, wrt_value);
+	log_debug(LOGGER, "unlock_memory_for_read, readers count: %d, %s, writer_sem: %d", READERS, name, wrt_value);
 	pthread_mutex_unlock(&MEMORY_READERS_MUTEX);
 	log_debug(LOGGER, "Finish unlock_memory_for_read");
 }
@@ -74,12 +74,12 @@ void unlock_memory_for_read(char *name)
 void lock_memory_for_write(char *name)
 {
 	sem_wait(&MEMORY_WRITE_MUTEX);
-	log_warning(LOGGER, "lock_memory_for_write: %s", name);
+	log_debug(LOGGER, "lock_memory_for_write: %s", name);
 }
 
 void unlock_memory_for_write(char *name)
 {
-	log_warning(LOGGER, "unlock_memory_for_write: %s", name);
+	log_debug(LOGGER, "unlock_memory_for_write: %s", name);
 	sem_post(&MEMORY_WRITE_MUTEX);
 	log_debug(LOGGER, "Finish unlock_memory_for_write");
 }

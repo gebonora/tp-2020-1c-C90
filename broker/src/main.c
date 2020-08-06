@@ -100,9 +100,9 @@ static void _init_memory() {
 
 static void _init_dump() {
 	if(signal(SIGUSR1, dump_handler) == SIG_ERR) {
-		log_info(LOGGER, "Error catching signal SIGUSR1");
+		log_error(LOGGER, "Error catching signal SIGUSR1");
 	}
 	if(signal(SIGUSR2, dump_handler) == SIG_ERR) {
-		log_info(LOGGER, "Error catching signal SIGUSR2");
+		log_error(LOGGER, "Error catching signal SIGUSR2");
 	}
 }
