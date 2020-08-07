@@ -46,8 +46,7 @@ cp tp-2020-1c-C90
 ```bash
 cd team/deploy/config
 cp archivo_prueba_puntual.config team.config (ej: cp fifo.config team.config)
-vim team.config
-editar IP_GAMEBOY_TEAM por la IP del team de la vm
+editar dentro de team.config IP_GAMEBOY_TEAM por la IP del team de la vm
 ```
 
 ### Broker
@@ -55,6 +54,7 @@ editar IP_GAMEBOY_TEAM por la IP del team de la vm
 ```bash
 cd broker/config
 cp archivo.config broker.config (ej: cp buddy_lru.config team.config)
+editar dentro de broker.config IP_BROKER por la IP del broker de la vm
 ```
 
 ## Editar archivos desde terminal
