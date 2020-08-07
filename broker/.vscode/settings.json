@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "subscribers.h": "c",
+        "broker.h": "c"
+    }
+}

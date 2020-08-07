@@ -11,7 +11,7 @@ void dump_handler(int signum) {
 	case SIGUSR1:
 		log_info(LOGGER, "Received SIGUSR1");
 		_create_dump();
-		log_info(LOGGER, "Dump file created at: %s", DUMP_PATH);
+		log_info(LOGGER, "Dump file created at: %s", DUMP_FILE);
 		break;
 	case SIGUSR2:
 		log_info(LOGGER, "Received SIGUSR2");

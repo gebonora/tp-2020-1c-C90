@@ -8,8 +8,6 @@
 #include "constants.h"
 #include "subscribers.h"
 
-#define DUMP_PATH "dump.log"
-
 void dump_handler(int);
 
 #endif

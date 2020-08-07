@@ -31,8 +31,8 @@ static void _init_logger() {
 	log_debug(LOGGER, "FRECUENCIA_COMPACTACION: %d", FRECUENCIA_COMPACTACION);
 	log_debug(LOGGER, "TAMANO_MEMORIA: %d", TAMANO_MEMORIA);
 	log_debug(LOGGER, "TAMANO_MINIMO_PARTICION: %d", TAMANO_MINIMO_PARTICION);
-	log_debug(LOGGER, "LOG_FILE: %d", LOG_FILE);
-	log_debug(LOGGER, "DUMP_FILE: %d", DUMP_FILE);
+	log_debug(LOGGER, "LOG_FILE: %s", LOG_FILE);
+	log_debug(LOGGER, "DUMP_FILE: %s", DUMP_FILE);
 }
 
 static void _init_config() {
