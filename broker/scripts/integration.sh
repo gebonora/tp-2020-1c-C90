@@ -46,7 +46,7 @@ function process() {
 
     # creo archivo de dump para el test y ejecuto dump de la memoria redireccionando el output a otro file
 
-    echo -e "\nCreating dump file for test: ${YELLOW} ${TEST_LOG} ${NC}"
+    echo -e "\nCreating dump file for test: ${YELLOW} ${TEST_DUMP} ${NC}"
 
     > ${TEST_DUMP}
 
