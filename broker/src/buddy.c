@@ -64,7 +64,7 @@ static void _consolidate_buddy(Partition* partition) {
 	Partition* buddy = _buddy_of(partition);
 
 	// si puedo consolidar, arranco, sino no hago nada
-	while(buddy->free && buddy->size == partition->size) {
+	while(buddy != NULL && buddy->free && buddy->size == partition->size) {
 		log_info(LOGGER, "Partition Position: %d, Size: %d, Free: %s", partition->position, partition->size, partition->free ? "true" : "false");
 		log_info(LOGGER, "Buddy Position: %d, Size: %d, Free: %s", buddy->position, buddy->size, buddy->free ? "true" : "false");
 
@@ -84,8 +84,7 @@ static void _consolidate_buddy(Partition* partition) {
 		// obtengo el buddy de la nueva particion consolidada
 		buddy = _buddy_of(partition);
 
-		log_debug(LOGGER, "Partition Position: %d, Size: %d, Free: %s", partition->position, partition->size, partition->free ? "true" : "false");
-		log_debug(LOGGER, "Buddy Position: %d, Size: %d, Free: %s", buddy->position, buddy->size, buddy->free ? "true" : "false");
+		log_debug(LOGGER, "New Partition Position: %d, Size: %d, Free: %s", partition->position, partition->size, partition->free ? "true" : "false");
 	}
 
 	log_info(LOGGER, "Buddy is not free or same size...done consolidating");

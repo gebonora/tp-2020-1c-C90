@@ -15,8 +15,6 @@
 #include <commons/collections/dictionary.h>
 #include <delibird/protocol.h>
 
-#define DUMP_PATH "dump.log"
-#define LOGGER_PATH "/home/utnso/tp-2020-1c-C90/broker/logs/broker.log"
 #define BUDDY_SYSTEM "BS"
 #define DYNAMIC_PARTITIONS "PARTICIONES"
 #define FIRST_FIT "FF"
@@ -84,6 +82,8 @@ int FRECUENCIA_COMPACTACION;
 char* ALGORITMO_PARTICION_LIBRE;
 int SHOW_IN_CONSOLE;
 int LOG_NOTIFICATION_LEVEL;
+char* LOG_FILE;
+char* DUMP_FILE;
 t_log* LOGGER;
 uint32_t MESSAGE_ID;
 pthread_mutex_t MUTEX_MESSAGE_ID;

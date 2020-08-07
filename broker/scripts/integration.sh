@@ -10,6 +10,7 @@ function process() {
     SCRIPT_NAME=$2
 
     SCRIPT_TO_EXECUTE=${SCRIPTS_PATH}/${SCRIPT_NAME}
+    DUMP_FILE=${BROKER_PATH}/${TEST_NAME}_dump.log
     TEST_DUMP=${DUMPS_PATH}/${TEST_NAME}_dump.log
     TEST_LOG=${LOGS_PATH}/${TEST_NAME}.txt
     TEST_CONFIG=${CONFIGS_PATH}/${TEST_NAME}.config
@@ -45,15 +46,15 @@ function process() {
 
     # creo archivo de dump para el test y ejecuto dump de la memoria redireccionando el output a otro file
 
-    echo -e "\nCreating dump file for test: ${YELLOW} ${TEST_LOG} ${NC}"
+    echo -e "\nCreating dump file for test: ${YELLOW} ${TEST_DUMP} ${NC}"
 
     > ${TEST_DUMP}
 
-    echo -e "\nCopying dump file ${YELLOW} ${DUMP_FILE} ${NC} to test folder ${YELLOW} ${TEST_DUMP} ${NC}\n"
+    echo -e "\nMoving dump file ${YELLOW} ${DUMP_FILE} ${NC} to test folder ${YELLOW} ${DUMPS_PATH} ${NC}\n"
 
     cat ${DUMP_FILE}
 
-    cp ${DUMP_FILE} ${TEST_DUMP}
+    mv ${DUMP_FILE} ${DUMPS_PATH}
 
     # elimino la primera linea del archivo de dump copiado
 
@@ -84,11 +85,10 @@ BROKER_PATH=${HOME_PATH}/broker
 BROKER_SCRIPTS=${BROKER_PATH}/scripts
 BROKER_CONFIG_FILE=${BROKER_PATH}/config/broker.config
 BROKER_BACKUP_FILE=${BROKER_PATH}/config/backup.config
-CONFIGS_PATH=${BROKER_PATH}/config
-LOGS_PATH=${BROKER_PATH}/tests/expected
-DUMPS_PATH=${BROKER_PATH}/tests/actual
+CONFIGS_PATH=${BROKER_PATH}/test/config
+LOGS_PATH=${BROKER_PATH}/test/expected
+DUMPS_PATH=${BROKER_PATH}/test/actual
 SCRIPTS_PATH=${HOME_PATH}/gameboy/scripts
-DUMP_FILE=${BROKER_PATH}/dump.log
 FAILED_TESTS=""
 PASSED_TESTS=""
 

@@ -11,7 +11,7 @@ void dump_handler(int signum) {
 	case SIGUSR1:
 		log_info(LOGGER, "Received SIGUSR1");
 		_create_dump();
-		log_info(LOGGER, "Dump file created at: %s", DUMP_PATH);
+		log_info(LOGGER, "Dump file created at: %s", DUMP_FILE);
 		break;
 	case SIGUSR2:
 		log_info(LOGGER, "Received SIGUSR2");
@@ -27,7 +27,7 @@ void dump_handler(int signum) {
 
 static void _create_dump() {
     FILE * dump_file;
-    dump_file = fopen(DUMP_PATH, "a");
+    dump_file = fopen(DUMP_FILE, "a");
 
 	fprintf(dump_file, "Dump: %s\n", current_date_time_as_string());
 

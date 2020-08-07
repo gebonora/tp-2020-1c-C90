@@ -21,7 +21,7 @@ int main(){
 /** PRIVATE FUNCTIONS **/
 
 static void _init_logger() {
-    LOGGER = log_create(LOGGER_PATH, "Broker Server", SHOW_IN_CONSOLE, LOG_NOTIFICATION_LEVEL);
+    LOGGER = log_create(LOG_FILE, "Broker Server", SHOW_IN_CONSOLE, LOG_NOTIFICATION_LEVEL);
 
 	log_debug(LOGGER, "IP: %s", IP);
 	log_debug(LOGGER, "PUERTO: %s", PUERTO);
@@ -31,6 +31,8 @@ static void _init_logger() {
 	log_debug(LOGGER, "FRECUENCIA_COMPACTACION: %d", FRECUENCIA_COMPACTACION);
 	log_debug(LOGGER, "TAMANO_MEMORIA: %d", TAMANO_MEMORIA);
 	log_debug(LOGGER, "TAMANO_MINIMO_PARTICION: %d", TAMANO_MINIMO_PARTICION);
+	log_debug(LOGGER, "LOG_FILE: %s", LOG_FILE);
+	log_debug(LOGGER, "DUMP_FILE: %s", DUMP_FILE);
 }
 
 static void _init_config() {
@@ -52,6 +54,8 @@ static void _init_config() {
 	}
 	SHOW_IN_CONSOLE = config_get_int_value(config, "SHOW_IN_CONSOLE");
 	LOG_NOTIFICATION_LEVEL = config_get_int_value(config, "LOG_NOTIFICATION_LEVEL");
+	LOG_FILE = string_duplicate(config_get_string_value(config, "LOG_FILE"));
+	DUMP_FILE = string_duplicate(config_get_string_value(config, "DUMP_FILE"));
 
 	config_destroy(config);
 }

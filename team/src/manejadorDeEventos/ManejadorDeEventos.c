@@ -209,6 +209,9 @@ char* traducirResult(Result result) {
 
 char* logCoordenadas(t_list* listaCoor) {
 	char* ret = string_new();
+	if (list_is_empty(listaCoor)){
+		string_append_with_format(&ret,", sin coordenadas");
+	}
 	for (int a = 0; a < listaCoor->elements_count; a++) {
 		if (a == 0)
 			string_append_with_format(&ret, ", coordenadas: (%d,%d)", ((Coordinate*) (list_get(listaCoor, a)))->pos_x, ((Coordinate*) (list_get(listaCoor, a)))->pos_y);

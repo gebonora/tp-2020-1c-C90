@@ -214,12 +214,27 @@ static EntrenadorConPokemon* entrenadorOptimo(ServicioDePlanificacion* this, t_l
 void asignarTareasDeCaptura(ServicioDePlanificacion* this, t_list* listaPokemon, t_list* entrenadoresDisponibles) {
 	log_info(this->logger, "Asignando tareas de captura");
 
+	log_error(this->logger, "tamanio listaPokemons: %d", list_size(listaPokemon));
 	bool pokemon_capturable(void* elem) {
 		PokemonAtrapable* poke = (PokemonAtrapable*) elem;
 		return this->objetivoGlobal.puedeCapturarse(&this->objetivoGlobal, poke->especie);
 	}
 
+
 	t_list* pokemones_capturables = list_filter(listaPokemon, pokemon_capturable);
+
+
+	// Si la lista está vacía salimos.
+
+
+	if(list_is_empty(pokemones_capturables)){
+		log_error(this->logger, "Saliendo porque se filtró y quedó la lista vacía.");
+		list_destroy(listaPokemon);
+		list_destroy(pokemones_capturables);
+		list_destroy(entrenadoresDisponibles);
+		sem_post(&semaforoContadorEntrenadoresDisponibles);
+		return;
+	}
 
 	for (int a = 0; a < list_size(pokemones_capturables); a++) {
 		PokemonAtrapable* pok = list_get(listaPokemon, a);

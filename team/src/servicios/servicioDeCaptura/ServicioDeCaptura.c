@@ -43,7 +43,9 @@ static PokemonAtrapable * obtenerPokemonAtrapable(ServicioDeCaptura * this, char
 }
 
 static void procesarPokemonCapturable(ServicioDeCaptura * this, char * especie, Coordinate posicion) {
-	this->altaDePokemon(this, especie, posicion);
+	if (objetivoGlobalProcesoTeam.puedeCapturarse(&objetivoGlobalProcesoTeam, especie)) {
+		this->altaDePokemon(this, especie, posicion);
+	}
 	log_debug(this->logger, "Procesando pokemon : %s.", especie);
 	free(especie);
 }
@@ -91,6 +93,7 @@ static bool registrarCapturaExitosa(ServicioDeCaptura * this, CapturaPokemon * c
 
 		capturaPokemon->entrenador->estaEsperandoAlgo = false;
 		//sem_post(&semaforoDeadlock);
+		//capturaPokemon->destruir(capturaPokemon);
 
 		free(posicion);
 	} else {
@@ -119,13 +122,14 @@ static bool registrarCapturaFallida(ServicioDeCaptura * this, CapturaPokemon * c
 		char * posicion = capturaPokemon->posicion(capturaPokemon);
 		log_info(this->logger, "%s eliminó las coordenadas de un %s en %s porque falló su captura.", capturaPokemon->idEntrenador(capturaPokemon),
 				capturaPokemon->pokemonAtrapable->especie, posicion);
+		objetivoGlobalProcesoTeam.sumarUnCapturado(&objetivoGlobalProcesoTeam, capturaPokemon->pokemonAtrapable->especie);
 		//sem_post(&semaforoDeadlock);
 
 		/*if (capturaPokemon->entrenador->puedeAtraparPokemones) {
-			//sem_wait(&capturaPokemon->entrenador->finalizacionDeCapturaSegura);
-			log_debug(capturaPokemon->entrenador->logger, "Falló en capturar un %s y se marcó como disponible de nuevo.", capturaPokemon->especie(capturaPokemon));
-			//sem_post(&semaforoContadorEntrenadoresDisponibles); // Quiero que este post no llegue antes que el entrenador a la cola blocked.
-		}*/
+		 //sem_wait(&capturaPokemon->entrenador->finalizacionDeCapturaSegura);
+		 log_debug(capturaPokemon->entrenador->logger, "Falló en capturar un %s y se marcó como disponible de nuevo.", capturaPokemon->especie(capturaPokemon));
+		 //sem_post(&semaforoContadorEntrenadoresDisponibles); // Quiero que este post no llegue antes que el entrenador a la cola blocked.
+		 }*/
 		free(posicion);
 	} else {
 		log_error(this->logger, "No se puede eliminar un pokemon que no figure en el mapa");
