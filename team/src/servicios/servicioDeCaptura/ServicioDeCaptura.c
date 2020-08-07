@@ -122,6 +122,7 @@ static bool registrarCapturaFallida(ServicioDeCaptura * this, CapturaPokemon * c
 		char * posicion = capturaPokemon->posicion(capturaPokemon);
 		log_info(this->logger, "%s eliminó las coordenadas de un %s en %s porque falló su captura.", capturaPokemon->idEntrenador(capturaPokemon),
 				capturaPokemon->pokemonAtrapable->especie, posicion);
+		objetivoGlobalProcesoTeam.sumarUnCapturado(&objetivoGlobalProcesoTeam, capturaPokemon->pokemonAtrapable->especie);
 		//sem_post(&semaforoDeadlock);
 
 		/*if (capturaPokemon->entrenador->puedeAtraparPokemones) {
