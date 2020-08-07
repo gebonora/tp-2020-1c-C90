@@ -10,6 +10,7 @@ function process() {
     SCRIPT_NAME=$2
 
     SCRIPT_TO_EXECUTE=${SCRIPTS_PATH}/${SCRIPT_NAME}
+    DUMP_FILE=${BROKER_PATH}/${TEST_NAME}_dump.log
     TEST_DUMP=${DUMPS_PATH}/${TEST_NAME}_dump.log
     TEST_LOG=${LOGS_PATH}/${TEST_NAME}.txt
     TEST_CONFIG=${CONFIGS_PATH}/${TEST_NAME}.config
@@ -49,11 +50,11 @@ function process() {
 
     > ${TEST_DUMP}
 
-    echo -e "\nMoving dump file ${YELLOW} ${TEST_DUMP} ${NC} to test folder ${YELLOW} ${DUMPS_PATH} ${NC}\n"
+    echo -e "\nMoving dump file ${YELLOW} ${DUMP_FILE} ${NC} to test folder ${YELLOW} ${DUMPS_PATH} ${NC}\n"
 
-    cat ${TEST_DUMP}
+    cat ${DUMP_FILE}
 
-    mv ${TEST_DUMP} ${DUMPS_PATH}
+    mv ${DUMP_FILE} ${DUMPS_PATH}
 
     # elimino la primera linea del archivo de dump copiado
 
