@@ -7,8 +7,8 @@
 void restarUnCapturado(ObjetivoGlobal * this, char * especie) {
     if (dictionary_has_key(this->contabilidadEspeciesActualizable, especie)) {
         pthread_mutex_lock(&this->mutexContabilidadActualizable);
-        int * capturados = dictionary_get(this->contabilidadEspeciesActualizable, especie);
-        (*capturados)--;
+        ContabilidadEspecie* capturados = dictionary_get(this->contabilidadEspeciesActualizable, especie);
+        capturados->capturados--;
         pthread_mutex_unlock(&this->mutexContabilidadActualizable);
     }
 }
@@ -16,8 +16,8 @@ void restarUnCapturado(ObjetivoGlobal * this, char * especie) {
 void sumarUnCapturado(ObjetivoGlobal * this, char * especie) {
     if (dictionary_has_key(this->contabilidadEspeciesActualizable, especie)) {
         pthread_mutex_lock(&this->mutexContabilidadActualizable);
-        int * capturados = dictionary_get(this->contabilidadEspeciesActualizable, especie);
-        (*capturados)++;
+        ContabilidadEspecie * capturados = dictionary_get(this->contabilidadEspeciesActualizable, especie);
+        capturados->capturados++;
         pthread_mutex_unlock(&this->mutexContabilidadActualizable);
     }
 }
