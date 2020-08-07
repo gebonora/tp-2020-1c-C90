@@ -49,11 +49,11 @@ function process() {
 
     > ${TEST_DUMP}
 
-    echo -e "\nCopying dump file ${YELLOW} ${DUMP_FILE} ${NC} to test folder ${YELLOW} ${TEST_DUMP} ${NC}\n"
+    echo -e "\nMoving dump file ${YELLOW} ${TEST_DUMP} ${NC} to test folder ${YELLOW} ${DUMPS_PATH} ${NC}\n"
 
-    cat ${DUMP_FILE}
+    cat ${TEST_DUMP}
 
-    cp ${DUMP_FILE} ${TEST_DUMP}
+    mv ${TEST_DUMP} ${DUMPS_PATH}
 
     # elimino la primera linea del archivo de dump copiado
 
@@ -84,11 +84,10 @@ BROKER_PATH=${HOME_PATH}/broker
 BROKER_SCRIPTS=${BROKER_PATH}/scripts
 BROKER_CONFIG_FILE=${BROKER_PATH}/config/broker.config
 BROKER_BACKUP_FILE=${BROKER_PATH}/config/backup.config
-CONFIGS_PATH=${BROKER_PATH}/config
-LOGS_PATH=${BROKER_PATH}/tests/expected
-DUMPS_PATH=${BROKER_PATH}/tests/actual
+CONFIGS_PATH=${BROKER_PATH}/test/config
+LOGS_PATH=${BROKER_PATH}/test/expected
+DUMPS_PATH=${BROKER_PATH}/test/actual
 SCRIPTS_PATH=${HOME_PATH}/gameboy/scripts
-DUMP_FILE=${BROKER_PATH}/dump.log
 FAILED_TESTS=""
 PASSED_TESTS=""
 

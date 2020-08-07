@@ -27,7 +27,7 @@ void dump_handler(int signum) {
 
 static void _create_dump() {
     FILE * dump_file;
-    dump_file = fopen(DUMP_PATH, "a");
+    dump_file = fopen(DUMP_FILE, "a");
 
 	fprintf(dump_file, "Dump: %s\n", current_date_time_as_string());
 

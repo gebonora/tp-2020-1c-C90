@@ -21,7 +21,7 @@ int main(){
 /** PRIVATE FUNCTIONS **/
 
 static void _init_logger() {
-    LOGGER = log_create(LOGGER_PATH, "Broker Server", SHOW_IN_CONSOLE, LOG_NOTIFICATION_LEVEL);
+    LOGGER = log_create(LOG_FILE, "Broker Server", SHOW_IN_CONSOLE, LOG_NOTIFICATION_LEVEL);
 
 	log_debug(LOGGER, "IP: %s", IP);
 	log_debug(LOGGER, "PUERTO: %s", PUERTO);
@@ -52,6 +52,8 @@ static void _init_config() {
 	}
 	SHOW_IN_CONSOLE = config_get_int_value(config, "SHOW_IN_CONSOLE");
 	LOG_NOTIFICATION_LEVEL = config_get_int_value(config, "LOG_NOTIFICATION_LEVEL");
+	LOG_FILE = config_get_string_value(config, "LOG_FILE");
+	DUMP_FILE = config_get_string_value(config, "DUMP_FILE");
 
 	config_destroy(config);
 }
