@@ -22,6 +22,7 @@ AlgoritmoPlanificador obtenerAlgoritmo(char * nombreAlgoritmo) {
     }
 }
 
+// Aguante este polimorfismo en C.
 void inicializarAlgoritmosDePlanificacion() {
     firstInFirstOut = FirstInFirstOutConstructor.new();
     shortestJobFirst = ShortestJobFirstConstructor.new();
