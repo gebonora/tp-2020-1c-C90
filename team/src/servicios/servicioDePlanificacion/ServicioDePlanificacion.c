@@ -10,6 +10,7 @@
  * Si se libera un entrenador signaleamos semaforoContadorEntrenadoresDisponibles.
  * De esta forma evitamos asignar tareas de captura si no hay gente o pokemones para laburar.
  * Un entrenador libre es aquel en NEW, o en BLOCKED a la espera de evento (en este caso aparicion de pokemones).
+ * Se distingue un entrenador libre con el flag 'estaEsperandoAlgo', asi no molestamos a aquellos a la espera de un caught.
  */
 void planificadorDeCapturas(ServicioDePlanificacion * this) {
 	log_debug(this->logger, "Hilo de Planificador de capturas creado.");
@@ -354,7 +355,7 @@ void definirYCambiarEstado(ServicioDePlanificacion* this, UnidadPlanificable* hi
 }
 
 /*
- * Si estan todos en exit.
+ * Deprecado! Ahora tenemos un wait en cada entrenador a la espera de que su objetivo global se complete y le haga signal.
  */
 bool teamFinalizado(ServicioDePlanificacion* this) { // TODO: se puede ir
 	return !list_is_empty(this->planificador.colas->colaExit) && list_is_empty(this->planificador.colas->colaReady) && list_is_empty(this->planificador.colas->colaExec)
